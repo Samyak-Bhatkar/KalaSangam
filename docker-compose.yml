@@ -1,0 +1,113 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # 1. SHILPSETU AI FASTAPI BACKEND
+  # ============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: shilpsetu_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=ShilpSetu AI - Virtual Business Manager
+      - DEBUG=True
+      - HOST=0.0.0.0
+      - PORT=8000
+      - STATUTORY_FAIR_WAGE_PER_HOUR=120.0
+      - WORKSHOP_OVERHEAD_RATE=0.10
+      - GEM_PROCUREMENT_MARGIN=0.15
+      # External AI Keys (Optional - uses zero-fail heuristics if blank)
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - BHASHINI_API_KEY=${BHASHINI_API_KEY:-}
+      # n8n Webhook Integration Endpoints
+      - N8N_ENABLED=${N8N_ENABLED:-true}
+      - N8N_BASE_URL=http://n8n:5678
+      - N8N_WEBHOOK_BARGAIN_GUARD=http://n8n:5678/webhook/bargain-guard
+      - N8N_WEBHOOK_ONDC_PUBLISH=http://n8n:5678/webhook/ondc-publish
+      - N8N_WEBHOOK_REEL_DISPATCH=http://n8n:5678/webhook/reel-dispatch
+      - N8N_WEBHOOK_MINISTRY_ANALYTICS=http://n8n:5678/webhook/ministry-analytics
+      # Cloud Storage (Optional - falls back to local /static/uploads)
+      - CLOUD_STORAGE_PROVIDER=${CLOUD_STORAGE_PROVIDER:-local}
+    volumes:
+      - backend_uploads:/app/app/static/uploads
+      - backend_audio:/app/app/static/audio
+    restart: unless-stopped
+    networks:
+      - shilpsetu_network
+
+  # ============================================================================
+  # 2. SHILPSETU AI REACT / VITE MOBILE-FIRST FRONTEND
+  # ============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: shilpsetu_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - shilpsetu_network
+
+  # ============================================================================
+  # 3. n8n WORKFLOW AUTOMATION ENGINE
+  # ============================================================================
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: shilpsetu_n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=Asia/Kolkata
+      - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n_db
+      - DB_POSTGRESDB_USER=shilpsetu
+      - DB_POSTGRESDB_PASSWORD=shilpsetupass
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/data/workflows
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - shilpsetu_network
+
+  # ============================================================================
+  # 4. POSTGRESQL DATABASE (For n8n & Catalog Persistence)
+  # ============================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: shilpsetu_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=n8n_db
+      - POSTGRES_USER=shilpsetu
+      - POSTGRES_PASSWORD=shilpsetupass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - shilpsetu_network
+
+networks:
+  shilpsetu_network:
+    driver: bridge
+
+volumes:
+  backend_uploads:
+  backend_audio:
+  n8n_data:
+  postgres_data:

@@ -1,0 +1,69 @@
+{
+  "name": "ShilpSetu MoSJE - Ministry Beneficiary Analytics & Living Wage Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ministry-analytics",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook - Ingest Ministry Event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || {};\nconst details = body.details || {};\n\nconst laborHours = Number(details.labor_hours || 8);\nconst fairWageEarned = laborHours * 120.0; // ₹120/hr statutory floor\n\nreturn [{\n  json: {\n    timestamp: new Date().toISOString(),\n    event: body.event || 'EVENT_LOG',\n    ministry: body.ministry || 'Ministry of Social Justice & Empowerment',\n    beneficiary_collective: body.beneficiary_collective || 'NBCFDC & NSFDC',\n    item_id: details.item_id || 'UNKNOWN',\n    item_title: details.title || 'Handicraft Item',\n    craft_category: details.category || 'Handicrafts',\n    cluster_pin: details.cluster_pin || '273001',\n    b2c_price: details.b2c_price || 0.0,\n    labor_hours_protected: laborHours,\n    statutory_living_wage_inr: fairWageEarned\n  }\n}];"
+      },
+      "id": "2",
+      "name": "Calculate Protected Wages & Cluster Metrics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "1MoSJE_Beneficiary_Artisan_National_Register",
+        "range": "Cluster_Earnings!A:J",
+        "options": {}
+      },
+      "id": "3",
+      "name": "Google Sheets - Append MoSJE Ledger",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [700, 300],
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Webhook - Ingest Ministry Event": {
+      "main": [
+        [
+          {
+            "node": "Calculate Protected Wages & Cluster Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Protected Wages & Cluster Metrics": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Append MoSJE Ledger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

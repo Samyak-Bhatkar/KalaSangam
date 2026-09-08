@@ -1,0 +1,95 @@
+{
+  "name": "ShilpSetu MoSJE - Bargain Guard WhatsApp Voice Alert & B2B Counter",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bargain-guard",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook - Ingest Lowball Inquiry",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.verdict }}",
+              "value2": "REJECT_AND_COUNTER"
+            }
+          ]
+        }
+      },
+      "id": "2",
+      "name": "Check If Predatory Offer",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "={{ $env.WHATSAPP_PHONE_NUMBER_ID || '104829102938' }}",
+        "recipientPhoneNumber": "={{ $json.body.artisan_phone || '+919876543210' }}",
+        "textBody": "={{ '🚨 शिल्पसेतु चेतावनी: थोक व्यापारी ' + $json.body.quantity + ' पीस के लिए ₹' + $json.body.buyer_offer_inr + '/पीस का ऑफर दे रहा है। आपकी लागत ₹' + $json.body.base_cost_inr + ' है। आपको ₹' + $json.body.margin_recovered_inr + ' का नुकसान होगा!\n\nक्या आप ₹' + $json.body.counter_offer_inr + ' का आधिकारिक MoSJE काउंटर-ऑफर भेजना चाहते हैं?' }}"
+      },
+      "id": "3",
+      "name": "WhatsApp - Send Hindi Audio & Alert",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [700, 200]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "={{ $env.WHATSAPP_PHONE_NUMBER_ID || '104829102938' }}",
+        "recipientPhoneNumber": "={{ $json.body.artisan_phone || '+919876543210' }}",
+        "textBody": "={{ '✅ बधाई! व्यापारी का ₹' + $json.body.buyer_offer_inr + ' का थोक ऑफर स्वीकार्य है। ऑर्डर तैयार करें।' }}"
+      },
+      "id": "4",
+      "name": "WhatsApp - Send Acceptance Notice",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [700, 420]
+    }
+  ],
+  "connections": {
+    "Webhook - Ingest Lowball Inquiry": {
+      "main": [
+        [
+          {
+            "node": "Check If Predatory Offer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Predatory Offer": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp - Send Hindi Audio & Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WhatsApp - Send Acceptance Notice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

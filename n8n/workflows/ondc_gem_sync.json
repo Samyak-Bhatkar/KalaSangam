@@ -1,0 +1,106 @@
+{
+  "name": "ShilpSetu MoSJE - Multi-Channel ONDC & GeM Network Broadcast",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ondc-publish",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook - Ingest Beckn v1.2 Payload",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const beckn = $json.body.beckn_schema || {};\nconst message = beckn.message || {};\nconst catalog = message.catalog || {};\nconst providers = catalog['bpp/providers'] || [];\nconst provider = providers[0] || {};\nconst items = provider.items || [];\nconst item = items[0] || {};\n\nreturn [{\n  json: {\n    transaction_id: beckn.context ? beckn.context.transaction_id : 'TXN-UNKNOWN',\n    item_id: item.id || 'ITEM-001',\n    item_name: item.descriptor ? item.descriptor.name : 'Indian Handicraft',\n    b2c_price: item.price ? item.price.value : '0.00',\n    provider_name: provider.descriptor ? provider.descriptor.name : 'Rural Collective',\n    published_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "2",
+      "name": "Transform & Validate Beckn Schema",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://staging.gateway.proteantech.in/protocol/v1/on_search",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "payload",
+              "value": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        }
+      },
+      "id": "3",
+      "name": "ONDC Registry Gateway Broadcast",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [720, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://gem.gov.in/api/v1/catalog/draft",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "tender_category",
+              "value": "HANDICRAFTS_PUBLIC_PROCUREMENT_15_PERCENT"
+            },
+            {
+              "name": "item",
+              "value": "={{ $json.item_name }}"
+            }
+          ]
+        }
+      },
+      "id": "4",
+      "name": "GeM Public Procurement Draft Sync",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [720, 400],
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Webhook - Ingest Beckn v1.2 Payload": {
+      "main": [
+        [
+          {
+            "node": "Transform & Validate Beckn Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform & Validate Beckn Schema": {
+      "main": [
+        [
+          {
+            "node": "ONDC Registry Gateway Broadcast",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GeM Public Procurement Draft Sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
