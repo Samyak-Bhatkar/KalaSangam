@@ -27,6 +27,9 @@ ENV/
 env/
 .venv/
 .pytest_cache/
+backend/app/static/uploads/*.mp4
+backend/app/static/uploads/*.webm
+backend/app/static/audio/*.wav
 
 # Node.js & React (Frontend)
 node_modules/

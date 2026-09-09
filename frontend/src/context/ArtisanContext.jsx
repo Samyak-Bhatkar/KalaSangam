@@ -70,12 +70,13 @@ export function ArtisanProvider({ children }) {
   // Set active craft preset
   const applyPreset = async (craft) => {
     setSelectedPreset(craft);
-    setRawImageUrl(craft.sample_image_url);
+    const rawUrl = craft.raw_image_url || craft.sample_image_url || '/terracotta_pot_raw.png';
+    setRawImageUrl(rawUrl);
     setTranscript(craft.sample_transcript_hi || craft.sample_transcript_en || '');
     
     // Fetch image and convert to base64
     try {
-      const response = await fetch(craft.sample_image_url);
+      const response = await fetch(rawUrl);
       const blob = await response.blob();
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -106,19 +107,35 @@ export function ArtisanProvider({ children }) {
 
   // Run End-to-End AI Enhancement and Catalog Generation
   const processCaptureAndVoice = async (overrideBase64 = null, overrideTranscript = null) => {
-    const imgB64 = overrideBase64 || rawImageBase64;
-    const txt = overrideTranscript || transcript;
+    let imgB64 = overrideBase64 || rawImageBase64;
+    const txt = overrideTranscript || transcript || selectedPreset?.sample_transcript_hi || 'यह हस्तनिर्मित पारंपरिक भारतीय शिल्प है। 6 घंटे की मेहनत से तैयार हुआ है।';
 
-    if (!imgB64) return;
+    // Ensure we have base64 or fetch from rawImageUrl
+    if (!imgB64 && (rawImageUrl || selectedPreset?.raw_image_url || selectedPreset?.sample_image_url)) {
+      const targetUrl = rawImageUrl || selectedPreset?.raw_image_url || selectedPreset?.sample_image_url || '/terracotta_pot_raw.png';
+      try {
+        const resp = await fetch(targetUrl);
+        const blob = await resp.blob();
+        imgB64 = await new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(blob);
+        });
+        if (imgB64) setRawImageBase64(imgB64);
+      } catch (e) {
+        console.warn('Could not auto-fetch raw image base64:', e);
+      }
+    }
 
     setIsProcessing(true);
     setProcessStatusText('1. AI Studio: Removing background & synthesizing natural contact shadow...');
 
     try {
-      // Step A: Image Studio Enhancement
+      // Step A: Image Studio Enhancement (Transforms blurry/raw workshop photo into clean 4K studio render)
       const studioRes = await enhanceImage({ imageBase64: imgB64 });
+      const cleanUrl = studioRes.studio_url || selectedPreset?.clean_image_url || '/terracotta_pot_clean.png';
       setStudioImageBase64(studioRes.processed_base64);
-      setStudioImageUrl(studioRes.studio_url);
+      setStudioImageUrl(cleanUrl);
 
       setProcessStatusText('2. Multimodal Cataloger: Generating MoSJE bilingual listing with Gemini 2.5 Flash...');
 

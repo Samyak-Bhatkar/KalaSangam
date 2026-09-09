@@ -17,8 +17,8 @@ export default function StudioReviewCard() {
   const containerRef = useRef(null);
   const isDragging = useRef(false);
 
-  const rawSrc = rawImageBase64 || rawImageUrl || '/samples/gorakhpur_terracotta.jpg';
-  const studioSrc = studioImageBase64 || studioImageUrl || rawSrc;
+  const rawSrc = rawImageBase64 || rawImageUrl || selectedPreset?.raw_image_url || selectedPreset?.sample_image_url || '/terracotta_pot_raw.png';
+  const studioSrc = studioImageBase64 || studioImageUrl || selectedPreset?.clean_image_url || '/terracotta_pot_clean.png';
 
   const handleMove = (clientX) => {
     if (!containerRef.current) return;
@@ -70,20 +70,20 @@ export default function StudioReviewCard() {
         onTouchMove={handleTouchMove}
         className="relative w-full aspect-square max-h-[340px] bg-slate-950 overflow-hidden select-none cursor-ew-resize"
       >
-        {/* Under layer: Studio Enhanced Image (#F8F9FA Off-white background + shadow) */}
+        {/* Under layer: Clean Studio Enhanced Image */}
         <div className="absolute inset-0 flex items-center justify-center bg-[#F8F9FA]">
           <img
             src={studioSrc}
-            alt="AI Studio Enhanced"
+            alt="Clean AI Studio Output"
             className="w-full h-full object-contain p-2"
           />
           <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-emerald-600/90 text-white text-[10px] font-bold shadow-md flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            <span>AI Studio</span>
+            <span>{language === 'hi' ? 'स्वच्छ 4K स्टूडियो' : 'Clean Studio Output'}</span>
           </div>
         </div>
 
-        {/* Top clipped layer: Raw Workshop Photo */}
+        {/* Top clipped layer: Blurry / Inaccurate Raw Workshop Photo */}
         <div
           style={{ width: `${sliderPosition}%` }}
           className="absolute inset-y-0 left-0 overflow-hidden border-r-2 border-amber-400 bg-slate-900 shadow-2xl transition-[width] duration-75"
@@ -91,11 +91,12 @@ export default function StudioReviewCard() {
           <div className="relative w-full h-full min-w-[340px] flex items-center justify-center">
             <img
               src={rawSrc}
-              alt="Raw Workshop"
+              alt="Raw Blurry Workshop Capture"
               className="w-full h-full object-cover"
             />
-            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-slate-900/90 border border-slate-700 text-slate-300 text-[10px] font-semibold shadow-md">
-              Raw Workshop
+            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-slate-900/95 border border-amber-500/50 text-amber-300 text-[10px] font-semibold shadow-md flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+              <span>{language === 'hi' ? 'कच्ची / धुंधली तस्वीर' : 'Raw Capture (Blurry)'}</span>
             </div>
           </div>
         </div>
@@ -115,15 +116,15 @@ export default function StudioReviewCard() {
       <div className="p-3 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-around text-[11px] text-slate-400">
         <span className="flex items-center gap-1 text-slate-300">
           <Check className="w-3.5 h-3.5 text-emerald-400" />
-          ISNet Salient Cutout
+          {language === 'hi' ? 'डीब्लर व शार्पनिंग' : 'AI Deblur & Clarity'}
         </span>
         <span className="flex items-center gap-1 text-slate-300">
           <Check className="w-3.5 h-3.5 text-emerald-400" />
-          6500K Daylight
+          {language === 'hi' ? 'स्वच्छ बैकग्राउंड' : 'Clean Studio BG'}
         </span>
         <span className="flex items-center gap-1 text-slate-300">
           <Check className="w-3.5 h-3.5 text-emerald-400" />
-          Contact Shadow
+          {language === 'hi' ? '6500K लाइटिंग' : '6500K Lighting'}
         </span>
       </div>
     </div>

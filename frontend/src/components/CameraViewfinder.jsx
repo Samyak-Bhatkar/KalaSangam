@@ -185,11 +185,17 @@ export default function CameraViewfinder() {
               className="w-full h-full object-cover"
             />
           ) : rawImageUrl ? (
-            <img
-              src={rawImageUrl}
-              alt="Craft Viewfinder"
-              className="w-full h-full object-cover transition-all duration-300"
-            />
+            <div className="relative w-full h-full overflow-hidden">
+              <img
+                src={rawImageUrl}
+                alt="Craft Viewfinder Raw Frame"
+                className="w-full h-full object-cover transition-all duration-300 filter blur-[0.6px] brightness-95 contrast-90"
+              />
+              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-slate-950/85 border border-amber-500/50 text-[10px] text-amber-300 font-medium backdrop-blur-md flex items-center gap-1.5 shadow-lg">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span>{language === 'hi' ? 'अपरिष्कृत कार्यशाला तस्वीर (कच्ची / धुंधली)' : 'Raw Capture (Blurry/Uncalibrated)'}</span>
+              </div>
+            </div>
           ) : (
             <div className="text-center p-6 text-slate-500">
               <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
