@@ -1,7 +1,7 @@
 services:
-  # ShilpSetu FastAPI Backend
+  # KalaSangam FastAPI Backend
   - type: web
-    name: shilpsetu-backend
+    name: kalasangam-backend
     runtime: python
     plan: free
     buildCommand: "cd backend && pip install -r requirements.txt && python scripts/generate_sample_crafts.py"
@@ -14,15 +14,15 @@ services:
       - key: ZERO_FAIL_MODE
         value: "true"
 
-  # ShilpSetu Frontend Web Client
+  # KalaSangam Frontend Web Client
   - type: web
-    name: shilpsetu-frontend
+    name: kalasangam-frontend
     runtime: static
     buildCommand: "cd frontend && npm install && npm run build"
     staticPublishPath: "./frontend/dist"
     envVars:
       - key: VITE_API_BASE_URL
-        value: https://shilpsetu-backend.onrender.com
+        value: https://kalasangam-backend.onrender.com
     routes:
       - type: rewrite
         source: /*
