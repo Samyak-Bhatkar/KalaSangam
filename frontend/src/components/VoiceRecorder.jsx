@@ -179,17 +179,22 @@ export default function VoiceRecorder() {
   const [audioLevels,      setAudioLevels]      = useState(Array(10).fill(4));
   const [activeDialect,    setActiveDialect]    = useState('hi');
   const [hasSpeechResult,  setHasSpeechResult]  = useState(false);
+  const [isCustomSpoken,   setIsCustomSpoken]   = useState(false);  // true once user speaks real vernacular words
+  const [liveInterim,      setLiveInterim]      = useState('');     // real-time in-flight speech string
   const [bhashiniMode,     setBhashiniMode]     = useState(false);  // switched to Bhashini recording
   const [bhashiniStatus,   setBhashiniStatus]   = useState('');
 
-  // ── Refs ───────────────────────────────────────────────────────────────────
-  const recognitionRef    = useRef(null);
-  const mediaRecorderRef  = useRef(null);
-  const audioContextRef   = useRef(null);
-  const analyserRef       = useRef(null);
-  const animFrameRef      = useRef(null);
-  const streamRef         = useRef(null);
-  const bhashiniChunksRef = useRef([]);
+  // ── Refs (Engine Architecture: Zero Stale Closures) ────────────────────────
+  const isListeningRef     = useRef(false);
+  const isRecognizingRef   = useRef(false);
+  const finalTranscriptRef = useRef('');
+  const recognitionRef     = useRef(null);
+  const mediaRecorderRef   = useRef(null);
+  const audioContextRef    = useRef(null);
+  const analyserRef        = useRef(null);
+  const animFrameRef       = useRef(null);
+  const streamRef          = useRef(null);
+  const bhashiniChunksRef  = useRef([]);
 
   // ── Derived helpers ────────────────────────────────────────────────────────
   const getActiveCraftType = () => {
@@ -272,6 +277,8 @@ export default function VoiceRecorder() {
   }, []);
 
   const cleanupAll = useCallback(() => {
+    isListeningRef.current = false;
+    isRecognizingRef.current = false;
     // Stop Web Speech
     if (recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch {}
@@ -286,93 +293,102 @@ export default function VoiceRecorder() {
     stopMicStream();
     setIsListening(false);
     setMicState('idle');
+    setLiveInterim('');
   }, [stopAudioVisualizer, stopMicStream]);
 
-  // ── Web Speech API (browser-native, works on localhost/HTTPS) ────────────
+  // ── Web Speech API (browser-native, zero-API-key, works on localhost & HTTPS) ──
   const startWebSpeech = useCallback(async () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setMicError(MIC_ERRORS.NOT_SUPPORTED);
       setMicState('error');
       setIsListening(false);
+      isListeningRef.current = false;
       return;
     }
 
-    // Request mic + start visualizer together
     setMicState('requesting');
     const permission = await checkMicPermission();
     if (permission === 'denied') {
       setMicError(MIC_ERRORS.NOT_ALLOWED);
       setMicState('error');
       setIsListening(false);
+      isListeningRef.current = false;
       return;
     }
 
-    const stream = await startAudioVisualizer();
-    if (!stream && permission !== 'unknown') {
-      setMicError(MIC_ERRORS.NOT_ALLOWED);
-      setMicState('error');
-      setIsListening(false);
-      return;
-    }
-    streamRef.current = stream;
+    // Launch audio visualizer safely (never let visualizer failure block speech)
+    startAudioVisualizer().catch(() => {});
 
-    const recognition      = new SpeechRecognition();
-    recognition.lang       = currentDialect.langCode;
+    // Create speech recognition instance
+    const recognition = new SpeechRecognition();
+    recognition.lang = currentDialect.langCode || 'hi-IN';
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
+      isRecognizingRef.current = true;
       setMicState('live');
       setMicError(null);
     };
 
     recognition.onresult = (event) => {
-      let finalText = '';
-      let interimText = '';
-      for (let i = 0; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) {
-          finalText += result[0].transcript;
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcriptChunk = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscriptRef.current += (finalTranscriptRef.current ? ' ' : '') + transcriptChunk;
         } else {
-          interimText += result[0].transcript;
+          interim += transcriptChunk;
         }
       }
-      const spoken = (finalText || interimText).trim();
-      if (spoken) {
-        setTranscript(spoken);
+
+      const fullLiveText = (finalTranscriptRef.current + (interim ? ' ' + interim : '')).trim();
+      if (fullLiveText) {
+        setTranscript(fullLiveText);
+        setLiveInterim(interim);
         setHasSpeechResult(true);
+        setIsCustomSpoken(true);
       }
     };
 
     recognition.onerror = (e) => {
-      console.warn('[WebSpeech] Error:', e.error);
+      console.warn('[WebSpeech] Event Error:', e.error);
       if (e.error === 'not-allowed' || e.error === 'permission-denied') {
+        isListeningRef.current = false;
+        isRecognizingRef.current = false;
         setMicError(MIC_ERRORS.NOT_ALLOWED);
         setMicState('error');
         setIsListening(false);
         stopAudioVisualizer();
         stopMicStream();
-      } else if (e.error === 'no-speech') {
-        // Timeout — not an error, user just didn't speak yet
-        setMicState('live');
       } else if (e.error === 'network') {
+        isListeningRef.current = false;
+        isRecognizingRef.current = false;
         setMicError(MIC_ERRORS.NETWORK);
         setMicState('error');
         setIsListening(false);
-      } else {
-        setMicState('live'); // other errors — keep trying
+        stopAudioVisualizer();
+        stopMicStream();
+      } else if (e.error === 'no-speech') {
+        // Normal silence event in Chrome Web Speech — keep session alive
       }
     };
 
     recognition.onend = () => {
-      // Auto-restart if still in "live" state (continuous listening)
-      if (isListening && micState === 'live') {
-        try { recognition.start(); } catch {}
+      isRecognizingRef.current = false;
+      // Auto-restart if user still has mic toggled on (overcoming Chrome silence timeout)
+      if (isListeningRef.current) {
+        try {
+          recognition.start();
+        } catch (err) {
+          console.log('[WebSpeech] auto-restart pending:', err);
+        }
       } else {
-        setIsListening(false);
         setMicState('idle');
+        setIsListening(false);
+        setLiveInterim('');
         stopAudioVisualizer();
         stopMicStream();
       }
@@ -382,15 +398,17 @@ export default function VoiceRecorder() {
     try {
       recognition.start();
     } catch (err) {
-      console.warn('[WebSpeech] Start failed:', err);
-      setMicError(MIC_ERRORS.NOT_ALLOWED);
-      setMicState('error');
-      setIsListening(false);
-      stopAudioVisualizer();
-      stopMicStream();
+      console.warn('[WebSpeech] Start threw:', err);
+      if (!isRecognizingRef.current) {
+        setMicError(MIC_ERRORS.NOT_ALLOWED);
+        setMicState('error');
+        setIsListening(false);
+        isListeningRef.current = false;
+        stopAudioVisualizer();
+        stopMicStream();
+      }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDialect, currentDialect, startAudioVisualizer, stopAudioVisualizer, stopMicStream]);
+  }, [currentDialect.langCode, startAudioVisualizer, stopAudioVisualizer, stopMicStream]);
 
   // ── Bhashini ASR (MediaRecorder → send blob → get transcript) ────────────
   const startBhashiniRecording = useCallback(async () => {
@@ -449,10 +467,15 @@ export default function VoiceRecorder() {
     }
   }, []);
 
-  // ── Main toggle logic ──────────────────────────────────────────────────────
+  // ── Main toggle logic (Apple / Google Live Voice Engine) ───────────────────
   const toggleListening = useCallback(async () => {
-    if (isListening) {
-      // Stop
+    if (isListeningRef.current) {
+      // User tapped Stop
+      isListeningRef.current = false;
+      setIsListening(false);
+      setMicState('idle');
+      setLiveInterim('');
+
       if (bhashiniMode) {
         stopBhashiniRecording();
       } else {
@@ -462,36 +485,51 @@ export default function VoiceRecorder() {
         }
         stopAudioVisualizer();
         stopMicStream();
-        setIsListening(false);
-        setMicState('idle');
+      }
+
+      // If user stopped without saying anything and field is blank, restore sample
+      if (!finalTranscriptRef.current.trim() && !transcript.trim()) {
+        const sample = currentVoiceSamples[activeDialect] || currentVoiceSamples.hi;
+        setTranscript(sample);
+        setIsCustomSpoken(false);
       }
       return;
     }
 
-    // Start — decide Web Speech vs Bhashini
+    // User tapped Speak (Start)
+    isListeningRef.current = true;
     setIsListening(true);
     setMicError(null);
     setHasSpeechResult(false);
+    setLiveInterim('');
 
-    // Use Bhashini if: key is present AND (regional dialect OR user toggled Bhashini mode)
-    const useBhashini = hasBhashini && (bhashiniMode || isRegionalDialect);
+    // Clear static sample so user's live Hindi speech immediately renders in real-time
+    finalTranscriptRef.current = '';
+    setTranscript('');
+    setIsCustomSpoken(true);
+
+    // Bhashini is only used if explicit API credentials exist and mode is active
+    const useBhashini = hasBhashini && bhashiniMode;
     if (useBhashini) {
       await startBhashiniRecording();
     } else {
       await startWebSpeech();
     }
   }, [
-    isListening, bhashiniMode, isRegionalDialect, hasBhashini,
-    startBhashiniRecording, startWebSpeech,
+    bhashiniMode, hasBhashini, startBhashiniRecording, startWebSpeech,
     stopBhashiniRecording, stopAudioVisualizer, stopMicStream,
+    transcript, currentVoiceSamples, activeDialect
   ]);
 
   // ── Dialect change ─────────────────────────────────────────────────────────
   const handleDialectChange = (d) => {
-    if (isListening) cleanupAll();
+    if (isListeningRef.current) cleanupAll();
     setActiveDialect(d.code);
     const sample = currentVoiceSamples[d.code] || currentVoiceSamples.hi;
+    finalTranscriptRef.current = '';
     setTranscript(sample);
+    setLiveInterim('');
+    setIsCustomSpoken(false);
     speakVoice(sample, d.langCode);
     if ('vibrate' in navigator) navigator.vibrate(30);
   };
@@ -508,11 +546,23 @@ export default function VoiceRecorder() {
     processCaptureAndVoice(null, effectiveText);
   };
 
-  const resetTranscript = () => {
-    setTranscript(currentVoiceSamples[activeDialect] || currentVoiceSamples.hi);
+  const resetToSample = () => {
+    const sample = currentVoiceSamples[activeDialect] || currentVoiceSamples.hi;
+    finalTranscriptRef.current = '';
+    setTranscript(sample);
+    setLiveInterim('');
+    setIsCustomSpoken(false);
     setHasSpeechResult(false);
     setMicError(null);
     setMicState('idle');
+  };
+
+  const clearTranscript = () => {
+    finalTranscriptRef.current = '';
+    setTranscript('');
+    setLiveInterim('');
+    setIsCustomSpoken(true);
+    setHasSpeechResult(false);
   };
 
   const craftImageSrc = rawImageUrl || '/terracotta_pot_raw.png';
@@ -800,40 +850,101 @@ export default function VoiceRecorder() {
 
       {/* ── Transcript Box ────────────────────────────────────────────────── */}
       <div>
-        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 mb-3 shadow-xs">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-black tracking-wider uppercase text-slate-800 flex items-center gap-1">
-              <Edit3 className="w-3.5 h-3.5 text-amber-700" />
-              {language === 'hi' ? 'बोला गया विवरण (संपादन योग्य):' : 'Spoken Voice Narrative (Editable):'}
-            </span>
-            <div className="flex items-center gap-1.5">
+        <div className={`p-3.5 rounded-2xl bg-white border transition-all shadow-xs mb-3 ${
+          isListening
+            ? 'border-amber-500 ring-4 ring-amber-500/10'
+            : 'border-slate-200'
+        }`}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] font-black tracking-wider uppercase text-slate-800 flex items-center gap-1">
+                <Edit3 className="w-3.5 h-3.5 text-amber-700" />
+                {language === 'hi' ? 'बोला गया विवरण:' : 'Spoken Voice Narrative:'}
+              </span>
+
+              {/* Dynamic Live Status Badges */}
+              {isListening && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-700 border border-red-200 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping" />
+                  {language === 'hi' ? '🔴 लाइव सुन रहे हैं...' : '🔴 Live Listening...'}
+                </span>
+              )}
+
+              {!isListening && isCustomSpoken && transcript && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  <CheckCircle className="w-3 h-3 text-emerald-600" />
+                  {language === 'hi' ? 'आपकी आवाज़ दर्ज' : 'Voice Captured'}
+                </span>
+              )}
+
+              {!isCustomSpoken && transcript && !isListening && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                  {language === 'hi' ? 'नमूना विवरण' : 'Preset Sample'}
+                </span>
+              )}
+            </div>
+
+            {/* Quick Actions: Listen, Sample, Clear */}
+            <div className="flex items-center gap-1">
               <button
                 onClick={playCurrentTranscript}
+                disabled={!transcript}
                 title="Listen to Transcript"
-                className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                className="p-1 px-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold flex items-center gap-1 cursor-pointer disabled:opacity-40 transition-colors"
               >
                 <Volume2 className="w-3 h-3 text-amber-700" />
                 <span>सुनें</span>
               </button>
               <button
-                onClick={resetTranscript}
-                title="Reset to Authentic Sample"
-                className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                onClick={resetToSample}
+                title="Reset to Authentic Benchmark Sample"
+                className="p-1 px-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors"
               >
-                <RefreshCw className="w-3 h-3 text-slate-600" />
-                <span>रीसेट</span>
+                <RefreshCw className="w-3 h-3 text-amber-700" />
+                <span>नमूना भरें</span>
+              </button>
+              <button
+                onClick={clearTranscript}
+                title="Clear Textarea"
+                className="p-1 px-2 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-600 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                <span>साफ़</span>
               </button>
             </div>
           </div>
 
-          <textarea
-            id="voice-transcript-area"
-            value={transcript}
-            onChange={(e) => setTranscript(e.target.value)}
-            rows={3}
-            className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl p-2.5 leading-relaxed focus:outline-none focus:border-amber-600 focus:bg-white transition-colors resize-none shadow-inner"
-            placeholder={language === 'hi' ? 'माइक से बोलें या सीधे यहां टाइप करें...' : 'Speak with mic or type your craft narrative here...'}
-          />
+          <div className="relative">
+            <textarea
+              id="voice-transcript-area"
+              value={transcript}
+              onChange={(e) => {
+                setTranscript(e.target.value);
+                finalTranscriptRef.current = e.target.value;
+                setIsCustomSpoken(true);
+              }}
+              rows={3}
+              className={`w-full text-xs font-medium text-slate-800 rounded-xl p-2.5 leading-relaxed focus:outline-none transition-all resize-none shadow-inner ${
+                isListening
+                  ? 'bg-amber-50/60 border-2 border-amber-500 ring-2 ring-amber-500/20'
+                  : 'bg-slate-50 border border-slate-200 focus:border-amber-600 focus:bg-white'
+              }`}
+              placeholder={
+                isListening
+                  ? (language === 'hi' ? '🎤 बोलना शुरू करें... आपकी हिंदी आवाज़ यहाँ तुरंत लाइव टाइप होगी...' : '🎤 Speak now... your live speech will stream here in real time...')
+                  : (language === 'hi' ? 'माइक दबाएं और अपनी भाषा में बोलें, या यहाँ सीधे टाइप करें...' : 'Tap mic and speak, or type directly here...')
+              }
+            />
+
+            {/* Real-time Streaming In-Flight Words Pill */}
+            {isListening && liveInterim && (
+              <div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-amber-900 bg-gradient-to-r from-amber-100 to-orange-100 px-2.5 py-1 rounded-lg border border-amber-300 shadow-xs animate-pulse">
+                <span className="w-2 h-2 rounded-full bg-amber-600 animate-ping shrink-0" />
+                <span className="truncate">
+                  लाइव शब्द: <span className="font-black text-slate-950">"{liveInterim}"</span>
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Processing Indicator */}

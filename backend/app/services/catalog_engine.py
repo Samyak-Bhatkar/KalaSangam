@@ -122,6 +122,62 @@ def call_gemini_multimodal(
         logger.error(f"Gemini API call failed: {ex}. Engaging zero-fail fallback.")
         return None
 
+def extract_hours_from_vernacular(text: str, default_hours: int = 6) -> int:
+    """Extract labor hours from spoken vernacular Hindi/English transcript."""
+    if not text:
+        return default_hours
+    
+    t_clean = text.lower()
+    
+    # 1. Regex for digits: "4 घंटे", "12 hours", "8 hrs", "6 घंटा"
+    digit_match = re.search(r"(\d+)\s*(?:घंटे|घंटा|घण्टे|hour|hours|hrs|h)", t_clean)
+    if digit_match:
+        try:
+            val = int(digit_match.group(1))
+            if 1 <= val <= 200:
+                return val
+        except ValueError:
+            pass
+
+    # 2. Hindi word numbers before घंटे / घंटा
+    hindi_words = {
+        "एक": 1, "दो": 2, "तीन": 3, "चार": 4, "पांच": 5, "पाँच": 5,
+        "छह": 6, "छः": 6, "सात": 7, "आठ": 8, "नौ": 9, "दस": 10,
+        "बारह": 12, "अठारह": 18, "चौबीस": 24, "छत्तीस": 36
+    }
+    for word, val in hindi_words.items():
+        if re.search(rf"{word}\s*(?:घंटे|घंटा|घण्टे)", t_clean):
+            return val
+
+    return default_hours
+
+
+def extract_cost_from_vernacular(text: str, default_cost: float = 180.0) -> float:
+    """Extract raw material cost from spoken vernacular Hindi/English transcript."""
+    if not text:
+        return default_cost
+    
+    t_clean = text.lower()
+    
+    # 1. Look for currency symbol or keyword followed or preceded by numbers
+    # e.g., "₹180", "रुपये 250", "200 रुपये", "150 का खर्चा"
+    patterns = [
+        r"(?:₹|रुपये|रुपए|रु\.?|rs\.?|inr)\s*(\d+(?:\.\d+)?)",
+        r"(\d+(?:\.\d+)?)\s*(?:रुपये|रुपए|रु\.?|rs\.?|inr|का खर्चा|का खर्च|की लागत|लागत)",
+    ]
+    for pat in patterns:
+        m = re.search(pat, t_clean)
+        if m:
+            try:
+                val = float(m.group(1))
+                if 10.0 <= val <= 100000.0:
+                    return val
+            except ValueError:
+                pass
+
+    return default_cost
+
+
 def process_voice_and_catalog(
     image_base64: str,
     language: str = "hi",
@@ -132,7 +188,7 @@ def process_voice_and_catalog(
     Multimodal cataloging controller:
     1. Transcribes voice (or uses client/heuristic transcript)
     2. Runs Gemini 2.5 Flash multimodal reasoning
-    3. Seamlessly falls back to authentic MoSJE craft fixtures
+    3. Seamlessly falls back to authentic MoSJE craft fixtures with smart vernacular metric extraction
     """
     effective_transcript = transcript
     if not effective_transcript:
@@ -160,8 +216,12 @@ def process_voice_and_catalog(
             transcription=effective_transcript
         )
 
-    # Hackathon Zero-Fail Mode with authentic fixtures
+    # Hackathon Zero-Fail Mode with authentic fixtures & intelligent vernacular entity extraction
     fixture = match_heuristic_fixture(effective_transcript, category_hint)
+    
+    extracted_hours = extract_hours_from_vernacular(effective_transcript, fixture["estimated_hours"])
+    extracted_cost = extract_cost_from_vernacular(effective_transcript, fixture["raw_material_cost_estimate_inr"])
+
     return CatalogItemResponse(
         title_en=fixture["title_en"],
         title_hi=fixture["title_hi"],
@@ -170,8 +230,8 @@ def process_voice_and_catalog(
         craft_category=fixture["craft_category"],
         materials_used=fixture["materials_used"],
         technique=fixture["technique"],
-        estimated_hours=fixture["estimated_hours"],
-        raw_material_cost_estimate_inr=fixture["raw_material_cost_estimate_inr"],
+        estimated_hours=extracted_hours,
+        raw_material_cost_estimate_inr=extracted_cost,
         seo_keywords=fixture["seo_keywords"],
         gi_tag_eligible=fixture["gi_tag_eligible"],
         source_language=language,
