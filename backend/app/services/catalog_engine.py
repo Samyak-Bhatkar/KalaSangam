@@ -84,24 +84,36 @@ def call_gemini_multimodal(
                 source_language=source_language
             )
 
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=[
-                    prompt,
-                    types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
-                ],
-                config=types.GenerateContentConfig(
-                    temperature=0.2,
-                    response_mime_type="application/json"
-                )
-            )
+            response = None
+            for model_name in ["gemini-3.5-flash-lite", "gemini-3.6-flash", "gemini-flash-latest"]:
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=[
+                            prompt,
+                            types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+                        ],
+                        config=types.GenerateContentConfig(
+                            temperature=0.2,
+                            response_mime_type="application/json"
+                        )
+                    )
+                    if response and response.text:
+                        break
+                except Exception as m_err:
+                    logger.warning(f"Catalog model {model_name} error: {m_err}")
+                    continue
+
+            if not response or not response.text:
+                raise ValueError("All Gemini catalog models returned empty response")
+
             raw_text = response.text.strip()
             # Clean possible markdown wrapping
             raw_text = re.sub(r"^```json\s*", "", raw_text)
             raw_text = re.sub(r"\s*```$", "", raw_text)
             return json.loads(raw_text)
         except Exception as e:
-            logger.warning(f"google-genai attempt failed ({e}), trying google.generativeai fallback")
+            logger.warning(f"google-genai attempt failed ({e}), trying heuristic fallback")
             import google.generativeai as gai
             gai.configure(api_key=settings.GEMINI_API_KEY)
             model = gai.GenerativeModel("gemini-2.5-flash")

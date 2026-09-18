@@ -219,6 +219,12 @@ export default function VoiceRecorder() {
   const [audioLevels,        setAudioLevels]        = useState(Array(10).fill(4));
   const [micVolumePct,       setMicVolumePct]       = useState(0);      // Real-time input volume 0-100%
   const [micDeviceName,      setMicDeviceName]      = useState('');     // Active microphone device label
+  const [availableMics,      setAvailableMics]      = useState([]);     // Available hardware microphones
+  const [selectedMicId,      setSelectedMicId]      = useState(() => {
+    return (typeof window !== 'undefined' && localStorage.getItem('shilpsetu_preferred_mic')) || '';
+  });
+  const [isZeroVolumeAlert,  setIsZeroVolumeAlert]  = useState(false);  // True if mic volume stays 0% while listening
+  const [isTranscribingAudio, setIsTranscribingAudio] = useState(false); // True during Gemini audio transcription
   const [speechEngineStatus, setSpeechEngineStatus] = useState('');     // Real-time speech engine event status
   const [recordedAudioUrl,   setRecordedAudioUrl]   = useState(null);   // Actual audio recorded from mic
   const [isPlayingRecorded,  setIsPlayingRecorded]  = useState(false);
@@ -230,18 +236,32 @@ export default function VoiceRecorder() {
   const [bhashiniStatus,     setBhashiniStatus]     = useState('');
 
   // ── Refs (Engine Architecture: Zero Stale Closures) ────────────────────────
-  const isListeningRef       = useRef(false);
-  const isRecognizingRef     = useRef(false);
-  const finalTranscriptRef   = useRef('');
-  const recognitionRef       = useRef(null);
-  const mediaRecorderRef     = useRef(null);
-  const localRecorderRef     = useRef(null);
-  const localChunksRef       = useRef([]);
-  const audioContextRef      = useRef(null);
-  const analyserRef          = useRef(null);
-  const animFrameRef         = useRef(null);
-  const streamRef            = useRef(null);
-  const bhashiniChunksRef    = useRef([]);
+  const isListeningRef         = useRef(false);
+  const isRecognizingRef       = useRef(false);
+  const finalTranscriptRef     = useRef('');
+  const recognitionRef         = useRef(null);
+  const mediaRecorderRef       = useRef(null);
+  const localRecorderRef       = useRef(null);
+  const localChunksRef         = useRef([]);
+  const audioContextRef        = useRef(null);
+  const analyserRef            = useRef(null);
+  const animFrameRef           = useRef(null);
+  const streamRef              = useRef(null);
+  const bhashiniChunksRef      = useRef([]);
+  const zeroVolumeTimerRef     = useRef(null);
+  const consecutiveNoSpeechRef = useRef(0);
+  const hasSpeechResultRef     = useRef(false);
+  const recordedBlobRef        = useRef(null);
+  const selectedMicIdRef       = useRef(selectedMicId);
+
+  // Sync refs with state changes
+  useEffect(() => {
+    selectedMicIdRef.current = selectedMicId;
+  }, [selectedMicId]);
+
+  useEffect(() => {
+    hasSpeechResultRef.current = hasSpeechResult;
+  }, [hasSpeechResult]);
 
   // ── Derived helpers ────────────────────────────────────────────────────────
   const getActiveCraftType = () => {
@@ -259,7 +279,23 @@ export default function VoiceRecorder() {
   // Regional dialects (non-Hindi-standard) benefit from Bhashini
   const isRegionalDialect = ['bhojpuri', 'bundeli', 'malwi', 'mr', 'bn'].includes(activeDialect);
 
-  // ── On mount: prefill transcript ──────────────────────────────────────────
+  // ── Enumerate hardware audio input devices ─────────────────────────────────
+  const refreshAudioDevices = useCallback(async () => {
+    if (!navigator.mediaDevices?.enumerateDevices) return;
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioInputs = devices.filter(d => d.kind === 'audioinput');
+      setAvailableMics(audioInputs);
+      if (audioInputs.length > 0 && !selectedMicIdRef.current) {
+        setSelectedMicId(audioInputs[0].deviceId);
+        selectedMicIdRef.current = audioInputs[0].deviceId;
+      }
+    } catch (err) {
+      console.warn('[VoiceRecorder] enumerateDevices error:', err);
+    }
+  }, []);
+
+  // ── On mount: prefill transcript & discover devices ───────────────────────
   useEffect(() => {
     if (!transcript) {
       setTranscript(currentVoiceSamples[activeDialect] || currentVoiceSamples.hi);
@@ -268,14 +304,28 @@ export default function VoiceRecorder() {
       ? 'कृपया अपने शिल्प के बारे में बोलें - सामग्री, बनाने का समय और लागत बताएं।'
       : 'Please describe your craft — mention materials, hours invested, and raw material cost.';
     speakVoice(promptText, language === 'hi' ? 'hi-IN' : 'en-IN');
-    return () => { cleanupAll(); };
+
+    refreshAudioDevices();
+    if (navigator.mediaDevices?.addEventListener) {
+      navigator.mediaDevices.addEventListener('devicechange', refreshAudioDevices);
+    }
+
+    return () => {
+      if (navigator.mediaDevices?.removeEventListener) {
+        navigator.mediaDevices.removeEventListener('devicechange', refreshAudioDevices);
+      }
+      cleanupAll();
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Real audio visualizer with True Decibel Level & Device Tracking ─────
   const startAudioVisualizer = useCallback(async (existingStream = null) => {
     try {
-      const stream = existingStream || await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      const audioConstraints = selectedMicIdRef.current
+        ? { deviceId: { exact: selectedMicIdRef.current } }
+        : true;
+      const stream = existingStream || await navigator.mediaDevices.getUserMedia({ audio: audioConstraints, video: false });
       if (!existingStream) streamRef.current = stream;
 
       const track = stream.getAudioTracks()[0];
@@ -310,6 +360,22 @@ export default function VoiceRecorder() {
         for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
         const avg = sum / dataArray.length;
         setMicVolumePct(Math.min(100, Math.round((avg / 128) * 100)));
+
+        // Real-time zero-volume detection for silent mics (e.g. Iriun when phone is disconnected)
+        if (isListeningRef.current) {
+          if (avg < 1) {
+            if (!zeroVolumeTimerRef.current) {
+              zeroVolumeTimerRef.current = Date.now();
+            } else if (Date.now() - zeroVolumeTimerRef.current > 2500) {
+              setIsZeroVolumeAlert(true);
+            }
+          } else {
+            zeroVolumeTimerRef.current = null;
+            setIsZeroVolumeAlert(false);
+            consecutiveNoSpeechRef.current = 0;
+          }
+        }
+
         animFrameRef.current = requestAnimationFrame(updateWaveform);
       };
       updateWaveform();
@@ -333,6 +399,8 @@ export default function VoiceRecorder() {
       audioContextRef.current.close().catch(() => {});
       audioContextRef.current = null;
     }
+    zeroVolumeTimerRef.current = null;
+    setIsZeroVolumeAlert(false);
     setAudioLevels(Array(10).fill(4));
     setMicVolumePct(0);
   }, []);
@@ -343,6 +411,87 @@ export default function VoiceRecorder() {
       streamRef.current = null;
     }
   }, []);
+
+  // ── Handle physical microphone device change ──────────────────────────────
+  const handleMicDeviceChange = async (e) => {
+    const newDeviceId = e.target.value;
+    setSelectedMicId(newDeviceId);
+    selectedMicIdRef.current = newDeviceId;
+    try {
+      localStorage.setItem('shilpsetu_preferred_mic', newDeviceId);
+    } catch {}
+
+    // If currently listening, switch stream smoothly without interrupting recording session
+    if (isListeningRef.current) {
+      stopAudioVisualizer();
+      stopMicStream();
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: newDeviceId ? { deviceId: { exact: newDeviceId } } : true,
+          video: false,
+        });
+        streamRef.current = stream;
+        const track = stream.getAudioTracks()[0];
+        if (track) setMicDeviceName(track.label || 'Microphone');
+        await startAudioVisualizer(stream);
+        setIsZeroVolumeAlert(false);
+        zeroVolumeTimerRef.current = null;
+        consecutiveNoSpeechRef.current = 0;
+      } catch (err) {
+        console.warn('[VoiceRecorder] Mic switch error:', err);
+      }
+    }
+  };
+
+  // ── Backend Gemini Multimodal Vernacular ASR Fallback ─────────────────────
+  const transcribeBlobWithBackend = useCallback(async (blobToTranscribe) => {
+    const blob = blobToTranscribe || recordedBlobRef.current;
+    if (!blob || blob.size < 100) return;
+
+    setIsTranscribingAudio(true);
+    setSpeechEngineStatus(
+      language === 'hi'
+        ? '🔄 Google Gemini AI: आपकी आवाज़ से टेक्स्ट बनाया जा रहा है...'
+        : '🔄 Google Gemini AI: Transcribing recorded voice...'
+    );
+
+    try {
+      const formData = new FormData();
+      formData.append('audio', blob, 'artisan_recording.webm');
+      formData.append('language', activeDialect);
+      if (selectedPreset?.craft_category) {
+        formData.append('category_hint', selectedPreset.craft_category);
+      }
+
+      const res = await fetch('/api/v1/voice/transcribe', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.transcript) {
+          setTranscript(data.transcript);
+          setHasSpeechResult(true);
+          hasSpeechResultRef.current = true;
+          setIsCustomSpoken(true);
+          setSpeechEngineStatus(
+            data.source?.startsWith('gemini')
+              ? (language === 'hi' ? '✓ Google Gemini AI ने आवाज़ को सही टेक्स्ट में बदला!' : '✓ Google Gemini AI transcribed successfully!')
+              : (language === 'hi' ? '✓ शिल्प विवरण सफलतापूर्वक तैयार हुआ!' : '✓ Craft narrative generated!')
+          );
+          if ('vibrate' in navigator) navigator.vibrate([40, 60, 40]);
+        }
+      }
+    } catch (err) {
+      console.warn('[VoiceRecorder] Backend transcribe error:', err);
+      setSpeechEngineStatus(
+        language === 'hi' ? 'ट्रांसक्रिप्शन में त्रुटि — कृपया पुनः प्रयास करें' : 'Transcription error — please retry'
+      );
+    } finally {
+      setIsTranscribingAudio(false);
+    }
+  }, [activeDialect, language, selectedPreset]);
 
   const cleanupAll = useCallback(() => {
     isListeningRef.current = false;
@@ -370,32 +519,31 @@ export default function VoiceRecorder() {
     setSpeechEngineStatus('');
   }, [stopAudioVisualizer, stopMicStream]);
 
-  // ── Web Speech API (browser-native, zero-API-key, works on localhost & HTTPS) ──
+  // ── Unified Speech & Audio Recording Engine (Browser Web Speech + Gemini Multimodal ASR) ──
   const startWebSpeech = useCallback(async () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setMicError(MIC_ERRORS.NOT_SUPPORTED);
-      setMicState('error');
-      setIsListening(false);
-      isListeningRef.current = false;
-      return;
-    }
-
     setMicState('requesting');
-    setSpeechEngineStatus('माइक्रोफ़ोन अनुमति जांची जा रही है...');
+    setSpeechEngineStatus(
+      language === 'hi' ? 'माइक्रोफ़ोन अनुमति जांची जा रही है...' : 'Checking microphone access...'
+    );
 
-    // Single unified hardware getUserMedia stream
+    // Single unified hardware getUserMedia stream using selected device
     let stream = null;
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      const audioConstraints = selectedMicIdRef.current
+        ? { deviceId: { exact: selectedMicIdRef.current } }
+        : true;
+      stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints, video: false });
       streamRef.current = stream;
       const track = stream.getAudioTracks()[0];
       if (track) setMicDeviceName(track.label || 'Default Microphone');
-      
-      // Start real decibel visualizer with the single active stream
+
+      // Refresh devices with real labels now that mic permission is granted
+      refreshAudioDevices();
+
+      // Start decibel visualizer with the active stream
       await startAudioVisualizer(stream);
 
-      // Start local audio recording concurrent capture for immediate playback proof
+      // Start local audio recording concurrent capture for immediate playback proof & Gemini transcription fallback
       try {
         localChunksRef.current = [];
         const mime = (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/webm;codecs=opus'))
@@ -405,11 +553,18 @@ export default function VoiceRecorder() {
         rec.ondataavailable = (e) => {
           if (e.data && e.data.size > 0) localChunksRef.current.push(e.data);
         };
-        rec.onstop = () => {
+        rec.onstop = async () => {
           if (localChunksRef.current.length > 0) {
             const blob = new Blob(localChunksRef.current, { type: 'audio/webm' });
             const url = URL.createObjectURL(blob);
             setRecordedAudioUrl(url);
+            recordedBlobRef.current = blob;
+
+            // CRITICAL MOBILE & ZERO-SPEECH FALLBACK:
+            // If WebSpeech did not produce custom transcribed text, automatically transcribe via Gemini backend!
+            if (!hasSpeechResultRef.current && blob.size > 1500) {
+              await transcribeBlobWithBackend(blob);
+            }
           }
         };
         rec.start(250);
@@ -426,10 +581,23 @@ export default function VoiceRecorder() {
       return;
     }
 
-    // Create speech recognition instance
+    // Real-time Browser SpeechRecognition (Web Speech API)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      // Graceful degradation for mobile browsers (e.g. mobile Safari / HTTP) — MediaRecorder handles audio!
+      setMicState('live');
+      setSpeechEngineStatus(
+        language === 'hi'
+          ? '🎙️ ऑडियो रिकॉर्डिंग सक्रिय — रुकने पर Google Gemini AI इसे टेक्स्ट में बदलेगा'
+          : '🎙️ Audio capture active — Google Gemini AI will transcribe on stop'
+      );
+      return;
+    }
+
+    const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const recognition = new SpeechRecognition();
     recognition.lang = currentDialect.langCode || 'hi-IN';
-    recognition.continuous = true;
+    recognition.continuous = !isMobile;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
@@ -437,23 +605,33 @@ export default function VoiceRecorder() {
       isRecognizingRef.current = true;
       setMicState('live');
       setMicError(null);
-      setSpeechEngineStatus('वाक् इंजन सक्रिय — आपकी आवाज़ सुनी जा रही है');
+      setSpeechEngineStatus(
+        language === 'hi' ? 'वाक् इंजन सक्रिय — आपकी आवाज़ सुनी जा रही है' : 'Speech engine active — listening...'
+      );
     };
 
     recognition.onaudiostart = () => {
-      setSpeechEngineStatus('माइक ऑडियो कैप्चर सक्रिय (Audio Stream Connected)');
+      setSpeechEngineStatus(
+        language === 'hi' ? 'माइक ऑडियो कैप्चर सक्रिय (Audio Stream Connected)' : 'Mic audio stream connected'
+      );
     };
 
     recognition.onsoundstart = () => {
-      setSpeechEngineStatus('ध्वनि का पता चला (Sound Detected)');
+      setSpeechEngineStatus(
+        language === 'hi' ? 'ध्वनि का पता चला (Sound Detected)' : 'Sound detected'
+      );
     };
 
     recognition.onspeechstart = () => {
-      setSpeechEngineStatus('भाषण पहचाना जा रहा है (Speech Detected)...');
+      setSpeechEngineStatus(
+        language === 'hi' ? 'भाषण पहचाना जा रहा है (Speech Detected)...' : 'Recognizing speech...'
+      );
     };
 
     recognition.onspeechend = () => {
-      setSpeechEngineStatus('भाषण विराम (Processing Utterance)...');
+      setSpeechEngineStatus(
+        language === 'hi' ? 'भाषण विराम (Processing Utterance)...' : 'Processing utterance...'
+      );
     };
 
     recognition.onresult = (event) => {
@@ -472,14 +650,16 @@ export default function VoiceRecorder() {
         setTranscript(fullLiveText);
         setLiveInterim(interim);
         setHasSpeechResult(true);
+        hasSpeechResultRef.current = true;
         setIsCustomSpoken(true);
-        setSpeechEngineStatus('शब्द सफलतापूर्वक टाइप हो रहे हैं');
+        setSpeechEngineStatus(
+          language === 'hi' ? 'शब्द सफलतापूर्वक टाइप हो रहे हैं' : 'Words transcribed successfully'
+        );
       }
     };
 
     recognition.onerror = (e) => {
       console.warn('[WebSpeech] Event Error:', e.error);
-      setSpeechEngineStatus(`इंजन संदेश: ${e.error}`);
       if (e.error === 'not-allowed' || e.error === 'permission-denied') {
         isListeningRef.current = false;
         isRecognizingRef.current = false;
@@ -489,13 +669,12 @@ export default function VoiceRecorder() {
         stopAudioVisualizer();
         stopMicStream();
       } else if (e.error === 'network') {
-        isListeningRef.current = false;
-        isRecognizingRef.current = false;
-        setMicError(MIC_ERRORS.NETWORK);
-        setMicState('error');
-        setIsListening(false);
-        stopAudioVisualizer();
-        stopMicStream();
+        console.warn('[WebSpeech] Network issue — relying on backend audio transcription');
+        setSpeechEngineStatus(
+          language === 'hi'
+            ? 'नेटवर्क धीमा है — रिकॉर्डिंग जारी है, रुकने पर AI टेक्स्ट बनाएगा'
+            : 'Slow network — audio recording continues, AI will transcribe on stop'
+        );
       } else if (e.error === 'audio-capture') {
         isListeningRef.current = false;
         isRecognizingRef.current = false;
@@ -505,20 +684,37 @@ export default function VoiceRecorder() {
         stopAudioVisualizer();
         stopMicStream();
       } else if (e.error === 'no-speech') {
-        // Normal silence event in Chrome Web Speech — keep session alive
-        setSpeechEngineStatus('आवाज़ की प्रतीक्षा कर रहे हैं... (कृपया थोड़ा ज़ोर से बोलें)');
+        consecutiveNoSpeechRef.current += 1;
+        if (consecutiveNoSpeechRef.current >= 3) {
+          setSpeechEngineStatus(
+            language === 'hi'
+              ? 'माइक से कोई आवाज़ नहीं आई (ध्वनि स्तर 0%)। कृपया माइक चालू करें या दूसरा माइक चुनें।'
+              : 'No audio detected. Please check mic volume or select another microphone.'
+          );
+        } else {
+          setSpeechEngineStatus(
+            language === 'hi'
+              ? 'आवाज़ की प्रतीक्षा कर रहे हैं... (कृपया थोड़ा ज़ोर से बोलें)'
+              : 'Listening for speech... (Please speak clearly)'
+          );
+        }
       }
     };
 
     recognition.onend = () => {
       isRecognizingRef.current = false;
-      // Auto-restart if user still has mic toggled on (overcoming Chrome silence timeout)
       if (isListeningRef.current) {
-        try {
-          recognition.start();
-        } catch (err) {
-          console.log('[WebSpeech] auto-restart pending:', err);
-        }
+        // Throttled restart to prevent infinite console spinning when mic is silent
+        const restartDelay = consecutiveNoSpeechRef.current >= 3 ? 1500 : (isMobile ? 150 : 300);
+        setTimeout(() => {
+          if (isListeningRef.current && !isRecognizingRef.current) {
+            try {
+              recognition.start();
+            } catch (err) {
+              console.log('[WebSpeech] auto-restart pending:', err);
+            }
+          }
+        }, restartDelay);
       } else {
         setMicState('idle');
         setIsListening(false);
@@ -533,16 +729,13 @@ export default function VoiceRecorder() {
       recognition.start();
     } catch (err) {
       console.warn('[WebSpeech] Start threw:', err);
-      if (!isRecognizingRef.current) {
-        setMicError(MIC_ERRORS.NOT_ALLOWED);
-        setMicState('error');
-        setIsListening(false);
-        isListeningRef.current = false;
-        stopAudioVisualizer();
-        stopMicStream();
-      }
+      setSpeechEngineStatus(
+        language === 'hi'
+          ? '🎙️ लाइव रिकॉर्डिंग चालू है (रुकने पर AI टेक्स्ट बनेगा)'
+          : '🎙️ Live recording active (AI will transcribe on stop)'
+      );
     }
-  }, [currentDialect.langCode, startAudioVisualizer, stopAudioVisualizer, stopMicStream]);
+  }, [currentDialect.langCode, language, refreshAudioDevices, startAudioVisualizer, stopAudioVisualizer, stopMicStream, transcribeBlobWithBackend]);
 
   // ── Bhashini ASR (MediaRecorder → send blob → get transcript) ────────────
   const startBhashiniRecording = useCallback(async () => {
@@ -1004,6 +1197,30 @@ export default function VoiceRecorder() {
           )}
         </p>
 
+        {/* Hardware Microphone Device Selector (Apple/Airbnb Clean Settings Pill) */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200 text-[11px] text-slate-700 shadow-2xs max-w-xs w-full justify-between">
+          <span className="flex items-center gap-1 font-bold text-slate-600 shrink-0">
+            <Radio className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span>{language === 'hi' ? 'माइक डिवाइस:' : 'Mic Device:'}</span>
+          </span>
+          <select
+            value={selectedMicId}
+            onChange={handleMicDeviceChange}
+            className="bg-transparent font-medium text-slate-800 text-[11px] focus:outline-none max-w-[170px] truncate cursor-pointer py-0.5"
+            title={language === 'hi' ? 'माइक्रोफ़ोन बदलें' : 'Change Microphone'}
+          >
+            {availableMics.length === 0 ? (
+              <option value="">{micDeviceName || (language === 'hi' ? 'डिफ़ॉल्ट माइक्रोफ़ोन' : 'Default Microphone')}</option>
+            ) : (
+              availableMics.map((mic, idx) => (
+                <option key={mic.deviceId || idx} value={mic.deviceId}>
+                  {mic.label || `Microphone ${idx + 1}`}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+
         {/* Real Mic Hardware Activity & Input Decibel Meter */}
         {micState === 'live' && (
           <div className="w-full max-w-xs px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200 flex items-center justify-between text-[10px] font-semibold text-slate-700">
@@ -1017,24 +1234,64 @@ export default function VoiceRecorder() {
           </div>
         )}
 
+        {/* Zero-Volume Empathetic Diagnostic Warning (Airbnb / Apple UX) */}
+        {isListening && isZeroVolumeAlert && (
+          <div className="w-full max-w-xs px-3 py-2 rounded-xl bg-amber-50 border-2 border-amber-300 shadow-xs flex items-start gap-2 text-left animate-in fade-in slide-in-from-top-1">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-[10px] leading-tight">
+              <p className="font-black text-amber-950">
+                {language === 'hi' ? 'माइक से कोई आवाज़ नहीं आ रही (ध्वनि स्तर 0%)' : 'No audio heard from mic (Volume 0%)'}
+              </p>
+              <p className="text-amber-800 mt-0.5 font-medium">
+                {micDeviceName?.toLowerCase().includes('iriun')
+                  ? (language === 'hi'
+                      ? 'Iriun Webcam चुना हुआ है। कृपया अपने फ़ोन में Iriun ऐप चालू रखें अथवा ऊपर मेन्यू से दूसरा माइक चुनें।'
+                      : 'Iriun Webcam is selected. Keep Iriun app active on your phone or select another mic above.')
+                  : (language === 'hi'
+                      ? 'कृपया थोड़ा ज़ोर से बोलें अथवा ऊपर मेन्यू से अपना मुख्य माइक्रोफ़ोन चुनें।'
+                      : 'Please speak louder or select your working microphone from the menu above.')}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Speech Engine Diagnostics Status */}
-        {isListening && speechEngineStatus && (
+        {speechEngineStatus && (
           <p className="text-[10px] font-bold text-slate-500 text-center tracking-tight px-2">
             {speechEngineStatus}
           </p>
         )}
 
-        {/* Playback Captured Real Voice Proof */}
+        {/* Playback Captured Real Voice Proof & AI Convert Button */}
         {recordedAudioUrl && !isListening && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-center">
             <button
               type="button"
               onClick={togglePlayRecordedAudio}
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 text-[11px] font-bold cursor-pointer transition-all shadow-xs active:scale-95"
             >
               {isPlayingRecorded ? <Pause className="w-3.5 h-3.5 text-emerald-700" /> : <Play className="w-3.5 h-3.5 text-emerald-700" />}
-              <span>{isPlayingRecorded ? 'आवाज़ रोकें' : '▶️ अपनी रिकॉर्ड की गई आवाज़ सुनें'}</span>
+              <span>{isPlayingRecorded ? 'आवाज़ रोकें' : '▶️ अपनी आवाज़ सुनें'}</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => transcribeBlobWithBackend()}
+              disabled={isTranscribingAudio}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-[11px] font-bold cursor-pointer transition-all shadow-xs active:scale-95 disabled:opacity-50"
+            >
+              {isTranscribingAudio ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
+              <span>
+                {isTranscribingAudio
+                  ? (language === 'hi' ? 'AI टेक्स्ट बना रहा है...' : 'Transcribing...')
+                  : (language === 'hi' ? '✨ आवाज़ से AI टेक्स्ट बनाएं' : '✨ Convert Voice to Text')}
+              </span>
+            </button>
+
             <audio
               id="shilpsetu-recorded-audio"
               src={recordedAudioUrl}

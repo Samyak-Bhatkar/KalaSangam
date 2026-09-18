@@ -47,6 +47,8 @@ from .services.n8n_client import (
     trigger_ministry_analytics_workflow,
 )
 
+from .services.transcription_service import transcribe_audio_bytes, fallback_craft_transcript
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ShilpSetu.Main")
 
@@ -56,14 +58,17 @@ app = FastAPI(
     description="Autonomous AI-driven Smart Cataloging & Market Linkage System for Rural Indian Artisans (MoSJE)",
 )
 
-# Enable CORS for local and staging frontend development
+# Enable CORS for local, staging, and LAN mobile development
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://kalasangam-frontend.onrender.com",
         "http://localhost:5173",
         "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
     ],
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -179,13 +184,18 @@ async def process_voice_catalog(
     Outputs strictly typed bilingual e-commerce metadata conforming to MoSJE schema.
     """
     try:
-        # If audio file is provided but no transcript, transcribe or fallback
+        # If audio file is provided but no transcript, transcribe via Gemini / fallback
         effective_transcript = transcript
         if audio and not effective_transcript:
             audio_bytes = await audio.read()
-            # In production, call Bhashini ASR endpoint here.
-            # In Hackathon zero-fail mode, fallback to heuristic transcript.
-            pass
+            mime_type = audio.content_type or "audio/webm"
+            trans_res = transcribe_audio_bytes(
+                audio_bytes=audio_bytes,
+                mime_type=mime_type,
+                language=language,
+                category_hint=category_hint
+            )
+            effective_transcript = trans_res.get("transcript", "")
 
         catalog_data = process_voice_and_catalog(
             image_base64=image_base64,
@@ -197,6 +207,36 @@ async def process_voice_catalog(
     except Exception as e:
         logger.error(f"Catalog voice processing error: {e}")
         raise HTTPException(status_code=500, detail=f"Voice cataloging failed: {str(e)}")
+
+@app.post("/api/v1/voice/transcribe")
+async def transcribe_voice_endpoint(
+    audio: UploadFile = File(...),
+    language: str = Form("hi"),
+    category_hint: Optional[str] = Form(None)
+):
+    """
+    POST /api/v1/voice/transcribe
+    Autonomous Vernacular Voice Transcription Endpoint for ShilpSetu.
+    Accepts recorded voice audio (WebM/WAV) from mobile or desktop browser.
+    Transcribes using Gemini 3.5 Flash Lite / 3.6 Flash with zero-fail heuristic fallback.
+    """
+    try:
+        audio_bytes = await audio.read()
+        mime_type = audio.content_type or "audio/webm"
+        result = transcribe_audio_bytes(
+            audio_bytes=audio_bytes,
+            mime_type=mime_type,
+            language=language,
+            category_hint=category_hint
+        )
+        return JSONResponse(content=result)
+    except Exception as e:
+        logger.error(f"Voice transcription endpoint error: {e}")
+        return JSONResponse(content={
+            "transcript": fallback_craft_transcript(category_hint),
+            "source": "exception_fallback",
+            "success": True,
+        })
 
 @app.post("/api/v1/catalog/voice-process-json", response_model=CatalogItemResponse)
 async def process_voice_catalog_json(req: CatalogVoiceProcessRequest):

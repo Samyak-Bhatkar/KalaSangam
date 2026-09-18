@@ -41,9 +41,10 @@ def calculate_living_wage_pricing(
             break
 
     # 4. Multi-Channel Tiers
-    b2c_price = round(base_cost * m_craft, 2)
+    default_b2c = round(base_cost * m_craft, 2)
+    b2c_price = round(artisan_expected_price, 2) if (artisan_expected_price is not None and artisan_expected_price > 0) else default_b2c
     b2b_margin_factor = 1.0 + ((m_craft - 1.0) * 0.40)
-    b2b_price = round(base_cost * b2b_margin_factor, 2)
+    b2b_price = round(b2c_price * 0.82, 2) if (artisan_expected_price and artisan_expected_price > 0) else round(base_cost * b2b_margin_factor, 2)
     gem_price = round(base_cost * (1.0 + settings.GEM_PROCUREMENT_MARGIN), 2)
 
     # 5. Underpricing Guard
@@ -56,11 +57,11 @@ def calculate_living_wage_pricing(
             shortfall = round(base_cost - artisan_expected_price, 2)
             warning_hi = (
                 f"चेतावनी: आपकी बताई गई कीमत (₹{artisan_expected_price:,.0f}) आपकी बुनियादी लागत और उचित मजदूरी "
-                f"(₹{base_cost:,.0f}) से ₹{shortfall:,.0f} कम है! कृपया कम से कम ₹{base_cost:,.0f} निर्धारित करें।"
+                f"(₹{base_cost:,.0f}) से ₹{shortfall:,.0f} कम है! कृपया कम से कम ₹{base_cost:,.0f} निर्धारित करें ताकि नुकसान न हो।"
             )
             warning_en = (
-                f"Warning: Your expected price (₹{artisan_expected_price:,.0f}) is ₹{shortfall:,.0f} below the "
-                f"statutory fair living wage cost (₹{base_cost:,.0f}). Artisan labor must be protected!"
+                f"Warning: Your chosen price (₹{artisan_expected_price:,.0f}) is ₹{shortfall:,.0f} below the "
+                f"statutory fair living wage cost (₹{base_cost:,.0f}). Please keep above cost floor to prevent loss."
             )
 
     # Margin percentage on B2C over direct cost
