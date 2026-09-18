@@ -22,7 +22,7 @@ services:
     staticPublishPath: "./frontend/dist"
     envVars:
       - key: VITE_API_BASE_URL
-        value: https://kalasangam-backend.onrender.com
+        value: https://kalasangam-backend-xj65.onrender.com
     routes:
       - type: rewrite
         source: /*
