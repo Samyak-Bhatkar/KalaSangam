@@ -1,0 +1,44 @@
+# Smart India Hackathon (SIH) — Problem Statement Details
+
+## Identification & Title
+- **Problem Statement ID**: `26090`
+- **Problem Statement Title**: AI-Driven Market Linkage and Smart Cataloging Mobile Application for Marginalized Artisans
+- **Client Organization / Ministry**: Ministry of Social Justice and Empowerment (MoSJE), Department of Social Justice and Empowerment, Government of India
+- **Target Beneficiaries**: Marginalized communities, particularly micro-entrepreneurs, artisans, and weavers supported by NBCFDC (National Backward Classes Finance & Development Corporation) and NSFDC (National Scheduled Castes Finance and Development Corporation).
+
+---
+
+## Background
+The government actively supports the socio-economic upliftment of marginalized communities, particularly micro-entrepreneurs, artisans, and weavers. Financial assistance is provided to establish small-scale manufacturing and handicraft units. To help these beneficiaries sell their goods, market exposure is facilitated through periodic physical exhibitions, cluster development programs, and trade fairs (such as *Shilp Samagam*, *Surajkund Mela*, and *Dilli Haat*). 
+
+While physical exhibitions provide a temporary boost in sales, these micro-entrepreneurs lack continuous, year-round access to broader digital markets. Transitioning to the digital economy is hindered by:
+1. Low digital literacy
+2. Regional language barriers
+3. Lack of technical skills required to professionally photograph, price, and catalog products for modern e-commerce.
+
+---
+
+## Challenge
+There is a critical need to bridge the gap between traditional craftsmanship and modern digital commerce. Beneficiaries struggle to present their products competitively online. They often fail to:
+- Capture high-quality product images under dim workshop conditions.
+- Write compelling, standardized product descriptions.
+- Understand dynamic market pricing and avoid predatory middleman exploitation.
+
+The challenge is to build an intuitive, AI-driven mobile application that acts as a **'virtual business manager'** for these artisans. The app must empower them to seamlessly digitize their inventory, optimize their listings using AI, and connect directly with larger B2B buyers or government e-marketplaces (GeM / ONDC) without requiring advanced technical knowledge.
+
+---
+
+## Expected Solution & Core Modules
+Participants are expected to develop an AI-powered, cross-platform mobile application supported by a robust, scalable backend architecture. To ensure high adoption among low-literacy users, the application must feature a highly responsive, minimalist UI/UX design (incorporating modern, clean visual hierarchies and accessible layouts).
+
+Key features include:
+1. **AI Image Enhancer & Studio**: A built-in camera module that utilizes AI to automatically remove cluttered backgrounds, correct lighting, and format product photos (e.g., textiles, handicrafts) to professional e-commerce standards.
+2. **Multilingual Auto-Cataloger**: An NLP-based engine that allows artisans to describe their product via voice notes in regional languages. The AI should translate and generate SEO-friendly, professional product descriptions in English and Hindi.
+3. **Dynamic Pricing Assistant**: A machine learning algorithm that analyzes the uploaded product image and description to suggest an optimal, competitive selling price based on current market trends and raw material costs.
+
+---
+
+## Impact Goals
+- **Year-Round Channel**: Provide marginalized micro-entrepreneurs with a continuous, year-round digital sales channel, reducing their dependency on periodic physical fairs.
+- **Zero Friction Onboarding**: Drastically lower the barrier to entry for digital commerce through intuitive AI automation (100% voice & visual cues).
+- **Economic Empowerment**: Improve digital literacy and financial independence, ultimately increasing the average annual income of the target demographic.

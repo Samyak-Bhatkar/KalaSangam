@@ -109,7 +109,7 @@ def segment_craft(pil_img: Image.Image) -> Image.Image:
             from rembg import remove
             start_t = time.time()
             cutout = remove(pil_img, session=sess)
-            if time.time() - start_t <= 3.5:
+            if cutout is not None:
                 return cutout
         except Exception:
             pass

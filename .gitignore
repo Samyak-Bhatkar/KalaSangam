@@ -29,7 +29,19 @@ env/
 .pytest_cache/
 backend/app/static/uploads/*.mp4
 backend/app/static/uploads/*.webm
+backend/app/static/uploads/*.jpg
+backend/app/static/uploads/*.png
 backend/app/static/audio/*.wav
+
+
+# Test Datasets & Benchmarks (Local evaluation only - never commit to git)
+test_images/
+test_dataset/
+backend/test_images/
+backend/test_dataset/
+benchmarks/
+*.benchmark.html
+
 
 # Node.js & React (Frontend)
 node_modules/
