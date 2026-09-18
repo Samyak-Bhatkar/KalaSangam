@@ -3,6 +3,7 @@ services:
   - type: web
     name: shilpsetu-backend
     runtime: python
+    plan: free
     buildCommand: "cd backend && pip install -r requirements.txt && python scripts/generate_sample_crafts.py"
     startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
@@ -19,6 +20,9 @@ services:
     runtime: static
     buildCommand: "cd frontend && npm install && npm run build"
     staticPublishPath: "./frontend/dist"
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://shilpsetu-backend.onrender.com
     routes:
       - type: rewrite
         source: /*
