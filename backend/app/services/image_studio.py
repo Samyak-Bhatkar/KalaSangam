@@ -71,33 +71,43 @@ def color_temperature_balance(img: Image.Image) -> Image.Image:
 
 def segment_craft_fallback(pil_img: Image.Image) -> Image.Image:
     """
-    High-speed OpenCV GrabCut & Otsu threshold segmentation fallback
-    guaranteed to execute under 500ms when rembg is offline or slow.
+    High-speed OpenCV GrabCut segmentation fallback.
+    Downscales processing frame to max 640px for sub-200ms latency and minimal RAM,
+    then upscales mask to original resolution with Gaussian anti-aliasing.
     """
     rgb_img = pil_img.convert("RGB")
-    cv_img = cv2.cvtColor(np.array(rgb_img), cv2.COLOR_RGB2BGR)
-    h, w = cv_img.shape[:2]
+    orig_w, orig_h = rgb_img.size
+    
+    # Scale down for fast, low-memory GrabCut (prevents OOM on 512MB RAM servers)
+    max_dim = 640
+    scale = min(1.0, max_dim / max(orig_w, orig_h))
+    proc_w = max(64, int(orig_w * scale))
+    proc_h = max(64, int(orig_h * scale))
+    
+    small_img = rgb_img.resize((proc_w, proc_h), Image.Resampling.BILINEAR)
+    cv_small = cv2.cvtColor(np.array(small_img), cv2.COLOR_RGB2BGR)
 
-    # Margin rectangle for GrabCut
-    rect = (int(w * 0.05), int(h * 0.05), int(w * 0.90), int(h * 0.90))
-    mask = np.zeros(cv_img.shape[:2], np.uint8)
+    rect = (int(proc_w * 0.05), int(proc_h * 0.05), int(proc_w * 0.90), int(proc_h * 0.90))
+    mask = np.zeros(cv_small.shape[:2], np.uint8)
     bgd_model = np.zeros((1, 65), np.float64)
     fgd_model = np.zeros((1, 65), np.float64)
 
     try:
-        cv2.grabCut(cv_img, mask, rect, bgd_model, fgd_model, 3, cv2.GC_INIT_WITH_RECT)
-        final_mask = np.where((mask == 2) | (mask == 0), 0, 255).astype('uint8')
-        # Soften edges
-        final_mask = cv2.GaussianBlur(final_mask, (7, 7), 2)
+        cv2.grabCut(cv_small, mask, rect, bgd_model, fgd_model, 2, cv2.GC_INIT_WITH_RECT)
+        small_mask = np.where((mask == 2) | (mask == 0), 0, 255).astype('uint8')
+        small_mask = cv2.GaussianBlur(small_mask, (5, 5), 1.5)
+        # Upscale mask to original resolution
+        final_mask = cv2.resize(small_mask, (orig_w, orig_h), interpolation=cv2.INTER_LINEAR)
     except Exception:
-        # Extreme fallback: center circular mask
-        final_mask = np.zeros((h, w), dtype=np.uint8)
-        cv2.circle(final_mask, (w // 2, h // 2), min(w, h) // 2 - 20, 255, -1)
+        final_mask = np.zeros((orig_h, orig_w), dtype=np.uint8)
+        cv2.circle(final_mask, (orig_w // 2, orig_h // 2), min(orig_w, orig_h) // 2 - 20, 255, -1)
         final_mask = cv2.GaussianBlur(final_mask, (15, 15), 5)
 
-    rgba = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGBA)
+    cv_orig = cv2.cvtColor(np.array(rgb_img), cv2.COLOR_RGB2BGR)
+    rgba = cv2.cvtColor(cv_orig, cv2.COLOR_BGR2RGBA)
     rgba[:, :, 3] = final_mask
     return Image.fromarray(rgba)
+
 
 def segment_craft(pil_img: Image.Image) -> Image.Image:
     """
