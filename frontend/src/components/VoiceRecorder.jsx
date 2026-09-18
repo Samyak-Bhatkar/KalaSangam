@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Mic, MicOff, Volume2, ArrowLeft, ArrowRight, Sparkles,
   AlertTriangle, CheckCircle, Languages, RefreshCw, Edit3,
-  WifiOff, ShieldAlert, Loader2, Radio
+  WifiOff, ShieldAlert, Loader2, Radio, Play, Pause
 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 
@@ -154,9 +154,49 @@ const MIC_ERRORS = {
   NOT_SUPPORTED: 'not-supported',
   NETWORK: 'network',
   NO_SPEECH: 'no-speech',
+  AUDIO_CAPTURE: 'audio-capture',
   BHASHINI_PROCESSING: 'bhashini-processing',
   BHASHINI_DONE: 'bhashini-done',
 };
+
+// ─── Instant Quick-Fill Vernacular Craft Chips ───────────────────────────────
+const QUICK_CHIPS = [
+  {
+    id: 'terracotta',
+    icon: '🏺',
+    label: 'टेराकोटा हांडी',
+    meta: '6 घंटे • ₹180',
+    text: 'यह गोरखपुर का हस्तनिर्मित टेराकोटा मिट्टी का कलश और हांडी है। तालाब की शुद्ध मिट्टी से चाक पर बनाया है। नक्काशी करने और पकाने में 6 घंटे लगे हैं। कच्चा माल ₹180 का लगा है।'
+  },
+  {
+    id: 'saree',
+    icon: '🪡',
+    label: 'चंदेरी साड़ी',
+    meta: '18 घंटे • ₹1400',
+    text: 'यह शुद्ध चंदेरी सिल्क की हाथ से बुनी ज़री साड़ी है। हथकरघे पर 18 घंटे की बुनाई से तैयार हुई है। शुद्ध जरी और रेशम का खर्च ₹1400 आया है।'
+  },
+  {
+    id: 'dhokra',
+    icon: '🔔',
+    label: 'बस्तर ढोकरा',
+    meta: '12 घंटे • ₹480',
+    text: 'यह बस्तर का पारंपरिक ढोकरा शिल्प है। मोम के धागे और पीतल ढालकर बनाया है। 12 घंटे की मेहनत लगी है। कच्चा माल ₹480 का है।'
+  },
+  {
+    id: 'madhubani',
+    icon: '🎨',
+    label: 'मधुबनी पेंटिंग',
+    meta: '10 घंटे • ₹250',
+    text: 'यह मिथिला की पारंपरिक कल्पवृक्ष मधुबनी पेंटिंग है। बांस की तीली और प्राकृतिक रंगों से 10 घंटे में बनाई है। खर्च ₹250 है।'
+  },
+  {
+    id: 'bamboo',
+    icon: '🎋',
+    label: 'बांस की टोकरी',
+    meta: '5 घंटे • ₹120',
+    text: 'यह शुद्ध प्राकृतिक बांस से हाथ से बुनी पारंपरिक टोकरी है। इसे तैयार करने में 5 घंटे का समय लगा और ₹120 की कच्ची सामग्री लगी है।'
+  }
+];
 
 export default function VoiceRecorder() {
   const {
@@ -173,28 +213,35 @@ export default function VoiceRecorder() {
   } = useArtisan();
 
   // ── State ──────────────────────────────────────────────────────────────────
-  const [isListening,      setIsListening]      = useState(false);
-  const [micState,         setMicState]         = useState('idle'); // 'idle'|'requesting'|'live'|'recording'|'processing'|'error'
-  const [micError,         setMicError]         = useState(null);   // null | MIC_ERRORS.*
-  const [audioLevels,      setAudioLevels]      = useState(Array(10).fill(4));
-  const [activeDialect,    setActiveDialect]    = useState('hi');
-  const [hasSpeechResult,  setHasSpeechResult]  = useState(false);
-  const [isCustomSpoken,   setIsCustomSpoken]   = useState(false);  // true once user speaks real vernacular words
-  const [liveInterim,      setLiveInterim]      = useState('');     // real-time in-flight speech string
-  const [bhashiniMode,     setBhashiniMode]     = useState(false);  // switched to Bhashini recording
-  const [bhashiniStatus,   setBhashiniStatus]   = useState('');
+  const [isListening,        setIsListening]        = useState(false);
+  const [micState,           setMicState]           = useState('idle'); // 'idle'|'requesting'|'live'|'recording'|'processing'|'error'
+  const [micError,           setMicError]           = useState(null);   // null | MIC_ERRORS.*
+  const [audioLevels,        setAudioLevels]        = useState(Array(10).fill(4));
+  const [micVolumePct,       setMicVolumePct]       = useState(0);      // Real-time input volume 0-100%
+  const [micDeviceName,      setMicDeviceName]      = useState('');     // Active microphone device label
+  const [speechEngineStatus, setSpeechEngineStatus] = useState('');     // Real-time speech engine event status
+  const [recordedAudioUrl,   setRecordedAudioUrl]   = useState(null);   // Actual audio recorded from mic
+  const [isPlayingRecorded,  setIsPlayingRecorded]  = useState(false);
+  const [activeDialect,      setActiveDialect]      = useState('hi');
+  const [hasSpeechResult,    setHasSpeechResult]    = useState(false);
+  const [isCustomSpoken,     setIsCustomSpoken]     = useState(false);  // true once user speaks real vernacular words
+  const [liveInterim,        setLiveInterim]        = useState('');     // real-time in-flight speech string
+  const [bhashiniMode,       setBhashiniMode]       = useState(false);  // switched to Bhashini recording
+  const [bhashiniStatus,     setBhashiniStatus]     = useState('');
 
   // ── Refs (Engine Architecture: Zero Stale Closures) ────────────────────────
-  const isListeningRef     = useRef(false);
-  const isRecognizingRef   = useRef(false);
-  const finalTranscriptRef = useRef('');
-  const recognitionRef     = useRef(null);
-  const mediaRecorderRef   = useRef(null);
-  const audioContextRef    = useRef(null);
-  const analyserRef        = useRef(null);
-  const animFrameRef       = useRef(null);
-  const streamRef          = useRef(null);
-  const bhashiniChunksRef  = useRef([]);
+  const isListeningRef       = useRef(false);
+  const isRecognizingRef     = useRef(false);
+  const finalTranscriptRef   = useRef('');
+  const recognitionRef       = useRef(null);
+  const mediaRecorderRef     = useRef(null);
+  const localRecorderRef     = useRef(null);
+  const localChunksRef       = useRef([]);
+  const audioContextRef      = useRef(null);
+  const analyserRef          = useRef(null);
+  const animFrameRef         = useRef(null);
+  const streamRef            = useRef(null);
+  const bhashiniChunksRef    = useRef([]);
 
   // ── Derived helpers ────────────────────────────────────────────────────────
   const getActiveCraftType = () => {
@@ -225,16 +272,29 @@ export default function VoiceRecorder() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Real audio visualizer using actual mic stream ─────────────────────────
+  // ── Real audio visualizer with True Decibel Level & Device Tracking ─────
   const startAudioVisualizer = useCallback(async (existingStream = null) => {
     try {
       const stream = existingStream || await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       if (!existingStream) streamRef.current = stream;
 
-      const audioCtx   = new (window.AudioContext || window.webkitAudioContext)();
-      const analyser   = audioCtx.createAnalyser();
+      const track = stream.getAudioTracks()[0];
+      if (track) {
+        setMicDeviceName(track.label || 'Default Microphone');
+      }
+
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioCtxClass();
+      
+      // CRITICAL: Resume AudioContext under Chromium autoplay policy
+      if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+      }
+
+      const analyser = audioCtx.createAnalyser();
       analyser.fftSize = 64;
-      const source     = audioCtx.createMediaStreamSource(stream);
+      analyser.smoothingTimeConstant = 0.5;
+      const source = audioCtx.createMediaStreamSource(stream);
       source.connect(analyser);
 
       audioContextRef.current = audioCtx;
@@ -245,13 +305,20 @@ export default function VoiceRecorder() {
         analyser.getByteFrequencyData(dataArray);
         const levels = Array.from(dataArray.slice(0, 10)).map(v => Math.max(4, Math.min(48, v / 4)));
         setAudioLevels(levels);
+        // Calculate average volume percentage
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+        const avg = sum / dataArray.length;
+        setMicVolumePct(Math.min(100, Math.round((avg / 128) * 100)));
         animFrameRef.current = requestAnimationFrame(updateWaveform);
       };
       updateWaveform();
       return stream;
-    } catch {
-      // ⚠️ Real mic access failed — show flat bars (no fake waveform)
+    } catch (err) {
+      console.warn('[AudioVisualizer] Failed:', err);
+      // Real mic access failed — show flat bars
       setAudioLevels(Array(10).fill(4));
+      setMicVolumePct(0);
       return null;
     }
   }, []);
@@ -267,6 +334,7 @@ export default function VoiceRecorder() {
       audioContextRef.current = null;
     }
     setAudioLevels(Array(10).fill(4));
+    setMicVolumePct(0);
   }, []);
 
   const stopMicStream = useCallback(() => {
@@ -284,6 +352,11 @@ export default function VoiceRecorder() {
       try { recognitionRef.current.stop(); } catch {}
       recognitionRef.current = null;
     }
+    // Stop Local MediaRecorder
+    if (localRecorderRef.current && localRecorderRef.current.state !== 'inactive') {
+      try { localRecorderRef.current.stop(); } catch {}
+      localRecorderRef.current = null;
+    }
     // Stop MediaRecorder (Bhashini)
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       try { mediaRecorderRef.current.stop(); } catch {}
@@ -294,6 +367,7 @@ export default function VoiceRecorder() {
     setIsListening(false);
     setMicState('idle');
     setLiveInterim('');
+    setSpeechEngineStatus('');
   }, [stopAudioVisualizer, stopMicStream]);
 
   // ── Web Speech API (browser-native, zero-API-key, works on localhost & HTTPS) ──
@@ -308,17 +382,49 @@ export default function VoiceRecorder() {
     }
 
     setMicState('requesting');
-    const permission = await checkMicPermission();
-    if (permission === 'denied') {
+    setSpeechEngineStatus('माइक्रोफ़ोन अनुमति जांची जा रही है...');
+
+    // Single unified hardware getUserMedia stream
+    let stream = null;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      streamRef.current = stream;
+      const track = stream.getAudioTracks()[0];
+      if (track) setMicDeviceName(track.label || 'Default Microphone');
+      
+      // Start real decibel visualizer with the single active stream
+      await startAudioVisualizer(stream);
+
+      // Start local audio recording concurrent capture for immediate playback proof
+      try {
+        localChunksRef.current = [];
+        const mime = (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/webm;codecs=opus'))
+          ? 'audio/webm;codecs=opus'
+          : undefined;
+        const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+        rec.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) localChunksRef.current.push(e.data);
+        };
+        rec.onstop = () => {
+          if (localChunksRef.current.length > 0) {
+            const blob = new Blob(localChunksRef.current, { type: 'audio/webm' });
+            const url = URL.createObjectURL(blob);
+            setRecordedAudioUrl(url);
+          }
+        };
+        rec.start(250);
+        localRecorderRef.current = rec;
+      } catch (recErr) {
+        console.warn('[VoiceRecorder] MediaRecorder setup:', recErr);
+      }
+    } catch (streamErr) {
+      console.warn('[VoiceRecorder] getUserMedia error:', streamErr);
       setMicError(MIC_ERRORS.NOT_ALLOWED);
       setMicState('error');
       setIsListening(false);
       isListeningRef.current = false;
       return;
     }
-
-    // Launch audio visualizer safely (never let visualizer failure block speech)
-    startAudioVisualizer().catch(() => {});
 
     // Create speech recognition instance
     const recognition = new SpeechRecognition();
@@ -331,6 +437,23 @@ export default function VoiceRecorder() {
       isRecognizingRef.current = true;
       setMicState('live');
       setMicError(null);
+      setSpeechEngineStatus('वाक् इंजन सक्रिय — आपकी आवाज़ सुनी जा रही है');
+    };
+
+    recognition.onaudiostart = () => {
+      setSpeechEngineStatus('माइक ऑडियो कैप्चर सक्रिय (Audio Stream Connected)');
+    };
+
+    recognition.onsoundstart = () => {
+      setSpeechEngineStatus('ध्वनि का पता चला (Sound Detected)');
+    };
+
+    recognition.onspeechstart = () => {
+      setSpeechEngineStatus('भाषण पहचाना जा रहा है (Speech Detected)...');
+    };
+
+    recognition.onspeechend = () => {
+      setSpeechEngineStatus('भाषण विराम (Processing Utterance)...');
     };
 
     recognition.onresult = (event) => {
@@ -350,11 +473,13 @@ export default function VoiceRecorder() {
         setLiveInterim(interim);
         setHasSpeechResult(true);
         setIsCustomSpoken(true);
+        setSpeechEngineStatus('शब्द सफलतापूर्वक टाइप हो रहे हैं');
       }
     };
 
     recognition.onerror = (e) => {
       console.warn('[WebSpeech] Event Error:', e.error);
+      setSpeechEngineStatus(`इंजन संदेश: ${e.error}`);
       if (e.error === 'not-allowed' || e.error === 'permission-denied') {
         isListeningRef.current = false;
         isRecognizingRef.current = false;
@@ -371,8 +496,17 @@ export default function VoiceRecorder() {
         setIsListening(false);
         stopAudioVisualizer();
         stopMicStream();
+      } else if (e.error === 'audio-capture') {
+        isListeningRef.current = false;
+        isRecognizingRef.current = false;
+        setMicError(MIC_ERRORS.AUDIO_CAPTURE);
+        setMicState('error');
+        setIsListening(false);
+        stopAudioVisualizer();
+        stopMicStream();
       } else if (e.error === 'no-speech') {
         // Normal silence event in Chrome Web Speech — keep session alive
+        setSpeechEngineStatus('आवाज़ की प्रतीक्षा कर रहे हैं... (कृपया थोड़ा ज़ोर से बोलें)');
       }
     };
 
@@ -483,6 +617,9 @@ export default function VoiceRecorder() {
           try { recognitionRef.current.stop(); } catch {}
           recognitionRef.current = null;
         }
+        if (localRecorderRef.current && localRecorderRef.current.state !== 'inactive') {
+          try { localRecorderRef.current.stop(); } catch {}
+        }
         stopAudioVisualizer();
         stopMicStream();
       }
@@ -502,6 +639,7 @@ export default function VoiceRecorder() {
     setMicError(null);
     setHasSpeechResult(false);
     setLiveInterim('');
+    setRecordedAudioUrl(null);
 
     // Clear static sample so user's live Hindi speech immediately renders in real-time
     finalTranscriptRef.current = '';
@@ -567,6 +705,20 @@ export default function VoiceRecorder() {
 
   const craftImageSrc = rawImageUrl || '/terracotta_pot_raw.png';
 
+  const togglePlayRecordedAudio = () => {
+    if (!recordedAudioUrl) return;
+    const audioEl = document.getElementById('shilpsetu-recorded-audio');
+    if (audioEl) {
+      if (isPlayingRecorded) {
+        audioEl.pause();
+        audioEl.currentTime = 0;
+        setIsPlayingRecorded(false);
+      } else {
+        audioEl.play().then(() => setIsPlayingRecorded(true)).catch(() => setIsPlayingRecorded(false));
+      }
+    }
+  };
+
   // ── Beautiful error banner component ──────────────────────────────────────
   const renderMicErrorBanner = () => {
     if (micState === 'processing') {
@@ -588,6 +740,24 @@ export default function VoiceRecorder() {
           <div>
             <p className="text-xs font-black text-emerald-900">Bhashini ने सफलतापूर्वक सुना!</p>
             <p className="text-[10px] text-emerald-700 font-medium">{bhashiniStatus}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (micError === MIC_ERRORS.AUDIO_CAPTURE) {
+      return (
+        <div className="flex items-start gap-2.5 px-4 py-3 rounded-2xl bg-amber-50 border border-amber-300 shadow-sm">
+          <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-black text-amber-900">
+              {language === 'hi' ? 'माइक्रोफ़ोन ऑडियो इनपुट नहीं मिला' : 'Microphone Audio Capture Issue'}
+            </p>
+            <p className="text-[10px] text-amber-800 font-medium leading-relaxed">
+              {language === 'hi'
+                ? 'Windows सेटिंग्स में माइक्रोफ़ोन चालू रखें या नीचे दिए गए त्वरित शिल्प विकल्पों में से किसी एक को 1-टैप में चुनें।'
+                : 'Check if your mic is muted in Windows sound settings, or tap any craft chip below for instant 1-tap entry.'}
+            </p>
           </div>
         </div>
       );
@@ -834,6 +1004,46 @@ export default function VoiceRecorder() {
           )}
         </p>
 
+        {/* Real Mic Hardware Activity & Input Decibel Meter */}
+        {micState === 'live' && (
+          <div className="w-full max-w-xs px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200 flex items-center justify-between text-[10px] font-semibold text-slate-700">
+            <span className="flex items-center gap-1.5 truncate">
+              <span className={`w-2 h-2 rounded-full ${micVolumePct > 5 ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'}`} />
+              <span className="truncate">{micDeviceName || 'माइक इनपुट'}</span>
+            </span>
+            <span className={`font-mono font-bold ${micVolumePct > 10 ? 'text-emerald-700 font-black' : 'text-slate-500'}`}>
+              ध्वनि स्तर: {micVolumePct}%
+            </span>
+          </div>
+        )}
+
+        {/* Speech Engine Diagnostics Status */}
+        {isListening && speechEngineStatus && (
+          <p className="text-[10px] font-bold text-slate-500 text-center tracking-tight px-2">
+            {speechEngineStatus}
+          </p>
+        )}
+
+        {/* Playback Captured Real Voice Proof */}
+        {recordedAudioUrl && !isListening && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={togglePlayRecordedAudio}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 text-[11px] font-bold cursor-pointer transition-all shadow-xs active:scale-95"
+            >
+              {isPlayingRecorded ? <Pause className="w-3.5 h-3.5 text-emerald-700" /> : <Play className="w-3.5 h-3.5 text-emerald-700" />}
+              <span>{isPlayingRecorded ? 'आवाज़ रोकें' : '▶️ अपनी रिकॉर्ड की गई आवाज़ सुनें'}</span>
+            </button>
+            <audio
+              id="shilpsetu-recorded-audio"
+              src={recordedAudioUrl}
+              onEnded={() => setIsPlayingRecorded(false)}
+              className="hidden"
+            />
+          </div>
+        )}
+
         {/* Beautiful Error Banner */}
         {renderMicErrorBanner()}
 
@@ -944,6 +1154,45 @@ export default function VoiceRecorder() {
                 </span>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* ── 1-Tap Instant Vernacular Craft Narrative Chips ────────────────── */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between mb-1.5 px-0.5">
+            <span className="text-[11px] font-black text-slate-700 flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              {language === 'hi' ? 'त्वरित शिल्प विवरण (1-टैप में भरें):' : 'Instant Craft Narrative (1-Tap):'}
+            </span>
+            <span className="text-[10px] text-slate-500 font-medium">
+              बोली / घंटे / लागत सहित
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+            {QUICK_CHIPS.map(chip => (
+              <button
+                key={chip.id}
+                type="button"
+                onClick={() => {
+                  setTranscript(chip.text);
+                  finalTranscriptRef.current = chip.text;
+                  setIsCustomSpoken(true);
+                  setHasSpeechResult(true);
+                  if ('vibrate' in navigator) navigator.vibrate(20);
+                }}
+                className={`flex items-start gap-1.5 p-2 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${
+                  transcript === chip.text
+                    ? 'bg-amber-100/80 border-amber-500 ring-2 ring-amber-500/20 shadow-xs'
+                    : 'bg-white hover:bg-amber-50/50 border-slate-200'
+                }`}
+              >
+                <span className="text-base leading-none shrink-0">{chip.icon}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-bold text-slate-900 truncate">{chip.label}</p>
+                  <p className="text-[9px] font-semibold text-amber-800">{chip.meta}</p>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
 
