@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Camera,
   Mic,
@@ -9,12 +8,23 @@ import {
   ChevronRight,
   Sparkles,
   ShieldCheck,
-  ShoppingBag
+  ShoppingBag,
+  FileText,
+  Trash2,
+  Clock,
+  ArrowRight
 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 
 export default function HomeCommandCenter() {
-  const { setCurrentStep, speakVoice, language } = useArtisan();
+  const {
+    setCurrentStep,
+    speakVoice,
+    language,
+    savedDrafts,
+    resumeDraft,
+    discardDraft
+  } = useArtisan();
 
   const handleEarningsAudio = () => {
     const text = language === 'hi'
@@ -171,6 +181,82 @@ export default function HomeCommandCenter() {
           </button>
         </div>
       </section>
+
+      {/* 2.5 DRAFTS DOCK: UNPUBLISHED CRAFTS (LAZY AUTO-CLEANUP IN 24H) */}
+      {savedDrafts && savedDrafts.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-5 bg-amber-500 rounded-full" />
+              <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+                <span>अधूरे ड्राफ्ट</span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
+                  {savedDrafts.length}
+                </span>
+              </h3>
+            </div>
+            <div className="flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+              <Clock className="w-3 h-3 text-amber-600" />
+              <span>24 घंटे में स्वतः साफ़</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {savedDrafts.map((draft) => (
+              <div
+                key={draft.id}
+                className="p-3 rounded-2xl bg-amber-50/50 border border-amber-200/80 shadow-xs flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-12 h-12 rounded-xl bg-white border border-amber-200 overflow-hidden shrink-0 flex items-center justify-center">
+                    {draft.studio_image_url || draft.raw_image_url ? (
+                      <img
+                        src={draft.studio_image_url || draft.raw_image_url}
+                        alt="Draft"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <FileText className="w-5 h-5 text-amber-600" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-bold text-slate-900 truncate">
+                      {draft.title_hi || draft.title_en || 'अप्रकाशित कलाकृति'}
+                    </h4>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-[10px] font-mono font-bold text-amber-800">
+                        ₹{draft.b2c_price || '—'}
+                      </span>
+                      <span className="text-[9px] text-slate-400">•</span>
+                      <span className="text-[9px] text-amber-700 font-medium">
+                        सुरक्षित ड्राफ्ट
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={() => discardDraft(draft.id)}
+                    title="हटाएं (Discard draft)"
+                    className="w-8 h-8 rounded-full bg-white hover:bg-rose-50 border border-slate-200 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => resumeDraft(draft)}
+                    className="py-1.5 px-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-xs active:scale-95"
+                  >
+                    <span>जारी रखें</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 3. ARTISAN'S LIVE INVENTORY CAROUSEL */}
       <section className="space-y-3">

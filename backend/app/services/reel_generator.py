@@ -19,6 +19,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 import qrcode
 
+from typing import Optional, Tuple
 from ..config import settings
 from ..models.schemas import ReelGenerationResponse
 
@@ -83,9 +84,9 @@ def generate_ambient_folk_audio(output_path: Path, duration_sec: float = 15.0):
             int_val = int(max(-32767, min(32767, val * 32767)))
             wav.writeframes(struct.pack('<h', int_val))
 
-def create_dynamic_ondc_qr(product_id: str, title: str, size: int = 180) -> Image.Image:
-    """Generates scannable ONDC Retail Checkout QR code."""
-    qr_content = f"ondc://beckn.retail.org/discover?item_id={product_id}&provider=MoSJE-Artisans&item={title}"
+def create_dynamic_ondc_qr(product_id: str, title: str, size: int = 180, verify_url: Optional[str] = None) -> Image.Image:
+    """Generates scannable QR code pointing to verify portal or Beckn ONDC discovery."""
+    qr_content = verify_url or f"https://kalasangam-frontend.onrender.com/verify/{product_id}"
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_M,
@@ -96,6 +97,32 @@ def create_dynamic_ondc_qr(product_id: str, title: str, size: int = 180) -> Imag
     qr.make(fit=True)
     qr_img = qr.make_image(fill_color="#1E2A4A", back_color="#FFFFFF").convert("RGBA")
     return qr_img.resize((size, size), Image.Resampling.LANCZOS)
+
+def generate_published_product_qr(product_id: str, title: str, base_verify_url: Optional[str] = None) -> Tuple[str, str]:
+    """
+    Generates and persists high-resolution QR code PNG for a published product.
+    Only invoked when product status transitions to 'published'.
+    Returns (qr_public_url, target_url).
+    """
+    domain = base_verify_url or "https://kalasangam-frontend.onrender.com"
+    target_url = f"{domain.rstrip('/')}/verify/{product_id}"
+
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=8,
+        border=3,
+    )
+    qr.add_data(target_url)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="#1E2A4A", back_color="#FFFFFF").convert("RGBA")
+
+    qr_filename = f"qr_{product_id}.png"
+    qr_path = settings.UPLOAD_DIR / qr_filename
+    qr_img.save(qr_path, format="PNG")
+
+    public_url = f"/static/uploads/{qr_filename}"
+    return public_url, target_url
 
 def generate_ken_burns_frame(
     studio_img: Image.Image,

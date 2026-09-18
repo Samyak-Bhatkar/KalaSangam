@@ -264,3 +264,75 @@ export async function exportBecknCatalog({ productData, pricingData, artisanInfo
 
   return await res.json();
 }
+
+// ==============================================================================
+// PRODUCT LIFECYCLE: DRAFT-FIRST, LAZY AUTO-CLEANUP & QR CODE LIFECYCLE
+// ==============================================================================
+
+export async function saveProductDraft(productPayload) {
+  const res = await fetch(`${API_BASE}/products/draft`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(productPayload),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to save product draft');
+  }
+
+  return await res.json();
+}
+
+export async function publishProduct(productId, { productData, pricingData, artisanInfo, verifyBaseUrl } = {}) {
+  const res = await fetch(`${API_BASE}/products/${productId}/publish`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      product_data: productData,
+      pricing_data: pricingData,
+      artisan_info: artisanInfo,
+      verify_base_url: verifyBaseUrl || window.location.origin,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to publish product');
+  }
+
+  return await res.json();
+}
+
+export async function fetchArtisanProducts(includeDrafts = true) {
+  const res = await fetch(`${API_BASE}/products?include_drafts=${includeDrafts}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to fetch products');
+  }
+  return await res.json();
+}
+
+export async function verifyPublicProduct(productId) {
+  const res = await fetch(`${API_BASE}/products/${productId}/verify`);
+  if (!res.ok) {
+    if (res.status === 404) {
+      throw new Error('NOT_FOUND_OR_DRAFT');
+    }
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Verification lookup failed');
+  }
+  return await res.json();
+}
+
+export async function deleteProductDraft(productId) {
+  const res = await fetch(`${API_BASE}/products/${productId}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to delete product');
+  }
+  return await res.json();
+}
+

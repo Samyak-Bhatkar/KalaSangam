@@ -22,12 +22,13 @@ export default function ONDCExportBadge() {
     catalogData,
     pricingData,
     selectedPreset,
-    language
+    language,
+    publishedProduct
   } = useArtisan();
 
   const [becknPayload, setBecknPayload] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState('summary'); // 'summary' | 'json'
+  const [activeTab, setActiveTab] = useState('summary'); // 'summary' | 'json' | 'qr'
 
   const isPublishedModal = activeModal === 'published';
   const isOndcModal = activeModal === 'ondc';
@@ -122,6 +123,38 @@ export default function ONDCExportBadge() {
               Zero middlemen. Direct discoverability on Paytm, Pincode, Magicpin, and Government e-Marketplace.
             </p>
           </div>
+
+          {/* Verified QR Code Card */}
+          {publishedProduct?.qr_code_url && (
+            <div className="p-3.5 rounded-2xl bg-slate-950 border border-emerald-500/40 flex items-center gap-3">
+              <img
+                src={publishedProduct.qr_code_url}
+                alt="Verified QR Code"
+                className="w-16 h-16 rounded-xl bg-white p-1 object-contain shadow-xs shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-0.5">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Verified QR Generated</span>
+                </div>
+                <h4 className="text-xs font-bold text-white truncate">
+                  {publishedProduct.title_hi || publishedProduct.title_en}
+                </h4>
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  Scan with any smartphone to open authentic MoSJE verification dossier.
+                </p>
+                <a
+                  href={`/verify/${publishedProduct.id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-300 hover:text-emerald-200 underline"
+                >
+                  <span>Open Verification Page</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+          )}
 
           {/* Tab Switcher: Summary vs Raw Beckn JSON */}
           <div className="flex p-1 rounded-xl bg-slate-950 border border-slate-800">

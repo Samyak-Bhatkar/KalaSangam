@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Camera,
   Mic,
@@ -13,7 +13,11 @@ import {
   Share2,
   HelpCircle,
   Smartphone,
-  Home
+  Home,
+  Bookmark,
+  FileText,
+  Loader2,
+  Check
 } from 'lucide-react';
 import { useArtisan, SUPPORTED_LANGUAGES } from './context/ArtisanContext';
 import HomeCommandCenter from './components/HomeCommandCenter';
@@ -25,6 +29,7 @@ import ReelPreviewModal from './components/ReelPreviewModal';
 import BargainGuard from './components/BargainGuard';
 import DigitalGIWatermarkModal from './components/DigitalGIWatermarkModal';
 import ONDCExportBadge from './components/ONDCExportBadge';
+import PublicVerifyScreen from './components/PublicVerifyScreen';
 
 export default function App() {
   const {
@@ -36,18 +41,36 @@ export default function App() {
     setActiveModal,
     catalogData,
     pricingData,
-    speakVoice
+    speakVoice,
+    productStatus,
+    isSavingDraft,
+    isPublishing,
+    saveCurrentDraft,
+    publishCurrentProduct,
   } = useArtisan();
 
-  const handlePublish = () => {
-    setActiveModal('published');
-    speakVoice(
-      language === 'hi'
-        ? 'बधाई हो! आपका शिल्प ओएनडीसी और जीईएम राष्ट्रीय नेटवर्क पर प्रसारित हो गया है।'
-        : 'Congratulations! Your craft listing is now broadcast live on ONDC and GeM national networks.',
-      language === 'hi' ? 'hi-IN' : 'en-IN'
+  // Support public QR verification route /verify/:id or ?verify=:id
+  const [verifyId, setVerifyId] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    const pathname = window.location.pathname;
+    if (pathname.startsWith('/verify/')) {
+      return pathname.replace('/verify/', '').replace(/\/$/, '');
+    }
+    const params = new URLSearchParams(window.location.search);
+    return params.get('verify') || params.get('id') || null;
+  });
+
+  if (verifyId) {
+    return (
+      <PublicVerifyScreen
+        productId={verifyId}
+        onBack={() => {
+          window.history.pushState({}, '', '/');
+          setVerifyId(null);
+        }}
+      />
     );
-  };
+  }
 
   return (
     <div className="min-h-screen bg-[#F1F5F9] text-slate-900 flex items-center justify-center p-0 md:p-6 select-none font-sans">
@@ -242,17 +265,66 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Single Giant Green Action Button: Publish to ONDC & GeM */}
-              <div className="pt-2">
-                <button
-                  onClick={handlePublish}
-                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 hover:from-emerald-500 hover:to-teal-300 text-slate-950 font-black text-base shadow-2xl shadow-emerald-500/40 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
-                >
-                  <Globe2 className="w-6 h-6" />
-                  <span>
-                    {language === 'hi' ? 'ONDC और GeM पर तुरंत प्रसारित करें' : 'Publish to ONDC & GeM'}
+              {/* Apple / Airbnb Grade Dual Action Dock: Draft vs Publish Lifecycle */}
+              <div className="pt-3 space-y-2.5">
+                <div className="grid grid-cols-5 gap-2.5">
+                  {/* Action A: Save as Draft (Subtle, tactile pill) */}
+                  <button
+                    onClick={saveCurrentDraft}
+                    disabled={isSavingDraft || isPublishing}
+                    className="col-span-2 py-3.5 px-3 rounded-2xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-extrabold text-xs shadow-xs active:scale-97 transition-all flex flex-col items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      {isSavingDraft ? (
+                        <Loader2 className="w-4 h-4 text-amber-600 animate-spin" />
+                      ) : (
+                        <Bookmark className="w-4 h-4 text-amber-600" />
+                      )}
+                      <span>{language === 'hi' ? 'ड्राफ्ट सेव करें' : 'Save Draft'}</span>
+                    </div>
+                    <span className="text-[9px] text-slate-400 font-medium">
+                      {language === 'hi' ? 'कोई QR नहीं बनेगा' : 'No public QR'}
+                    </span>
+                  </button>
+
+                  {/* Action B: Hero Publish to ONDC & GeM */}
+                  <button
+                    onClick={publishCurrentProduct}
+                    disabled={isSavingDraft || isPublishing}
+                    className="col-span-3 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 hover:from-emerald-500 hover:to-teal-300 text-slate-950 font-black text-xs shadow-xl shadow-emerald-500/30 active:scale-97 transition-all flex flex-col items-center justify-center gap-1 cursor-pointer uppercase tracking-wider disabled:opacity-50"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      {isPublishing ? (
+                        <Loader2 className="w-4 h-4 text-slate-950 animate-spin" />
+                      ) : (
+                        <Globe2 className="w-4 h-4 text-slate-950" />
+                      )}
+                      <span>{language === 'hi' ? 'ONDC पर प्रकाशित करें' : 'Publish Live'}</span>
+                    </div>
+                    <span className="text-[9px] text-slate-900/80 font-bold normal-case">
+                      {language === 'hi' ? 'सत्यापित QR कोड जनरेट होगा' : 'Generates verified QR'}
+                    </span>
+                  </button>
+                </div>
+
+                {/* State Reassurance Callout */}
+                <div className="text-center">
+                  <span className="text-[10px] text-slate-500 font-medium">
+                    {productStatus === 'draft' ? (
+                      <span className="text-amber-700 font-bold inline-flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        ड्राफ्ट सुरक्षित है • 24 घंटे बाद स्वतः साफ़ होगा
+                      </span>
+                    ) : productStatus === 'published' ? (
+                      <span className="text-emerald-700 font-bold inline-flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        ONDC व GeM पर लाइव प्रसारित • सत्यापन QR सक्रिय
+                      </span>
+                    ) : (
+                      'परीक्षण सुरक्षित: प्रकाशित करने तक कोई भी सार्वजनिक QR नहीं बनता।'
+                    )}
                   </span>
-                </button>
+                </div>
               </div>
             </div>
           )}

@@ -32,6 +32,10 @@ backend/app/static/uploads/*.webm
 backend/app/static/uploads/*.jpg
 backend/app/static/uploads/*.png
 backend/app/static/audio/*.wav
+backend/app/static/*.db
+backend/app/static/*.sqlite3
+*.db
+*.sqlite3
 
 
 # Test Datasets & Benchmarks (Local evaluation only - never commit to git)

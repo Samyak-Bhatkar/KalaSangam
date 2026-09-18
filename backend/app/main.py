@@ -31,12 +31,16 @@ from .models.schemas import (
     WatermarkEmbedResponse,
     WatermarkVerifyRequest,
     WatermarkVerifyResponse,
+    ProductDraftSaveRequest,
+    ProductPublishRequest,
+    ProductResponse,
+    ProductPublicVerifyResponse,
 )
 from .models.mock_data import CRAFT_FIXTURES
 from .services.image_studio import process_studio_image, image_to_base64
 from .services.catalog_engine import process_voice_and_catalog
 from .services.pricing_engine import calculate_living_wage_pricing
-from .services.reel_generator import render_vertical_reel
+from .services.reel_generator import render_vertical_reel, generate_published_product_qr
 from .services.negotiator import evaluate_b2b_negotiation
 from .services.watermark import embed_dct_watermark, extract_dct_watermark
 from .services.ondc_adapter import generate_beckn_catalog_payload
@@ -46,7 +50,15 @@ from .services.n8n_client import (
     trigger_reel_dispatch_workflow,
     trigger_ministry_analytics_workflow,
 )
-
+from .database import (
+    init_db,
+    save_draft_product,
+    publish_product as db_publish_product,
+    get_product_by_id,
+    list_artisan_products,
+    delete_product,
+    cleanup_expired_drafts,
+)
 from .services.transcription_service import transcribe_audio_bytes, fallback_craft_transcript
 
 logging.basicConfig(level=logging.INFO)
@@ -81,6 +93,16 @@ app.mount("/static", StaticFiles(directory=str(settings.STATIC_DIR)), name="stat
 flutter_build_dir = Path(__file__).resolve().parent.parent.parent / "mobile_flutter" / "build" / "web"
 if flutter_build_dir.exists():
     app.mount("/flutter", StaticFiles(directory=str(flutter_build_dir), html=True), name="flutter")
+
+@app.on_event("startup")
+def startup_event():
+    """Initializes SQLite database schema and runs lazy draft cleanup."""
+    try:
+        init_db()
+        purged = cleanup_expired_drafts(hours=24)
+        logger.info(f"Database initialized. Lazy cleanup purged {purged} expired draft(s).")
+    except Exception as e:
+        logger.error(f"Database startup failed: {e}")
 
 @app.get("/health")
 def health_check():
@@ -454,3 +476,177 @@ async def export_beckn_catalog(payload: dict = Body(...), background_tasks: Back
     except Exception as e:
         logger.error(f"ONDC Beckn generation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# ==============================================================================
+# PRODUCT LIFECYCLE: DRAFT-FIRST, LAZY AUTO-CLEANUP & QR CODE LIFECYCLE
+# ==============================================================================
+@app.post("/api/v1/products/draft", response_model=ProductResponse)
+async def create_or_update_product_draft(req: ProductDraftSaveRequest):
+    """
+    POST /api/v1/products/draft
+    Saves or updates artisan in-session work as a 'draft'.
+    Guarantees that NO QR code is generated or scannable for drafts.
+    """
+    try:
+        data = req.dict()
+        saved = save_draft_product(data)
+        logger.info(f"Saved product draft: {req.id} (Status: {saved.get('status')})")
+        return ProductResponse(**saved)
+    except Exception as e:
+        logger.error(f"Failed to save product draft: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/v1/products/{product_id}/publish", response_model=ProductResponse)
+async def publish_product_endpoint(
+    product_id: str,
+    req: Optional[ProductPublishRequest] = Body(None),
+    background_tasks: BackgroundTasks = None
+):
+    """
+    POST /api/v1/products/{product_id}/publish
+    Deliberate transition from 'draft' -> 'published':
+    1. Generates high-res verified QR code PNG pointing to /verify/{product_id}
+    2. Sets status = 'published' and published_at timestamp in database
+    3. Builds Beckn Retail v1.2.0 Open Commerce schema
+    4. Dispatches n8n ONDC/GeM broadcast & MoSJE ministry analytics
+    """
+    try:
+        product_dict = req.product_data.dict() if (req and req.product_data) else None
+        
+        # Determine title for QR generation
+        title = "Handcrafted Craft"
+        if product_dict:
+            title = product_dict.get("title_en") or product_dict.get("title_hi") or title
+        else:
+            existing = get_product_by_id(product_id)
+            if existing:
+                title = existing.get("title_en") or existing.get("title_hi") or title
+
+        # 1. Generate verified QR code pointing to public verification URL
+        verify_base = req.verify_base_url if req else None
+        qr_url, _ = generate_published_product_qr(
+            product_id=product_id,
+            title=title,
+            base_verify_url=verify_base
+        )
+
+        # 2. Build Beckn schema
+        pricing_data = req.pricing_data if req else None
+        artisan_info = req.artisan_info if req else None
+        beckn_schema = None
+        if product_dict:
+            try:
+                beckn_schema = generate_beckn_catalog_payload(
+                    product_data=product_dict,
+                    pricing_data=pricing_data,
+                    artisan_info=artisan_info
+                )
+            except Exception as e:
+                logger.warning(f"Beckn generation note: {e}")
+
+        # 3. Commit publish transition to database
+        published = db_publish_product(
+            product_id=product_id,
+            qr_code_url=qr_url,
+            beckn_payload=beckn_schema,
+            product_data=product_dict
+        )
+
+        # 4. Asynchronously notify n8n / analytics
+        if background_tasks and beckn_schema:
+            background_tasks.add_task(trigger_ondc_publish_workflow, beckn_schema)
+            background_tasks.add_task(
+                trigger_ministry_analytics_workflow,
+                "CATALOG_PUBLISHED",
+                {
+                    "item_id": product_id,
+                    "title": title,
+                    "status": "published",
+                    "qr_code_url": qr_url
+                }
+            )
+
+        logger.info(f"Published product {product_id} live with verified QR: {qr_url}")
+        return ProductResponse(**published)
+    except Exception as e:
+        logger.error(f"Publish failed for {product_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/products")
+async def list_products_endpoint(include_drafts: bool = True):
+    """
+    GET /api/v1/products
+    Artisan inventory listing endpoint.
+    Automatically executes Lazy Auto-Cleanup: purges drafts older than 24h
+    before returning active inventory.
+    """
+    try:
+        products = list_artisan_products(include_drafts=include_drafts, perform_cleanup=True)
+        return {
+            "status": "success",
+            "count": len(products),
+            "products": products
+        }
+    except Exception as e:
+        logger.error(f"Listing products failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/products/{product_id}/verify", response_model=ProductPublicVerifyResponse)
+async def verify_product_public_endpoint(product_id: str):
+    """
+    GET /api/v1/products/{product_id}/verify
+    PUBLIC PRODUCT VERIFICATION ENDPOINT.
+    Checks status:
+    - If status == 'published': returns full authentic verification dossier and certificate.
+    - If status == 'draft' or product not found: returns generic 404 Not Found
+      (Guarantees zero leakage of test drafts to the public).
+    """
+    product = get_product_by_id(product_id)
+    if not product or product.get("status") != "published":
+        # Raise generic 404 without leaking whether a draft exists
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found or not published"
+        )
+
+    ondc_url = f"ondc://beckn.retail.org/discover?item_id={product_id}&provider=MoSJE-Artisans"
+    return ProductPublicVerifyResponse(
+        status="verified",
+        id=product["id"],
+        title_hi=product.get("title_hi"),
+        title_en=product.get("title_en"),
+        description_hi=product.get("description_hi"),
+        description_en=product.get("description_en"),
+        craft_category=product.get("craft_category"),
+        technique=product.get("technique"),
+        b2c_price=product.get("b2c_price"),
+        gem_price=product.get("gem_price"),
+        artisan_name=product.get("artisan_name"),
+        beneficiary_id=product.get("beneficiary_id"),
+        cluster_pin=product.get("cluster_pin"),
+        studio_image_url=product.get("studio_image_url"),
+        watermarked_image_url=product.get("watermarked_image_url"),
+        published_at=str(product.get("published_at") or ""),
+        qr_code_url=product.get("qr_code_url"),
+        ondc_buy_url=ondc_url,
+        fair_wage_guarantee="₹120/hr statutory floor compliant (NBCFDC/NSFDC)",
+        authenticity_seal="MoSJE GI Certified Authentic Handcrafted Indian Product"
+    )
+
+@app.delete("/api/v1/products/{product_id}")
+async def delete_product_endpoint(product_id: str):
+    """
+    DELETE /api/v1/products/{product_id}
+    Allows artisan to discard a draft or delete a listing.
+    """
+    try:
+        success = delete_product(product_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Product not found")
+        return {"status": "success", "message": f"Product {product_id} deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Delete failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+

@@ -4,24 +4,26 @@ import {
   enhanceImage,
   processVoiceCatalog,
   calculatePricing,
+  saveProductDraft,
+  publishProduct,
+  fetchArtisanProducts,
+  deleteProductDraft,
 } from '../services/api';
 
 const ArtisanContext = createContext(null);
 
 export const SUPPORTED_LANGUAGES = [
-  { code: 'hi', name: 'हिन्दी', label: 'Hindi' },
-  { code: 'mr', name: 'मराठी', label: 'Marathi' },
-  { code: 'bn', name: 'বাংলা', label: 'Bengali' },
-  { code: 'ta', name: 'தமிழ்', label: 'Tamil' },
-  { code: 'te', name: 'తెలుగు', label: 'Telugu' },
-  { code: 'kn', name: 'ಕನ್ನಡ', label: 'Kannada' },
-  { code: 'gu', name: 'ગુજરાતી', label: 'Gujarati' },
-  { code: 'or', name: 'ଓଡ଼ିଆ', label: 'Odia' },
-  { code: 'en', name: 'English', label: 'English' },
+  { code: 'hi', label: 'हिन्दी', name: 'Hindi' },
+  { code: 'en', label: 'English', name: 'English' },
+  { code: 'bn', label: 'বাংলা', name: 'Bengali' },
+  { code: 'te', label: 'తెలుగు', name: 'Telugu' },
+  { code: 'mr', label: 'मराठी', name: 'Marathi' },
+  { code: 'ta', label: 'தமிழ்', name: 'Tamil' },
 ];
 
 export function ArtisanProvider({ children }) {
-  const [currentStep, setCurrentStep] = useState(0); // 0: Home, 1: Snap, 2: Speak, 3: Review
+  // Step in workflow: 0 = Home, 1 = Camera, 2 = Voice, 3 = Review & Publish
+  const [currentStep, setCurrentStep] = useState(0);
   const [language, setLanguage] = useState('hi');
   const [presets, setPresets] = useState([]);
   const [selectedPreset, setSelectedPreset] = useState(null);
@@ -44,6 +46,14 @@ export function ArtisanProvider({ children }) {
   const [catalogData, setCatalogData] = useState(null);
   const [pricingData, setPricingData] = useState(null);
   const [artisanExpectedPrice, setArtisanExpectedPrice] = useState(null);
+
+  // Product Lifecycle State: 'session' | 'draft' | 'published'
+  const [currentProductId, setCurrentProductId] = useState(() => `ART-${Date.now()}`);
+  const [productStatus, setProductStatus] = useState('session'); // 'session' | 'draft' | 'published'
+  const [publishedProduct, setPublishedProduct] = useState(null);
+  const [savedDrafts, setSavedDrafts] = useState([]);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   // Active Innovation Modals
   const [activeModal, setActiveModal] = useState(null); // 'reel' | 'bargain' | 'watermark' | 'ondc' | 'published'
@@ -208,6 +218,152 @@ export function ArtisanProvider({ children }) {
     }
   };
 
+  // Draft & Publish Lifecycle Handlers
+  const refreshDrafts = async () => {
+    try {
+      const res = await fetchArtisanProducts(true);
+      if (res && res.products) {
+        setSavedDrafts(res.products.filter(p => p.status === 'draft'));
+      }
+    } catch (err) {
+      console.warn('Could not load drafts:', err);
+    }
+  };
+
+  useEffect(() => {
+    refreshDrafts();
+  }, []);
+
+  const saveCurrentDraft = async () => {
+    if (!catalogData) return;
+    setIsSavingDraft(true);
+    try {
+      const productId = currentProductId || selectedPreset?.id || `ART-${Date.now()}`;
+      const payload = {
+        id: productId,
+        title_hi: catalogData.title_hi || '',
+        title_en: catalogData.title_en || '',
+        description_hi: catalogData.description_hi || '',
+        description_en: catalogData.description_en || '',
+        craft_category: catalogData.craft_category || '',
+        technique: catalogData.technique || '',
+        raw_cost: pricingData?.raw_cost || catalogData.raw_material_cost_estimate_inr || 0,
+        labor_hours: pricingData?.labor_hours || catalogData.estimated_hours || 0,
+        b2c_price: pricingData?.b2c_price || 0,
+        b2b_price: pricingData?.b2b_price || 0,
+        gem_price: pricingData?.gem_price || 0,
+        artisan_name: selectedPreset?.artisan_name || 'Shanti Devi',
+        beneficiary_id: selectedPreset?.beneficiary_id || 'MoSJE-NBCFDC-01',
+        cluster_pin: selectedPreset?.cluster_pin || '273001',
+        raw_image_url: rawImageUrl || '',
+        studio_image_url: studioImageUrl || '',
+      };
+      const res = await saveProductDraft(payload);
+      setProductStatus('draft');
+      await refreshDrafts();
+      const msg = language === 'hi'
+        ? 'कलाकृति का ड्राफ्ट सुरक्षित कर लिया गया है। यह 24 घंटे तक सुरक्षित रहेगा।'
+        : 'Draft saved successfully. It will remain saved for 24 hours.';
+      speakVoice(msg, language === 'hi' ? 'hi-IN' : 'en-IN');
+      return res;
+    } catch (err) {
+      console.error('Error saving draft:', err);
+      alert(`Draft save error: ${err.message}`);
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
+
+  const publishCurrentProduct = async () => {
+    if (!catalogData) return;
+    setIsPublishing(true);
+    try {
+      const productId = currentProductId || selectedPreset?.id || `ART-${Date.now()}`;
+      const payload = {
+        id: productId,
+        title_hi: catalogData.title_hi || '',
+        title_en: catalogData.title_en || '',
+        description_hi: catalogData.description_hi || '',
+        description_en: catalogData.description_en || '',
+        craft_category: catalogData.craft_category || '',
+        technique: catalogData.technique || '',
+        raw_cost: pricingData?.raw_cost || catalogData.raw_material_cost_estimate_inr || 0,
+        labor_hours: pricingData?.labor_hours || catalogData.estimated_hours || 0,
+        b2c_price: pricingData?.b2c_price || 0,
+        b2b_price: pricingData?.b2b_price || 0,
+        gem_price: pricingData?.gem_price || 0,
+        artisan_name: selectedPreset?.artisan_name || 'Shanti Devi',
+        beneficiary_id: selectedPreset?.beneficiary_id || 'MoSJE-NBCFDC-01',
+        cluster_pin: selectedPreset?.cluster_pin || '273001',
+        raw_image_url: rawImageUrl || '',
+        studio_image_url: studioImageUrl || '',
+      };
+      const res = await publishProduct(productId, {
+        productData: payload,
+        pricingData,
+        artisanInfo: {
+          beneficiary_id: payload.beneficiary_id,
+          artisan_name: payload.artisan_name,
+          cluster_pin: payload.cluster_pin,
+        },
+        verifyBaseUrl: window.location.origin
+      });
+      setProductStatus('published');
+      setPublishedProduct(res);
+      await refreshDrafts();
+      setActiveModal('published');
+      const msg = language === 'hi'
+        ? 'बधाई हो! आपका शिल्प ओएनडीसी और जीईएम पर लाइव प्रसारित हो गया है और सत्यापन क्यूआर कोड बन गया है।'
+        : 'Congratulations! Your craft is now broadcast live on ONDC & GeM with verified QR code.';
+      speakVoice(msg, language === 'hi' ? 'hi-IN' : 'en-IN');
+      return res;
+    } catch (err) {
+      console.error('Error publishing product:', err);
+      alert(`Publish error: ${err.message}`);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const resumeDraft = (draft) => {
+    setCurrentProductId(draft.id);
+    setProductStatus('draft');
+    setStudioImageUrl(draft.studio_image_url || draft.raw_image_url);
+    setRawImageUrl(draft.raw_image_url);
+    setCatalogData({
+      title_hi: draft.title_hi,
+      title_en: draft.title_en,
+      description_hi: draft.description_hi,
+      description_en: draft.description_en,
+      craft_category: draft.craft_category,
+      technique: draft.technique,
+      estimated_hours: draft.labor_hours,
+      raw_material_cost_estimate_inr: draft.raw_cost,
+    });
+    setPricingData({
+      b2c_price: draft.b2c_price,
+      b2b_price: draft.b2b_price,
+      gem_price: draft.gem_price,
+      raw_cost: draft.raw_cost,
+      labor_hours: draft.labor_hours,
+    });
+    setCurrentStep(3);
+    const msg = language === 'hi' ? `ड्राफ्ट लोड हुआ: ${draft.title_hi || draft.title_en}` : `Draft resumed: ${draft.title_en}`;
+    speakVoice(msg, language === 'hi' ? 'hi-IN' : 'en-IN');
+  };
+
+  const discardDraft = async (productId) => {
+    try {
+      await deleteProductDraft(productId);
+      await refreshDrafts();
+      if (currentProductId === productId) {
+        resetFlow();
+      }
+    } catch (err) {
+      console.error('Error discarding draft:', err);
+    }
+  };
+
   const resetFlow = () => {
     setCurrentStep(0);
     setStudioImageBase64(null);
@@ -215,6 +371,9 @@ export function ArtisanProvider({ children }) {
     setCatalogData(null);
     setPricingData(null);
     setActiveModal(null);
+    setProductStatus('session');
+    setPublishedProduct(null);
+    setCurrentProductId(`ART-${Date.now()}`);
   };
 
   const value = {
@@ -249,6 +408,17 @@ export function ArtisanProvider({ children }) {
     setActiveModal,
     activeCategoryMode,
     setActiveCategoryMode,
+    currentProductId,
+    productStatus,
+    publishedProduct,
+    savedDrafts,
+    isSavingDraft,
+    isPublishing,
+    saveCurrentDraft,
+    publishCurrentProduct,
+    resumeDraft,
+    discardDraft,
+    refreshDrafts,
     speakVoice,
     processCaptureAndVoice,
     updatePricing,
@@ -269,3 +439,4 @@ export function useArtisan() {
   }
   return context;
 }
+

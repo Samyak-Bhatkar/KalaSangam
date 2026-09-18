@@ -125,3 +125,77 @@ class WatermarkVerifyResponse(BaseModel):
 class BecknCatalogPayload(BaseModel):
     context: Dict[str, Any]
     message: Dict[str, Any]
+
+# Product Lifecycle Schemas (Draft-First & QR Code Lifecycle)
+class ProductDraftSaveRequest(BaseModel):
+    id: str
+    title_hi: Optional[str] = ""
+    title_en: Optional[str] = ""
+    description_hi: Optional[str] = ""
+    description_en: Optional[str] = ""
+    craft_category: Optional[str] = ""
+    technique: Optional[str] = ""
+    raw_cost: Optional[float] = 0.0
+    labor_hours: Optional[float] = 0.0
+    b2c_price: Optional[float] = 0.0
+    b2b_price: Optional[float] = 0.0
+    gem_price: Optional[float] = 0.0
+    artisan_name: Optional[str] = "Rural Artisan"
+    beneficiary_id: Optional[str] = "MoSJE-NBCFDC-01"
+    cluster_pin: Optional[str] = "273001"
+    raw_image_url: Optional[str] = ""
+    studio_image_url: Optional[str] = ""
+    watermarked_image_url: Optional[str] = ""
+
+class ProductPublishRequest(BaseModel):
+    product_data: Optional[ProductDraftSaveRequest] = None
+    verify_base_url: Optional[str] = None
+    pricing_data: Optional[Dict[str, Any]] = None
+    artisan_info: Optional[Dict[str, Any]] = None
+
+class ProductResponse(BaseModel):
+    id: str
+    title_hi: Optional[str] = None
+    title_en: Optional[str] = None
+    description_hi: Optional[str] = None
+    description_en: Optional[str] = None
+    craft_category: Optional[str] = None
+    technique: Optional[str] = None
+    raw_cost: Optional[float] = 0.0
+    labor_hours: Optional[float] = 0.0
+    b2c_price: Optional[float] = 0.0
+    b2b_price: Optional[float] = 0.0
+    gem_price: Optional[float] = 0.0
+    artisan_name: Optional[str] = None
+    beneficiary_id: Optional[str] = None
+    cluster_pin: Optional[str] = None
+    raw_image_url: Optional[str] = None
+    studio_image_url: Optional[str] = None
+    watermarked_image_url: Optional[str] = None
+    status: str  # 'draft' | 'published'
+    qr_code_url: Optional[str] = None
+    created_at: Optional[str] = None
+    published_at: Optional[str] = None
+
+class ProductPublicVerifyResponse(BaseModel):
+    status: str = "verified"
+    id: str
+    title_hi: Optional[str] = None
+    title_en: Optional[str] = None
+    description_hi: Optional[str] = None
+    description_en: Optional[str] = None
+    craft_category: Optional[str] = None
+    technique: Optional[str] = None
+    b2c_price: Optional[float] = None
+    gem_price: Optional[float] = None
+    artisan_name: Optional[str] = None
+    beneficiary_id: Optional[str] = None
+    cluster_pin: Optional[str] = None
+    studio_image_url: Optional[str] = None
+    watermarked_image_url: Optional[str] = None
+    published_at: Optional[str] = None
+    qr_code_url: Optional[str] = None
+    ondc_buy_url: str
+    fair_wage_guarantee: str = "₹120/hr statutory floor compliant (NBCFDC/NSFDC)"
+    authenticity_seal: str = "MoSJE GI Certified Authentic Handcrafted Indian Product"
+
