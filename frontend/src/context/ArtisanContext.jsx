@@ -25,6 +25,7 @@ export function ArtisanProvider({ children }) {
   const [language, setLanguage] = useState('hi');
   const [presets, setPresets] = useState([]);
   const [selectedPreset, setSelectedPreset] = useState(null);
+  const [activeCategoryMode, setActiveCategoryMode] = useState('auto'); // 'auto' | 'pottery' | 'saree' | 'idol' | 'painting' | 'craft'
 
   // Images
   const [rawImageBase64, setRawImageBase64] = useState(null);
@@ -139,12 +140,21 @@ export function ArtisanProvider({ children }) {
 
       setProcessStatusText('2. Multimodal Cataloger: Generating MoSJE bilingual listing with Gemini 2.5 Flash...');
 
+      // Determine effective category hint
+      let determinedHint = 'General Handicraft';
+      if (activeCategoryMode === 'pottery') determinedHint = 'Terracotta & Pottery';
+      else if (activeCategoryMode === 'saree') determinedHint = 'Handloom Textiles';
+      else if (activeCategoryMode === 'idol') determinedHint = 'Dhokra & Metalware';
+      else if (activeCategoryMode === 'painting') determinedHint = 'Folk Painting';
+      else if (activeCategoryMode === 'craft') determinedHint = 'Wood & Bamboo Craft';
+      else if (selectedPreset && !overrideBase64 && activeCategoryMode !== 'auto') determinedHint = selectedPreset.craft_category;
+
       // Step B: Catalog Generation
       const catRes = await processVoiceCatalog({
         imageBase64: studioRes.processed_base64,
         language,
         transcript: txt,
-        categoryHint: selectedPreset?.craft_category || 'Handicraft',
+        categoryHint: determinedHint,
       });
       setCatalogData(catRes);
 
@@ -237,6 +247,8 @@ export function ArtisanProvider({ children }) {
     setArtisanExpectedPrice,
     activeModal,
     setActiveModal,
+    activeCategoryMode,
+    setActiveCategoryMode,
     speakVoice,
     processCaptureAndVoice,
     updatePricing,

@@ -265,56 +265,60 @@ export default function VoiceRecorder() {
   const craftImageSrc = rawImageUrl || (getActiveCraftType() === 'terracotta' ? '/terracotta_pot_raw.png' : '/chanderi_saree.png');
 
   return (
-    <div className="relative w-full h-full flex flex-col justify-between bg-slate-950 text-white p-5 select-none overflow-y-auto">
+    <div className="relative w-full h-full flex flex-col justify-between bg-[#FDFBF7] text-slate-900 p-5 select-none overflow-y-auto font-sans">
       {/* Top Header */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <button
             onClick={() => setCurrentStep(1)}
-            className="flex items-center gap-1 text-slate-300 hover:text-white text-xs font-semibold py-1.5 px-3 rounded-xl bg-slate-900 border border-slate-800 active:scale-95 transition-transform"
+            className="flex items-center gap-1 text-slate-700 hover:text-slate-950 text-xs font-bold py-1.5 px-3 rounded-xl bg-white border border-slate-200 shadow-xs active:scale-95 transition-transform cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>{language === 'hi' ? 'कैमरा' : 'Camera'}</span>
           </button>
 
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-400 text-xs font-bold">
-              3
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-600 text-white text-xs font-black shadow-xs">
+              2
             </span>
-            <span className="text-xs font-black tracking-wider uppercase text-amber-400">
-              {language === 'hi' ? 'चरण ३: बोलकर विवरण दें' : 'Step 3: Vernacular Voice'}
+            <span className="text-xs font-black tracking-tight uppercase text-slate-900">
+              {language === 'hi' ? 'दूसरा चरण: बोलकर विवरण दें' : 'Step 2: Vernacular Voice'}
             </span>
           </div>
 
           <button
             onClick={playVoicePrompt}
             aria-label="Replay Audio Instruction"
-            className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-amber-400 hover:text-amber-300"
+            className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-amber-700 hover:text-amber-800 shadow-xs cursor-pointer"
           >
             <Volume2 className="w-4 h-4" />
           </button>
         </div>
 
         {/* Selected Craft Thumbnail Bar */}
-        <div className="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 mb-3 flex items-center gap-3 shadow-md">
+        <div className="p-3 rounded-2xl bg-white border border-slate-200/90 mb-3 flex items-center gap-3 shadow-xs">
           <img
             src={craftImageSrc}
             alt="Craft Preview"
-            className="w-14 h-14 rounded-xl object-cover bg-slate-800 border border-amber-500/30 shrink-0 shadow"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = '/samples/gorakhpur_terracotta.jpg';
+            }}
+            className="w-14 h-14 rounded-xl object-cover bg-slate-50 border border-slate-200 shrink-0 shadow-xs"
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wide">
                 कच्ची तस्वीर (Raw Capture) • AI स्टूडियो में स्वच्छ होगी
               </span>
             </div>
-            <h4 className="text-xs font-bold text-white truncate">
+            <h4 className="text-xs font-bold text-slate-900 truncate">
               {getActiveCraftType() === 'terracotta'
                 ? 'पारंपरिक गोरखपुर टेराकोटा हांडी व कलश'
                 : 'शाही नीली चंदेरी सिल्क ज़री साड़ी'}
             </h4>
-            <p className="text-[11px] text-amber-400 font-semibold">
+            <p className="text-[11px] text-amber-800 font-bold">
               {getActiveCraftType() === 'terracotta' ? 'हाथ से नक्काशीदार मिट्टी शिल्प' : '18 घंटे हथकरघा बुनाई'}
             </p>
           </div>
@@ -322,12 +326,12 @@ export default function VoiceRecorder() {
 
         {/* Vernacular Dialect Chips - Matching SIH Slide Step 3 */}
         <div className="mb-3">
-          <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1.5">
+          <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 mb-1.5">
             <span className="flex items-center gap-1">
-              <Languages className="w-3.5 h-3.5 text-amber-400" />
+              <Languages className="w-3.5 h-3.5 text-amber-700" />
               बोली / Dialect चुनें:
             </span>
-            <span className="text-[10px] text-emerald-400 font-semibold">
+            <span className="text-[10px] text-emerald-700 font-bold">
               Bhashini ASR + Llama 3.2
             </span>
           </div>
@@ -336,13 +340,13 @@ export default function VoiceRecorder() {
               <button
                 key={d.code}
                 onClick={() => handleDialectChange(d)}
-                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all active:scale-95 ${
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all active:scale-95 cursor-pointer ${
                   activeDialect === d.code
-                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20'
-                    : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:border-slate-700'
+                    ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                 }`}
               >
-                <span className="w-4 h-4 rounded-full bg-black/20 flex items-center justify-center text-[10px]">
+                <span className="w-4 h-4 rounded-full bg-black/10 flex items-center justify-center text-[10px]">
                   {d.badge}
                 </span>
                 <span>{d.label}</span>
@@ -358,8 +362,8 @@ export default function VoiceRecorder() {
           {/* Animated Ripple Rings when recording */}
           {isListening && (
             <>
-              <div className="absolute w-44 h-44 rounded-full bg-amber-500/30 animate-ping pointer-events-none" />
-              <div className="absolute w-36 h-36 rounded-full bg-emerald-500/40 animate-pulse pointer-events-none" />
+              <div className="absolute w-44 h-44 rounded-full bg-amber-500/20 animate-ping pointer-events-none" />
+              <div className="absolute w-36 h-36 rounded-full bg-emerald-500/30 animate-pulse pointer-events-none" />
             </>
           )}
 
@@ -367,16 +371,16 @@ export default function VoiceRecorder() {
           <button
             onClick={toggleListening}
             aria-label={isListening ? 'Stop Recording' : 'Start Speaking'}
-            className={`relative w-28 h-28 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 active:scale-95 cursor-pointer ${
+            className={`relative w-28 h-28 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 active:scale-95 cursor-pointer ${
               isListening
-                ? 'bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 ring-8 ring-rose-500/30 shadow-rose-500/50'
-                : 'bg-gradient-to-tr from-amber-500 via-amber-600 to-orange-600 ring-8 ring-amber-500/20 shadow-amber-500/40'
+                ? 'bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 ring-8 ring-rose-500/30 shadow-rose-500/40 text-white'
+                : 'bg-gradient-to-tr from-amber-500 via-amber-600 to-orange-600 ring-8 ring-amber-500/20 shadow-amber-500/30 text-white'
             }`}
           >
             {isListening ? (
               <MicOff className="w-12 h-12 text-white animate-pulse" />
             ) : (
-              <Mic className="w-12 h-12 text-slate-950" />
+              <Mic className="w-12 h-12 text-white drop-shadow-sm" />
             )}
           </button>
         </div>
@@ -389,18 +393,18 @@ export default function VoiceRecorder() {
               style={{ height: `${isListening ? lvl : 8}px` }}
               className={`w-2 rounded-full transition-all duration-100 ${
                 isListening
-                  ? 'bg-gradient-to-t from-emerald-400 via-amber-400 to-orange-500'
-                  : 'bg-slate-800'
+                  ? 'bg-gradient-to-t from-emerald-500 via-amber-500 to-orange-600'
+                  : 'bg-slate-200'
               }`}
             />
           ))}
         </div>
 
-        <p className="text-xs font-bold uppercase tracking-wider text-slate-300 mt-2 flex items-center gap-1.5">
+        <p className="text-xs font-bold uppercase tracking-wider text-slate-600 mt-2 flex items-center gap-1.5">
           {isListening ? (
             <>
               <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-              <span>{language === 'hi' ? 'सुन रहे हैं... (रोकने के लिए दबाएं)' : 'Listening live... (Tap to pause)'}</span>
+              <span className="text-red-600 font-extrabold">{language === 'hi' ? 'सुन रहे हैं... (रोकने के लिए दबाएं)' : 'Listening live... (Tap to pause)'}</span>
             </>
           ) : (
             <span>{language === 'hi' ? 'माइक दबाएं और अपनी भाषा में बोलें' : 'Tap Mic & Speak in Your Dialect'}</span>
@@ -408,7 +412,7 @@ export default function VoiceRecorder() {
         </p>
 
         {speechError && (
-          <p className="text-[11px] text-amber-300 mt-1 px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-center">
+          <p className="text-[11px] text-amber-900 mt-1 px-3 py-1 rounded-lg bg-amber-50 border border-amber-200 text-center font-medium">
             {speechError}
           </p>
         )}
@@ -416,19 +420,19 @@ export default function VoiceRecorder() {
 
       {/* Spoken Transcript Area (Interactive & Editable) */}
       <div>
-        <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 mb-3 shadow-inner">
+        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 mb-3 shadow-xs">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-extrabold tracking-wider uppercase text-amber-400 flex items-center gap-1">
-              <Edit3 className="w-3.5 h-3.5" />
+            <span className="text-[11px] font-black tracking-wider uppercase text-slate-800 flex items-center gap-1">
+              <Edit3 className="w-3.5 h-3.5 text-amber-700" />
               {language === 'hi' ? 'बोला गया विवरण (संपादन योग्य):' : 'Spoken Voice Narrative (Editable):'}
             </span>
             <div className="flex items-center gap-1.5">
               <button
                 onClick={playCurrentTranscript}
                 title="Listen to Transcript"
-                className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold flex items-center gap-1"
+                className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
               >
-                <Volume2 className="w-3 h-3" />
+                <Volume2 className="w-3 h-3 text-amber-700" />
                 <span>सुनें</span>
               </button>
               <button
@@ -437,9 +441,9 @@ export default function VoiceRecorder() {
                   setTranscript(sample);
                 }}
                 title="Reset to Authentic Sample"
-                className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold flex items-center gap-1"
+                className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
               >
-                <RefreshCw className="w-3 h-3" />
+                <RefreshCw className="w-3 h-3 text-slate-600" />
                 <span>रीसेट</span>
               </button>
             </div>
@@ -449,15 +453,15 @@ export default function VoiceRecorder() {
             value={transcript}
             onChange={(e) => setTranscript(e.target.value)}
             rows={3}
-            className="w-full text-xs font-medium text-slate-100 bg-slate-950/60 border border-slate-800 rounded-xl p-2.5 leading-relaxed focus:outline-none focus:border-amber-400 transition-colors resize-none"
+            className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl p-2.5 leading-relaxed focus:outline-none focus:border-amber-600 focus:bg-white transition-colors resize-none shadow-inner"
             placeholder={language === 'hi' ? 'माइक से बोलें या सीधे यहां टाइप करें...' : 'Speak with mic or type narrative here...'}
           />
         </div>
 
         {/* Processing Indicator Overlay */}
         {isProcessing && (
-          <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center gap-3 mb-3 animate-pulse">
-            <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
+          <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold flex items-center gap-3 mb-3 animate-pulse">
+            <Sparkles className="w-5 h-5 text-amber-600 shrink-0" />
             <span>{processStatusText || 'AI Studio & Llama 3.2 Vision Cataloging in progress...'}</span>
           </div>
         )}
@@ -466,7 +470,7 @@ export default function VoiceRecorder() {
         <button
           onClick={handleProceed}
           disabled={isProcessing}
-          className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black text-sm shadow-xl shadow-orange-500/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 hover:from-amber-500 hover:to-orange-500 text-white font-black text-sm shadow-xl shadow-orange-600/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
         >
           <span>{isProcessing ? 'AI कैटलॉग तैयार हो रहा है...' : (language === 'hi' ? 'कैटलॉग और उचित मूल्य तैयार करें' : 'Generate Studio Catalog & Fair Price')}</span>
           <ArrowRight className="w-4 h-4" />

@@ -50,32 +50,32 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-0 md:p-6 select-none font-sans">
+    <div className="min-h-screen bg-[#F1F5F9] text-slate-900 flex items-center justify-center p-0 md:p-6 select-none font-sans">
       {/* Mobile-First Application Frame (390px-430px optimized, native bezel on desktop) */}
-      <div className="relative w-full md:max-w-[430px] h-screen md:h-[900px] md:max-h-[95vh] bg-slate-950 md:rounded-[44px] md:border-4 md:border-slate-800 shadow-[0_25px_60px_-15px_rgba(200,90,50,0.25)] flex flex-col overflow-hidden">
+      <div className="relative w-full md:max-w-[430px] h-screen md:h-[900px] md:max-h-[95vh] bg-[#FDFBF7] md:rounded-[40px] md:border md:border-slate-200/80 shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden">
         
         {/* ==================================================================== */}
         {/* TOP STATUS BAR & MoSJE GOVT EMBLEM HEADER                           */}
         {/* ==================================================================== */}
-        <header className="z-30 px-4 pt-3 pb-2.5 bg-slate-950 border-b border-slate-900 flex items-center justify-between shrink-0">
+        <header className="z-30 px-4 pt-3 pb-2.5 bg-white/95 backdrop-blur-md border-b border-slate-200/80 flex items-center justify-between shrink-0 shadow-xs">
           <div className="flex items-center gap-2.5">
             {/* ShilpSetu Brand Emblem */}
             <img
               src="/brand_emblem.png"
               alt="ShilpSetu Emblem"
-              className="w-8 h-8 rounded-full border border-amber-500/40 object-cover shrink-0 shadow-md"
+              className="w-8 h-8 rounded-full border border-amber-500/40 object-cover shrink-0 shadow-xs"
             />
 
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="text-sm font-black tracking-tight text-white flex items-center gap-1">
+                <h1 className="text-sm font-black tracking-tight text-slate-900 flex items-center gap-1">
                   <span>ShilpSetu AI</span>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-400 font-mono font-bold border border-amber-500/30">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-50 text-amber-800 font-mono font-bold border border-amber-200">
                     MoSJE
                   </span>
                 </h1>
               </div>
-              <p className="text-[9px] text-slate-400 font-medium tracking-tight">
+              <p className="text-[9px] text-slate-500 font-medium tracking-tight">
                 NBCFDC / NSFDC Virtual Business Manager
               </p>
             </div>
@@ -87,10 +87,10 @@ export default function App() {
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
               aria-label="Select Language"
-              className="py-1 px-2.5 rounded-full bg-slate-900 border border-slate-700 text-amber-300 font-bold text-xs focus:outline-none focus:border-amber-400 cursor-pointer"
+              className="py-1 px-2.5 rounded-full bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-slate-800 font-bold text-xs focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
             >
               {SUPPORTED_LANGUAGES.map(lang => (
-                <option key={lang.code} value={lang.code} className="bg-slate-900 text-white">
+                <option key={lang.code} value={lang.code} className="bg-white text-slate-900">
                   {lang.name} ({lang.label})
                 </option>
               ))}
@@ -100,7 +100,7 @@ export default function App() {
               <button
                 onClick={resetFlow}
                 title="Return to Home / Restart Flow"
-                className="w-7 h-7 rounded-full bg-slate-900 hover:bg-slate-800 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-all cursor-pointer"
+                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-all cursor-pointer shadow-xs"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
@@ -111,7 +111,7 @@ export default function App() {
         {/* ==================================================================== */}
         {/* 4-STAGE WORKFLOW STEPPER (Stitch Screen 1 -> 2 -> 3 -> 4)            */}
         {/* ==================================================================== */}
-        <nav className="z-20 px-3 py-2 bg-slate-950/90 border-b border-slate-900 flex items-center justify-between shrink-0">
+        <nav className="z-20 px-3 py-2 bg-white border-b border-slate-200/70 flex items-center justify-between shrink-0 shadow-xs">
           {[
             { step: 0, label: language === 'hi' ? 'होम' : 'Home', icon: Home },
             { step: 1, label: language === 'hi' ? 'फोटो' : '1. Snap', icon: Camera },
@@ -126,16 +126,16 @@ export default function App() {
                 <button
                   onClick={() => setCurrentStep(item.step)}
                   className={`flex items-center gap-1 cursor-pointer transition-all ${
-                    isActive ? 'text-amber-400 font-extrabold' : isDone ? 'text-emerald-400 font-semibold' : 'text-slate-500 hover:text-slate-300'
+                    isActive ? 'text-amber-700 font-extrabold' : isDone ? 'text-emerald-700 font-semibold' : 'text-slate-400 hover:text-slate-600'
                   }`}
                 >
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all ${
                       isActive
-                        ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/30'
+                        ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
                         : isDone
-                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                        : 'bg-slate-900 text-slate-500 border-slate-800'
+                        ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
+                        : 'bg-slate-100 text-slate-400 border-slate-200'
                     }`}
                   >
                     <Icon className="w-3 h-3" />
@@ -143,7 +143,7 @@ export default function App() {
                   <span className="text-[10px] font-bold tracking-tight">{item.label}</span>
                 </button>
                 {idx < 3 && (
-                  <div className={`flex-1 h-0.5 mx-1.5 rounded-full ${isDone ? 'bg-emerald-500/50' : 'bg-slate-800'}`} />
+                  <div className={`flex-1 h-0.5 mx-1.5 rounded-full ${isDone ? 'bg-emerald-500' : 'bg-slate-200'}`} />
                 )}
               </React.Fragment>
             );
@@ -267,10 +267,10 @@ export default function App() {
         <ONDCExportBadge />
 
         {/* Bottom Ambient Footer Bar */}
-        <footer className="z-20 py-2 px-4 bg-slate-950/95 border-t border-slate-900 text-center text-[10px] text-slate-500 flex items-center justify-between shrink-0">
-          <span>MoSJE GoI • NSFDC / NBCFDC</span>
-          <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+        <footer className="z-20 py-2.5 px-4 bg-white/95 border-t border-slate-200/80 text-center text-[10px] text-slate-500 flex items-center justify-between shrink-0 shadow-xs">
+          <span className="font-semibold text-slate-700">MoSJE GoI • NSFDC / NBCFDC</span>
+          <span className="flex items-center gap-1.5 text-emerald-700 font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
             Zero-Text Voice UI Active
           </span>
         </footer>

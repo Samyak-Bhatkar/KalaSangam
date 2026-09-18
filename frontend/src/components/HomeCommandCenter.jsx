@@ -92,8 +92,8 @@ export default function HomeCommandCenter() {
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-5 bg-[#C85A32] rounded-full" />
-            <h3 className="text-base font-extrabold text-white">
-              तुरंत नया सामान जोड़ें <span className="text-xs font-normal text-slate-400">(1-टैप एक्शन)</span>
+            <h3 className="text-base font-extrabold text-slate-900">
+              तुरंत नया सामान जोड़ें <span className="text-xs font-normal text-slate-500">(1-टैप एक्शन)</span>
             </h3>
           </div>
           <span className="text-[10px] text-[#C85A32] font-bold bg-[#FFDBCF] px-2.5 py-0.5 rounded-full">
@@ -106,7 +106,7 @@ export default function HomeCommandCenter() {
           {/* Option A: Snap Craft Photo */}
           <button
             onClick={() => setCurrentStep(1)}
-            className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#C85A32] to-[#BF542C] text-white p-4 shadow-lg flex flex-col justify-between text-left h-[200px] active:scale-[0.97] transition-all cursor-pointer border border-[#E06D44]"
+            className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#C85A32] to-[#BF542C] text-white p-4 shadow-md hover:shadow-lg flex flex-col justify-between text-left h-[200px] active:scale-[0.97] transition-all cursor-pointer border border-[#E06D44]"
           >
             <div className="flex items-center justify-between relative z-10">
               <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
@@ -124,7 +124,7 @@ export default function HomeCommandCenter() {
               <div className="text-xs font-bold text-amber-200">
                 Snap Craft
               </div>
-              <p className="text-[10px] text-white/80 mt-1 line-clamp-1">
+              <p className="text-[10px] text-white/90 mt-1 line-clamp-1">
                 पृष्ठभूमि खुद हट जाएगी
               </p>
             </div>
@@ -137,7 +137,7 @@ export default function HomeCommandCenter() {
           {/* Option B: Voice Describe FAB */}
           <button
             onClick={() => setCurrentStep(2)}
-            className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#F59E0B] to-[#B45309] text-white p-4 shadow-lg flex flex-col justify-between text-left h-[200px] active:scale-[0.97] transition-all cursor-pointer border border-amber-400"
+            className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#D97706] to-[#B45309] text-white p-4 shadow-md hover:shadow-lg flex flex-col justify-between text-left h-[200px] active:scale-[0.97] transition-all cursor-pointer border border-amber-500"
           >
             <div className="flex items-center justify-between relative z-10">
               <div className="w-12 h-12 rounded-full bg-white text-[#825100] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
@@ -177,13 +177,13 @@ export default function HomeCommandCenter() {
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-5 bg-[#4059AA] rounded-full" />
-            <h3 className="text-base font-extrabold text-white">
-              आपकी लाइव कलाकृतियां <span className="text-xs font-normal text-slate-400">(2 सक्रिय)</span>
+            <h3 className="text-base font-extrabold text-slate-900">
+              आपकी लाइव कलाकृतियां <span className="text-xs font-normal text-slate-500">(2 सक्रिय)</span>
             </h3>
           </div>
           <button
             onClick={() => setCurrentStep(3)}
-            className="text-xs font-bold text-blue-400 flex items-center gap-0.5"
+            className="text-xs font-bold text-blue-700 flex items-center gap-0.5 hover:underline cursor-pointer"
           >
             <span>सभी देखें</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -193,54 +193,54 @@ export default function HomeCommandCenter() {
         {/* Live Items Cards */}
         <div className="space-y-2.5">
           {/* Item 1: Chanderi Silk Saree */}
-          <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm flex items-center gap-3">
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs hover:shadow-md transition-shadow flex items-center gap-3">
             <img
               src="/chanderi_saree.png"
               alt="Chanderi Saree"
-              className="w-16 h-16 rounded-xl object-cover bg-slate-800 shrink-0"
+              className="w-16 h-16 rounded-xl object-cover bg-slate-50 border border-slate-100 shrink-0"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 mb-0.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="text-[10px] font-bold text-emerald-400 uppercase">ONDC पर लाइव</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-[10px] font-bold text-emerald-700 uppercase">ONDC पर लाइव</span>
               </div>
-              <h4 className="text-sm font-bold text-white truncate">
+              <h4 className="text-sm font-bold text-slate-900 truncate">
                 शाही नीली चंदेरी सिल्क ज़री साड़ी
               </h4>
-              <p className="text-xs font-bold text-amber-400">
+              <p className="text-xs font-bold text-amber-700">
                 ₹3,200 • 18h श्रम
               </p>
             </div>
             <button
               onClick={() => speakVoice('शाही नीली चंदेरी सिल्क साड़ी, असली ज़री का काम, कीमत बत्तीस सौ रुपये, तुरंत बिक्री हेतु उपलब्ध है।', 'hi-IN')}
-              className="w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0"
+              className="w-9 h-9 rounded-full bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center shrink-0 hover:bg-amber-100 cursor-pointer shadow-xs"
             >
               <Volume2 className="w-4 h-4" />
             </button>
           </div>
 
           {/* Item 2: Gorakhpur Terracotta Handi Pot */}
-          <div className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm flex items-center gap-3">
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs hover:shadow-md transition-shadow flex items-center gap-3">
             <img
               src="/terracotta_pot.png"
               alt="Gorakhpur Terracotta"
-              className="w-16 h-16 rounded-xl object-cover bg-slate-800 shrink-0"
+              className="w-16 h-16 rounded-xl object-cover bg-slate-50 border border-slate-100 shrink-0"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 mb-0.5">
-                <span className="w-2 h-2 rounded-full bg-blue-400" />
-                <span className="text-[10px] font-bold text-blue-400 uppercase">GeM स्वीकृत</span>
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="text-[10px] font-bold text-blue-700 uppercase">GeM स्वीकृत</span>
               </div>
-              <h4 className="text-sm font-bold text-white truncate">
+              <h4 className="text-sm font-bold text-slate-900 truncate">
                 हस्तनिर्मित गोरखपुर टेराकोटा कलश
               </h4>
-              <p className="text-xs font-bold text-amber-400">
+              <p className="text-xs font-bold text-amber-700">
                 ₹1,150 • 6h श्रम
               </p>
             </div>
             <button
               onClick={() => speakVoice('हस्तनिर्मित गोरखपुर टेराकोटा कलश, प्राकृतिक लाल चिकनी मिट्टी, कीमत ग्यारह सौ पचास रुपये।', 'hi-IN')}
-              className="w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0"
+              className="w-9 h-9 rounded-full bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center shrink-0 hover:bg-amber-100 cursor-pointer shadow-xs"
             >
               <Volume2 className="w-4 h-4" />
             </button>
