@@ -19,7 +19,6 @@ import {
   Loader2,
   Check,
   PhoneCall,
-  ShieldCheck,
   LogOut,
   UserCheck,
   Store
@@ -219,16 +218,6 @@ export default function App() {
             >
               <PhoneCall className="w-3 h-3 text-emerald-600 animate-pulse" />
               <span className="font-extrabold">IVR</span>
-            </button>
-
-            {/* Village Coordinator Review Panel Launcher */}
-            <button
-              onClick={() => setActiveModal('coordinator')}
-              title="Village Field Coordinator Review Panel (Human Checkpoint)"
-              className="py-1 px-2 rounded-full bg-amber-50 hover:bg-amber-100/80 border border-amber-300 text-amber-900 font-bold text-[11px] flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-xs"
-            >
-              <ShieldCheck className="w-3 h-3 text-amber-700" />
-              <span className="font-extrabold">{language === 'hi' ? 'समन्वयक' : 'Review'}</span>
             </button>
 
             {/* Regional Dialect / Language Selector */}
