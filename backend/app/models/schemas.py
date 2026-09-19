@@ -216,3 +216,30 @@ class ProductPublicVerifyResponse(BaseModel):
     fair_wage_guarantee: str = "₹120/hr statutory floor compliant (NBCFDC/NSFDC)"
     authenticity_seal: str = "MoSJE GI Certified Authentic Handcrafted Indian Product"
 
+# IVR Telephony Schemas (Zero-Smartphone Tier)
+class IVRCatalogDraftRequest(BaseModel):
+    product_name: str
+    material: str
+    price: float
+    detected_language: Optional[str] = "hi"
+    timestamp: Optional[str] = None
+    artisan_id: Optional[str] = None
+    artisan_name: Optional[str] = "Rural Artisan (Keypad IVR Caller)"
+    cluster_pin: Optional[str] = "273001"
+    channel: Optional[str] = "voice_ivr_keypad"
+
+class CoordinatorNotification(BaseModel):
+    recipient: str
+    message: str
+    cluster_pin: str
+    dispatched_at: str
+    channel: str = "voice_ivr_keypad"
+    status: str = "QUEUED_FOR_FIELD_DISPATCH"
+
+class IVRCatalogDraftResponse(BaseModel):
+    status: str = "success"
+    draft_id: str
+    product: Dict[str, Any]
+    coordinator_notification: CoordinatorNotification
+
+

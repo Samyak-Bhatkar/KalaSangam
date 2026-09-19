@@ -12,7 +12,8 @@ import {
   FileText,
   Trash2,
   Clock,
-  ArrowRight
+  ArrowRight,
+  PhoneCall
 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 
@@ -23,7 +24,8 @@ export default function HomeCommandCenter() {
     language,
     savedDrafts,
     resumeDraft,
-    discardDraft
+    discardDraft,
+    setActiveModal
   } = useArtisan();
 
   const handleEarningsAudio = () => {
@@ -180,6 +182,42 @@ export default function HomeCommandCenter() {
             </div>
           </button>
         </div>
+
+        {/* Option C: Zero-Smartphone Conversational Voice-IVR Keypad Simulator */}
+        <button
+          onClick={() => setActiveModal('ivr')}
+          className="w-full group relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-slate-900 to-[#122216] text-white p-4 shadow-lg hover:shadow-xl flex items-center justify-between text-left active:scale-[0.98] transition-all cursor-pointer border border-emerald-500/40"
+        >
+          <div className="flex items-center gap-3.5 relative z-10">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform shrink-0">
+              <PhoneCall className="w-6 h-6 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-sm font-black text-white">
+                  कला-वाणी IVR (Zero-Smartphone Tier)
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-black border border-emerald-500/30 uppercase tracking-wide">
+                  कीपैड फोन सिम्युलेटर
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-300 line-clamp-1 mt-0.5">
+                बिना इंटरनेट या कैमरा • 1800-208-SHILP पर कॉल करके आवाज से लिस्ट करें
+              </p>
+              <div className="flex items-center gap-2 mt-1 text-[9px] text-emerald-400 font-semibold font-mono">
+                <span>Bhashini ASR</span>
+                <span>•</span>
+                <span>DTMF 1/2/3</span>
+                <span>•</span>
+                <span>समन्वयक SMS</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white group-hover:translate-x-1 transition-transform shrink-0">
+            <ArrowRight className="w-4 h-4" />
+          </div>
+        </button>
       </section>
 
       {/* 2.5 DRAFTS DOCK: UNPUBLISHED CRAFTS (LAZY AUTO-CLEANUP IN 24H) */}

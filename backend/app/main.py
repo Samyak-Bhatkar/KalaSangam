@@ -37,8 +37,11 @@ from .models.schemas import (
     ProductPublishRequest,
     ProductResponse,
     ProductPublicVerifyResponse,
+    IVRCatalogDraftRequest,
+    IVRCatalogDraftResponse,
 )
 from .models.mock_data import CRAFT_FIXTURES
+from .services.ivr_service import process_ivr_step_audio, create_ivr_draft_listing
 from .services.image_studio import process_studio_image, image_to_base64, assess_photo_quality
 from .services.catalog_engine import process_voice_and_catalog
 from .services.pricing_engine import calculate_living_wage_pricing
@@ -716,4 +719,96 @@ async def delete_product_endpoint(product_id: str):
     except Exception as e:
         logger.error(f"Delete failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# ==============================================================================
+# INNOVATION 5: ZERO-SMARTPHONE CONVERSATIONAL VOICE-IVR TELEPHONY PIPELINE
+# ==============================================================================
+@app.post("/api/ivr/process-response")
+@app.post("/api/v1/ivr/process-response")
+async def ivr_process_response_endpoint(
+    audio: UploadFile = File(...),
+    step: str = Form("product_name"),
+    language: str = Form("hi"),
+    bhashini_key: Optional[str] = Form(None),
+    bhashini_user_id: Optional[str] = Form(None),
+    allow_gemini_fallback: Optional[bool] = Form(False),
+):
+    """
+    POST /api/ivr/process-response
+    Processes audio response for a specific IVR question step:
+    - Step 1: Product name / description
+    - Step 2: Craft material
+    - Step 3: Selling price
+    Calls MeitY Bhashini ASR then Bhashini Translation API.
+    Returns { transcript, translatedText, language, extractedValue, engineUsed, latencyMs }.
+    Fails with structured 503 if Bhashini API keys are unconfigured (No fake/mocked AI).
+    """
+    try:
+        audio_bytes = await audio.read()
+        if not audio_bytes or len(audio_bytes) < 100:
+            raise HTTPException(status_code=400, detail="Empty or invalid audio blob received.")
+
+        mime_type = audio.content_type or "audio/webm"
+        result = await process_ivr_step_audio(
+            audio_bytes=audio_bytes,
+            mime_type=mime_type,
+            step=step,
+            language=language,
+            bhashini_key=bhashini_key,
+            bhashini_user_id=bhashini_user_id,
+            allow_gemini_fallback=bool(allow_gemini_fallback),
+        )
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"IVR process response error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/catalog/draft", response_model=IVRCatalogDraftResponse)
+@app.post("/api/v1/catalog/draft", response_model=IVRCatalogDraftResponse)
+async def create_ivr_catalog_draft_endpoint(
+    req: IVRCatalogDraftRequest,
+    background_tasks: BackgroundTasks = None
+):
+    """
+    POST /api/catalog/draft
+    Accepts compiled fields from IVR call confirmation:
+    - product_name, material, price, detected_language, timestamp, artisan_id, etc.
+    Creates draft catalog entry in SQLite database (status='draft', zero QR code).
+    Dispatches simulated Field Coordinator SMS alert.
+    """
+    try:
+        draft_result = create_ivr_draft_listing(
+            product_name=req.product_name,
+            material=req.material,
+            price=req.price,
+            detected_language=req.detected_language or "hi",
+            artisan_id=req.artisan_id,
+            artisan_name=req.artisan_name,
+            cluster_pin=req.cluster_pin,
+            channel=req.channel or "voice_ivr_keypad"
+        )
+
+        if background_tasks:
+            background_tasks.add_task(
+                trigger_ministry_analytics_workflow,
+                "IVR_DRAFT_CREATED",
+                {
+                    "draft_id": draft_result["draft_id"],
+                    "product_name": req.product_name,
+                    "price": req.price,
+                    "channel": "voice_ivr_keypad",
+                    "cluster_pin": req.cluster_pin or "273001"
+                }
+            )
+
+        logger.info(f"Created IVR draft: {draft_result['draft_id']} (SMS dispatched to coordinator)")
+        return IVRCatalogDraftResponse(**draft_result)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"IVR catalog draft creation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 

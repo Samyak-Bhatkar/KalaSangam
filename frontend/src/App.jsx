@@ -17,7 +17,8 @@ import {
   Bookmark,
   FileText,
   Loader2,
-  Check
+  Check,
+  PhoneCall
 } from 'lucide-react';
 import { useArtisan, SUPPORTED_LANGUAGES } from './context/ArtisanContext';
 import HomeCommandCenter from './components/HomeCommandCenter';
@@ -30,6 +31,7 @@ import BargainGuard from './components/BargainGuard';
 import DigitalGIWatermarkModal from './components/DigitalGIWatermarkModal';
 import ONDCExportBadge from './components/ONDCExportBadge';
 import PublicVerifyScreen from './components/PublicVerifyScreen';
+import KeypadPhoneSimulator from './components/KeypadPhoneSimulator';
 
 export default function App() {
   const {
@@ -38,6 +40,7 @@ export default function App() {
     language,
     setLanguage,
     resetFlow,
+    activeModal,
     setActiveModal,
     catalogData,
     pricingData,
@@ -104,13 +107,24 @@ export default function App() {
             </div>
           </div>
 
-          {/* Regional Dialect / Language Selector */}
-          <div className="flex items-center gap-2">
+          {/* Quick Header Launchers */}
+          <div className="flex items-center gap-1.5">
+            {/* Zero-Smartphone Voice-IVR Launcher */}
+            <button
+              onClick={() => setActiveModal('ivr')}
+              title="Zero-Smartphone IVR (Keypad Phone Simulator)"
+              className="py-1 px-2.5 rounded-full bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-300 text-emerald-800 font-bold text-[11px] flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-xs"
+            >
+              <PhoneCall className="w-3 h-3 text-emerald-600 animate-pulse" />
+              <span className="font-extrabold">IVR</span>
+            </button>
+
+            {/* Regional Dialect / Language Selector */}
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
               aria-label="Select Language"
-              className="py-1 px-2.5 rounded-full bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-slate-800 font-bold text-xs focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
+              className="py-1 px-2 rounded-full bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-slate-800 font-bold text-xs focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
             >
               {SUPPORTED_LANGUAGES.map(lang => (
                 <option key={lang.code} value={lang.code} className="bg-white text-slate-900">
@@ -337,6 +351,7 @@ export default function App() {
         <BargainGuard />
         <DigitalGIWatermarkModal />
         <ONDCExportBadge />
+        {activeModal === 'ivr' && <KeypadPhoneSimulator onClose={() => setActiveModal(null)} />}
 
         {/* Bottom Ambient Footer Bar */}
         <footer className="z-20 py-2.5 px-4 bg-white/95 border-t border-slate-200/80 text-center text-[10px] text-slate-500 flex items-center justify-between shrink-0 shadow-xs">

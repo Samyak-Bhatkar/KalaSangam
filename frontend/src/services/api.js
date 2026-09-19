@@ -374,3 +374,84 @@ export async function deleteProductDraft(productId) {
   return await res.json();
 }
 
+/**
+ * Sends recorded audio blob for a specific IVR question step to backend
+ * Calls Bhashini ASR and Translation
+ */
+export async function processIvrAudioResponse({
+  audioBlob,
+  step = 'product_name',
+  language = 'hi',
+  bhashiniKey = '',
+  bhashiniUserId = '',
+  allowGeminiFallback = false,
+}) {
+  const formData = new FormData();
+  formData.append('audio', audioBlob, 'ivr_voice.wav');
+  formData.append('step', step);
+  formData.append('language', language);
+  if (bhashiniKey) formData.append('bhashini_key', bhashiniKey);
+  if (bhashiniUserId) formData.append('bhashini_user_id', bhashiniUserId);
+  formData.append('allow_gemini_fallback', allowGeminiFallback ? 'true' : 'false');
+
+  const res = await fetch(`${API_BASE}/ivr/process-response`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const err = new Error(
+      errorData.detail?.message ||
+      (typeof errorData.detail === 'string' ? errorData.detail : 'IVR voice processing failed')
+    );
+    err.status = res.status;
+    err.data = errorData;
+    throw err;
+  }
+
+  return await res.json();
+}
+
+/**
+ * Saves confirmed IVR draft product into SQLite database
+ * Dispatches simulated Field Coordinator SMS
+ */
+export async function saveIvrCatalogDraft({
+  productName,
+  material,
+  price,
+  detectedLanguage = 'hi',
+  artisanId,
+  artisanName,
+  clusterPin = '273001',
+}) {
+  const payload = {
+    product_name: productName,
+    material: material,
+    price: Number(price) || 0,
+    detected_language: detectedLanguage,
+    artisan_id: artisanId,
+    artisan_name: artisanName,
+    cluster_pin: clusterPin,
+    channel: 'voice_ivr_keypad',
+  };
+
+  const res = await fetch(`${API_BASE}/catalog/draft`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    const err = new Error(errData.detail || 'Failed to save IVR catalog draft');
+    err.status = res.status;
+    err.data = errData;
+    throw err;
+  }
+
+  return await res.json();
+}
+
+
