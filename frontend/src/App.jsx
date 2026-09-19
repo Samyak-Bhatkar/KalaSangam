@@ -18,7 +18,8 @@ import {
   FileText,
   Loader2,
   Check,
-  PhoneCall
+  PhoneCall,
+  ShieldCheck
 } from 'lucide-react';
 import { useArtisan, SUPPORTED_LANGUAGES } from './context/ArtisanContext';
 import HomeCommandCenter from './components/HomeCommandCenter';
