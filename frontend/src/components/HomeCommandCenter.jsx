@@ -13,7 +13,8 @@ import {
   Trash2,
   Clock,
   ArrowRight,
-  PhoneCall
+  PhoneCall,
+  ClipboardCheck
 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 
@@ -210,6 +211,42 @@ export default function HomeCommandCenter() {
                 <span>DTMF 1/2/3</span>
                 <span>•</span>
                 <span>समन्वयक SMS</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white group-hover:translate-x-1 transition-transform shrink-0">
+            <ArrowRight className="w-4 h-4" />
+          </div>
+        </button>
+
+        {/* Option D: Village Field Coordinator Review Desk */}
+        <button
+          onClick={() => setActiveModal('coordinator')}
+          className="w-full group relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-4 shadow-lg hover:shadow-xl flex items-center justify-between text-left active:scale-[0.98] transition-all cursor-pointer border border-indigo-500/40"
+        >
+          <div className="flex items-center gap-3.5 relative z-10">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-300 group-hover:scale-105 transition-transform shrink-0">
+              <ClipboardCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-sm font-black text-white">
+                  ग्राम समन्वयक डेस्क (Field Coordinator Desk)
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[9px] font-black border border-indigo-500/30 uppercase tracking-wide">
+                  मानव सत्यापन
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-300 line-clamp-1 mt-0.5">
+                AI ड्राफ्ट्स समीक्षा • भौतिक फोटो विज़िट • ONDC लाइव स्टोरफ्रंट
+              </p>
+              <div className="flex items-center gap-2 mt-1 text-[9px] text-indigo-300 font-semibold font-mono">
+                <span>समीक्षा कतार</span>
+                <span>•</span>
+                <span>फोटो विज़िट (To-Do)</span>
+                <span>•</span>
+                <span>स्टोरफ्रंट</span>
               </div>
             </div>
           </div>

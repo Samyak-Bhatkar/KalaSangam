@@ -32,6 +32,7 @@ import DigitalGIWatermarkModal from './components/DigitalGIWatermarkModal';
 import ONDCExportBadge from './components/ONDCExportBadge';
 import PublicVerifyScreen from './components/PublicVerifyScreen';
 import KeypadPhoneSimulator from './components/KeypadPhoneSimulator';
+import CoordinatorReviewPanel from './components/CoordinatorReviewPanel';
 
 export default function App() {
   const {
@@ -62,6 +63,16 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     return params.get('verify') || params.get('id') || null;
   });
+
+  // Support ?view=coordinator direct link
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('view') === 'coordinator') {
+        setActiveModal('coordinator');
+      }
+    }
+  }, [setActiveModal]);
 
   if (verifyId) {
     return (
@@ -117,6 +128,16 @@ export default function App() {
             >
               <PhoneCall className="w-3 h-3 text-emerald-600 animate-pulse" />
               <span className="font-extrabold">IVR</span>
+            </button>
+
+            {/* Village Coordinator Review Panel Launcher */}
+            <button
+              onClick={() => setActiveModal('coordinator')}
+              title="Village Field Coordinator Review Panel (Human Checkpoint)"
+              className="py-1 px-2 rounded-full bg-amber-50 hover:bg-amber-100/80 border border-amber-300 text-amber-900 font-bold text-[11px] flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-xs"
+            >
+              <ShieldCheck className="w-3 h-3 text-amber-700" />
+              <span className="font-extrabold">{language === 'hi' ? 'समन्वयक' : 'Review'}</span>
             </button>
 
             {/* Regional Dialect / Language Selector */}
@@ -352,6 +373,7 @@ export default function App() {
         <DigitalGIWatermarkModal />
         <ONDCExportBadge />
         {activeModal === 'ivr' && <KeypadPhoneSimulator onClose={() => setActiveModal(null)} />}
+        {activeModal === 'coordinator' && <CoordinatorReviewPanel onClose={() => setActiveModal(null)} />}
 
         {/* Bottom Ambient Footer Bar */}
         <footer className="z-20 py-2.5 px-4 bg-white/95 border-t border-slate-200/80 text-center text-[10px] text-slate-500 flex items-center justify-between shrink-0 shadow-xs">

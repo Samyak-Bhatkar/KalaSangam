@@ -39,6 +39,10 @@ from .models.schemas import (
     ProductPublicVerifyResponse,
     IVRCatalogDraftRequest,
     IVRCatalogDraftResponse,
+    CoordinatorDraftUpdateRequest,
+    CoordinatorDraftRejectRequest,
+    CoordinatorDraftListResponse,
+    CoordinatorPhotoUploadResponse,
 )
 from .models.mock_data import CRAFT_FIXTURES
 from .services.ivr_service import process_ivr_step_audio, create_ivr_draft_listing
@@ -63,6 +67,10 @@ from .database import (
     list_artisan_products,
     delete_product,
     cleanup_expired_drafts,
+    list_coordinator_drafts,
+    update_coordinator_draft,
+    reject_coordinator_draft,
+    list_published_products,
 )
 from .services.transcription_service import transcribe_audio_bytes, fallback_craft_transcript
 
@@ -812,6 +820,222 @@ async def create_ivr_catalog_draft_endpoint(
         raise
     except Exception as e:
         logger.error(f"IVR catalog draft creation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ==============================================================================
+# INNOVATION 6: VILLAGE FIELD COORDINATOR REVIEW PANEL (HUMAN-IN-THE-LOOP CHECKPOINT)
+# ==============================================================================
+@app.get("/api/v1/coordinator/drafts", response_model=CoordinatorDraftListResponse)
+async def get_coordinator_drafts_endpoint(filter: Optional[str] = "all"):
+    """
+    GET /api/v1/coordinator/drafts
+    Returns the pending review queue for Village Field Coordinators.
+    Filters: 'all', 'camera', 'ivr', 'missing_photo'
+    Includes aggregate count headers for coordinator task management.
+    """
+    try:
+        data = list_coordinator_drafts(filter_type=filter)
+        return CoordinatorDraftListResponse(**data)
+    except Exception as e:
+        logger.error(f"Error fetching coordinator drafts: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/v1/coordinator/drafts/{draft_id}")
+async def update_coordinator_draft_endpoint(
+    draft_id: str,
+    req: CoordinatorDraftUpdateRequest
+):
+    """
+    PUT /api/v1/coordinator/drafts/{draft_id}
+    Updates draft listing fields with human review corrections.
+    Automatically audits diffs into correction_log ('AI suggested X -> Coordinator changed to Y').
+    """
+    try:
+        updated = update_coordinator_draft(
+            draft_id=draft_id,
+            updates=req.dict(exclude_unset=True),
+            actor="coordinator"
+        )
+        return {"status": "success", "draft": updated}
+    except ValueError as val_err:
+        raise HTTPException(status_code=404, detail=str(val_err))
+    except Exception as e:
+        logger.error(f"Error updating coordinator draft {draft_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/coordinator/drafts/{draft_id}/reject")
+async def reject_coordinator_draft_endpoint(
+    draft_id: str,
+    req: CoordinatorDraftRejectRequest
+):
+    """
+    POST /api/v1/coordinator/drafts/{draft_id}/reject
+    Rejects a draft with mandatory justification (e.g. 'unclear audio, needs re-recording').
+    """
+    try:
+        rejected = reject_coordinator_draft(draft_id=draft_id, reason=req.reason)
+        logger.info(f"Coordinator rejected draft {draft_id}: {req.reason}")
+        return {"status": "success", "draft": rejected}
+    except ValueError as val_err:
+        raise HTTPException(status_code=400, detail=str(val_err))
+    except Exception as e:
+        logger.error(f"Error rejecting draft {draft_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/coordinator/drafts/{draft_id}/publish", response_model=ProductResponse)
+async def publish_coordinator_draft_endpoint(
+    draft_id: str,
+    req: Optional[CoordinatorDraftUpdateRequest] = None,
+    verify_base_url: Optional[str] = None,
+    background_tasks: BackgroundTasks = None
+):
+    """
+    POST /api/v1/coordinator/drafts/{draft_id}/publish
+    Final human checkpoint approval: moves status from draft/approved -> published.
+    Generates verified QR code, Beckn payload, and broadcasts to ONDC/GeM.
+    """
+    try:
+        # 1. Apply any final edits if provided
+        if req:
+            update_coordinator_draft(
+                draft_id=draft_id,
+                updates=req.dict(exclude_unset=True),
+                actor="coordinator"
+            )
+
+        product = get_product_by_id(draft_id)
+        if not product:
+            raise HTTPException(status_code=404, detail="Draft not found")
+
+        title = product.get("title_en") or product.get("title_hi") or "Handcrafted Artisan Product"
+
+        # 2. Generate certified QR code PNG
+        qr_url, _ = generate_published_product_qr(
+            product_id=draft_id,
+            title=title,
+            base_verify_url=verify_base_url
+        )
+
+        # 3. Build Beckn schema
+        beckn_schema = None
+        try:
+            beckn_schema = generate_beckn_catalog_payload(product_data=product)
+        except Exception as e:
+            logger.warning(f"Beckn generation note during coordinator publish: {e}")
+
+        # 4. Commit publish transition
+        published = db_publish_product(
+            product_id=draft_id,
+            qr_code_url=qr_url,
+            beckn_payload=beckn_schema,
+            product_data=product
+        )
+
+        # 5. Broadcast to n8n / analytics
+        if background_tasks and beckn_schema:
+            background_tasks.add_task(trigger_ondc_publish_workflow, beckn_schema)
+            background_tasks.add_task(
+                trigger_ministry_analytics_workflow,
+                "COORDINATOR_PUBLISHED",
+                {
+                    "item_id": draft_id,
+                    "title": title,
+                    "status": "published",
+                    "qr_code_url": qr_url,
+                    "published_by": "village_coordinator"
+                }
+            )
+
+        logger.info(f"Coordinator approved & published {draft_id} live on ONDC/GeM with QR: {qr_url}")
+        return ProductResponse(**published)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Coordinator publish error for {draft_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/coordinator/drafts/{draft_id}/upload-photo", response_model=CoordinatorPhotoUploadResponse)
+async def upload_coordinator_draft_photo(
+    draft_id: str,
+    file: UploadFile = File(...)
+):
+    """
+    POST /api/v1/coordinator/drafts/{draft_id}/upload-photo
+    Takes raw craft photo taken during coordinator's in-person visit.
+    Reuses the AI Image Studio enhancement pipeline:
+    - Salient object cutout
+    - 6500K daylight white balance
+    - Centering & 85% Amazon canvas rule
+    - Elliptical contact drop shadow synthesis
+    Saves enhanced studio image to static uploads and updates draft record.
+    """
+    try:
+        product = get_product_by_id(draft_id)
+        if not product:
+            raise HTTPException(status_code=404, detail="Draft not found")
+
+        raw_bytes = await file.read()
+        if not raw_bytes or len(raw_bytes) < 100:
+            raise HTTPException(status_code=400, detail="Invalid photo file received.")
+
+        # Process through flagship AI Image Studio pipeline
+        raw_img, studio_canvas, metadata = process_studio_image(raw_bytes)
+
+        timestamp = int(time.time() * 1000)
+        raw_filename = f"coord_raw_{draft_id}_{timestamp}.jpg"
+        studio_filename = f"coord_studio_{draft_id}_{timestamp}.jpg"
+
+        raw_path = settings.UPLOAD_DIR / raw_filename
+        studio_path = settings.UPLOAD_DIR / studio_filename
+
+        raw_img.save(raw_path, format="JPEG", quality=90)
+        rgb_studio = studio_canvas.convert("RGB")
+        rgb_studio.save(studio_path, format="JPEG", quality=95)
+
+        raw_url = f"/static/uploads/{raw_filename}"
+        studio_url = f"/static/uploads/{studio_filename}"
+        processed_b64 = image_to_base64(studio_canvas, format="JPEG")
+
+        # Update draft with newly taken studio photo
+        update_coordinator_draft(
+            draft_id=draft_id,
+            updates={
+                "raw_image_url": raw_url,
+                "studio_image_url": studio_url,
+            },
+            actor="coordinator_photo_visit"
+        )
+
+        logger.info(f"Enhanced in-person visit photo for draft {draft_id}: {studio_url}")
+        return CoordinatorPhotoUploadResponse(
+            status="success",
+            draft_id=draft_id,
+            raw_image_url=raw_url,
+            studio_image_url=studio_url,
+            processed_base64=processed_b64,
+            message="Craft photo enhanced and studio grounded successfully"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Coordinator photo upload failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/storefront/products")
+async def get_storefront_products_endpoint():
+    """
+    GET /api/v1/storefront/products
+    Returns live marketplace catalog of verified published artisan crafts.
+    """
+    try:
+        products = list_published_products()
+        return {
+            "status": "success",
+            "count": len(products),
+            "products": products
+        }
+    except Exception as e:
+        logger.error(f"Error fetching storefront products: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

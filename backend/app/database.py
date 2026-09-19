@@ -62,6 +62,83 @@ def init_db() -> None:
         cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_products_created ON products(created_at)
         """)
+
+        # Schema Migration: Dynamically ensure coordinator panel columns and expanded status exist
+        cursor.execute("PRAGMA table_info(products)")
+        existing_cols = {row["name"] for row in cursor.fetchall()}
+
+        if "channel" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN channel TEXT DEFAULT 'camera'")
+        if "original_transcript" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN original_transcript TEXT DEFAULT ''")
+        if "rejection_reason" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN rejection_reason TEXT DEFAULT ''")
+        if "correction_log" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN correction_log TEXT DEFAULT '[]'")
+
+        # If old table had restrictive status CHECK constraint, recreate table cleanly
+        cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='products'")
+        tbl_meta = cursor.fetchone()
+        if tbl_meta and "CHECK(status IN ('draft', 'published'))" in (tbl_meta["sql"] or ""):
+            cursor.execute("""
+                CREATE TABLE products_v2 (
+                    id TEXT PRIMARY KEY,
+                    title_hi TEXT,
+                    title_en TEXT,
+                    description_hi TEXT,
+                    description_en TEXT,
+                    craft_category TEXT,
+                    technique TEXT,
+                    raw_cost REAL DEFAULT 0.0,
+                    labor_hours REAL DEFAULT 0.0,
+                    b2c_price REAL DEFAULT 0.0,
+                    b2b_price REAL DEFAULT 0.0,
+                    gem_price REAL DEFAULT 0.0,
+                    artisan_name TEXT,
+                    beneficiary_id TEXT,
+                    cluster_pin TEXT,
+                    raw_image_url TEXT,
+                    studio_image_url TEXT,
+                    watermarked_image_url TEXT,
+                    status TEXT CHECK(status IN ('draft', 'pending', 'approved', 'rejected', 'published')) DEFAULT 'draft',
+                    qr_code_url TEXT,
+                    beckn_payload TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    published_at TIMESTAMP,
+                    channel TEXT DEFAULT 'camera',
+                    original_transcript TEXT DEFAULT '',
+                    rejection_reason TEXT DEFAULT '',
+                    correction_log TEXT DEFAULT '[]'
+                )
+            """)
+            cursor.execute("""
+                INSERT INTO products_v2 (
+                    id, title_hi, title_en, description_hi, description_en,
+                    craft_category, technique, raw_cost, labor_hours,
+                    b2c_price, b2b_price, gem_price, artisan_name,
+                    beneficiary_id, cluster_pin, raw_image_url,
+                    studio_image_url, watermarked_image_url, status,
+                    qr_code_url, beckn_payload, created_at, published_at,
+                    channel, original_transcript, rejection_reason, correction_log
+                )
+                SELECT
+                    id, title_hi, title_en, description_hi, description_en,
+                    craft_category, technique, raw_cost, labor_hours,
+                    b2c_price, b2b_price, gem_price, artisan_name,
+                    beneficiary_id, cluster_pin, raw_image_url,
+                    studio_image_url, watermarked_image_url, status,
+                    qr_code_url, beckn_payload, created_at, published_at,
+                    COALESCE(channel, 'camera'),
+                    COALESCE(original_transcript, ''),
+                    COALESCE(rejection_reason, ''),
+                    COALESCE(correction_log, '[]')
+                FROM products
+            """)
+            cursor.execute("DROP TABLE products")
+            cursor.execute("ALTER TABLE products_v2 RENAME TO products")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_products_status ON products(status)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_products_created ON products(created_at)")
+
         conn.commit()
     logger.info(f"Initialized SQLite database at {DB_PATH}")
 
@@ -105,6 +182,14 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
         if existing and existing["status"] == "published":
             raise ValueError(f"Product {product_id} is already published and cannot be demoted to draft.")
 
+        target_status = product.get("status") or "draft"
+        target_channel = product.get("channel") or ("ivr" if "IVR" in str(product_id) else "camera")
+        original_transcript = product.get("original_transcript", "")
+        rejection_reason = product.get("rejection_reason", "")
+        correction_log = product.get("correction_log", "[]")
+        if isinstance(correction_log, list):
+            correction_log = json.dumps(correction_log)
+
         cursor.execute("""
             INSERT INTO products (
                 id, title_hi, title_en, description_hi, description_en,
@@ -112,14 +197,16 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
                 b2c_price, b2b_price, gem_price, artisan_name,
                 beneficiary_id, cluster_pin, raw_image_url,
                 studio_image_url, watermarked_image_url, status,
-                qr_code_url, created_at, published_at
+                qr_code_url, channel, original_transcript,
+                rejection_reason, correction_log, created_at, published_at
             ) VALUES (
                 :id, :title_hi, :title_en, :description_hi, :description_en,
                 :craft_category, :technique, :raw_cost, :labor_hours,
                 :b2c_price, :b2b_price, :gem_price, :artisan_name,
                 :beneficiary_id, :cluster_pin, :raw_image_url,
-                :studio_image_url, :watermarked_image_url, 'draft',
-                NULL, CURRENT_TIMESTAMP, NULL
+                :studio_image_url, :watermarked_image_url, :status,
+                NULL, :channel, :original_transcript,
+                :rejection_reason, :correction_log, CURRENT_TIMESTAMP, NULL
             )
             ON CONFLICT(id) DO UPDATE SET
                 title_hi = excluded.title_hi,
@@ -139,7 +226,11 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
                 raw_image_url = excluded.raw_image_url,
                 studio_image_url = excluded.studio_image_url,
                 watermarked_image_url = excluded.watermarked_image_url,
-                status = 'draft',
+                status = excluded.status,
+                channel = excluded.channel,
+                original_transcript = excluded.original_transcript,
+                rejection_reason = excluded.rejection_reason,
+                correction_log = excluded.correction_log,
                 qr_code_url = NULL
         """, {
             "id": product_id,
@@ -160,6 +251,11 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
             "raw_image_url": product.get("raw_image_url", ""),
             "studio_image_url": product.get("studio_image_url", ""),
             "watermarked_image_url": product.get("watermarked_image_url", ""),
+            "status": target_status,
+            "channel": target_channel,
+            "original_transcript": original_transcript,
+            "rejection_reason": rejection_reason,
+            "correction_log": correction_log,
         })
         conn.commit()
 
@@ -343,3 +439,199 @@ def delete_product(product_id: str) -> bool:
         cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
         conn.commit()
         return cursor.rowcount > 0
+
+def list_coordinator_drafts(filter_type: Optional[str] = "all") -> Dict[str, Any]:
+    """
+    Returns pending and non-published drafts for the Village Field Coordinator Review Panel.
+    Includes rich counts for queue filtration (All, Camera, IVR, Missing Photo).
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM products
+            WHERE status != 'published'
+            ORDER BY created_at DESC
+        """)
+        rows = cursor.fetchall()
+        
+        all_drafts = []
+        for r in rows:
+            d = dict(r)
+            if d.get("correction_log"):
+                try:
+                    d["correction_log"] = json.loads(d["correction_log"]) if isinstance(d["correction_log"], str) else d["correction_log"]
+                except Exception:
+                    d["correction_log"] = []
+            else:
+                d["correction_log"] = []
+
+            # Infer channel if not set
+            if not d.get("channel"):
+                d["channel"] = "ivr" if "IVR" in str(d.get("id", "")) else "camera"
+
+            # Parse beckn_payload if string
+            if d.get("beckn_payload") and isinstance(d["beckn_payload"], str):
+                try:
+                    d["beckn_payload"] = json.loads(d["beckn_payload"])
+                except Exception:
+                    pass
+
+            all_drafts.append(d)
+
+        total_pending = len([d for d in all_drafts if d.get("status") in ("draft", "pending")])
+        missing_photo = len([d for d in all_drafts if not d.get("studio_image_url") and not d.get("raw_image_url")])
+        camera_drafts = len([d for d in all_drafts if d.get("channel") == "camera" and "IVR" not in str(d.get("id", ""))])
+        ivr_drafts = len([d for d in all_drafts if d.get("channel") == "ivr" or "IVR" in str(d.get("id", ""))])
+
+        filtered = all_drafts
+        f_lower = (filter_type or "all").lower().strip()
+        if f_lower == "camera":
+            filtered = [d for d in all_drafts if d.get("channel") == "camera" and "IVR" not in str(d.get("id", ""))]
+        elif f_lower == "ivr":
+            filtered = [d for d in all_drafts if d.get("channel") == "ivr" or "IVR" in str(d.get("id", ""))]
+        elif f_lower == "missing_photo":
+            filtered = [d for d in all_drafts if not d.get("studio_image_url") and not d.get("raw_image_url")]
+
+        return {
+            "status": "success",
+            "counts": {
+                "total_pending": total_pending,
+                "missing_photo": missing_photo,
+                "camera_drafts": camera_drafts,
+                "ivr_drafts": ivr_drafts,
+                "all": len(all_drafts)
+            },
+            "drafts": filtered
+        }
+
+def update_coordinator_draft(draft_id: str, updates: Dict[str, Any], actor: str = "coordinator") -> Dict[str, Any]:
+    """
+    Updates draft fields from coordinator edit screen.
+    Records structured audit diff in correction_log so we can track:
+    'AI suggested X, coordinator changed to Y'.
+    """
+    product = get_product_by_id(draft_id)
+    if not product:
+        raise ValueError(f"Draft {draft_id} not found")
+
+    corrections = []
+    if product.get("correction_log"):
+        try:
+            corrections = json.loads(product["correction_log"]) if isinstance(product["correction_log"], str) else product["correction_log"]
+        except Exception:
+            corrections = []
+
+    trackable_fields = [
+        ("title_en", "Title (English)"),
+        ("title_hi", "Title (Hindi)"),
+        ("description_en", "Description (English)"),
+        ("description_hi", "Description (Hindi)"),
+        ("b2c_price", "Selling Price (INR)"),
+        ("craft_category", "Craft Category"),
+        ("technique", "Heritage Technique"),
+    ]
+
+    timestamp = datetime.utcnow().isoformat() + "Z"
+    for fld, label in trackable_fields:
+        if fld in updates and updates[fld] is not None:
+            old_val = product.get(fld)
+            new_val = updates[fld]
+            if fld == "b2c_price":
+                try:
+                    old_num = float(old_val or 0)
+                    new_num = float(new_val or 0)
+                    if abs(old_num - new_num) > 0.01:
+                        corrections.append({
+                            "field": fld,
+                            "label": label,
+                            "original": old_num,
+                            "corrected": new_num,
+                            "timestamp": timestamp,
+                            "actor": actor
+                        })
+                except Exception:
+                    pass
+            else:
+                str_old = str(old_val or "").strip()
+                str_new = str(new_val or "").strip()
+                if str_old and str_new and str_old != str_new:
+                    corrections.append({
+                        "field": fld,
+                        "label": label,
+                        "original": str_old,
+                        "corrected": str_new,
+                        "timestamp": timestamp,
+                        "actor": actor
+                    })
+
+    corr_json = json.dumps(corrections)
+    new_status = updates.get("status") or product.get("status") or "draft"
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE products SET
+                title_hi = COALESCE(:title_hi, title_hi),
+                title_en = COALESCE(:title_en, title_en),
+                description_hi = COALESCE(:description_hi, description_hi),
+                description_en = COALESCE(:description_en, description_en),
+                craft_category = COALESCE(:craft_category, craft_category),
+                technique = COALESCE(:technique, technique),
+                raw_cost = COALESCE(:raw_cost, raw_cost),
+                labor_hours = COALESCE(:labor_hours, labor_hours),
+                b2c_price = COALESCE(:b2c_price, b2c_price),
+                b2b_price = COALESCE(:b2b_price, b2b_price),
+                gem_price = COALESCE(:gem_price, gem_price),
+                artisan_name = COALESCE(:artisan_name, artisan_name),
+                beneficiary_id = COALESCE(:beneficiary_id, beneficiary_id),
+                cluster_pin = COALESCE(:cluster_pin, cluster_pin),
+                raw_image_url = COALESCE(:raw_image_url, raw_image_url),
+                studio_image_url = COALESCE(:studio_image_url, studio_image_url),
+                watermarked_image_url = COALESCE(:watermarked_image_url, watermarked_image_url),
+                status = :status,
+                correction_log = :correction_log
+            WHERE id = :id
+        """, {
+            "id": draft_id,
+            "title_hi": updates.get("title_hi"),
+            "title_en": updates.get("title_en"),
+            "description_hi": updates.get("description_hi"),
+            "description_en": updates.get("description_en"),
+            "craft_category": updates.get("craft_category"),
+            "technique": updates.get("technique"),
+            "raw_cost": updates.get("raw_cost"),
+            "labor_hours": updates.get("labor_hours"),
+            "b2c_price": updates.get("b2c_price"),
+            "b2b_price": updates.get("b2b_price"),
+            "gem_price": updates.get("gem_price"),
+            "artisan_name": updates.get("artisan_name"),
+            "beneficiary_id": updates.get("beneficiary_id"),
+            "cluster_pin": updates.get("cluster_pin"),
+            "raw_image_url": updates.get("raw_image_url"),
+            "studio_image_url": updates.get("studio_image_url"),
+            "watermarked_image_url": updates.get("watermarked_image_url"),
+            "status": new_status,
+            "correction_log": corr_json
+        })
+        conn.commit()
+
+    return get_product_by_id(draft_id)
+
+def reject_coordinator_draft(draft_id: str, reason: str) -> Dict[str, Any]:
+    """Rejects a draft with required coordinator justification."""
+    if not reason or not reason.strip():
+        raise ValueError("Rejection reason is required.")
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE products SET
+                status = 'rejected',
+                rejection_reason = ?
+            WHERE id = ?
+        """, (reason.strip(), draft_id))
+        conn.commit()
+    return get_product_by_id(draft_id)
+
+def list_published_products() -> List[Dict[str, Any]]:
+    """Returns verified live published listings for the storefront view."""
+    return list_artisan_products(include_drafts=False, perform_cleanup=False)

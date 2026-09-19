@@ -189,8 +189,12 @@ class ProductResponse(BaseModel):
     raw_image_url: Optional[str] = None
     studio_image_url: Optional[str] = None
     watermarked_image_url: Optional[str] = None
-    status: str  # 'draft' | 'published'
+    status: str  # 'draft' | 'pending' | 'approved' | 'rejected' | 'published'
     qr_code_url: Optional[str] = None
+    channel: Optional[str] = "camera"
+    original_transcript: Optional[str] = ""
+    rejection_reason: Optional[str] = ""
+    correction_log: Optional[Any] = None
     created_at: Optional[str] = None
     published_at: Optional[str] = None
 
@@ -241,5 +245,43 @@ class IVRCatalogDraftResponse(BaseModel):
     draft_id: str
     product: Dict[str, Any]
     coordinator_notification: CoordinatorNotification
+
+# Coordinator Review Panel Schemas
+class CoordinatorDraftUpdateRequest(BaseModel):
+    title_hi: Optional[str] = None
+    title_en: Optional[str] = None
+    description_hi: Optional[str] = None
+    description_en: Optional[str] = None
+    b2c_price: Optional[float] = None
+    b2b_price: Optional[float] = None
+    gem_price: Optional[float] = None
+    craft_category: Optional[str] = None
+    technique: Optional[str] = None
+    artisan_name: Optional[str] = None
+    cluster_pin: Optional[str] = None
+    status: Optional[str] = "approved"
+
+class CoordinatorDraftRejectRequest(BaseModel):
+    reason: str = Field(min_length=3, description="Required audit justification for draft rejection")
+
+class CoordinatorDraftCounts(BaseModel):
+    total_pending: int
+    missing_photo: int
+    camera_drafts: int
+    ivr_drafts: int
+    all: int
+
+class CoordinatorDraftListResponse(BaseModel):
+    status: str = "success"
+    counts: CoordinatorDraftCounts
+    drafts: List[Dict[str, Any]]
+
+class CoordinatorPhotoUploadResponse(BaseModel):
+    status: str = "success"
+    draft_id: str
+    raw_image_url: str
+    studio_image_url: str
+    processed_base64: str
+    message: str = "Craft photo enhanced and studio grounded successfully"
 
 

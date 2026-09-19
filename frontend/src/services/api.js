@@ -453,4 +453,81 @@ export async function saveIvrCatalogDraft({
   return await res.json();
 }
 
+/**
+ * Village Field Coordinator Review Panel API
+ */
+
+export async function fetchCoordinatorDrafts(filter = 'all') {
+  const res = await fetch(`${API_BASE}/coordinator/drafts?filter=${encodeURIComponent(filter)}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to fetch coordinator drafts');
+  }
+  return await res.json();
+}
+
+export async function updateCoordinatorDraft(draftId, updates) {
+  const res = await fetch(`${API_BASE}/coordinator/drafts/${draftId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to update draft');
+  }
+  return await res.json();
+}
+
+export async function rejectCoordinatorDraft(draftId, reason) {
+  const res = await fetch(`${API_BASE}/coordinator/drafts/${draftId}/reject`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to reject draft');
+  }
+  return await res.json();
+}
+
+export async function publishCoordinatorDraft(draftId, updates = null) {
+  const res = await fetch(`${API_BASE}/coordinator/drafts/${draftId}/publish`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates || {}),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to publish draft');
+  }
+  return await res.json();
+}
+
+export async function uploadCoordinatorPhoto(draftId, fileOrBlob) {
+  const formData = new FormData();
+  formData.append('file', fileOrBlob, 'field_photo.jpg');
+
+  const res = await fetch(`${API_BASE}/coordinator/drafts/${draftId}/upload-photo`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to upload and enhance in-person craft photo');
+  }
+  return await res.json();
+}
+
+export async function fetchStorefrontProducts() {
+  const res = await fetch(`${API_BASE}/storefront/products`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to fetch published storefront products');
+  }
+  return await res.json();
+}
+
+
 
