@@ -8,6 +8,7 @@ import io
 import os
 import time
 import base64
+from typing import Optional, Tuple, Dict, Any
 import numpy as np
 from PIL import Image, ImageOps, ImageFilter, ImageEnhance
 import cv2
@@ -242,3 +243,203 @@ def image_to_base64(img: Image.Image, format: str = "JPEG") -> str:
     
     b64_str = base64.b64encode(buf.getvalue()).decode("utf-8")
     return f"data:{mime};base64,{b64_str}"
+
+
+def assess_photo_quality(
+    raw_bytes: bytes,
+    language: str = "hi",
+    category_hint: Optional[str] = None
+) -> dict:
+    """
+    Evaluates photo quality across:
+    1. Sharpness/Blur (Laplacian variance in OpenCV)
+    2. Framing & Clipping (Edge clearance / bounding box margin)
+    3. Lighting / Exposure (Luminance histogram & clipping)
+    4. Background Complexity (High-frequency edge clutter)
+    5. Optional Gemini Vision cross-verification if API key is active.
+    
+    Returns structured pass/fail with ONE dominant issue, visual icon, and localized voice prompt.
+    """
+    import json
+    import re
+    from ..config import settings
+
+    np_arr = np.frombuffer(raw_bytes, np.uint8)
+    cv_img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+    if cv_img is None:
+        return {
+            "passed": False,
+            "dominant_issue": "blurry",
+            "issue_icon": "shake",
+            "voice_prompt_hi": "फोटो पढ़ी नहीं जा सकी। कृपया दोबारा फोटो लें।",
+            "voice_prompt_en": "Image could not be read. Please snap again.",
+            "sharpness_score": 0.0,
+            "mean_brightness": 0.0,
+            "coverage_pct": 0.0,
+            "is_removable_bg": False
+        }
+
+    h, w = cv_img.shape[:2]
+    gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+
+    # 1. Sharpness / Blur metric via Laplacian Variance
+    lap_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())
+
+    # 2. Exposure / Brightness metric
+    mean_lum = float(np.mean(gray))
+    overexposed_ratio = float(np.sum(gray > 245)) / float(gray.size)
+    underexposed_ratio = float(np.sum(gray < 20)) / float(gray.size)
+
+    # 3. Framing & Subject Contour Margin
+    # Downscale for fast contour analysis
+    scale = min(1.0, 480.0 / max(w, h))
+    small_gray = cv2.resize(gray, (max(1, int(w * scale)), max(1, int(h * scale))))
+    sh, sw = small_gray.shape[:2]
+
+    # Otsu thresholding + edge detection
+    blur = cv2.GaussianBlur(small_gray, (5, 5), 0)
+    _, thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    touch_left = False
+    touch_right = False
+    touch_top = False
+    touch_bottom = False
+    coverage_pct = 50.0
+
+    if contours:
+        # Find the largest contour
+        largest_cnt = max(contours, key=cv2.contourArea)
+        cx, cy, cw, ch = cv2.boundingRect(largest_cnt)
+        coverage_pct = float((cw * ch) / (sw * sh) * 100.0)
+
+        # Check if subject cuts into borders (within 3% margin)
+        margin_x = int(sw * 0.03)
+        margin_y = int(sh * 0.03)
+        if cx <= margin_x:
+            touch_left = True
+        if cy <= margin_y:
+            touch_top = True
+        if cx + cw >= (sw - margin_x):
+            touch_right = True
+        if cy + ch >= (sh - margin_y):
+            touch_bottom = True
+
+    is_cut_off = (touch_left or touch_right or touch_top or touch_bottom) and (coverage_pct > 65.0)
+
+    # 4. Background clutter: edge density in peripheral boundary (15% outer frame)
+    edges = cv2.Canny(small_gray, 50, 150)
+    mask_perimeter = np.ones((sh, sw), dtype=np.uint8)
+    inner_mx, inner_my = int(sw * 0.15), int(sh * 0.15)
+    mask_perimeter[inner_my:sh - inner_my, inner_mx:sw - inner_mx] = 0
+    perimeter_edges = cv2.bitwise_and(edges, edges, mask=mask_perimeter)
+    clutter_density = float(np.sum(perimeter_edges > 0)) / float(max(1, np.sum(mask_perimeter > 0)))
+
+    # Evaluate heuristic dominance
+    dominant_issue = None
+    issue_icon = "check"
+
+    # Strict thresholds:
+    # Blur has highest priority
+    if lap_var < 65.0:
+        dominant_issue = "blurry"
+        issue_icon = "shake"
+    elif is_cut_off:
+        dominant_issue = "cut_off"
+        issue_icon = "crop"
+    elif mean_lum < 45.0 or underexposed_ratio > 0.45:
+        dominant_issue = "too_dark"
+        issue_icon = "moon"
+    elif mean_lum > 220.0 or overexposed_ratio > 0.35:
+        dominant_issue = "too_bright"
+        issue_icon = "sun_high"
+    elif clutter_density > 0.28:
+        dominant_issue = "cluttered"
+        issue_icon = "layers"
+
+    # Optional: Cross-verify with Gemini Vision if API key is active
+    if settings.GEMINI_API_KEY:
+        try:
+            from google import genai
+            from google.genai import types
+            client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            prompt = (
+                "You are an expert e-commerce product photography validator for rural artisans. "
+                "Inspect this craft photo. Determine if it is acceptable for cataloging or if there is a fatal issue. "
+                "Respond ONLY with a JSON object: "
+                "{\"passed\": true/false, \"dominant_issue\": null | \"blurry\" | \"cut_off\" | \"too_dark\" | \"too_bright\" | \"cluttered\"}"
+            )
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=[
+                    types.Part.from_bytes(data=raw_bytes, mime_type="image/jpeg"),
+                    prompt,
+                ],
+                config=types.GenerateContentConfig(temperature=0.1, response_mime_type="application/json")
+            )
+            if response and response.text:
+                parsed = json.loads(response.text)
+                if parsed.get("passed") is False and parsed.get("dominant_issue"):
+                    gem_issue = parsed["dominant_issue"]
+                    if gem_issue in ["blurry", "cut_off", "too_dark", "too_bright", "cluttered"]:
+                        dominant_issue = gem_issue
+                        icon_map = {
+                            "blurry": "shake",
+                            "cut_off": "crop",
+                            "too_dark": "moon",
+                            "too_bright": "sun_high",
+                            "cluttered": "layers"
+                        }
+                        issue_icon = icon_map.get(dominant_issue, "shake")
+                elif parsed.get("passed") is True and lap_var >= 50.0 and 50.0 <= mean_lum <= 225.0:
+                    dominant_issue = None
+                    issue_icon = "check"
+        except Exception:
+            pass  # Fail gracefully to OpenCV heuristics
+
+    passed = dominant_issue is None
+
+    # Regional localized voice prompts (Hindi default, plus English)
+    prompts = {
+        "blurry": {
+            "hi": "फोटो थोड़ी धुंधली है। कृपया हाथ स्थिर रखकर दोबारा फोटो लें।",
+            "en": "Photo is slightly blurry. Please hold steady and snap again."
+        },
+        "cut_off": {
+            "hi": "शिल्प किनारे से कट रहा है। कृपया कैमरा थोड़ा पीछे करें।",
+            "en": "Craft is cut off at the edge. Please step back slightly."
+        },
+        "too_dark": {
+            "hi": "रोशनी बहुत कम है। कृपया खिड़की या बल्ब के पास जाएं।",
+            "en": "Lighting is too dim. Please move closer to a window or light."
+        },
+        "too_bright": {
+            "hi": "रोशनी बहुत तेज़ है। कृपया छाया में जाकर फोटो लें।",
+            "en": "Direct glare detected. Please move into soft, even light."
+        },
+        "cluttered": {
+            "hi": "पीछे बहुत सामान दिख रहा है। कृपया सादे कपड़े या दीवार के आगे रखें।",
+            "en": "Background is busy. Please place craft against a plain wall."
+        },
+        "pass": {
+            "hi": "बहुत सुंदर! फोटो बिल्कुल स्पष्ट है। स्टूडियो रूपांतरण शुरू हो रहा है।",
+            "en": "Perfect! Photo is sharp and centered. Studio enhancement starting."
+        }
+    }
+
+    issue_key = dominant_issue if dominant_issue else "pass"
+    voice_hi = prompts[issue_key]["hi"]
+    voice_en = prompts[issue_key]["en"]
+
+    return {
+        "passed": passed,
+        "dominant_issue": dominant_issue,
+        "issue_icon": issue_icon,
+        "voice_prompt_hi": voice_hi,
+        "voice_prompt_en": voice_en,
+        "sharpness_score": round(lap_var, 1),
+        "mean_brightness": round(mean_lum, 1),
+        "coverage_pct": round(coverage_pct, 1),
+        "is_removable_bg": (clutter_density < 0.35)
+    }

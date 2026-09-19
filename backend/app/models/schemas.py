@@ -2,6 +2,23 @@ from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 
 # Studio Enhancer Schemas
+class StudioQualityCheckRequest(BaseModel):
+    image_base64: Optional[str] = None
+    language: str = "hi"
+    category_hint: Optional[str] = None
+
+class StudioQualityCheckResponse(BaseModel):
+    status: str = "success"
+    passed: bool
+    dominant_issue: Optional[str] = None  # "blurry", "cut_off", "too_dark", "too_bright", "cluttered", or None
+    issue_icon: Optional[str] = None      # "shake", "crop", "moon", "sun_high", "layers", "check"
+    voice_prompt_hi: str
+    voice_prompt_en: str
+    sharpness_score: float
+    mean_brightness: float
+    coverage_pct: float
+    is_removable_bg: bool
+
 class StudioEnhanceResponse(BaseModel):
     status: str = "success"
     original_url: str

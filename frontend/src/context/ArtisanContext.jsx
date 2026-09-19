@@ -29,13 +29,47 @@ export function ArtisanProvider({ children }) {
   const [selectedPreset, setSelectedPreset] = useState(null);
   const [activeCategoryMode, setActiveCategoryMode] = useState('auto'); // 'auto' | 'pottery' | 'saree' | 'idol' | 'painting' | 'craft'
 
-  // Images
+  // Images & Multi-Angle Studio Gallery
   const [rawImageBase64, setRawImageBase64] = useState(null);
   const [rawImageUrl, setRawImageUrl] = useState(null);
   const [studioImageBase64, setStudioImageBase64] = useState(null);
   const [studioImageUrl, setStudioImageUrl] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processStatusText, setProcessStatusText] = useState('');
+
+  // Multi-Angle Workflow: 0 = Hero Front, 1 = Side 45°, 2 = Back/Detail
+  const [activeAngleIndex, setActiveAngleIndex] = useState(0);
+  const [anglePhotos, setAnglePhotos] = useState([
+    { id: 'hero', key: 'hero', title_en: 'Front View (Hero)', title_hi: 'सामने का मुख्य दृश्य', rawBase64: null, studioBase64: null, quality: null },
+    { id: 'side', key: 'side', title_en: 'Side Profile (45°)', title_hi: 'किनारे का दृश्य (45°)', rawBase64: null, studioBase64: null, quality: null },
+    { id: 'detail', key: 'detail', title_en: 'Back / Detail', title_hi: 'पीछे / बारीक विवरण', rawBase64: null, studioBase64: null, quality: null },
+  ]);
+
+  const saveAnglePhoto = (index, { rawBase64, studioBase64, quality }) => {
+    setAnglePhotos(prev => {
+      const next = [...prev];
+      if (next[index]) {
+        next[index] = {
+          ...next[index],
+          rawBase64: rawBase64 !== undefined ? rawBase64 : next[index].rawBase64,
+          studioBase64: studioBase64 !== undefined ? studioBase64 : next[index].studioBase64,
+          quality: quality !== undefined ? quality : next[index].quality,
+        };
+      }
+      return next;
+    });
+
+    if (index === 0) {
+      if (rawBase64) {
+        setRawImageBase64(rawBase64);
+        setRawImageUrl(rawBase64);
+      }
+      if (studioBase64) {
+        setStudioImageBase64(studioBase64);
+        setStudioImageUrl(studioBase64);
+      }
+    }
+  };
 
   // Voice & Transcript
   const [transcript, setTranscript] = useState('');
@@ -368,6 +402,14 @@ export function ArtisanProvider({ children }) {
     setCurrentStep(0);
     setStudioImageBase64(null);
     setStudioImageUrl(null);
+    setRawImageBase64(null);
+    setRawImageUrl(null);
+    setActiveAngleIndex(0);
+    setAnglePhotos([
+      { id: 'hero', key: 'hero', title_en: 'Front View (Hero)', title_hi: 'सामने का मुख्य दृश्य', rawBase64: null, studioBase64: null, quality: null },
+      { id: 'side', key: 'side', title_en: 'Side Profile (45°)', title_hi: 'किनारे का दृश्य (45°)', rawBase64: null, studioBase64: null, quality: null },
+      { id: 'detail', key: 'detail', title_en: 'Back / Detail', title_hi: 'पीछे / बारीक विवरण', rawBase64: null, studioBase64: null, quality: null },
+    ]);
     setCatalogData(null);
     setPricingData(null);
     setActiveModal(null);
@@ -390,6 +432,13 @@ export function ArtisanProvider({ children }) {
     setRawImageUrl,
     studioImageBase64,
     studioImageUrl,
+    setStudioImageBase64,
+    setStudioImageUrl,
+    activeAngleIndex,
+    setActiveAngleIndex,
+    anglePhotos,
+    setAnglePhotos,
+    saveAnglePhoto,
     isProcessing,
     processStatusText,
     transcript,
