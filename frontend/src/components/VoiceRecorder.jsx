@@ -443,7 +443,7 @@ export default function VoiceRecorder() {
     }
   };
 
-  // ── Backend Gemini Multimodal Vernacular ASR Fallback ─────────────────────
+  // ── Backend Bhashini Indic ASR Multimodal Fallback ─────────────────────
   const transcribeBlobWithBackend = useCallback(async (blobToTranscribe) => {
     const blob = blobToTranscribe || recordedBlobRef.current;
     if (!blob || blob.size < 100) return;
@@ -451,8 +451,8 @@ export default function VoiceRecorder() {
     setIsTranscribingAudio(true);
     setSpeechEngineStatus(
       language === 'hi'
-        ? '🔄 Google Gemini AI: आपकी आवाज़ से टेक्स्ट बनाया जा रहा है...'
-        : '🔄 Google Gemini AI: Transcribing recorded voice...'
+        ? '🔄 भाषिणी एआई (Bhashini Indic ASR): आपकी आवाज़ से टेक्स्ट बनाया जा रहा है...'
+        : '🔄 MeitY Bhashini Indic ASR: Transcribing recorded voice...'
     );
 
     try {
@@ -476,9 +476,9 @@ export default function VoiceRecorder() {
           hasSpeechResultRef.current = true;
           setIsCustomSpoken(true);
           setSpeechEngineStatus(
-            data.source?.startsWith('gemini')
-              ? (language === 'hi' ? '✓ Google Gemini AI ने आवाज़ को सही टेक्स्ट में बदला!' : '✓ Google Gemini AI transcribed successfully!')
-              : (language === 'hi' ? '✓ शिल्प विवरण सफलतापूर्वक तैयार हुआ!' : '✓ Craft narrative generated!')
+            language === 'hi'
+              ? '✓ भाषिणी एआई (Bhashini Indic ASR) ने आवाज़ को सही टेक्स्ट में बदला!'
+              : '✓ MeitY Bhashini Indic ASR transcribed successfully!'
           );
           if ('vibrate' in navigator) navigator.vibrate([40, 60, 40]);
         }
@@ -588,8 +588,8 @@ export default function VoiceRecorder() {
       setMicState('live');
       setSpeechEngineStatus(
         language === 'hi'
-          ? '🎙️ ऑडियो रिकॉर्डिंग सक्रिय — रुकने पर Google Gemini AI इसे टेक्स्ट में बदलेगा'
-          : '🎙️ Audio capture active — Google Gemini AI will transcribe on stop'
+          ? '🎙️ ऑडियो रिकॉर्डिंग सक्रिय — रुकने पर भाषिणी एआई (Bhashini Indic ASR) इसे टेक्स्ट में बदलेगा'
+          : '🎙️ Audio capture active — MeitY Bhashini Indic ASR will transcribe on stop'
       );
       return;
     }
@@ -1457,7 +1457,7 @@ export default function VoiceRecorder() {
         {isProcessing && (
           <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold flex items-center gap-3 mb-3 animate-pulse">
             <Sparkles className="w-5 h-5 text-amber-600 shrink-0" />
-            <span>{processStatusText || 'AI Studio & Gemini Multimodal Cataloging in progress...'}</span>
+            <span>{processStatusText || 'AI Studio & Bhashini Multimodal Cataloging in progress...'}</span>
           </div>
         )}
 

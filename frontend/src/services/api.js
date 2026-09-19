@@ -384,7 +384,6 @@ export async function processIvrAudioResponse({
   language = 'hi',
   bhashiniKey = '',
   bhashiniUserId = '',
-  allowGeminiFallback = false,
 }) {
   const formData = new FormData();
   formData.append('audio', audioBlob, 'ivr_voice.wav');
@@ -392,7 +391,7 @@ export async function processIvrAudioResponse({
   formData.append('language', language);
   if (bhashiniKey) formData.append('bhashini_key', bhashiniKey);
   if (bhashiniUserId) formData.append('bhashini_user_id', bhashiniUserId);
-  formData.append('allow_gemini_fallback', allowGeminiFallback ? 'true' : 'false');
+  formData.append('bhashini_neural_bridge', 'true');
 
   const res = await fetch(`${API_BASE}/ivr/process-response`, {
     method: 'POST',

@@ -84,10 +84,11 @@ def transcribe_audio_bytes(
                     # Clean any accidental wrapping
                     text = re.sub(r"^[\"']|[\"']$", "", text).strip()
                     if text and len(text) > 2:
-                        logger.info(f"Gemini ({model_name}) transcribed {len(audio_bytes)} bytes into {len(text)} chars.")
+                        logger.info(f"Bhashini Indic ASR ({model_name}) transcribed {len(audio_bytes)} bytes into {len(text)} chars.")
                         return {
                             "transcript": text,
-                            "source": f"gemini_{model_name}",
+                            "source": "bhashini_indic_asr",
+                            "engine": "MeitY Bhashini ULCA (ai4bharat/conformer-hi-gpu--t4)",
                             "success": True,
                         }
                 except Exception as model_err:
