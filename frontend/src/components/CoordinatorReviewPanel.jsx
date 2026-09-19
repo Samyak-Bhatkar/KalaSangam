@@ -30,7 +30,8 @@ import {
   DollarSign,
   Eye,
   History,
-  Store
+  Store,
+  LogOut
 } from 'lucide-react';
 import {
   fetchCoordinatorDrafts,
@@ -41,7 +42,7 @@ import {
   fetchStorefrontProducts
 } from '../services/api';
 
-export default function CoordinatorReviewPanel({ onClose }) {
+export default function CoordinatorReviewPanel({ onClose, onLogout, user }) {
   // Navigation: 'queue' | 'storefront'
   const [activeTab, setActiveTab] = useState('queue');
 
@@ -381,13 +382,34 @@ export default function CoordinatorReviewPanel({ onClose }) {
               </button>
             </div>
 
+            {/* Logged in indicator & Logout action */}
+            {user && (
+              <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-800 text-xs">
+                <span className="text-slate-400 font-medium">
+                  Logged in as <strong className="text-white">{user.role === 'coordinator' ? 'Coordinator' : 'User'}</strong> ({user.phone})
+                </span>
+                {onLogout && (
+                  <button
+                    onClick={onLogout}
+                    title="Log out and return to Phone + OTP screen"
+                    className="py-1 px-2.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors active:scale-95"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Log out</span>
+                  </button>
+                )}
+              </div>
+            )}
+
             {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-            >
-              ✕
-            </button>
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </header>
 

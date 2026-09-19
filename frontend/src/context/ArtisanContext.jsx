@@ -21,7 +21,68 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'ta', label: 'தமிழ்', name: 'Tamil' },
 ];
 
+export const MOCK_USERS = [
+  {
+    phone: '9876543210',
+    name: 'राजेश कुमार (Field Coordinator)',
+    role: 'coordinator',
+    district: 'Varanasi',
+    state: 'Uttar Pradesh'
+  },
+  {
+    phone: '9820011223',
+    name: 'शांति देवी (Shanti Devi)',
+    role: 'artisan',
+    artisan_id: 'ART-NBCFDC-8492',
+    craft: 'Gorakhpur Terracotta',
+    district: 'Gorakhpur',
+    state: 'Uttar Pradesh'
+  }
+];
+
 export function ArtisanProvider({ children }) {
+  // Auth & Role State
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('shilpsetu_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const loginWithPhone = (phoneNumber) => {
+    const cleanPhone = (phoneNumber || '').replace(/\D/g, '').slice(-10);
+    let user = MOCK_USERS.find(u => u.phone === cleanPhone);
+    if (!user) {
+      // Auto-register new artisan matching zero-smartphone IVR pattern
+      user = {
+        phone: cleanPhone,
+        name: `कारीगर #${cleanPhone.slice(-4)}`,
+        role: 'artisan',
+        artisan_id: `ART-${cleanPhone.slice(-4)}`,
+        craft: 'हस्तशिल्प (Craft)',
+        isNew: true
+      };
+    }
+    setCurrentUser(user);
+    try {
+      localStorage.setItem('shilpsetu_user', JSON.stringify(user));
+    } catch (e) {
+      console.warn('Failed to save session to localStorage', e);
+    }
+    return user;
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem('shilpsetu_user');
+    } catch (e) {
+      console.warn('Failed to clear session from localStorage', e);
+    }
+  };
+
   // Step in workflow: 0 = Home, 1 = Camera, 2 = Voice, 3 = Review & Publish
   const [currentStep, setCurrentStep] = useState(0);
   const [language, setLanguage] = useState('hi');
@@ -472,6 +533,9 @@ export function ArtisanProvider({ children }) {
     processCaptureAndVoice,
     updatePricing,
     resetFlow,
+    currentUser,
+    loginWithPhone,
+    logout,
   };
 
   return (

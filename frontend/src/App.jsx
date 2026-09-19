@@ -19,7 +19,10 @@ import {
   Loader2,
   Check,
   PhoneCall,
-  ShieldCheck
+  ShieldCheck,
+  LogOut,
+  UserCheck,
+  Store
 } from 'lucide-react';
 import { useArtisan, SUPPORTED_LANGUAGES } from './context/ArtisanContext';
 import HomeCommandCenter from './components/HomeCommandCenter';
@@ -34,6 +37,8 @@ import ONDCExportBadge from './components/ONDCExportBadge';
 import PublicVerifyScreen from './components/PublicVerifyScreen';
 import KeypadPhoneSimulator from './components/KeypadPhoneSimulator';
 import CoordinatorReviewPanel from './components/CoordinatorReviewPanel';
+import AuthLoginScreen from './components/AuthLoginScreen';
+import BuyerStorefrontScreen from './components/BuyerStorefrontScreen';
 
 export default function App() {
   const {
@@ -52,7 +57,16 @@ export default function App() {
     isPublishing,
     saveCurrentDraft,
     publishCurrentProduct,
+    currentUser,
+    logout,
   } = useArtisan();
+
+  // Support public buyer storefront route with NO login (?view=storefront or ?storefront=true)
+  const [publicStorefront, setPublicStorefront] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('view') === 'storefront' || params.get('storefront') === 'true';
+  });
 
   // Support public QR verification route /verify/:id or ?verify=:id
   const [verifyId, setVerifyId] = useState(() => {
@@ -75,6 +89,19 @@ export default function App() {
     }
   }, [setActiveModal]);
 
+  // 1. PUBLIC BUYER STOREFRONT (Zero login required)
+  if (publicStorefront) {
+    return (
+      <BuyerStorefrontScreen
+        onGoToLogin={() => {
+          window.history.pushState({}, '', '/');
+          setPublicStorefront(false);
+        }}
+      />
+    );
+  }
+
+  // 2. PUBLIC QR VERIFICATION ROUTE (Zero login required)
   if (verifyId) {
     return (
       <PublicVerifyScreen
@@ -87,11 +114,74 @@ export default function App() {
     );
   }
 
+  // 3. UNAUTHENTICATED USERS: SHARED PHONE + OTP LOGIN SCREEN
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-[#F1F5F9] text-slate-900 flex items-center justify-center p-0 md:p-6 select-none font-sans">
+        <div className="relative w-full md:max-w-[430px] h-screen md:h-[900px] md:max-h-[95vh] bg-[#FDFBF7] md:rounded-[40px] md:border md:border-slate-200/80 shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden">
+          <AuthLoginScreen
+            onBrowseStorefront={() => {
+              window.history.pushState({}, '', '?view=storefront');
+              setPublicStorefront(true);
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // 4. COORDINATOR ROLE: DIRECT TO COORDINATOR REVIEW PANEL WORKSPACE
+  if (currentUser.role === 'coordinator') {
+    return (
+      <CoordinatorReviewPanel
+        user={currentUser}
+        onLogout={logout}
+        onClose={null}
+      />
+    );
+  }
+
+  // 5. ARTISAN ROLE: ARTISAN HOME & CATALOGING STUDIO WORKSPACE
   return (
     <div className="min-h-screen bg-[#F1F5F9] text-slate-900 flex items-center justify-center p-0 md:p-6 select-none font-sans">
       {/* Mobile-First Application Frame (390px-430px optimized, native bezel on desktop) */}
       <div className="relative w-full md:max-w-[430px] h-screen md:h-[900px] md:max-h-[95vh] bg-[#FDFBF7] md:rounded-[40px] md:border md:border-slate-200/80 shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden">
         
+        {/* ==================================================================== */}
+        {/* PERSISTENT STAKEHOLDER SESSION BAR & LOGOUT                          */}
+        {/* ==================================================================== */}
+        <div className="z-40 px-3.5 py-1.5 flex items-center justify-between text-[11px] font-bold bg-[#2A1810] text-amber-200 border-b border-amber-950">
+          <div className="flex items-center gap-1.5 truncate">
+            <UserCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="truncate">
+              Logged in as <strong className="text-white">Artisan</strong> — <span className="font-mono text-amber-300">{currentUser.phone}</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => {
+                window.history.pushState({}, '', '?view=storefront');
+                setPublicStorefront(true);
+              }}
+              title="View Public Marketplace Storefront"
+              className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center gap-1 cursor-pointer transition-colors"
+            >
+              <Store className="w-3 h-3 text-amber-300" />
+              <span className="hidden sm:inline">Store</span>
+            </button>
+
+            <button
+              onClick={logout}
+              title="Log out and return to Phone + OTP screen"
+              className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 border border-red-500/30 flex items-center gap-1 cursor-pointer transition-colors active:scale-95"
+            >
+              <LogOut className="w-3 h-3" />
+              <span>Log out</span>
+            </button>
+          </div>
+        </div>
+
         {/* ==================================================================== */}
         {/* TOP STATUS BAR & MoSJE GOVT EMBLEM HEADER                           */}
         {/* ==================================================================== */}
