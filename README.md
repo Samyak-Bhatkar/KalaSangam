@@ -17,21 +17,28 @@ The Government of India provides financial support and term loans to marginalize
 
 ---
 
-## 2. System Architecture & 3-Tap Flow
+> 📖 **Complete Master Documentation**: For an in-depth breakdown of every feature, tech stack justification, and architectural diagram, read [PROJECT_ARCHITECTURE_AND_FEATURES.md](file:///c:/SAMYAKFILES/Users/AppData/Local/Programs/DATA%20SCIENCE%20COURSE/SIH/ShilpSetu/PROJECT_ARCHITECTURE_AND_FEATURES.md).
+
+---
+
+## 2. System Architecture & Complete Innovation Suite
 
 ```
-[ 1. SNAP ]                      [ 2. SPEAK ]                    [ 3. PUBLISH ]
-Camera Viewfinder               Giant 96px Pulsing Mic          Interactive Before/After Slider
-Silhouette Guides (Pottery,      Regional Spoken Guidance        Statutory Living-Wage Pricing
-Saree, Idol, Painting)       --> Live Web Audio Waveform     --> Bilingual Listing (EN & HI)
-Tactile 72px Shutter             Bhashini ASR / Whisper          1-Tap Broadcast to ONDC & GeM
+[ 1. SNAP / CALL ]               [ 2. SPEAK / TRANSCRIBE ]       [ 3. VERIFY & PUBLISH ]
+Camera Studio (3 Angles)         Giant 96px Pulsing Mic          Coordinator Review Panel
+OR 1800-208-SHILP Voice-IVR  --> Bhashini ASR (Indic Speech)  --> Audit Trail Correction Log
+Silhouette Guides & Studio Light  Multimodal Gemini Cataloger    1-Tap Broadcast to ONDC & GeM
 ```
 
-### 4 Breakthrough Ministry Showcase Innovations:
-1. **AI Reel Storyteller**: 15-second 9:16 vertical video reel with Ken Burns pan-zoom, artisan heritage voiceover, ambient sitar/flute soundtrack, and dynamic ONDC scannable QR code.
-2. **Bargain Guard**: Autonomous voice negotiator that intercepts lowball wholesale inquiries, alerts the artisan in Hindi about fair labor loss, and generates polished corporate B2B counter-offers.
-3. **Steganographic Digital GI Watermark**: 2D Discrete Cosine Transform (DCT) frequency embedding of 64-bit payload `[MoSJE-Beneficiary-ID | Cluster-PIN | GI-Tag-Serial]` into the image luminance channel to combat industrial powerloom counterfeiting.
-4. **ONDC Beckn Retail v1.2 Gateway**: Serialization into open network commerce JSON schemas ready for instant staging registry discovery.
+### 8 Breakthrough Ministry Showcase Innovations:
+1. **Shared Phone + OTP Gateway & Role-Based Routing**: Zero-password, low-literacy mobile access for Artisans and Coordinators with built-in hackathon demo resilience and public unauthenticated buyer storefront.
+2. **Zero-Smartphone Conversational Voice-IVR ("कला-वाणी IVR")**: Toll-free `1800-208-SHILP` keypad telephone simulator with Indic ASR, DTMF audio confirmation, and automated SMS dispatch to local village coordinators.
+3. **Village Field Coordinator Review Desk**: Dedicated human-in-the-loop workspace to review AI drafts, upload in-person artisan photos via the AI studio pipeline, log correction diffs (`correction_log`), and publish.
+4. **Public Buyer Storefront & Cryptographic QR Verification**: Zero-login e-commerce showcase featuring tamper-proof SHA-256 digital provenance certificates for ONDC and GeM.
+5. **AI Reel Storyteller**: 15-second 9:16 vertical video reel with Ken Burns pan-zoom, artisan heritage voiceover, ambient sitar/flute soundtrack, and dynamic ONDC scannable QR code.
+6. **Bargain Guard**: Autonomous voice negotiator that intercepts lowball wholesale inquiries, alerts the artisan in Hindi about fair labor loss, and generates polished corporate B2B counter-offers.
+7. **Steganographic Digital GI Watermark**: 2D Discrete Cosine Transform (DCT) frequency embedding of 64-bit payload `[MoSJE-Beneficiary-ID | Cluster-PIN | GI-Tag-Serial]` into the image luminance channel to combat industrial powerloom counterfeiting.
+8. **ONDC Beckn Retail v1.2 Gateway**: Serialization into open network commerce JSON schemas ready for instant staging registry discovery.
 
 ---
 
