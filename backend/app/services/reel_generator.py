@@ -13,6 +13,7 @@ import wave
 import struct
 import base64
 import subprocess
+import socket
 from pathlib import Path
 import cv2
 import numpy as np
@@ -22,6 +23,17 @@ import qrcode
 from typing import Optional, Tuple
 from ..config import settings
 from ..models.schemas import ReelGenerationResponse
+
+def get_lan_ip() -> str:
+    """Discovers machine primary LAN IPv4 address for mobile network resolution."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('8.8.8.8', 80))
+        return s.getsockname()[0]
+    except Exception:
+        return '127.0.0.1'
+    finally:
+        s.close()
 
 def generate_ambient_folk_audio(output_path: Path, duration_sec: float = 15.0):
     """
@@ -87,6 +99,11 @@ def generate_ambient_folk_audio(output_path: Path, duration_sec: float = 15.0):
 def create_dynamic_ondc_qr(product_id: str, title: str, size: int = 180, verify_url: Optional[str] = None) -> Image.Image:
     """Generates scannable QR code pointing to verify portal or Beckn ONDC discovery."""
     qr_content = verify_url or f"https://kalasangam-frontend.onrender.com/verify/{product_id}"
+    if "localhost" in qr_content or "127.0.0.1" in qr_content:
+        lan_ip = get_lan_ip()
+        if lan_ip and lan_ip != "127.0.0.1":
+            qr_content = qr_content.replace("localhost", lan_ip).replace("127.0.0.1", lan_ip)
+
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_M,
@@ -105,6 +122,11 @@ def generate_published_product_qr(product_id: str, title: str, base_verify_url: 
     Returns (qr_public_url, target_url).
     """
     domain = base_verify_url or "https://kalasangam-frontend.onrender.com"
+    if "localhost" in domain or "127.0.0.1" in domain:
+        lan_ip = get_lan_ip()
+        if lan_ip and lan_ip != "127.0.0.1":
+            domain = domain.replace("localhost", lan_ip).replace("127.0.0.1", lan_ip)
+
     target_url = f"{domain.rstrip('/')}/verify/{product_id}"
 
     qr = qrcode.QRCode(
