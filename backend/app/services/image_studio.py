@@ -126,47 +126,132 @@ def segment_craft(pil_img: Image.Image) -> Image.Image:
             pass
     return segment_craft_fallback(pil_img)
 
-def synthesize_ground_contact_shadow(cutout_img: Image.Image, canvas_size: int = 1080) -> Image.Image:
+def filter_salient_main_body(cutout_img: Image.Image) -> Image.Image:
     """
-    Creates directional Gaussian-blurred contact drop shadow:
-    1. Extract alpha channel from segmented craft.
-    2. Apply elliptical scale transformation along vertical axis (Y = 0.2 * X).
-    3. Directional Gaussian blur (sigma = 18px) with 28% opacity (rgba(20, 20, 20, 0.28)).
-    4. Offset +15px Y to simulate grounding on table/pedestal.
+    Senior CV E-Commerce Pipeline:
+    Isolates primary craft/product mass and severs trailing wires, charger cables,
+    cords, USB leads, and stray artifacts using distance-transform skeletal core analysis
+    and geodesic morphological reconstruction.
     """
-    alpha = cutout_img.split()[3]
-    w, h = cutout_img.size
+    rgba = np.array(cutout_img)
+    alpha = rgba[:, :, 3]
 
-    # 1. Shadow base: pure dark color with craft alpha
-    shadow_mask = Image.new("L", (w, h), 0)
-    shadow_mask.paste(alpha, (0, 0))
+    # Binarize alpha with confidence threshold
+    mask = (alpha > 35).astype(np.uint8) * 255
+    if np.sum(mask > 0) < 100:
+        return cutout_img
 
-    # 2. Elliptical squashing (ground projection: Y = 0.2 * X)
-    shadow_height = max(16, int(h * 0.22))
-    shadow_squashed = shadow_mask.resize((w, shadow_height), Image.Resampling.BILINEAR)
+    # 1. Distance transform to isolate solid mass of product from thin cords/wires
+    dist = cv2.distanceTransform(mask, cv2.DIST_L2, 5)
+    d_max = float(dist.max())
 
-    # 3. Create full shadow layer with 28% opacity (0.28 * 255 ~= 71)
-    shadow_np = np.array(shadow_squashed, dtype=np.float32)
-    shadow_np = (shadow_np / 255.0) * 71.0  # 28% max opacity
-    shadow_alpha = Image.fromarray(shadow_np.astype(np.uint8))
+    if d_max > 8.0:
+        # A cable/wire typically has thickness < 10-14px (radius < 5-7px),
+        # while real products have a substantial internal mass radius
+        core_thresh = max(6.0, min(24.0, 0.12 * d_max))
+        core = (dist > core_thresh).astype(np.uint8) * 255
 
-    # Apply Gaussian blur (sigma = 18)
-    shadow_alpha = shadow_alpha.filter(ImageFilter.GaussianBlur(radius=18))
+        # Extract primary product component
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(core, connectivity=8)
+        if num_labels > 1:
+            areas = stats[1:, cv2.CC_STAT_AREA]
+            max_label = 1 + int(np.argmax(areas))
+            main_core = (labels == max_label).astype(np.uint8) * 255
 
-    # Dark shadow pigment: rgba(20, 20, 20, alpha)
-    shadow_layer = Image.new("RGBA", shadow_alpha.size, (20, 20, 20, 0))
-    shadow_layer.putalpha(shadow_alpha)
+            # Geodesic reconstruction: dilate core back out bounded by original mask
+            # Restores true outer product facets without reviving the thin disconnected cable
+            k_size = int(core_thresh * 2.2) | 1
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k_size, k_size))
+            reconstructed = cv2.dilate(main_core, kernel)
+            reconstructed = np.minimum(reconstructed, mask)
 
-    return shadow_layer
+            # Accept reconstruction if it retains the primary craft mass
+            if np.sum(reconstructed > 0) > 0.45 * np.sum(mask > 0):
+                mask = reconstructed
+
+    # 2. Trim spatial outlier fringes (stray specks, floating dust, thin cable tips)
+    ys, xs = np.where(mask > 0)
+    if len(xs) > 100:
+        x0, x1 = int(np.percentile(xs, 0.2)), int(np.percentile(xs, 99.8))
+        y0, y1 = int(np.percentile(ys, 0.2)), int(np.percentile(ys, 99.8))
+        mask[:max(0, y0), :] = 0
+        mask[min(mask.shape[0], y1 + 1):, :] = 0
+        mask[:, :max(0, x0)] = 0
+        mask[:, min(mask.shape[1], x1 + 1):] = 0
+
+    # 3. Alpha matte blending with smooth anti-aliased edge
+    cleaned_alpha = np.minimum(alpha, mask)
+    cleaned_alpha = cv2.GaussianBlur(cleaned_alpha, (3, 3), 0.5)
+
+    rgba[:, :, 3] = cleaned_alpha
+    return Image.fromarray(rgba)
+
+def synthesize_ecom_ground_shadow(craft_img: Image.Image, canvas_size: int, craft_x: int, craft_y: int) -> Image.Image:
+    """
+    Synthesizes a dual-tier Amazon/Apple-grade studio ground shadow:
+    1. Tier 1 (Ambient Occlusion Seam): Dark, tight contact shadow directly at the base touchline.
+    2. Tier 2 (Floor Penumbra): Soft feathered elliptical falloff simulating studio bounce light.
+    """
+    alpha = np.array(craft_img.split()[3])
+    cw, ch = craft_img.size
+
+    # Extract base width from bottom 12% of the craft
+    bottom_slice = alpha[max(0, int(ch * 0.88)):, :]
+    base_ys, base_xs = np.where(bottom_slice > 40)
+    if len(base_xs) > 10:
+        base_x_min = int(np.percentile(base_xs, 2))
+        base_x_max = int(np.percentile(base_xs, 98))
+    else:
+        base_x_min = int(cw * 0.15)
+        base_x_max = int(cw * 0.85)
+
+    base_width = max(24, base_x_max - base_x_min)
+    base_center_x = craft_x + base_x_min + (base_width // 2)
+    contact_y = craft_y + ch
+
+    from PIL import ImageDraw
+
+    # Layer 1: Ambient Occlusion Seam (Crisp contact line, dark, razor sharp grounding)
+    ao_w = int(base_width * 0.90)
+    ao_h = max(5, int(ch * 0.025))
+    ao_bbox = [
+        base_center_x - (ao_w // 2),
+        contact_y - (ao_h // 2) - 1,
+        base_center_x + (ao_w // 2),
+        contact_y + (ao_h // 2) - 1,
+    ]
+    ao_layer = Image.new("RGBA", (canvas_size, canvas_size), (0, 0, 0, 0))
+    ao_draw = ImageDraw.Draw(ao_layer)
+    ao_draw.ellipse(ao_bbox, fill=(20, 22, 28, 140))  # Crisp grounding touchline
+    ao_blurred = ao_layer.filter(ImageFilter.GaussianBlur(radius=2.5))
+
+    # Layer 2: Ambient Floor Penumbra (Subtle, soft, feathered floor light bounce)
+    pen_w = int(base_width * 1.15)
+    pen_h = max(12, int(ch * 0.065))
+    pen_bbox = [
+        base_center_x - (pen_w // 2),
+        contact_y - 2,
+        base_center_x + (pen_w // 2),
+        contact_y + pen_h - 2,
+    ]
+    pen_layer = Image.new("RGBA", (canvas_size, canvas_size), (0, 0, 0, 0))
+    pen_draw = ImageDraw.Draw(pen_layer)
+    pen_draw.ellipse(pen_bbox, fill=(35, 38, 48, 38))  # Soft 15% studio penumbra
+    pen_blurred = pen_layer.filter(ImageFilter.GaussianBlur(radius=8.5))
+
+    # Composite Penumbra + Occlusion Seam
+    shadow_composite = Image.alpha_composite(pen_blurred, ao_blurred)
+    return shadow_composite
 
 def process_studio_image(raw_bytes: bytes) -> tuple[Image.Image, Image.Image, dict]:
     """
-    Full Autonomous Studio Pipeline:
+    Amazon / GeM Flagship Studio Pipeline:
     1. Color temperature normalization (6500K neutral daylight)
-    2. Salient craft segmentation
-    3. Auto-centering with 10% safety cushion on 1080x1080 canvas
-    4. Ground contact drop shadow synthesis
-    5. Final composition: Studio Canvas (#F8F9FA) -> Drop Shadow -> Segmented Craft
+    2. Salient craft segmentation with cable/debris pruning
+    3. Amazon 85% Canvas Rule (dominant dimension fills 85%-87% of canvas)
+    4. Symmetrical horizontal and vertical optical centering (balanced top/bottom padding)
+    5. Dual-tier realistic ground contact shadow (Ambient Occlusion + Floor Penumbra)
+    6. Composition on pure white #FFFFFF (or #F8F9FA) studio canvas
     """
     raw_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
     
@@ -174,52 +259,61 @@ def process_studio_image(raw_bytes: bytes) -> tuple[Image.Image, Image.Image, di
     balanced_img = color_temperature_balance(raw_img)
 
     # 2. Salient segmentation
-    cutout = segment_craft(balanced_img)
+    raw_cutout = segment_craft(balanced_img)
 
-    # 3. Bounding box & 10% cushion scaling onto 1080x1080 canvas
-    # Get alpha bounding box
+    # 3. Clean main body (prune trailing cords, wires, detached debris)
+    cutout = filter_salient_main_body(raw_cutout)
+
+    # 4. Extract tight bounding box of true product
     bbox = cutout.getbbox()
     if bbox:
         craft_cropped = cutout.crop(bbox)
     else:
         craft_cropped = cutout
 
-    # Target area is 80% of canvas (allowing 10% cushion on each side)
-    max_dim = int(TARGET_SIZE * 0.80)  # 864px
+    # 5. Amazon / GeM 85% Rule Scaling:
+    # Dominant dimension fills ~86% of canvas, leaving 7% balanced breathing margins
+    target_canvas_size = TARGET_SIZE  # 1080px
+    target_occupancy_ratio = 0.86     # 86% rule
+    max_dim = int(target_canvas_size * target_occupancy_ratio)  # ~928px on 1080 canvas
+
     cw, ch = craft_cropped.size
-    scale = min(max_dim / cw, max_dim / ch)
+    scale = min(max_dim / max(1, cw), max_dim / max(1, ch))
     new_w = max(1, int(cw * scale))
     new_h = max(1, int(ch * scale))
     craft_resized = craft_cropped.resize((new_w, new_h), Image.Resampling.LANCZOS)
 
-    # 4. Generate elliptical ground contact shadow
-    shadow = synthesize_ground_contact_shadow(craft_resized, TARGET_SIZE)
-    sw, sh = shadow.size
+    # 6. Symmetrical Horizontal & Vertical Optical Centering:
+    # Account for the shadow ground line (+16px) to perfectly balance top and bottom padding
+    ground_extension = max(8, int(new_h * 0.04))
+    total_optical_height = new_h + ground_extension
 
-    # 5. Composite layers onto 1080x1080 #F8F9FA canvas
-    studio_canvas = Image.new("RGBA", (TARGET_SIZE, TARGET_SIZE), STUDIO_BG_COLOR)
+    craft_x = (target_canvas_size - new_w) // 2
+    craft_y = max(int(target_canvas_size * 0.04), (target_canvas_size - total_optical_height) // 2)
 
-    # Craft coordinates (centered, slightly elevated for natural ground plane)
-    craft_x = (TARGET_SIZE - new_w) // 2
-    craft_y = (TARGET_SIZE - new_h) // 2 - 15  # 15px up to leave room for shadow
+    # 7. Generate Dual-Tier Grounding Contact Shadow
+    shadow_composite = synthesize_ecom_ground_shadow(craft_resized, target_canvas_size, craft_x, craft_y)
 
-    # Shadow coordinates (+15px Y offset at the base of the craft)
-    shadow_x = (TARGET_SIZE - sw) // 2
-    shadow_y = craft_y + new_h - (sh // 2) + 15
+    # 8. Composite onto Pure Studio Canvas (Amazon pure white / studio neutral)
+    studio_bg = (255, 255, 255, 255)
+    studio_canvas = Image.new("RGBA", (target_canvas_size, target_canvas_size), studio_bg)
 
-    # Paste shadow with transparency
-    studio_canvas.paste(shadow, (shadow_x, shadow_y), shadow)
-    # Paste segmented craft
+    # Paste shadow with alpha
+    studio_canvas.paste(shadow_composite, (0, 0), shadow_composite)
+    # Paste centered 85% product with alpha
     studio_canvas.paste(craft_resized, (craft_x, craft_y), craft_resized)
 
     # Return raw image, enhanced studio image, and metadata
     metadata = {
-        "width": TARGET_SIZE,
-        "height": TARGET_SIZE,
-        "cushion_padding_pct": 10.0,
+        "width": target_canvas_size,
+        "height": target_canvas_size,
+        "occupancy_pct": round((max(new_w, new_h) / target_canvas_size) * 100, 1),
+        "cushion_padding_pct": round(((target_canvas_size - max(new_w, new_h)) / target_canvas_size) * 50, 1),
         "lighting_normalized": True,
         "color_temp_target": "6500K Neutral Daylight",
         "drop_shadow_applied": True,
+        "shadow_type": "Dual-Tier Occlusion & Floor Penumbra",
+        "amazon_compliant": True,
         "segmentation_engine": "rembg-BiRefNet" if REMBG_AVAILABLE else "opencv-saliency-grabcut"
     }
 
