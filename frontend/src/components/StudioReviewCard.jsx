@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Award, Sliders, Check, ImagePlus, RefreshCw, X, Eye, Edit3 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Award, Check, ImagePlus, RefreshCw, X, Eye, Edit3 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 import { fetchBackgroundOptions, compositeLifestyleImage } from '../services/api';
 import FineTuneStudioModal from './FineTuneStudioModal';
@@ -26,11 +26,6 @@ export default function StudioReviewCard() {
     anglePhotos,
     activeAngleIndex
   } = useArtisan();
-
-  // Primary split-slider state
-  const [sliderPosition, setSliderPosition] = useState(50); // 0 to 100 percentage
-  const containerRef = useRef(null);
-  const isDragging = useRef(false);
 
   // Fine-Tune modal state
   const [isFineTuneOpen, setIsFineTuneOpen] = useState(false);
@@ -247,27 +242,6 @@ export default function StudioReviewCard() {
     setActiveViewTab('studio');
   };
 
-  // Split slider mouse & touch handlers
-  const handleMove = (clientX) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    setSliderPosition(pct);
-  };
-
-  const handleTouchMove = (e) => {
-    if (e.touches.length > 0) {
-      handleMove(e.touches[0].clientX);
-    }
-  };
-
-  const handleMouseMove = (e) => {
-    if (isDragging.current) {
-      handleMove(e.clientX);
-    }
-  };
-
   const activeLifestyleDisplay = lifestyleImageBase64 ||
     lifestyleImageUrl ||
     (selectedBgId && compositeCache[selectedBgId]?.base64) ||
@@ -298,10 +272,15 @@ export default function StudioReviewCard() {
             </button>
             <button
               onClick={() => {
-                if (activeLifestyleDisplay) setActiveViewTab('lifestyle');
+                if (activeLifestyleDisplay) {
+                  setActiveViewTab('lifestyle');
+                } else if (backgroundCandidates.length > 0) {
+                  const rec = backgroundCandidates.find(o => o.recommended) || backgroundCandidates[0];
+                  handleSelectBackground(rec);
+                }
               }}
-              disabled={!activeLifestyleDisplay}
-              className={`px-3 py-1 rounded-full font-bold transition-all flex items-center gap-1.5 ${!activeLifestyleDisplay
+              disabled={!activeLifestyleDisplay && backgroundCandidates.length === 0}
+              className={`px-3 py-1 rounded-full font-bold transition-all flex items-center gap-1.5 ${(!activeLifestyleDisplay && backgroundCandidates.length === 0)
                   ? 'opacity-40 cursor-not-allowed text-slate-500'
                   : activeViewTab === 'lifestyle'
                     ? 'bg-amber-500 text-slate-950 shadow-xs font-black cursor-pointer'
@@ -329,56 +308,20 @@ export default function StudioReviewCard() {
         )}
       </div>
 
-      {/* Main Visual Display: Either Before/After Split Slider or Lifestyle Preview */}
+      {/* Main Visual Display: Primary Clean Studio or Secondary Lifestyle Preview */}
       {activeViewTab === 'studio' ? (
-        <div
-          ref={containerRef}
-          onMouseDown={() => (isDragging.current = true)}
-          onMouseUp={() => (isDragging.current = false)}
-          onMouseLeave={() => (isDragging.current = false)}
-          onMouseMove={handleMouseMove}
-          onTouchMove={handleTouchMove}
-          className="relative w-full aspect-square max-h-[340px] bg-slate-950 overflow-hidden select-none cursor-ew-resize"
-        >
-          {/* Under layer: Clean Studio Enhanced Image */}
-          <div className="absolute inset-0 flex items-center justify-center bg-[#F8F9FA]">
-            <img
-              src={studioSrc}
-              alt="Clean AI Studio Output"
-              className="w-full h-full object-contain p-2"
-            />
-            <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-emerald-600/90 text-white text-[10px] font-bold shadow-md flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              <span>{language === 'hi' ? 'स्वच्छ 4K स्टूडियो (मुख्य)' : 'Clean Studio (Primary)'}</span>
-            </div>
+        <div className="relative w-full aspect-square max-h-[340px] bg-[#F8F9FA] overflow-hidden flex items-center justify-center select-none">
+          <img
+            src={studioSrc}
+            alt="Clean AI Studio Output"
+            className="w-full h-full object-contain p-3"
+          />
+          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-emerald-600/90 text-white text-[10px] font-bold shadow-md flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            <span>{language === 'hi' ? 'स्वच्छ 4K स्टूडियो (मुख्य)' : 'Clean Studio (Primary)'}</span>
           </div>
-
-          {/* Top clipped layer: Blurry / Inaccurate Raw Workshop Photo */}
-          <div
-            style={{ width: `${sliderPosition}%` }}
-            className="absolute inset-y-0 left-0 overflow-hidden border-r-2 border-amber-400 bg-slate-900 shadow-2xl transition-[width] duration-75"
-          >
-            <div className="relative w-full h-full min-w-[340px] flex items-center justify-center">
-              <img
-                src={rawSrc}
-                alt="Raw Blurry Workshop Capture"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-slate-900/95 border border-amber-500/50 text-amber-300 text-[10px] font-semibold shadow-md flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-                <span>{language === 'hi' ? 'कच्ची / धुंधली तस्वीर' : 'Raw Capture (Blurry)'}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Divider Handle Knob */}
-          <div
-            style={{ left: `${sliderPosition}%` }}
-            className="absolute inset-y-0 -ml-4 flex items-center justify-center pointer-events-none"
-          >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 border-2 border-slate-950 shadow-xl flex items-center justify-center text-slate-950">
-              <Sliders className="w-4 h-4 rotate-90" />
-            </div>
+          <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md border border-slate-700 text-slate-300 text-[10px] font-bold shadow-md flex items-center gap-1">
+            <span>{language === 'hi' ? 'तटस्थ पृष्ठभूमि (सफेद)' : 'Neutral White Background'}</span>
           </div>
         </div>
       ) : (
