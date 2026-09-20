@@ -40,6 +40,7 @@ const IVR_PROMPTS = {
     q_product: 'बीप के बाद, कृपया अपने शिल्प या उत्पाद का नाम बताएं।',
     q_material: 'बीप के बाद, बताएं कि यह किस सामग्री या मिट्टी-धातु से बना है।',
     q_price: 'बीप के बाद, बताएं कि आप इसे कितने रुपये में बेचना चाहते हैं।',
+    price_warning: (spoken, rec) => `आपका बताया मूल्य ${spoken} रुपये, उचित बाज़ार मूल्य ${rec} रुपये से कम है। ${rec} रुपये रखने के लिए 1 दबाएं, या दोबारा बोलने के लिए 2 दबाएं।`,
     readback: (prod, mat, pr) => `आपने कहा: ${prod}, ${mat} से निर्मित, कीमत ${pr} रुपये। पुष्टि के लिए 1 दबाएं, सुधार के लिए 2 दबाएं।`,
     redo_select: 'सुधार के लिए: उत्पाद हेतु 1, सामग्री हेतु 2, या कीमत हेतु 3 दबाएं।',
     confirmed: 'आपका ड्राफ्ट सुरक्षित कर लिया गया है। ग्राम समन्वयक को फोटो खींचने हेतु एसएमएस भेजा गया है। धन्यवाद।',
@@ -49,6 +50,7 @@ const IVR_PROMPTS = {
     q_product: 'बीप नंतर, कृपया आपल्या हस्तकलेचे किंवा वस्तूचे नाव सांगा.',
     q_material: 'बीप नंतर, सांगा की हे कोणत्या साहित्यापासून किंवा माती-धातूपासून बनवले आहे.',
     q_price: 'बीप नंतर, सांगा की आपण हे किती रुपयांत विकू इच्छिता.',
+    price_warning: (spoken, rec) => `आपण सांगितलेली किंमत ${spoken} रुपये, योग्य बाजारभाव ${rec} रुपयांपेक्षा कमी आहे. ${rec} रुपये स्वीकारण्यासाठी 1 दाबा, किंवा पुन्हा किंमत सांगण्यासाठी 2 दाबा.`,
     readback: (prod, mat, pr) => `आपण सांगितले: ${prod}, ${mat} चे बनलेले, किंमत ${pr} रुपये. खात्री करण्यासाठी 1 दाबा, दुरुस्तीसाठी 2 दाबा.`,
     redo_select: 'दुरुस्तीसाठी: वस्तूसाठी 1, साहित्यासाठी 2, किंवा किमतीसाठी 3 दाबा.',
     confirmed: 'आपला मसुदा सुरक्षित करण्यात आला आहे. छायाचित्रासाठी ग्राम समन्वयकाला एसएमएस पाठवला आहे. धन्यवाद.',
@@ -58,6 +60,7 @@ const IVR_PROMPTS = {
     q_product: 'After the beep, please describe what craft product you are making.',
     q_material: 'After the beep, what material or metal is it made from?',
     q_price: 'After the beep, what price in rupees would you like to sell it for?',
+    price_warning: (spoken, rec) => `Your price of ${spoken} rupees is below the fair market value of ${rec} rupees. Press 1 to accept ${rec} rupees, or press 2 to speak your price again.`,
     readback: (prod, mat, pr) => `You said: ${prod}, made of ${mat}, priced at ${pr} rupees. Press 1 to confirm, 2 to redo.`,
     redo_select: 'Press 1 to redo product name, 2 for material, or 3 for price.',
     confirmed: 'Your draft listing has been saved. An SMS has been dispatched to the village field coordinator to photograph your product.',
@@ -68,7 +71,7 @@ export default function KeypadPhoneSimulator({ onClose }) {
   const { refreshDrafts } = useArtisan();
 
   // ─── IVR State Machine ───────────────────────────────────────────────────────
-  // 'IDLE' | 'DIALING' | 'WELCOME_LANG' | 'PLAYING_PROMPT' | 'RECORDING' | 'PROCESSING' | 'CONFIRMATION' | 'REDO_SELECT' | 'SUBMITTING' | 'RECEIPT' | 'ERROR'
+  // 'IDLE' | 'DIALING' | 'WELCOME_LANG' | 'PLAYING_PROMPT' | 'RECORDING' | 'PROCESSING' | 'CONFIRMATION' | 'PRICE_WARNING' | 'REDO_SELECT' | 'SUBMITTING' | 'RECEIPT' | 'ERROR'
   const [callState, setCallState] = useState('IDLE');
   const [callDuration, setCallDuration] = useState(0);
   const [selectedLanguage, setSelectedLanguage] = useState('hi'); // 'hi' | 'mr' | 'en'
@@ -89,10 +92,12 @@ export default function KeypadPhoneSimulator({ onClose }) {
   const [draftResult, setDraftResult] = useState(null);
   const [coordinatorSms, setCoordinatorSms] = useState(null);
   const [lastError, setLastError] = useState(null);
+  const [lowPriceWarning, setLowPriceWarning] = useState(null); // { spoken: number, recommended: number }
 
   // Real-Time Telemetry Log Stream
   const [telemetryLogs, setTelemetryLogs] = useState([]);
   const [activeTelemetryTab, setActiveTelemetryTab] = useState('logs'); // 'logs' | 'payload' | 'settings'
+  const [showMobileTelemetry, setShowMobileTelemetry] = useState(false); // mobile screen inspector toggle
 
   // Bhashini Pipeline & Gateway Configuration
   const [bhashiniKey, setBhashiniKey] = useState('ulca_bhashini_active_26090');
@@ -246,7 +251,7 @@ export default function KeypadPhoneSimulator({ onClose }) {
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
 
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      try { mediaRecorderRef.current.stop(); } catch (e) {}
+      try { mediaRecorderRef.current.stop(); } catch (e) { }
     }
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach(t => t.stop());
@@ -291,6 +296,7 @@ export default function KeypadPhoneSimulator({ onClose }) {
     logTelemetry('INFO', `Call Terminated by user after ${formatTime(callDuration)}.`);
     setCallState('IDLE');
     setCallDuration(0);
+    setLowPriceWarning(null);
   }, [stopAudioTracks, playDtmfTone, logTelemetry, callDuration]);
 
   // ─── Step Execution Engine: Play Prompt -> Beep -> Record ────────────────────
@@ -408,6 +414,32 @@ export default function KeypadPhoneSimulator({ onClose }) {
     }
   }, [getAudioContext, logTelemetry, stopAudioTracks]);
 
+  // ─── Low Price Disclaimer Warning (BargainGuard Protection) ─────────────────
+  const triggerPriceWarning = useCallback(async (spoken, recommended, lang) => {
+    setCallState('PRICE_WARNING');
+    const langPack = IVR_PROMPTS[lang] || IVR_PROMPTS.hi;
+    const warningMsg = langPack.price_warning ? langPack.price_warning(spoken, recommended) : `आपका बताया मूल्य ${spoken} रुपये, उचित बाज़ार मूल्य ${recommended} रुपये से कम है। ${recommended} रुपये रखने के लिए 1 दबाएं, या दोबारा बोलने के लिए 2 दबाएं।`;
+    logTelemetry('VOICE', `Low Price Warning Prompt: "${warningMsg}"`);
+    await speakIvrPrompt(warningMsg, lang);
+    logTelemetry('DTMF', 'Awaiting Price Selection DTMF: Press 1 to Accept ₹450 (Recommended), Press 2 to Speak Again.');
+  }, [logTelemetry, speakIvrPrompt]);
+
+  // ─── Confirmation Read-Back Loop (Error Correction) ──────────────────────────
+  const triggerConfirmationReadback = useCallback(async (lang, overridePrice = null) => {
+    setCallState('CONFIRMATION');
+    const langPack = IVR_PROMPTS[lang] || IVR_PROMPTS.hi;
+
+    // Use current form values
+    const prod = formData.product_name || 'मिट्टी का कलश';
+    const mat = formData.material || 'टेराकोटा लाल मिट्टी';
+    const pr = overridePrice !== null ? overridePrice : (formData.price || 450);
+
+    const readbackText = langPack.readback(prod, mat, pr);
+    logTelemetry('VOICE', `Read-Back Verification Loop: "${readbackText}"`);
+    await speakIvrPrompt(readbackText, lang);
+    logTelemetry('DTMF', 'Awaiting Confirmation DTMF: Press 1 to Confirm & Save Draft, Press 2 to Redo.');
+  }, [formData, logTelemetry, speakIvrPrompt]);
+
   // ─── Send Audio to Backend (POST /api/ivr/process-response) ───────────────────
   const handleProcessCapturedAudio = useCallback(async (audioBlob, stepIndex, lang) => {
     setCallState('PROCESSING');
@@ -428,6 +460,9 @@ export default function KeypadPhoneSimulator({ onClose }) {
       logTelemetry('BHASHINI', `Bhashini Pipeline Response [${resp.engineUsed}] (${resp.latencyMs}ms)`, resp);
 
       // Update state with parsed values
+      let isLowPrice = false;
+      let detectedPriceVal = 450;
+
       setFormData(prev => {
         const next = { ...prev };
         if (stepIndex === 0) {
@@ -439,8 +474,15 @@ export default function KeypadPhoneSimulator({ onClose }) {
           next.raw_transcripts.material = resp.transcript;
           next.translated_texts.material = resp.translatedText;
         } else if (stepIndex === 2) {
-          const numPrice = Number(resp.extractedValue) || 450;
-          next.price = numPrice > 0 ? numPrice : 450;
+          const rawNum = Number(resp.extractedValue);
+          const parsed = (!isNaN(rawNum) && rawNum > 0) ? rawNum : 450;
+          detectedPriceVal = parsed;
+          if (parsed < 450) {
+            isLowPrice = true;
+            next.price = 450; // Automatically select 450 baseline
+          } else {
+            next.price = parsed;
+          }
           next.raw_transcripts.price = resp.transcript;
           next.translated_texts.price = resp.translatedText;
         }
@@ -454,10 +496,19 @@ export default function KeypadPhoneSimulator({ onClose }) {
           executeQuestionStep(stepIndex + 1, lang);
         }, 1200);
       } else {
-        // All 3 questions answered! Proceed to confirmation readback
-        setTimeout(() => {
-          triggerConfirmationReadback(lang);
-        }, 1200);
+        // All 3 questions answered!
+        if (isLowPrice) {
+          setLowPriceWarning({ spoken: detectedPriceVal, recommended: 450 });
+          logTelemetry('VOICE', `BargainGuard Disclaimer: Spoken price ₹${detectedPriceVal} < fair market minimum ₹450.`);
+          setTimeout(() => {
+            triggerPriceWarning(detectedPriceVal, 450, lang);
+          }, 1200);
+        } else {
+          // Proceed to standard confirmation readback
+          setTimeout(() => {
+            triggerConfirmationReadback(lang);
+          }, 1200);
+        }
       }
     } catch (err) {
       console.error('IVR backend processing error:', err);
@@ -472,23 +523,7 @@ export default function KeypadPhoneSimulator({ onClose }) {
       logTelemetry('ERROR', `AI Pipeline Error: ${err.message}`, err.data || null);
       setCallState('ERROR');
     }
-  }, [bhashiniKey, bhashiniUserId, logTelemetry, executeQuestionStep]);
-
-  // ─── Confirmation Read-Back Loop (Error Correction) ──────────────────────────
-  const triggerConfirmationReadback = useCallback(async (lang) => {
-    setCallState('CONFIRMATION');
-    const langPack = IVR_PROMPTS[lang] || IVR_PROMPTS.hi;
-
-    // Use current form values
-    const prod = formData.product_name || 'मिट्टी का कलश';
-    const mat = formData.material || 'टेराकोटा लाल मिट्टी';
-    const pr = formData.price || 450;
-
-    const readbackText = langPack.readback(prod, mat, pr);
-    logTelemetry('VOICE', `Read-Back Verification Loop: "${readbackText}"`);
-    await speakIvrPrompt(readbackText, lang);
-    logTelemetry('DTMF', 'Awaiting Confirmation DTMF: Press 1 to Confirm & Save Draft, Press 2 to Redo.');
-  }, [formData, logTelemetry, speakIvrPrompt]);
+  }, [bhashiniKey, bhashiniUserId, logTelemetry, executeQuestionStep, triggerPriceWarning, triggerConfirmationReadback]);
 
   // ─── Submit Confirmed Draft (POST /api/catalog/draft) ────────────────────────
   const handleSubmitConfirmedDraft = useCallback(async () => {
@@ -593,13 +628,31 @@ export default function KeypadPhoneSimulator({ onClose }) {
       return;
     }
 
+    // Step k: Low Price Disclaimer Warning (BargainGuard Protection)
+    if (callState === 'PRICE_WARNING') {
+      if (key === '1') {
+        const recPrice = lowPriceWarning?.recommended || 450;
+        logTelemetry('DTMF', `Artisan pressed 1: Accepted recommended fair price ₹${recPrice}. Proceeding to confirmation.`);
+        setFormData(prev => ({ ...prev, price: recPrice }));
+        setLowPriceWarning(null);
+        setTimeout(() => {
+          triggerConfirmationReadback(selectedLanguage, recPrice);
+        }, 300);
+      } else if (key === '2') {
+        logTelemetry('DTMF', 'Artisan pressed 2: Re-recording Question 3 (Price)...');
+        setLowPriceWarning(null);
+        executeQuestionStep(2, selectedLanguage);
+      }
+      return;
+    }
+
     // If on receipt, pressing end call returns to idle
     if (callState === 'RECEIPT') {
       if (key === '#' || key === '0') {
         handleEndCall();
       }
     }
-  }, [callState, playDtmfTone, logTelemetry, stopAudioTracks, executeQuestionStep, handleSubmitConfirmedDraft, selectedLanguage, speakIvrPrompt, handleEndCall]);
+  }, [callState, playDtmfTone, logTelemetry, stopAudioTracks, executeQuestionStep, handleSubmitConfirmedDraft, selectedLanguage, speakIvrPrompt, handleEndCall, lowPriceWarning, triggerConfirmationReadback]);
 
   // ─── Physical PC Keyboard Support ────────────────────────────────────────────
   useEffect(() => {
@@ -623,19 +676,19 @@ export default function KeypadPhoneSimulator({ onClose }) {
       stopAudioTracks();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
       if (audioContextRef.current) {
-        try { audioContextRef.current.close(); } catch (e) {}
+        try { audioContextRef.current.close(); } catch (e) { }
       }
     };
   }, [stopAudioTracks]);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 md:p-6 select-none animate-in fade-in duration-200">
-      <div className="relative w-full max-w-5xl h-full max-h-[96vh] bg-slate-900 rounded-3xl border border-slate-700/80 shadow-2xl flex flex-col md:flex-row overflow-hidden">
+      <div className={`relative w-full ${showMobileTelemetry ? 'max-w-2xl' : 'max-w-sm sm:max-w-md'} md:max-w-5xl h-full max-h-[96vh] bg-slate-900 rounded-3xl border border-slate-700/80 shadow-2xl flex flex-col md:flex-row overflow-hidden`}>
 
         {/* ==================================================================== */}
         {/* LEFT COLUMN: THE KEYPAD FEATURE PHONE (Nokia/JioBharat Metaphor)     */}
         {/* ==================================================================== */}
-        <div className="w-full md:w-[420px] bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-4 md:p-6 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col items-center justify-between shrink-0 overflow-y-auto">
+        <div className={`w-full md:w-[420px] bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-4 md:p-6 border-b md:border-b-0 md:border-r border-slate-800 flex-col items-center justify-between shrink-0 overflow-y-auto ${showMobileTelemetry ? 'hidden md:flex' : 'flex'}`}>
 
           {/* Phone Shell Header with Speaker Grill */}
           <div className="w-full flex items-center justify-between mb-3 px-2">
@@ -645,15 +698,26 @@ export default function KeypadPhoneSimulator({ onClose }) {
                 कला-वाणी IVR • MoSJE
               </span>
             </div>
-            {onClose && (
+            <div className="flex items-center gap-2">
+              {/* Optional mobile toggle to view live telemetry logs */}
               <button
-                onClick={onClose}
-                className="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs transition-colors cursor-pointer"
-                title="Close Simulator"
+                onClick={() => setShowMobileTelemetry(true)}
+                className="md:hidden px-2 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 active:scale-95 text-amber-300 border border-amber-500/30 flex items-center gap-1.5 text-[10px] font-bold tracking-wide transition-all cursor-pointer shadow-xs"
+                title="View AI Telemetry & Pipeline Logs"
               >
-                <X className="w-4 h-4" />
+                <Terminal className="w-3 h-3 text-amber-400" />
+                <span>AI Logs</span>
               </button>
-            )}
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs transition-colors cursor-pointer"
+                  title="Close Simulator"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Realistic Hardware Phone Chassis */}
@@ -685,7 +749,7 @@ export default function KeypadPhoneSimulator({ onClose }) {
                     <span className="w-0.5 h-2 bg-[#142310]" />
                     <span className="w-0.5 h-2.5 bg-[#142310]" />
                   </div>
-                  <span>JIO 4G</span>
+                  <span>BSNL 2G</span>
                 </div>
 
                 {/* Call Timer or Network Status */}
@@ -829,6 +893,30 @@ export default function KeypadPhoneSimulator({ onClose }) {
                   </div>
                 )}
 
+                {/* STATE: PRICE_WARNING (FAIR PRICE DISCLAIMER) */}
+                {callState === 'PRICE_WARNING' && (
+                  <div className="w-full space-y-0.5 text-left text-[8px] leading-tight animate-in fade-in">
+                    <div className="text-center font-black text-[9px] pb-0.5 border-b border-[#557049]/40 text-[#251010] flex items-center justify-center gap-1">
+                      <span>⚠️ कम मूल्य चेतावनी (Low Price)</span>
+                    </div>
+                    <div className="flex justify-between font-bold pt-0.5">
+                      <span>बोली गई कीमत:</span>
+                      <span className="line-through text-[#3a1d1d]">₹{lowPriceWarning?.spoken || 200}</span>
+                    </div>
+                    <div className="flex justify-between font-black text-[#13280e]">
+                      <span>उचित मूल्य (MSP):</span>
+                      <span className="bg-[#557049]/30 px-1 rounded text-[8.5px]">₹{lowPriceWarning?.recommended || 450}</span>
+                    </div>
+                    <div className="text-[7px] text-[#241313] font-bold leading-tight pt-0.5">
+                      यह शिल्प के न्यूनतम बाज़ार मूल्य से कम है।
+                    </div>
+                    <div className="flex justify-between pt-1 font-black text-[8.5px] text-[#1F3617] border-t border-[#557049]/30">
+                      <span>1: ₹450 चुनें ✓</span>
+                      <span>2: फिर बोलें ↺</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* STATE 8: REDO SELECTION */}
                 {callState === 'REDO_SELECT' && (
                   <div className="w-full space-y-0.5 text-left text-[8px] font-bold animate-in fade-in">
@@ -880,9 +968,9 @@ export default function KeypadPhoneSimulator({ onClose }) {
 
               {/* LCD Bottom Bar */}
               <div className="flex items-center justify-between text-[8px] font-black pt-1 border-t border-[#557049]/40 shrink-0">
-                <span>{callState === 'IDLE' ? 'MENU' : 'INFO'}</span>
-                <span>{callState === 'IDLE' ? 'DIAL' : 'HOLD'}</span>
-                <span>{callState === 'IDLE' ? 'NAMES' : 'BACK'}</span>
+                <span>{callState === 'IDLE' ? 'MENU' : callState === 'PRICE_WARNING' ? '₹450 (1)' : 'INFO'}</span>
+                <span>{callState === 'IDLE' ? 'DIAL' : callState === 'PRICE_WARNING' ? 'WARN' : 'HOLD'}</span>
+                <span>{callState === 'IDLE' ? 'NAMES' : callState === 'PRICE_WARNING' ? 'REDO (2)' : 'BACK'}</span>
               </div>
             </div>
 
@@ -892,6 +980,7 @@ export default function KeypadPhoneSimulator({ onClose }) {
               <button
                 onClick={() => {
                   if (callState === 'IDLE') handleStartCall();
+                  else if (callState === 'PRICE_WARNING') handleKeyPress('1');
                   else handleKeyPress('1');
                 }}
                 className="w-12 h-6 bg-[#2B3540] hover:bg-[#394654] active:translate-y-0.5 rounded-lg border border-[#445363] text-[9px] font-black text-slate-300 shadow-md cursor-pointer flex items-center justify-center"
@@ -905,6 +994,7 @@ export default function KeypadPhoneSimulator({ onClose }) {
                   onClick={() => {
                     if (callState === 'IDLE') handleStartCall();
                     else if (callState === 'RECORDING') handleKeyPress('#');
+                    else if (callState === 'PRICE_WARNING') handleKeyPress('1');
                   }}
                   className="w-8 h-8 rounded-full bg-[#181F26] hover:bg-[#202933] active:scale-95 border border-[#4A5D70] flex items-center justify-center text-[10px] font-black text-amber-400 cursor-pointer shadow-inner"
                   title="OK / Select"
@@ -916,7 +1006,8 @@ export default function KeypadPhoneSimulator({ onClose }) {
               {/* Right Soft Key */}
               <button
                 onClick={() => {
-                  if (callState !== 'IDLE') handleEndCall();
+                  if (callState === 'PRICE_WARNING') handleKeyPress('2');
+                  else if (callState !== 'IDLE') handleEndCall();
                 }}
                 className="w-12 h-6 bg-[#2B3540] hover:bg-[#394654] active:translate-y-0.5 rounded-lg border border-[#445363] text-[9px] font-black text-slate-300 shadow-md cursor-pointer flex items-center justify-center"
               >
@@ -995,79 +1086,97 @@ export default function KeypadPhoneSimulator({ onClose }) {
         {/* ==================================================================== */}
         {/* RIGHT COLUMN: REAL-TIME AI TELEMETRY & LIVE DEMO INSPECT DOCK        */}
         {/* ==================================================================== */}
-        <div className="flex-1 bg-slate-900/90 flex flex-col overflow-hidden">
+        <div className={`flex-1 bg-slate-900/90 flex-col overflow-hidden ${showMobileTelemetry ? 'flex' : 'hidden md:flex'}`}>
 
           {/* Telemetry Header */}
-          <div className="px-5 py-3.5 bg-slate-850 border-b border-slate-800 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+          <div className="px-4 md:px-5 py-3.5 bg-slate-850 border-b border-slate-800 flex items-center justify-between shrink-0 gap-2">
+            <div className="flex items-center gap-2 md:gap-2.5 min-w-0">
+              {/* Mobile Back Button to return to phone */}
+              <button
+                onClick={() => setShowMobileTelemetry(false)}
+                className="md:hidden px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 flex items-center gap-1 text-xs cursor-pointer shrink-0"
+                title="Back to Phone"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[10px] font-bold text-slate-200">Phone</span>
+              </button>
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
                 <Terminal className="w-4 h-4" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-black text-white tracking-tight">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-sm font-black text-white tracking-tight truncate">
                     Live Telemetry & AI Inspection
                   </h2>
                   {/* Mandatory transparency label */}
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-black border border-emerald-500/30 uppercase tracking-wide">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-black border border-emerald-500/30 uppercase tracking-wide shrink-0">
                     Simulated Call — Real AI Pipeline
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400 font-medium">
+                <p className="text-[10px] text-slate-400 font-medium truncate">
                   Smart India Hackathon 2026 • Problem Statement 26090 (Zero-Smartphone Tier)
                 </p>
               </div>
             </div>
 
-            {/* Telemetry View Tabs */}
-            <div className="flex items-center gap-1 bg-slate-800/80 p-1 rounded-xl border border-slate-700/80">
-              <button
-                onClick={() => setActiveTelemetryTab('logs')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeTelemetryTab === 'logs' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Log Stream
-              </button>
-              <button
-                onClick={() => setActiveTelemetryTab('payload')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeTelemetryTab === 'payload' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Data Payload
-              </button>
-              <button
-                onClick={() => setActiveTelemetryTab('settings')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeTelemetryTab === 'settings' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                AI Credentials
-              </button>
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Telemetry View Tabs */}
+              <div className="flex items-center gap-1 bg-slate-800/80 p-1 rounded-xl border border-slate-700/80">
+                <button
+                  onClick={() => setActiveTelemetryTab('logs')}
+                  className={`px-2.5 md:px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${activeTelemetryTab === 'logs' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+                    }`}
+                >
+                  Log Stream
+                </button>
+                <button
+                  onClick={() => setActiveTelemetryTab('payload')}
+                  className={`px-2.5 md:px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${activeTelemetryTab === 'payload' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+                    }`}
+                >
+                  Data Payload
+                </button>
+                <button
+                  onClick={() => setActiveTelemetryTab('settings')}
+                  className={`px-2.5 md:px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${activeTelemetryTab === 'settings' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
+                    }`}
+                >
+                  AI Credentials
+                </button>
+              </div>
+
+              {/* Close button on mobile if in telemetry view */}
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="md:hidden w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs transition-colors cursor-pointer shrink-0"
+                  title="Close Simulator"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
 
           {/* 6-Stage Real-Time Pipeline Progress Indicator */}
-          <div className="px-5 py-3 bg-slate-950/40 border-b border-slate-800 shrink-0">
-            <div className="grid grid-cols-6 gap-2 text-center text-[10px]">
+          <div className="px-3 md:px-5 py-2.5 md:py-3 bg-slate-950/40 border-b border-slate-800 shrink-0 overflow-x-auto">
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-1.5 md:gap-2 text-center text-[10px]">
               {[
                 { stage: '1. PSTN Hop', active: callState !== 'IDLE', done: callState !== 'IDLE' && callState !== 'DIALING' },
-                { stage: '2. Silence Gate', active: callState === 'RECORDING', done: ['PROCESSING', 'CONFIRMATION', 'RECEIPT'].includes(callState) },
-                { stage: '3. Bhashini ASR', active: callState === 'PROCESSING', done: ['CONFIRMATION', 'RECEIPT'].includes(callState) },
-                { stage: '4. Translation', active: callState === 'PROCESSING', done: ['CONFIRMATION', 'RECEIPT'].includes(callState) },
+                { stage: '2. Silence Gate', active: callState === 'RECORDING', done: ['PROCESSING', 'PRICE_WARNING', 'CONFIRMATION', 'RECEIPT'].includes(callState) },
+                { stage: '3. Bhashini ASR', active: callState === 'PROCESSING', done: ['PRICE_WARNING', 'CONFIRMATION', 'RECEIPT'].includes(callState) },
+                { stage: '4. Translation', active: callState === 'PROCESSING' || callState === 'PRICE_WARNING', done: ['CONFIRMATION', 'RECEIPT'].includes(callState) },
                 { stage: '5. Draft SQLite', active: callState === 'SUBMITTING', done: callState === 'RECEIPT' },
                 { stage: '6. SMS Dispatch', active: callState === 'RECEIPT', done: callState === 'RECEIPT' },
               ].map(({ stage, active, done }, idx) => (
                 <div
                   key={idx}
-                  className={`p-1.5 rounded-xl border transition-all ${
-                    done
+                  className={`p-1.5 rounded-xl border transition-all ${done
                       ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 font-bold'
                       : active
-                      ? 'bg-amber-500/20 border-amber-500/60 text-amber-300 font-black animate-pulse'
-                      : 'bg-slate-800/40 border-slate-800 text-slate-500 font-medium'
-                  }`}
+                        ? 'bg-amber-500/20 border-amber-500/60 text-amber-300 font-black animate-pulse'
+                        : 'bg-slate-800/40 border-slate-800 text-slate-500 font-medium'
+                    }`}
                 >
                   <div className="flex items-center justify-center gap-1">
                     {done ? <Check className="w-3 h-3 text-emerald-400" /> : <span className="w-1.5 h-1.5 rounded-full bg-current" />}
