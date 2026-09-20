@@ -653,13 +653,13 @@ export default function StudioReviewCard() {
                 <span>{language === 'hi' ? 'क्रेता दृश्य • ONDC' : 'Buyer Preview • ONDC'}</span>
               </div>
 
-              {/* Leader Lines SVG (Two-Segment Jogged Elbow Lines in #000000) */}
+              {/* Leader Lines SVG: Elegant Hairline Charcoal Lines (#262626) with Smooth Organic Elbows */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible">
                 {containerDimensions.width > 0 && craftPins.map((pin) => {
                   const W = containerDimensions.width;
                   const H = containerDimensions.height;
-                  const r = Math.max(36, Math.min(54, W * 0.14));
-                  const shelfLen = Math.max(18, Math.min(28, W * 0.075));
+                  const r = Math.max(34, Math.min(52, W * 0.13));
+                  const shelfLen = Math.max(16, Math.min(26, W * 0.07));
 
                   const anchorX = ((pin.x ?? pin.x_pct ?? 50) / 100) * W;
                   const anchorY = ((pin.y ?? pin.y_pct ?? 50) / 100) * H;
@@ -673,46 +673,61 @@ export default function StudioReviewCard() {
                   const endX = kneeX + (isRight ? shelfLen : -shelfLen);
                   const endY = kneeY;
 
+                  // Smooth organic elbow transition using quadratic bezier fillet
+                  const fillet = Math.min(7.0, r * 0.25, shelfLen * 0.4);
+                  const pStartX = kneeX - fillet * Math.cos(rad);
+                  const pStartY = kneeY - fillet * Math.sin(rad);
+                  const pEndX = kneeX + (isRight ? fillet : -fillet);
+                  const pEndY = kneeY;
+
                   return (
                     <g key={`buyer-leader-${pin.id}`}>
-                      {/* Two-segment jogged elbow callout leader line: diagonal then horizontal shelf */}
+                      {/* Hairline elegant charcoal line with organic curved elbow transition */}
                       <path
-                        d={`M ${anchorX.toFixed(1)} ${anchorY.toFixed(1)} L ${kneeX.toFixed(1)} ${kneeY.toFixed(1)} L ${endX.toFixed(1)} ${endY.toFixed(1)}`}
-                        stroke="#000000"
-                        strokeWidth="1.6"
+                        d={`M ${anchorX.toFixed(1)} ${anchorY.toFixed(1)} L ${pStartX.toFixed(1)} ${pStartY.toFixed(1)} Q ${kneeX.toFixed(1)} ${kneeY.toFixed(1)} ${pEndX.toFixed(1)} ${pEndY.toFixed(1)} L ${endX.toFixed(1)} ${endY.toFixed(1)}`}
+                        stroke="#262626"
+                        strokeWidth="1"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         fill="none"
                       />
-                      {/* Solid black anchor dot */}
+                      {/* Minimalist Dual-Layer Terminal: Translucent Halo + Tiny Solid Center Dot */}
                       <circle
                         cx={anchorX}
                         cy={anchorY}
-                        r="3.5"
-                        fill="#000000"
-                        stroke="#000000"
-                        strokeWidth="1"
+                        r="4.5"
+                        fill="rgba(38, 38, 38, 0.08)"
+                        stroke="#262626"
+                        strokeWidth="0.75"
+                        strokeOpacity="0.45"
                       />
-                      {/* Minimal elbow jog joint dot */}
                       <circle
-                        cx={kneeX}
-                        cy={kneeY}
-                        r="1.5"
-                        fill="#000000"
+                        cx={anchorX}
+                        cy={anchorY}
+                        r="1.75"
+                        fill="#262626"
+                      />
+                      {/* Hairline Shelf Terminal Dot */}
+                      <circle
+                        cx={endX}
+                        cy={endY}
+                        r="1"
+                        fill="#262626"
+                        opacity="0.6"
                       />
                     </g>
                   );
                 })}
               </svg>
 
-              {/* Radial Callout Cards (Curated Bank Term + One-Line Summary) */}
+              {/* Ultra-Refined Frosted Glass Radial Callout Cards (Luxury Apple/Net-a-Porter Aesthetic) */}
               <div className="absolute inset-0 pointer-events-auto overflow-hidden">
                 {containerDimensions.width > 0 && craftPins.map((pin) => {
                   const W = containerDimensions.width;
                   const H = containerDimensions.height;
-                  const r = Math.max(36, Math.min(54, W * 0.14));
-                  const shelfLen = Math.max(18, Math.min(28, W * 0.075));
-                  const cardWidth = Math.min(128, Math.max(105, W * 0.35));
+                  const r = Math.max(34, Math.min(52, W * 0.13));
+                  const shelfLen = Math.max(16, Math.min(26, W * 0.07));
+                  const cardWidth = Math.min(148, Math.max(118, W * 0.38));
 
                   const anchorX = ((pin.x ?? pin.x_pct ?? 50) / 100) * W;
                   const anchorY = ((pin.y ?? pin.y_pct ?? 50) / 100) * H;
@@ -726,11 +741,11 @@ export default function StudioReviewCard() {
                   const endX = kneeX + (isRight ? shelfLen : -shelfLen);
                   const endY = kneeY;
 
-                  let cardLeft = isRight ? endX + 4 : endX - cardWidth - 4;
-                  cardLeft = Math.max(6, Math.min(W - cardWidth - 6, cardLeft));
+                  // Ensure generous padding offsets so layout breathes naturally without clipping
+                  let cardLeft = isRight ? endX + 6 : endX - cardWidth - 6;
+                  cardLeft = Math.max(12, Math.min(W - cardWidth - 12, cardLeft));
 
-                  let cardTop = endY;
-                  cardTop = Math.max(24, Math.min(H - 28, cardTop));
+                  let cardTop = Math.max(26, Math.min(H - 32, endY));
 
                   const isRotating = activeRotatingPinId === pin.id;
 
@@ -743,49 +758,47 @@ export default function StudioReviewCard() {
                         width: `${cardWidth}px`,
                         transform: 'translateY(-50%)',
                       }}
-                      className={`absolute z-20 transition-all ${
+                      className={`absolute z-20 transition-all duration-200 ${
                         isRotating ? 'scale-105 z-30' : ''
                       }`}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className={`bg-white/95 backdrop-blur-md rounded-xl p-1.5 border shadow-md text-slate-900 select-none ${
-                        isRotating ? 'border-amber-400 ring-2 ring-amber-400/40 shadow-lg' : 'border-slate-300'
+                      {/* Frosted Glass Floating Card with 0.5px subtle border & soft shadow */}
+                      <div className={`bg-white/85 backdrop-blur-md rounded-2xl px-2.5 py-2 border border-[#E5E7EB] shadow-lg shadow-black/5 text-slate-900 select-none transition-shadow ${
+                        isRotating ? 'border-amber-400 ring-2 ring-amber-400/20 shadow-xl' : 'hover:border-slate-300'
                       }`}>
-                        {/* Header: Curated Bank Term & Rotation Drag Handle */}
-                        <div className="flex items-center justify-between gap-1 mb-0.5">
-                          <span className="font-extrabold text-[10px] leading-tight text-slate-950 truncate tracking-tight">
+                        {/* Primary Heading: 13px, font-semibold, tracking-wide, #111111 */}
+                        <div className="flex items-center justify-between gap-1">
+                          <h5 className="font-semibold text-[13px] tracking-wide text-[#111111] leading-tight font-sans truncate">
                             {pin.bank_term || pin.short_label_en || pin.short_label}
-                          </span>
+                          </h5>
                           <button
                             type="button"
                             onMouseDown={(e) => startRotatePin(e, pin.id)}
                             onTouchStart={(e) => startRotatePin(e, pin.id)}
-                            className={`p-0.5 rounded cursor-grab active:cursor-grabbing hover:bg-slate-100 transition ${
-                              isRotating ? 'text-amber-600 bg-amber-50' : 'text-slate-400 hover:text-slate-600'
+                            className={`p-0.5 rounded cursor-grab active:cursor-grabbing transition-colors shrink-0 ${
+                              isRotating ? 'text-amber-600 bg-amber-50' : 'text-[#888888] hover:text-[#111111]'
                             }`}
-                            title="Drag to rotate callout angle"
+                            title="Drag to adjust callout angle"
                           >
-                            <Move className="w-2.5 h-2.5" />
+                            <Move className="w-2.5 h-2.5 stroke-[1.5]" />
                           </button>
                         </div>
 
-                        {/* Supporting Sentence */}
-                        <p className="text-[8.5px] leading-tight text-slate-600 line-clamp-2">
+                        {/* Supporting Description: 11px, font-normal, #555555, tightly kerned */}
+                        <p className="font-normal text-[11px] text-[#555555] leading-snug tracking-tight font-sans mt-0.5 line-clamp-2">
                           {pin.one_line_summary || pin.full_description_en || pin.full_description}
                         </p>
 
-                        {/* Micro Footprint */}
-                        <div className="mt-1 pt-0.5 border-t border-slate-100 flex items-center justify-between text-[7.5px]">
-                          <span
-                            className={`font-bold px-1 rounded-xs ${
-                              pin.category === 'craft_detail'
-                                ? 'text-amber-700 bg-amber-50'
-                                : 'text-teal-700 bg-teal-50'
-                            }`}
-                          >
-                            {pin.category === 'craft_detail' ? 'Craft Detail' : 'Natural Var.'}
+                        {/* Museum-grade subtle footer */}
+                        <div className="flex items-center justify-between mt-1 pt-1 border-t border-[#F0F2F5] text-[9px] text-[#888888] font-sans">
+                          <span className="flex items-center gap-1">
+                            <span className={`w-1.5 h-1.5 rounded-full ${pin.category === 'craft_detail' ? 'bg-amber-500' : 'bg-teal-500'}`} />
+                            <span className="font-medium tracking-wider uppercase text-[8px]">
+                              {pin.category === 'craft_detail' ? 'Craft Detail' : 'Natural Var.'}
+                            </span>
                           </span>
-                          <span className="text-slate-400 font-mono">
+                          <span className="text-[8px] font-mono text-slate-400">
                             {Math.round(angle)}°
                           </span>
                         </div>

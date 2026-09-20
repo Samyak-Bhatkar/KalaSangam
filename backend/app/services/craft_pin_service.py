@@ -393,10 +393,15 @@ def composite_annotated_buyer_image(
     draw = ImageDraw.Draw(canvas)
     font_title, font_sub = get_pillow_fonts(title_size=20, sub_size=14)
 
-    # Solid black color palette for callouts as requested (#000000)
-    BLACK = (0, 0, 0, 255)
+    # Museum-grade luxury color palette (Apple / Net-a-Porter aesthetic)
+    CHARCOAL = (38, 38, 38, 255)       # #262626 elegant hairline leader
+    TEXT_HEADING = (17, 17, 17, 255)    # #111111 premium sans-serif heading
+    TEXT_MUTED = (85, 85, 85, 255)      # #555555 refined description
+    BORDER_GRAY = (229, 231, 235, 255)  # #E5E7EB 0.5px subtle border
     WHITE = (255, 255, 255, 255)
-    TEXT_MUTED = (71, 85, 105, 255)
+    SHADOW_TINT = (0, 0, 0, 14)         # soft luxury drop shadow
+    HALO_FILL = (38, 38, 38, 20)        # translucent halo for anchor
+    HALO_STROKE = (38, 38, 38, 90)
 
     # 3. Draw Each Pin's Callout
     for pin in pins:
@@ -438,22 +443,22 @@ def composite_annotated_buyer_image(
             sub_w = tb_sub[2] - tb_sub[0]
             sub_h = tb_sub[3] - tb_sub[1]
 
-        pad_x = 16
-        pad_y = 12
+        pad_x = 18
+        pad_y = 14
         card_w = max(title_w, sub_w) + (pad_x * 2)
         card_h = title_h + (sub_h + 6 if sub_text else 0) + (pad_y * 2)
 
-        # Card position: adjacent to shelf endpoint
+        # Card position: adjacent to shelf endpoint with breathing room
         if is_right:
-            cx = sx + 8
+            cx = sx + 10
             cy = sy - (card_h / 2.0)
         else:
-            cx = sx - card_w - 8
+            cx = sx - card_w - 10
             cy = sy - (card_h / 2.0)
 
-        # Clamp card to stay safely inside 1080 canvas
-        cx = max(18.0, min(canvas_size - card_w - 18.0, cx))
-        cy = max(18.0, min(canvas_size - card_h - 18.0, cy))
+        # Clamp card to stay safely inside 1080 canvas with breathing room
+        cx = max(24.0, min(canvas_size - card_w - 24.0, cx))
+        cy = max(24.0, min(canvas_size - card_h - 24.0, cy))
 
         # Re-adjust shelf end to attach neatly to card edge if clamped
         if is_right:
@@ -461,31 +466,48 @@ def composite_annotated_buyer_image(
         else:
             shelf_end_x = cx + card_w
 
-        # --- A. Draw Leader Line (2-segment jogged elbow line in solid black #000000) ---
-        # Diagonal segment
-        draw.line([(ax, ay), (ex, ey)], fill=BLACK, width=3)
-        # Horizontal shelf segment
-        draw.line([(ex, ey), (shelf_end_x, sy)], fill=BLACK, width=3)
+        # --- A. Draw Hairline Leader Line with Smooth Organic Elbow Transition ---
+        fillet = min(18.0, r_diag * 0.25, shelf_len * 0.4)
+        p_start_x = ex - fillet * math.cos(angle_rad)
+        p_start_y = ey - fillet * math.sin(angle_rad)
+        p_end_x = ex + (fillet if is_right else -fillet)
+        p_end_y = ey
 
-        # --- B. Draw Anchor Dot (solid black with crisp white outer ring for contrast) ---
-        dot_r = 7
-        draw.ellipse([ax - dot_r - 2, ay - dot_r - 2, ax + dot_r + 2, ay + dot_r + 2], fill=WHITE)
-        draw.ellipse([ax - dot_r, ay - dot_r, ax + dot_r, ay + dot_r], fill=BLACK)
+        # Hairline diagonal
+        draw.line([(ax, ay), (p_start_x, p_start_y)], fill=CHARCOAL, width=2)
+        # Organic curved fillet at elbow
+        curve_pts = [(p_start_x, p_start_y)]
+        for t_step in range(1, 6):
+            t = t_step / 6.0
+            bx = (1 - t)**2 * p_start_x + 2 * (1 - t) * t * ex + t**2 * p_end_x
+            by = (1 - t)**2 * p_start_y + 2 * (1 - t) * t * ey + t**2 * p_end_y
+            curve_pts.append((bx, by))
+        curve_pts.append((p_end_x, p_end_y))
+        for i in range(len(curve_pts) - 1):
+            draw.line([curve_pts[i], curve_pts[i + 1]], fill=CHARCOAL, width=2)
+        # Hairline horizontal shelf
+        draw.line([(p_end_x, p_end_y), (shelf_end_x, sy)], fill=CHARCOAL, width=2)
 
-        # Shelf endpoint dot at card boundary
-        draw.ellipse([shelf_end_x - 4, sy - 4, shelf_end_x + 4, sy + 4], fill=BLACK)
+        # --- B. Draw Minimalist Dual-Layer Terminal Pin ---
+        halo_r = 9
+        draw.ellipse([ax - halo_r, ay - halo_r, ax + halo_r, ay + halo_r], fill=HALO_FILL, outline=HALO_STROKE, width=1)
+        dot_r = 3.5
+        draw.ellipse([ax - dot_r, ay - dot_r, ax + dot_r, ay + dot_r], fill=CHARCOAL)
 
-        # --- C. Draw Callout Card Card Box ---
-        # Card background (clean white card with crisp solid black border)
+        # Delicate termination dot at shelf card junction
+        draw.ellipse([shelf_end_x - 2, sy - 2, shelf_end_x + 2, sy + 2], fill=CHARCOAL)
+
+        # --- C. Draw Frosted Luxury Callout Card ---
         card_bbox = [cx, cy, cx + card_w, cy + card_h]
-        # Drop shadow behind card
-        draw.rounded_rectangle([cx + 3, cy + 3, cx + card_w + 3, cy + card_h + 3], radius=10, fill=(0, 0, 0, 35))
-        draw.rounded_rectangle(card_bbox, radius=10, fill=WHITE, outline=BLACK, width=2)
+        # Soft luxury shadow
+        draw.rounded_rectangle([cx + 3, cy + 4, cx + card_w + 3, cy + card_h + 4], radius=16, fill=SHADOW_TINT)
+        # Clean white card with ultra-subtle 0.5px soft gray border (#E5E7EB)
+        draw.rounded_rectangle(card_bbox, radius=16, fill=WHITE, outline=BORDER_GRAY, width=1)
 
-        # Draw Title
-        draw.text((cx + pad_x, cy + pad_y), label_text, font=font_title, fill=BLACK)
+        # Primary Heading: 13px equivalent, semibold, #111111
+        draw.text((cx + pad_x, cy + pad_y), label_text, font=font_title, fill=TEXT_HEADING)
 
-        # Draw Subtitle
+        # Supporting Description: 11px equivalent, #555555, tightly kerned
         if sub_text:
             draw.text((cx + pad_x, cy + pad_y + title_h + 6), sub_text, font=font_sub, fill=TEXT_MUTED)
 
