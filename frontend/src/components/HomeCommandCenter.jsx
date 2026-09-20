@@ -572,138 +572,140 @@ export default function HomeCommandCenter() {
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-5 bg-[#C85A32] rounded-full" />
-            <h3 className="text-base font-extrabold text-slate-900">
-              तुरंत नया सामान जोड़ें <span className="text-xs font-normal text-slate-500">(1-टैप एक्शन)</span>
+            <h3 className="text-base font-extrabold text-stone-900">
+              तुरंत नया सामान जोड़ें <span className="text-xs font-normal text-stone-500">(1-टैप एक्शन)</span>
             </h3>
           </div>
-          <span className="text-[10px] text-[#C85A32] font-bold bg-[#FFDBCF] px-2.5 py-0.5 rounded-full">
+          <span className="text-[10px] text-[#C85A32] font-bold bg-[#C85A32]/10 px-2.5 py-0.5 rounded-full border border-[#C85A32]/20">
             सुपर-फ़ास्ट
           </span>
         </div>
 
-        {/* Dual Touch Islands */}
+        {/* Dual Touch Islands: Elevated White Cards with Tinted Icon Wells */}
         <div className="grid grid-cols-2 gap-3">
           {/* Option A: Snap Craft Photo */}
           <button
             onClick={() => setCurrentStep(1)}
-            className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#C85A32] to-[#BF542C] text-white p-4 shadow-md hover:shadow-lg flex flex-col justify-between text-left h-[200px] active:scale-[0.97] transition-all cursor-pointer border border-[#E06D44]"
+            className="group relative overflow-hidden rounded-3xl bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-4px_rgba(0,0,0,0.06)] hover:shadow-md flex flex-col justify-between text-left h-[200px] active:scale-[0.98] transition-all cursor-pointer border border-stone-200/90 hover:border-[#C85A32]/40"
           >
+            {/* Top subtle terracotta accent strip */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#C85A32] to-[#E85D04]" />
+
             <div className="flex items-center justify-between relative z-10">
-              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
-                <Camera className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-2xl bg-[#C85A32]/10 border border-[#C85A32]/20 flex items-center justify-center text-[#C85A32] group-hover:scale-105 transition-transform shadow-xs">
+                <Camera className="w-6 h-6 stroke-[2]" />
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-[#FFDBCF] text-[#390C00] text-[10px] font-extrabold">
+              <span className="px-2 py-0.5 rounded-full bg-stone-100 text-stone-700 text-[10px] font-extrabold border border-stone-200/80">
                 AI स्टूडियो
               </span>
             </div>
 
             <div className="relative z-10 mt-auto">
-              <div className="text-xl font-black text-white leading-tight">
+              <div className="text-xl font-black text-stone-900 leading-tight">
                 फोटो लें
               </div>
-              <div className="text-xs font-bold text-amber-200">
+              <div className="text-xs font-bold text-[#C85A32]">
                 Snap Craft
               </div>
-              <p className="text-[10px] text-white/90 mt-1 line-clamp-1">
+              <p className="text-[11px] text-stone-500 mt-1 line-clamp-1 font-medium">
                 पृष्ठभूमि खुद हट जाएगी
               </p>
             </div>
 
-            <div className="w-full h-1.5 bg-white/20 rounded-full mt-2 overflow-hidden">
-              <div className="w-2/3 h-full bg-amber-300 rounded-full" />
+            <div className="w-full h-1.5 bg-stone-100 rounded-full mt-2 overflow-hidden">
+              <div className="w-2/3 h-full bg-[#C85A32] rounded-full" />
             </div>
           </button>
 
           {/* Option B: Voice Describe FAB */}
           <button
             onClick={() => setCurrentStep(2)}
-            className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#D97706] to-[#B45309] text-white p-4 shadow-md hover:shadow-lg flex flex-col justify-between text-left h-[200px] active:scale-[0.97] transition-all cursor-pointer border border-amber-500"
+            className="group relative overflow-hidden rounded-3xl bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-4px_rgba(0,0,0,0.06)] hover:shadow-md flex flex-col justify-between text-left h-[200px] active:scale-[0.98] transition-all cursor-pointer border border-stone-200/90 hover:border-amber-400/80"
           >
+            {/* Top subtle saffron accent strip */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-400" />
+
             <div className="flex items-center justify-between relative z-10">
-              <div className="w-12 h-12 rounded-full bg-white text-[#825100] flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                <Mic className="w-6 h-6 text-[#825100]" />
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-700 group-hover:scale-105 transition-transform shadow-xs">
+                <Mic className="w-6 h-6 stroke-[2]" />
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-white text-slate-900 text-[10px] font-extrabold flex items-center gap-1">
+              <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200/80 text-[10px] font-extrabold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
                 लाइव माइक
               </span>
             </div>
 
             <div className="relative z-10 mt-auto">
-              <div className="text-xl font-black text-white leading-tight">
+              <div className="text-xl font-black text-stone-900 leading-tight">
                 बोलकर बताएं
               </div>
-              <div className="text-xs font-bold text-amber-100">
+              <div className="text-xs font-bold text-amber-700">
                 Hold & Speak
               </div>
-              <p className="text-[10px] text-white/90 mt-1 line-clamp-1 font-medium">
+              <p className="text-[11px] text-stone-500 mt-1 line-clamp-1 font-medium">
                 हिन्दी, बुंदेली, मालवी
               </p>
             </div>
 
             <div className="flex items-end gap-1 h-2 mt-2 px-1">
-              <span className="w-1.5 h-2 bg-white/80 rounded-full" />
-              <span className="w-1.5 h-3 bg-white rounded-full" />
-              <span className="w-1.5 h-1 bg-white/60 rounded-full" />
-              <span className="w-1.5 h-3 bg-white rounded-full" />
-              <span className="w-1.5 h-2 bg-white/80 rounded-full" />
+              <span className="w-1.5 h-2 bg-amber-400 rounded-full" />
+              <span className="w-1.5 h-3.5 bg-amber-500 rounded-full" />
+              <span className="w-1.5 h-1.5 bg-amber-300 rounded-full" />
+              <span className="w-1.5 h-3.5 bg-amber-500 rounded-full" />
+              <span className="w-1.5 h-2 bg-amber-400 rounded-full" />
             </div>
           </button>
         </div>
 
-        {/* Option C: Zero-Smartphone Conversational Voice-IVR Keypad Simulator */}
+        {/* Option C: Plain User-Value IVR Banner (Zero Backend Jargon) */}
         <button
           onClick={() => setActiveModal('ivr')}
-          className="w-full group relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-slate-900 to-[#122216] text-white p-4 shadow-lg hover:shadow-xl flex items-center justify-between text-left active:scale-[0.98] transition-all cursor-pointer border border-emerald-500/40"
+          className="w-full group relative overflow-hidden rounded-3xl bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-4px_rgba(0,0,0,0.06)] hover:shadow-md flex items-center justify-between text-left active:scale-[0.98] transition-all cursor-pointer border border-emerald-200/80 hover:border-emerald-300"
         >
           <div className="flex items-center gap-3.5 relative z-10">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 group-hover:scale-105 transition-transform shrink-0 shadow-xs">
               <PhoneCall className="w-6 h-6 animate-pulse" />
             </div>
             <div>
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-sm font-black text-white">
-                  कला-वाणी IVR (Zero-Smartphone Tier)
+                <span className="text-sm font-black text-stone-900">
+                  बिना इंटरनेट ऑर्डर पाएं — मिस्ड कॉल दें
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-black border border-emerald-500/30 uppercase tracking-wide">
-                  कीपैड फोन सिम्युलेटर
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[9px] font-bold border border-emerald-200">
+                  सादा कीपैड फोन
                 </span>
               </div>
-              <p className="text-[11px] text-slate-300 line-clamp-1 mt-0.5">
-                बिना इंटरनेट या कैमरा • 1800-208-SHILP पर कॉल करके आवाज से लिस्ट करें
+              <p className="text-[11px] text-stone-600 line-clamp-1 mt-0.5 font-medium">
+                1800-208-SHILP पर कॉल करें • केवल बोलकर नया सामान जोड़ें
               </p>
-              <div className="flex items-center gap-2 mt-1 text-[9px] text-emerald-400 font-semibold font-mono">
-                <span>Bhashini ASR</span>
+              <div className="flex items-center gap-2 mt-1 text-[10px] text-emerald-700 font-bold">
+                <span>मुफ़्त सेवा</span>
                 <span>•</span>
-                <span>DTMF 1/2/3</span>
-                <span>•</span>
-                <span>समन्वयक SMS</span>
+                <span>बिना स्मार्टफोन या इंटरनेट काम करे</span>
               </div>
             </div>
           </div>
 
-          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white group-hover:translate-x-1 transition-transform shrink-0">
+          <div className="w-8 h-8 rounded-full bg-stone-100 group-hover:bg-emerald-50 flex items-center justify-center text-stone-500 group-hover:text-emerald-700 group-hover:translate-x-1 transition-all shrink-0">
             <ArrowRight className="w-4 h-4" />
           </div>
         </button>
-
-
       </section>
 
-      {/* 2.5 DRAFTS DOCK: UNPUBLISHED CRAFTS (LAZY AUTO-CLEANUP IN 24H) */}
+      {/* 2.5 DRAFTS DOCK: UNPUBLISHED CRAFTS */}
       {savedDrafts && savedDrafts.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-5 bg-amber-500 rounded-full" />
-              <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+              <h3 className="text-base font-extrabold text-stone-900 flex items-center gap-1.5">
                 <span>अधूरे ड्राफ्ट</span>
                 <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
                   {savedDrafts.length}
                 </span>
               </h3>
             </div>
-            <div className="flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+            <div className="flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
               <Clock className="w-3 h-3 text-amber-600" />
               <span>24 घंटे में स्वतः साफ़</span>
             </div>
@@ -713,10 +715,10 @@ export default function HomeCommandCenter() {
             {savedDrafts.map((draft) => (
               <div
                 key={draft.id}
-                className="p-3 rounded-2xl bg-amber-50/50 border border-amber-200/80 shadow-xs flex items-center justify-between gap-3"
+                className="p-3 rounded-2xl bg-white border border-stone-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-4px_rgba(0,0,0,0.06)] flex items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-12 h-12 rounded-xl bg-white border border-amber-200 overflow-hidden shrink-0 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-stone-50 border border-stone-200 overflow-hidden shrink-0 flex items-center justify-center">
                     {draft.studio_image_url || draft.raw_image_url ? (
                       <img
                         src={draft.studio_image_url || draft.raw_image_url}
@@ -728,15 +730,15 @@ export default function HomeCommandCenter() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-xs font-bold text-slate-900 truncate">
+                    <h4 className="text-xs font-bold text-stone-900 truncate">
                       {draft.title_hi || draft.title_en || 'अप्रकाशित कलाकृति'}
                     </h4>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-[10px] font-mono font-bold text-amber-800">
+                      <span className="text-[11px] font-mono font-bold text-stone-900">
                         ₹{draft.b2c_price || '—'}
                       </span>
-                      <span className="text-[9px] text-slate-400">•</span>
-                      <span className="text-[9px] text-amber-700 font-medium">
+                      <span className="text-[9px] text-stone-400">•</span>
+                      <span className="text-[9px] text-amber-800 font-semibold">
                         सुरक्षित ड्राफ्ट
                       </span>
                     </div>
@@ -747,14 +749,14 @@ export default function HomeCommandCenter() {
                   <button
                     onClick={() => discardDraft(draft.id)}
                     title="हटाएं (Discard draft)"
-                    className="w-8 h-8 rounded-full bg-white hover:bg-rose-50 border border-slate-200 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+                    className="w-8 h-8 rounded-full bg-stone-50 hover:bg-rose-50 border border-stone-200 text-stone-400 hover:text-rose-600 flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
 
                   <button
                     onClick={() => resumeDraft(draft)}
-                    className="py-1.5 px-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-xs active:scale-95"
+                    className="py-1.5 px-3 rounded-full bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-xs active:scale-95"
                   >
                     <span>जारी रखें</span>
                     <ArrowRight className="w-3 h-3" />
@@ -766,18 +768,18 @@ export default function HomeCommandCenter() {
         </section>
       )}
 
-      {/* 3. ARTISAN'S LIVE INVENTORY CAROUSEL */}
+      {/* 3. ARTISAN'S LIVE INVENTORY */}
       <section className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-5 bg-[#4059AA] rounded-full" />
-            <h3 className="text-base font-extrabold text-slate-900">
-              आपकी लाइव कलाकृतियां <span className="text-xs font-normal text-slate-500">(2 सक्रिय)</span>
+            <span className="w-1.5 h-5 bg-[#C85A32] rounded-full" />
+            <h3 className="text-base font-extrabold text-stone-900">
+              आपकी लाइव कलाकृतियां <span className="text-xs font-normal text-stone-500">(2 सक्रिय)</span>
             </h3>
           </div>
           <button
             onClick={() => setCurrentStep(3)}
-            className="text-xs font-bold text-blue-700 flex items-center gap-0.5 hover:underline cursor-pointer"
+            className="text-xs font-bold text-[#C85A32] flex items-center gap-0.5 hover:underline cursor-pointer"
           >
             <span>सभी देखें</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -787,54 +789,54 @@ export default function HomeCommandCenter() {
         {/* Live Items Cards */}
         <div className="space-y-2.5">
           {/* Item 1: Chanderi Silk Saree */}
-          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs hover:shadow-md transition-shadow flex items-center gap-3">
+          <div className="p-3.5 rounded-2xl bg-white border border-stone-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-4px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow flex items-center gap-3">
             <img
               src="/chanderi_saree.png"
               alt="Chanderi Saree"
-              className="w-16 h-16 rounded-xl object-cover bg-slate-50 border border-slate-100 shrink-0"
+              className="w-16 h-16 rounded-xl object-cover bg-stone-50 border border-stone-100 shrink-0"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 mb-0.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-[10px] font-bold text-emerald-700 uppercase">ONDC पर लाइव</span>
+                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">ONDC पर लाइव</span>
               </div>
-              <h4 className="text-sm font-bold text-slate-900 truncate">
+              <h4 className="text-sm font-bold text-stone-900 truncate">
                 शाही नीली चंदेरी सिल्क ज़री साड़ी
               </h4>
-              <p className="text-xs font-bold text-amber-700">
-                ₹3,200 • 18h श्रम
+              <p className="text-xs font-bold text-[#C85A32] font-mono">
+                ₹3,200 <span className="text-stone-400 font-sans font-normal">• 18h श्रम</span>
               </p>
             </div>
             <button
               onClick={() => speakVoice('शाही नीली चंदेरी सिल्क साड़ी, असली ज़री का काम, कीमत बत्तीस सौ रुपये, तुरंत बिक्री हेतु उपलब्ध है।', 'hi-IN')}
-              className="w-9 h-9 rounded-full bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center shrink-0 hover:bg-amber-100 cursor-pointer shadow-xs"
+              className="w-9 h-9 rounded-full bg-stone-50 hover:bg-stone-100 border border-stone-200 text-stone-700 flex items-center justify-center shrink-0 cursor-pointer shadow-2xs transition-colors"
             >
               <Volume2 className="w-4 h-4" />
             </button>
           </div>
 
           {/* Item 2: Gorakhpur Terracotta Handi Pot */}
-          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs hover:shadow-md transition-shadow flex items-center gap-3">
+          <div className="p-3.5 rounded-2xl bg-white border border-stone-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-4px_rgba(0,0,0,0.06)] hover:shadow-md transition-shadow flex items-center gap-3">
             <img
               src="/terracotta_pot.png"
               alt="Gorakhpur Terracotta"
-              className="w-16 h-16 rounded-xl object-cover bg-slate-50 border border-slate-100 shrink-0"
+              className="w-16 h-16 rounded-xl object-cover bg-stone-50 border border-stone-100 shrink-0"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 mb-0.5">
                 <span className="w-2 h-2 rounded-full bg-blue-500" />
-                <span className="text-[10px] font-bold text-blue-700 uppercase">GeM स्वीकृत</span>
+                <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">GeM स्वीकृत</span>
               </div>
-              <h4 className="text-sm font-bold text-slate-900 truncate">
+              <h4 className="text-sm font-bold text-stone-900 truncate">
                 हस्तनिर्मित गोरखपुर टेराकोटा कलश
               </h4>
-              <p className="text-xs font-bold text-amber-700">
-                ₹1,150 • 6h श्रम
+              <p className="text-xs font-bold text-[#C85A32] font-mono">
+                ₹1,150 <span className="text-stone-400 font-sans font-normal">• 6h श्रम</span>
               </p>
             </div>
             <button
               onClick={() => speakVoice('हस्तनिर्मित गोरखपुर टेराकोटा कलश, प्राकृतिक लाल चिकनी मिट्टी, कीमत ग्यारह सौ पचास रुपये।', 'hi-IN')}
-              className="w-9 h-9 rounded-full bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center shrink-0 hover:bg-amber-100 cursor-pointer shadow-xs"
+              className="w-9 h-9 rounded-full bg-stone-50 hover:bg-stone-100 border border-stone-200 text-stone-700 flex items-center justify-center shrink-0 cursor-pointer shadow-2xs transition-colors"
             >
               <Volume2 className="w-4 h-4" />
             </button>
