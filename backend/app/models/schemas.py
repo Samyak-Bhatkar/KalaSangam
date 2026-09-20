@@ -30,6 +30,28 @@ class StudioEnhanceResponse(BaseModel):
     drop_shadow_applied: bool
     cutout_url: Optional[str] = None
     cutout_base64: Optional[str] = None
+    preserve_original_tones: bool = False
+
+class StudioClearSpotRequest(BaseModel):
+    image_base64: Optional[str] = None
+    cutout_base64: Optional[str] = None
+    x: float
+    y: float
+    canvas_width: Optional[int] = 1080
+    canvas_height: Optional[int] = 1080
+    preserve_original_tones: Optional[bool] = False
+    tolerance: Optional[int] = 24
+    tier: Optional[str] = None
+
+class StudioClearSpotResponse(BaseModel):
+    status: str = "success"
+    cutout_url: str
+    cutout_base64: str
+    studio_url: str
+    studio_base64: str
+    cleared_pixels: int
+    tier_used: str = "lightweight"
+    message: str = "Enclosed residual hole cleared successfully"
 
 # Catalog Engine Schemas
 class CatalogVoiceProcessRequest(BaseModel):

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Award, Sliders, Check, ImagePlus, RefreshCw, X, Eye } from 'lucide-react';
+import { Sparkles, Award, Sliders, Check, ImagePlus, RefreshCw, X, Eye, Edit3 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 import { fetchBackgroundOptions, compositeLifestyleImage } from '../services/api';
+import FineTuneStudioModal from './FineTuneStudioModal';
 
 export default function StudioReviewCard() {
   const {
@@ -9,7 +10,10 @@ export default function StudioReviewCard() {
     rawImageBase64,
     studioImageBase64,
     studioImageUrl,
+    setStudioImageBase64,
+    setStudioImageUrl,
     cutoutBase64,
+    setCutoutBase64,
     lifestyleImageUrl,
     setLifestyleImageUrl,
     lifestyleImageBase64,
@@ -24,6 +28,19 @@ export default function StudioReviewCard() {
   const [sliderPosition, setSliderPosition] = useState(50); // 0 to 100 percentage
   const containerRef = useRef(null);
   const isDragging = useRef(false);
+
+  // Fine-Tune modal state
+  const [isFineTuneOpen, setIsFineTuneOpen] = useState(false);
+
+  const handleFineTuneApply = ({ studioBase64, cutoutBase64: newCutout }) => {
+    if (studioBase64) {
+      setStudioImageBase64(studioBase64);
+      setStudioImageUrl(studioBase64);
+    }
+    if (newCutout) {
+      setCutoutBase64(newCutout);
+    }
+  };
 
   // Active view tab: 'studio' | 'lifestyle'
   const [activeViewTab, setActiveViewTab] = useState('studio');
@@ -316,6 +333,25 @@ export default function StudioReviewCard() {
         </div>
       )}
 
+      {/* Secondary Fine-Tune Action Bar (Below Split Slider) */}
+      <div className="px-4 py-2.5 bg-slate-950/90 border-t border-slate-800 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[11px] font-medium text-slate-300">
+            {language === 'hi' ? 'स्वच्छ 4K स्टूडियो परिणाम' : 'Clean 4K Studio Result'}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsFineTuneOpen(true)}
+          className="min-h-[48px] px-4 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-amber-400/60 text-amber-300 hover:text-amber-200 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95"
+        >
+          <Edit3 className="w-4 h-4 text-amber-400" />
+          <span>{language === 'hi' ? '✏️ सुधारें (Fine-Tune)' : '✏️ Fine-Tune'}</span>
+        </button>
+      </div>
+
       {/* Enhancement summary chips */}
       <div className="p-3 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-around text-[11px] text-slate-400">
         <span className="flex items-center gap-1 text-slate-300">
@@ -487,6 +523,16 @@ export default function StudioReviewCard() {
           </div>
         ) : null}
       </div>
+
+      {/* Fine-Tune Slide-Up Modal */}
+      <FineTuneStudioModal
+        isOpen={isFineTuneOpen}
+        onClose={() => setIsFineTuneOpen(false)}
+        initialStudioSrc={studioSrc}
+        initialCutoutSrc={effectiveCutout}
+        rawSrc={rawSrc}
+        onApply={handleFineTuneApply}
+      />
     </div>
   );
 }

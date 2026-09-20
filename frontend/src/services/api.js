@@ -132,13 +132,16 @@ export async function checkPhotoQuality({ file, imageBase64, language = 'hi', ca
   }
 }
 
-export async function enhanceImage({ file, imageBase64 }) {
+export async function enhanceImage({ file, imageBase64, preserveOriginalTones = false }) {
   try {
     const formData = new FormData();
     if (file) {
       formData.append('file', file);
     } else if (imageBase64) {
       formData.append('image_base64', imageBase64);
+    }
+    if (preserveOriginalTones !== undefined) {
+      formData.append('preserve_original_tones', preserveOriginalTones ? 'true' : 'false');
     }
 
     const res = await fetch(`${API_BASE}/studio/enhance`, {
@@ -160,8 +163,49 @@ export async function enhanceImage({ file, imageBase64 }) {
       width: 1080,
       height: 1080,
       lighting_normalized: true,
-      drop_shadow_applied: true
+      drop_shadow_applied: true,
+      preserve_original_tones: Boolean(preserveOriginalTones),
     };
+  }
+}
+
+export async function clearSpotAtPoint({
+  cutoutBase64,
+  imageBase64,
+  x,
+  y,
+  canvasWidth = 1080,
+  canvasHeight = 1080,
+  tolerance = 24,
+  preserveOriginalTones = false,
+  tier = 'lightweight',
+}) {
+  try {
+    const res = await fetch(`${API_BASE}/studio/clear-spot`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cutout_base64: cutoutBase64,
+        image_base64: imageBase64,
+        x: Math.round(x),
+        y: Math.round(y),
+        canvas_width: canvasWidth,
+        canvas_height: canvasHeight,
+        tolerance,
+        preserve_original_tones: Boolean(preserveOriginalTones),
+        tier,
+      }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || `Clear spot failed: HTTP ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.warn('Clear spot error:', err);
+    throw err;
   }
 }
 

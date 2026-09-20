@@ -8,10 +8,14 @@ import io
 import os
 import time
 import base64
-from typing import Optional, Tuple, Dict, Any
+import logging
+from typing import Optional, Tuple, Dict, Any, Union
 import numpy as np
 from PIL import Image, ImageOps, ImageFilter, ImageEnhance
 import cv2
+from ..config import settings
+
+logger = logging.getLogger("ShilpSetu.ImageStudio")
 
 REMBG_AVAILABLE = False
 session = None
@@ -36,39 +40,66 @@ def get_rembg_session():
 STUDIO_BG_COLOR = (248, 249, 250, 255)  # Off-white studio #F8F9FA
 TARGET_SIZE = 1080
 
-def color_temperature_balance(img: Image.Image) -> Image.Image:
+def color_temperature_balance(img: Image.Image, bg_mask: Optional[np.ndarray] = None) -> Image.Image:
     """
-    Analyzes RGB histogram. If color temperature is below 5000K (warm tungsten workshop lighting),
-    shifts towards balanced neutral daylight (6500K) by boosting blue and balancing red.
+    Segmentation-Aware White Balance:
+    Computes Gray World average using ONLY background pixels identified by the segmentation mask.
+    Prevents single-hue crafts (e.g. terracotta red, temple brass gold, indigo block-print) from being
+    misidentified as a color cast and washed out into grayish tones.
     """
     rgb_img = img.convert("RGB")
     np_img = np.array(rgb_img, dtype=np.float32)
-    
-    avg_r = np.mean(np_img[:, :, 0])
-    avg_g = np.mean(np_img[:, :, 1])
-    avg_b = np.mean(np_img[:, :, 2])
-    
-    # Heuristic for tungsten light: high red, low blue (R/B > 1.35)
-    is_warm = (avg_r / (avg_b + 1e-5)) > 1.25 or avg_r > (avg_g * 1.15)
-    
+    h, w, _ = np_img.shape
+    total_pixels = h * w
+
+    # 1. Determine sampling pixels for neutral color reference
+    if bg_mask is not None and np.sum(bg_mask) > (total_pixels * 0.03):
+        # Sample exclusively from ambient background (floor, table, walls)
+        sample_pixels = np_img[bg_mask]
+    else:
+        # Fallback: peripheral border sampling (outer 10% perimeter) which avoids central craft body
+        border_mask = np.ones((h, w), dtype=bool)
+        border_mask[int(h * 0.10):int(h * 0.90), int(w * 0.10):int(w * 0.90)] = False
+        sample_pixels = np_img[border_mask]
+
+    avg_r = float(np.mean(sample_pixels[:, 0]))
+    avg_g = float(np.mean(sample_pixels[:, 1]))
+    avg_b = float(np.mean(sample_pixels[:, 2]))
+
+    # Ambient workshop tungsten light heuristic: high red, low blue (R/B > 1.25)
+    is_warm = (avg_r / (avg_b + 1e-5)) > 1.22 or avg_r > (avg_g * 1.12)
+
     if is_warm:
-        # Gray-world balance with daylight 6500K calibration
         avg_gray = (avg_r + avg_g + avg_b) / 3.0
-        # Boost blue slightly more to emulate 6500K daylight
-        scale_r = avg_gray / (avg_r + 1e-5) * 0.95
-        scale_g = avg_gray / (avg_g + 1e-5) * 1.00
-        scale_b = avg_gray / (avg_b + 1e-5) * 1.12
-        
+        # Compute correction factors derived from ambient background reference
+        raw_scale_r = avg_gray / (avg_r + 1e-5) * 0.96
+        raw_scale_g = avg_gray / (avg_g + 1e-5) * 1.00
+        raw_scale_b = avg_gray / (avg_b + 1e-5) * 1.10
+
+        # Safe bounding to prevent unnatural color distortion
+        scale_r = max(0.75, min(1.15, raw_scale_r))
+        scale_g = max(0.90, min(1.10, raw_scale_g))
+        scale_b = max(0.90, min(1.30, raw_scale_b))
+
         np_img[:, :, 0] = np.clip(np_img[:, :, 0] * scale_r, 0, 255)
         np_img[:, :, 1] = np.clip(np_img[:, :, 1] * scale_g, 0, 255)
         np_img[:, :, 2] = np.clip(np_img[:, :, 2] * scale_b, 0, 255)
-        
-        balanced = Image.fromarray(np_img.astype(np.uint8))
-        # Gentle contrast enhancement to pop craft textures
+
+    balanced = Image.fromarray(np_img.astype(np.uint8))
+
+    # CLAHE Luminance Normalization on L channel in LAB color space
+    try:
+        lab = cv2.cvtColor(np.array(balanced), cv2.COLOR_RGB2LAB)
+        l, a, b_ch = cv2.split(lab)
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        cl = clahe.apply(l)
+        merged = cv2.merge((cl, a, b_ch))
+        balanced = Image.fromarray(cv2.cvtColor(merged, cv2.COLOR_LAB2RGB))
+    except Exception:
         enhancer = ImageEnhance.Contrast(balanced)
-        return enhancer.enhance(1.08)
-    
-    return img
+        balanced = enhancer.enhance(1.08)
+
+    return balanced
 
 def segment_craft_fallback(pil_img: Image.Image) -> Image.Image:
     """
@@ -243,26 +274,42 @@ def synthesize_ecom_ground_shadow(craft_img: Image.Image, canvas_size: int, craf
     shadow_composite = Image.alpha_composite(pen_blurred, ao_blurred)
     return shadow_composite
 
-def process_studio_image(raw_bytes: bytes) -> tuple[Image.Image, Image.Image, dict]:
+def process_studio_image(
+    raw_bytes: bytes,
+    preserve_original_tones: bool = False
+) -> tuple[Image.Image, Image.Image, dict]:
     """
     Amazon / GeM Flagship Studio Pipeline:
-    1. Color temperature normalization (6500K neutral daylight)
-    2. Salient craft segmentation with cable/debris pruning
-    3. Amazon 85% Canvas Rule (dominant dimension fills 85%-87% of canvas)
-    4. Symmetrical horizontal and vertical optical centering (balanced top/bottom padding)
-    5. Dual-tier realistic ground contact shadow (Ambient Occlusion + Floor Penumbra)
-    6. Composition on pure white #FFFFFF (or #F8F9FA) studio canvas
+    1. Preliminary segmentation pass on raw image to obtain foreground craft vs background reference.
+    2. Segmentation-Aware White Balance (sampling only ambient background pixels to preserve rich terracotta/silk tones).
+       If preserve_original_tones is True, skips color-cast balancing completely.
+    3. CLAHE Luminance Normalization in LAB space.
+    4. Salient craft segmentation with cable/debris pruning.
+    5. Amazon 85% Canvas Rule Scaling (centered on 1080x1080).
+    6. Dual-tier realistic ground contact shadow (Ambient Occlusion + Floor Penumbra).
+    7. Composition on pure studio backdrop.
     """
     raw_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
     
-    # 1. Temperature & contrast normalization
-    balanced_img = color_temperature_balance(raw_img)
+    # 1. Preliminary segmentation pass to isolate craft vs background reference
+    raw_cutout = segment_craft(raw_img)
+    alpha_mask = np.array(raw_cutout.split()[3])
+    bg_mask = (alpha_mask <= 40)
+    
+    # 2. Temperature & contrast normalization
+    if preserve_original_tones:
+        # Skip color-cast balancing completely: preserve exact raw RGB channels
+        balanced_img = raw_img
+    else:
+        # Segmentation-aware white balance (uses ONLY ambient background pixels as neutral reference)
+        balanced_img = color_temperature_balance(raw_img, bg_mask=bg_mask)
 
-    # 2. Salient segmentation
-    raw_cutout = segment_craft(balanced_img)
+    # Apply alpha mask from segmentation pass to the balanced image
+    balanced_rgba = balanced_img.convert("RGBA")
+    balanced_rgba.putalpha(raw_cutout.split()[3])
 
     # 3. Clean main body (prune trailing cords, wires, detached debris)
-    cutout = filter_salient_main_body(raw_cutout)
+    cutout = filter_salient_main_body(balanced_rgba)
 
     # 4. Extract tight bounding box of true product
     bbox = cutout.getbbox()
@@ -303,8 +350,13 @@ def process_studio_image(raw_bytes: bytes) -> tuple[Image.Image, Image.Image, di
     # Paste centered 85% product with alpha
     studio_canvas.paste(craft_resized, (craft_x, craft_y), craft_resized)
 
-    # Save transparent cutout base64 for optional lifestyle scene compositing
-    cutout_b64 = image_to_base64(cutout, format="PNG")
+    # Create 1080x1080 positioned canvas cutout (enables exact 1-to-1 tap-to-clear coordinate mapping)
+    canvas_cutout = Image.new("RGBA", (target_canvas_size, target_canvas_size), (0, 0, 0, 0))
+    canvas_cutout.paste(craft_resized, (craft_x, craft_y), craft_resized)
+
+    # Save transparent cutout base64 (1080x1080 positioned canvas cutout for spot clearing)
+    cutout_b64 = image_to_base64(canvas_cutout, format="PNG")
+    tight_cutout_b64 = image_to_base64(cutout, format="PNG")
 
     # Return raw image, enhanced studio image, and metadata
     metadata = {
@@ -313,15 +365,165 @@ def process_studio_image(raw_bytes: bytes) -> tuple[Image.Image, Image.Image, di
         "occupancy_pct": round((max(new_w, new_h) / target_canvas_size) * 100, 1),
         "cushion_padding_pct": round(((target_canvas_size - max(new_w, new_h)) / target_canvas_size) * 50, 1),
         "lighting_normalized": True,
-        "color_temp_target": "6500K Neutral Daylight",
+        "color_temp_target": "Original Raw Tones" if preserve_original_tones else "6500K Neutral Daylight (Segmentation-Aware)",
+        "preserve_original_tones": preserve_original_tones,
         "drop_shadow_applied": True,
         "shadow_type": "Dual-Tier Occlusion & Floor Penumbra",
         "amazon_compliant": True,
         "segmentation_engine": "rembg-BiRefNet" if REMBG_AVAILABLE else "opencv-saliency-grabcut",
-        "cutout_base64": cutout_b64
+        "cutout_base64": cutout_b64,
+        "tight_cutout_base64": tight_cutout_b64,
+        "craft_placement": {
+            "x": craft_x,
+            "y": craft_y,
+            "width": new_w,
+            "height": new_h
+        }
     }
 
     return raw_img, studio_canvas, metadata
+
+
+def _clear_hole_lightweight_tier(
+    cutout_img: Image.Image,
+    tap_x: int,
+    tap_y: int,
+    tolerance: int = 24
+) -> tuple[Image.Image, int]:
+    """
+    Lightweight Tier (CPU / Render Free Tier):
+    Uses OpenCV flood-fill with color tolerance & Gaussian edge feathering.
+    Clears enclosed residual background holes (e.g. inside handles, sunglasses arms, strap loops)
+    in <15ms with 0MB additional model weights.
+    """
+    rgba = np.array(cutout_img.convert("RGBA"))
+    h, w, _ = rgba.shape
+
+    # Boundary check
+    x = max(0, min(w - 1, int(tap_x)))
+    y = max(0, min(h - 1, int(tap_y)))
+
+    # If the tapped pixel is already transparent, search locally for the nearest non-transparent pixel
+    if rgba[y, x, 3] < 20:
+        found = False
+        for rad in range(1, 16):
+            for dy in range(-rad, rad + 1):
+                for dx in range(-rad, rad + 1):
+                    ny, nx = y + dy, x + dx
+                    if 0 <= ny < h and 0 <= nx < w and rgba[ny, nx, 3] >= 20:
+                        y, x = ny, nx
+                        found = True
+                        break
+                if found:
+                    break
+
+    # Prepare mask for OpenCV floodFill (needs size h+2, w+2 and uint8)
+    flood_mask = np.zeros((h + 2, w + 2), dtype=np.uint8)
+
+    # Protect already transparent areas so floodFill doesn't bleed across canvas
+    already_transparent = (rgba[:, :, 3] <= 15).astype(np.uint8)
+    flood_mask[1:h+1, 1:w+1] = already_transparent
+
+    bgr = cv2.cvtColor(rgba, cv2.COLOR_RGBA2BGR)
+    flags = 4 | cv2.FLOODFILL_MASK_ONLY | (255 << 8)
+    lo_diff = (tolerance, tolerance, tolerance)
+    up_diff = (tolerance, tolerance, tolerance)
+
+    try:
+        cv2.floodFill(
+            bgr,
+            flood_mask,
+            seedPoint=(x, y),
+            newVal=(0, 0, 0),
+            loDiff=lo_diff,
+            upDiff=up_diff,
+            flags=flags
+        )
+    except Exception as e:
+        logger.warning(f"FloodFill exception: {e}")
+        return cutout_img, 0
+
+    # Filled area in image coordinates
+    cleared_mask = (flood_mask[1:h+1, 1:w+1] == 255)
+    cleared_count = int(np.sum(cleared_mask))
+
+    if cleared_count > 0:
+        # Smooth edge feathering along the boundary of the cleared hole
+        hole_float = cleared_mask.astype(np.float32)
+        dilated = cv2.dilate(hole_float, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
+        feathered = cv2.GaussianBlur(dilated, (5, 5), 1.0)
+
+        # Apply transparency to alpha channel
+        new_alpha = rgba[:, :, 3].astype(np.float32) * (1.0 - feathered)
+        rgba[:, :, 3] = np.clip(new_alpha, 0, 255).astype(np.uint8)
+
+    return Image.fromarray(rgba), cleared_count
+
+
+def _clear_hole_precision_tier(
+    cutout_img: Image.Image,
+    tap_x: int,
+    tap_y: int,
+    tolerance: int = 24
+) -> tuple[Image.Image, int]:
+    """
+    Precision Tier (Future GPU / Production Architecture):
+    Interface hook for point-prompt neural segmentation (e.g. MobileSAM / SAM2 point-prompt).
+    Seamlessly swappable behind the clear_hole_at_point interface without breaking client contracts.
+    """
+    logger.info("Precision tier requested - executing via scalable CPU-safe lightweight fallback on current tier.")
+    return _clear_hole_lightweight_tier(cutout_img, tap_x, tap_y, tolerance)
+
+
+def clear_hole_at_point(
+    cutout_img: Image.Image,
+    tap_x: float,
+    tap_y: float,
+    tolerance: int = 24,
+    tier: Optional[str] = None
+) -> tuple[Image.Image, int, str]:
+    """
+    Tiered Architecture Interface for Single-Tap Hole Removal:
+    - 'lightweight' (Default for free-tier / CPU): High-speed OpenCV flood-fill with edge feathering (<15ms, 0MB model weights).
+    - 'precision' (Future swap-in for GPU/production): Point-prompt segmentation (MobileSAM / SAM2).
+    """
+    effective_tier = tier or getattr(settings, "PROCESSING_TIER", "lightweight")
+
+    w, h = cutout_img.size
+    px = int(tap_x * w) if tap_x <= 1.0 else int(tap_x)
+    py = int(tap_y * h) if tap_y <= 1.0 else int(tap_y)
+
+    if effective_tier == "precision":
+        updated_cutout, count = _clear_hole_precision_tier(cutout_img, px, py, tolerance)
+    else:
+        updated_cutout, count = _clear_hole_lightweight_tier(cutout_img, px, py, tolerance)
+
+    return updated_cutout, count, effective_tier
+
+
+def recomposite_studio_from_cutout(
+    canvas_cutout: Image.Image,
+    target_canvas_size: int = TARGET_SIZE,
+    bg_color: tuple = (255, 255, 255, 255)
+) -> Image.Image:
+    """
+    Re-composites studio canvas from a 1080x1080 canvas cutout.
+    Preserves ground contact drop shadow and updates craft layer.
+    """
+    bbox = canvas_cutout.getbbox()
+    if not bbox:
+        return Image.new("RGBA", (target_canvas_size, target_canvas_size), bg_color)
+
+    craft_cropped = canvas_cutout.crop(bbox)
+    craft_x = bbox[0]
+    craft_y = bbox[1]
+
+    shadow_composite = synthesize_ecom_ground_shadow(craft_cropped, target_canvas_size, craft_x, craft_y)
+
+    studio_canvas = Image.new("RGBA", (target_canvas_size, target_canvas_size), bg_color)
+    studio_canvas.paste(shadow_composite, (0, 0), shadow_composite)
+    studio_canvas.paste(canvas_cutout, (0, 0), canvas_cutout)
+    return studio_canvas
 
 def image_to_base64(img: Image.Image, format: str = "JPEG") -> str:
     """Encodes PIL image to data URL base64 string."""

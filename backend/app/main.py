@@ -11,6 +11,7 @@ import base64
 import logging
 from pathlib import Path
 from typing import Optional
+from PIL import Image
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -48,10 +49,18 @@ from .models.schemas import (
     BackgroundOptionsResponse,
     LifestyleCompositeRequest,
     LifestyleCompositeResponse,
+    StudioClearSpotRequest,
+    StudioClearSpotResponse,
 )
 from .models.mock_data import CRAFT_FIXTURES
 from .services.ivr_service import process_ivr_step_audio, create_ivr_draft_listing
-from .services.image_studio import process_studio_image, image_to_base64, assess_photo_quality
+from .services.image_studio import (
+    process_studio_image,
+    image_to_base64,
+    assess_photo_quality,
+    clear_hole_at_point,
+    recomposite_studio_from_cutout
+)
 from .services.stock_background_service import get_background_options, composite_lifestyle_scene
 from .services.catalog_engine import process_voice_and_catalog
 from .services.pricing_engine import calculate_living_wage_pricing
@@ -224,15 +233,18 @@ async def check_studio_photo_quality_json(
 # MODULE 2: AUTONOMOUS AI IMAGE STUDIO ENDPOINT
 # ==============================================================================
 @app.post("/api/v1/studio/enhance", response_model=StudioEnhanceResponse)
+@app.post("/api/studio/enhance", response_model=StudioEnhanceResponse)
 async def enhance_studio_image(
     file: Optional[UploadFile] = File(None),
-    image_base64: Optional[str] = Form(None)
+    image_base64: Optional[str] = Form(None),
+    preserve_original_tones: Optional[bool] = Form(False)
 ):
     """
-    POST /api/v1/studio/enhance
+    POST /api/v1/studio/enhance or /api/studio/enhance
     Takes raw workshop craft photo (multipart file or base64), applies:
     - Salient craft segmentation (rembg / OpenCV)
-    - 6500K daylight white balancing
+    - Segmentation-Aware 6500K daylight white balancing (skips craft body)
+    - Optional preserve_original_tones flag to keep 100% untouched raw RGB colors
     - 10% safety cushion centering on 1080x1080 canvas
     - Directional elliptical contact drop shadow (#F8F9FA background)
     """
@@ -247,7 +259,10 @@ async def enhance_studio_image(
         else:
             raise HTTPException(status_code=400, detail="Either file upload or image_base64 is required.")
 
-        raw_img, studio_canvas, metadata = process_studio_image(raw_bytes)
+        raw_img, studio_canvas, metadata = process_studio_image(
+            raw_bytes,
+            preserve_original_tones=bool(preserve_original_tones)
+        )
 
         # Save to static uploads
         timestamp = int(time.time() * 1000)
@@ -287,11 +302,80 @@ async def enhance_studio_image(
             lighting_normalized=metadata["lighting_normalized"],
             drop_shadow_applied=metadata["drop_shadow_applied"],
             cutout_url=cutout_url,
-            cutout_base64=cutout_b64
+            cutout_base64=cutout_b64,
+            preserve_original_tones=bool(preserve_original_tones)
         )
     except Exception as e:
         logger.error(f"Studio enhancement error: {e}")
         raise HTTPException(status_code=500, detail=f"Image enhancement failed: {str(e)}")
+
+# ==============================================================================
+# MODULE 2C: SINGLE-TAP HOLE REMOVAL ENDPOINT (TIERED ARCHITECTURE)
+# ==============================================================================
+@app.post("/api/v1/studio/clear-spot", response_model=StudioClearSpotResponse)
+@app.post("/api/studio/clear-spot", response_model=StudioClearSpotResponse)
+async def clear_studio_spot(req: StudioClearSpotRequest):
+    """
+    POST /api/studio/clear-spot or /api/v1/studio/clear-spot
+    Single-Tap Hole Removal Endpoint:
+    - Accepts current cutout_base64 (or image_base64) and tap coordinates (x, y).
+    - Executes OpenCV flood-fill with edge feathering (Lightweight Tier / Free Tier safe).
+    - Swappable behind the clear_hole_at_point interface for future precision tier (MobileSAM).
+    - Re-composites updated cutout onto 1080x1080 studio frame.
+    """
+    try:
+        source_b64 = req.cutout_base64 or req.image_base64
+        if not source_b64:
+            raise HTTPException(status_code=400, detail="cutout_base64 or image_base64 is required.")
+
+        clean_b64 = source_b64
+        if "," in clean_b64:
+            clean_b64 = clean_b64.split(",")[1]
+        cutout_bytes = base64.b64decode(clean_b64)
+        cutout_pil = Image.open(io.BytesIO(cutout_bytes)).convert("RGBA")
+
+        # Execute tiered hole clearing
+        updated_cutout, cleared_count, tier_used = clear_hole_at_point(
+            cutout_img=cutout_pil,
+            tap_x=req.x,
+            tap_y=req.y,
+            tolerance=req.tolerance or 24,
+            tier=req.tier
+        )
+
+        # Re-composite updated cutout onto 1080x1080 studio frame
+        studio_canvas = recomposite_studio_from_cutout(updated_cutout, target_canvas_size=1080)
+
+        # Save static files
+        timestamp = int(time.time() * 1000)
+        cutout_filename = f"cleared_cutout_{timestamp}.png"
+        studio_filename = f"cleared_studio_{timestamp}.jpg"
+
+        cutout_path = settings.UPLOAD_DIR / cutout_filename
+        studio_path = settings.UPLOAD_DIR / studio_filename
+
+        updated_cutout.save(cutout_path, format="PNG")
+        rgb_studio = studio_canvas.convert("RGB")
+        rgb_studio.save(studio_path, format="JPEG", quality=95)
+
+        updated_cutout_b64 = image_to_base64(updated_cutout, format="PNG")
+        updated_studio_b64 = image_to_base64(studio_canvas, format="JPEG")
+
+        return StudioClearSpotResponse(
+            status="success",
+            cutout_url=f"/static/uploads/{cutout_filename}",
+            cutout_base64=updated_cutout_b64,
+            studio_url=f"/static/uploads/{studio_filename}",
+            studio_base64=updated_studio_b64,
+            cleared_pixels=cleared_count,
+            tier_used=tier_used,
+            message="Enclosed residual hole cleared successfully"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in clear_studio_spot: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to clear spot: {str(e)}")
 
 # ==============================================================================
 # MODULE 2B: LIFESTYLE STOCK BACKGROUND RETRIEVAL & COMPOSITING

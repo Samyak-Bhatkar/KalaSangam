@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     CLOUD_STORAGE_REGION: str = os.getenv("CLOUD_STORAGE_REGION", "ap-south-1")
     CLOUD_STORAGE_PUBLIC_URL: str = os.getenv("CLOUD_STORAGE_PUBLIC_URL", "")
 
+    # Vision Studio Processing Tier ('lightweight' = OpenCV flood-fill / CPU, 'precision' = MobileSAM / GPU)
+    PROCESSING_TIER: str = os.getenv("PROCESSING_TIER", "lightweight")
+
     class Config:
         env_file = ".env"
         extra = "ignore"

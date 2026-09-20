@@ -15,10 +15,12 @@ import {
   Layers,
   Activity,
   Check,
-  Loader2
+  Loader2,
+  Edit3
 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 import { enhanceImage } from '../services/api';
+import FineTuneStudioModal from './FineTuneStudioModal';
 
 export default function StudioQualityReviewModal({
   isOpen,
@@ -44,6 +46,16 @@ export default function StudioQualityReviewModal({
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhancementPhase, setEnhancementPhase] = useState(0);
+  const [isFineTuneOpen, setIsFineTuneOpen] = useState(false);
+
+  const handleFineTuneApply = ({ studioBase64, cutoutBase64 }) => {
+    setEnhancedResult(prev => ({
+      ...(prev || {}),
+      processed_base64: studioBase64,
+      studio_url: studioBase64,
+      cutout_base64: cutoutBase64 || prev?.cutout_base64,
+    }));
+  };
 
   const containerRef = useRef(null);
   const isDragging = useRef(false);
@@ -383,6 +395,16 @@ export default function StudioQualityReviewModal({
                 <span>{language === 'hi' ? 'दोबारा लें' : 'Retake'}</span>
               </button>
 
+              {/* Secondary Fine-Tune Button */}
+              <button
+                type="button"
+                onClick={() => setIsFineTuneOpen(true)}
+                className="py-3 px-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-amber-400/40 text-amber-300 hover:text-amber-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all min-h-[48px]"
+              >
+                <Edit3 className="w-4 h-4 text-amber-400" />
+                <span>{language === 'hi' ? '✏️ सुधारें' : '✏️ Fine-Tune'}</span>
+              </button>
+
               {/* Big Thumbs-up / Accept */}
               <button
                 onClick={handleAcceptAndNext}
@@ -401,6 +423,16 @@ export default function StudioQualityReviewModal({
         )}
 
       </div>
+
+      {/* Fine-Tune Slide-Up Modal */}
+      <FineTuneStudioModal
+        isOpen={isFineTuneOpen}
+        onClose={() => setIsFineTuneOpen(false)}
+        initialStudioSrc={enhancedResult?.processed_base64 || enhancedResult?.studio_url || rawPhotoBase64}
+        initialCutoutSrc={enhancedResult?.cutout_base64}
+        rawSrc={rawPhotoBase64}
+        onApply={handleFineTuneApply}
+      />
     </div>
   );
 }
