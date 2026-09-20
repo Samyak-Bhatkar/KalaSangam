@@ -780,6 +780,120 @@ export async function compositeLifestyleImage({
   }
 }
 
+/**
+ * Tap-to-Annotate Craft Honesty & Authenticity Pins
+ * Sends voice audio recording or transcript with coordinates (x_pct, y_pct)
+ * for AI classification (natural variation vs craft highlight) and bilingual label generation.
+ */
+export async function annotatePinVoice({
+  audioBlob,
+  transcript,
+  language = 'hi',
+  categoryHint,
+  pinNumber = 1,
+  xPct,
+  yPct,
+}) {
+  try {
+    const formData = new FormData();
+    if (audioBlob) {
+      const isWav = audioBlob.type && audioBlob.type.includes('wav');
+      formData.append('audio', audioBlob, isWav ? `pin_${pinNumber}.wav` : `pin_${pinNumber}.webm`);
+    }
+    if (transcript) {
+      formData.append('transcript', transcript);
+    }
+    formData.append('language', language);
+    if (categoryHint) {
+      formData.append('category_hint', categoryHint);
+    }
+    formData.append('pin_number', String(pinNumber));
+    formData.append('x_pct', String(xPct));
+    formData.append('y_pct', String(yPct));
+
+    const res = await fetch(`${API_BASE}/studio/annotate-pin-voice`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || `Annotation failed: HTTP ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.warn('annotatePinVoice API error:', err);
+    // Zero-fail client fallback adhering strictly to curated word banks
+    const isImperfection = (transcript || '').match(/(दरार|crack|हल्का|दाग|mark|rough|asymmetry|variation|मिट्टी|hairline)/i);
+    const category = isImperfection ? 'imperfection' : 'craft_detail';
+    const bankTerm = isImperfection ? 'Hairline Crack' : 'Traditional Motif';
+    const label = isImperfection 
+      ? (language === 'hi' ? 'प्राकृतिक हेयरलाइन दरार' : 'Hairline Crack')
+      : (language === 'hi' ? 'पारंपरिक चाक नक्काशी' : 'Traditional Motif');
+    
+    return {
+      status: 'fallback',
+      pin: {
+        id: `pin_${Date.now()}_${pinNumber}`,
+        pin_number: pinNumber,
+        x: xPct,
+        y: yPct,
+        x_pct: xPct,
+        y_pct: yPct,
+        category: category,
+        bank_term: bankTerm,
+        short_label: label,
+        short_label_hi: label,
+        short_label_en: bankTerm,
+        one_line_summary: isImperfection 
+          ? 'Natural handmade variation from kiln firing.' 
+          : 'Heritage craft motif detailing.',
+        label_angle: (pinNumber * 90) % 360,
+        full_description: transcript || (language === 'hi' ? 'हस्तशिल्प की प्रामाणिक विशेषता' : 'Authentic handmade craft nuance'),
+        full_description_hi: transcript || 'हस्तशिल्प की प्रामाणिक विशेषता',
+        full_description_en: transcript || 'Authentic handmade craft nuance',
+        audio_url: null,
+        language: language,
+      },
+      raw_transcript: transcript || '',
+    };
+  }
+}
+
+/**
+ * Exports a flattened, non-interactive JPEG image with dot markers,
+ * two-segment jogged elbow lines (#000000), and short callout cards burned directly
+ * into the pixels using Pillow for ONDC/Beckn marketplace syndication.
+ */
+export async function exportAnnotatedImage({
+  productId,
+  imageSrc,
+  imageBase64,
+  pins,
+  canvasSize = 1080,
+}) {
+  const res = await fetch(`${API_BASE}/studio/export-annotated-image`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      product_id: productId,
+      image_url: imageSrc,
+      image_base64: imageBase64,
+      pins,
+      canvas_size: canvasSize,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to export flattened ONDC image');
+  }
+
+  return await res.json();
+}
+
+
 
 
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ShieldCheck,
   CheckCircle2,
@@ -14,7 +14,11 @@ import {
   AlertCircle,
   Copy,
   Check,
-  Loader2
+  Loader2,
+  Eye,
+  EyeOff,
+  Play,
+  Pause,
 } from 'lucide-react';
 import { verifyPublicProduct } from '../services/api';
 
@@ -23,6 +27,26 @@ export default function PublicVerifyScreen({ productId, onBack }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [showCraftPins, setShowCraftPins] = useState(false);
+  const [activePinId, setActivePinId] = useState(null);
+  const [playingAudioUrl, setPlayingAudioUrl] = useState(null);
+  const audioRef = useRef(null);
+
+  const togglePlayAudio = (url) => {
+    if (!url) return;
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    if (playingAudioUrl === url) {
+      setPlayingAudioUrl(null);
+    } else {
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      setPlayingAudioUrl(url);
+      audio.play().catch(() => {});
+      audio.onended = () => setPlayingAudioUrl(null);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -156,12 +180,12 @@ export default function PublicVerifyScreen({ productId, onBack }) {
           </div>
 
           {/* Craft Studio Visual */}
-          <div className="relative aspect-square bg-[#FDFBF7] flex items-center justify-center p-6 border-b border-slate-100">
+          <div className="relative aspect-square bg-[#FDFBF7] flex items-center justify-center p-6 border-b border-slate-100 overflow-hidden">
             {product.studio_image_url ? (
               <img
                 src={product.studio_image_url}
                 alt={product.title_en}
-                className="max-h-full max-w-full object-contain drop-shadow-xl"
+                className="max-h-full max-w-full object-contain drop-shadow-xl pointer-events-none"
               />
             ) : (
               <div className="w-32 h-32 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-700 font-bold text-xs">
@@ -169,12 +193,143 @@ export default function PublicVerifyScreen({ productId, onBack }) {
               </div>
             )}
 
+            {/* Pins Overlay */}
+            {showCraftPins &&
+              product.craft_pins &&
+              product.craft_pins.map((pin) => (
+                <div
+                  key={pin.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActivePinId(activePinId === pin.id ? null : pin.id);
+                  }}
+                  style={{
+                    left: `${pin.x ?? pin.x_pct ?? 50}%`,
+                    top: `${pin.y ?? pin.y_pct ?? 50}%`,
+                  }}
+                  className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 transition-all ${
+                    activePinId === pin.id ? 'scale-125 z-30' : 'hover:scale-110'
+                  }`}
+                >
+                  <div
+                    className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-xs shadow-lg border-2 border-white transition-all ${
+                      pin.category === 'craft_detail'
+                        ? 'bg-gradient-to-tr from-amber-600 to-amber-400 text-white ring-2 ring-amber-300/80 shadow-amber-900/30'
+                        : 'bg-gradient-to-tr from-teal-700 to-teal-500 text-white ring-2 ring-teal-300/80 shadow-teal-900/30'
+                    }`}
+                  >
+                    {pin.pin_number}
+                  </div>
+                </div>
+              ))}
+
             {/* Steganographic GI Seal Badge */}
             <div className="absolute bottom-3 right-3 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-emerald-300 text-emerald-800 text-[10px] font-bold shadow-md flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Digital GI Seal Protected</span>
             </div>
           </div>
+
+          {/* View Craft Details Disclosure Button & Panel */}
+          {product.craft_pins && product.craft_pins.length > 0 && (
+            <div className="px-5 pt-3">
+              <button
+                type="button"
+                onClick={() => setShowCraftPins(!showCraftPins)}
+                className={`w-full py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
+                  showCraftPins
+                    ? 'bg-amber-500/10 border-amber-400 text-amber-900'
+                    : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                }`}
+              >
+                {showCraftPins ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                <span>
+                  {showCraftPins
+                    ? 'शिल्प विवरण छुपाएं (Hide Craft Details)'
+                    : `शिल्प विवरण देखें (View Craft Details - ${product.craft_pins.length})`}
+                </span>
+              </button>
+
+              {showCraftPins && (
+                <div className="mt-3 p-3 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-2 animate-fadeIn">
+                  <div className="flex items-center justify-between text-xs font-bold text-amber-900 mb-1">
+                    <span>कारीगर प्रामाणिकता प्रकटीकरण (Artisan Authenticity Disclosure):</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-200/70 text-amber-900 font-bold">
+                      {product.craft_pins.length} Points
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {product.craft_pins.map((pin) => (
+                      <div
+                        key={pin.id}
+                        onClick={() => setActivePinId(activePinId === pin.id ? null : pin.id)}
+                        className={`p-2.5 rounded-xl border transition cursor-pointer text-xs ${
+                          activePinId === pin.id
+                            ? 'bg-white border-amber-400 shadow-xs'
+                            : 'bg-white/80 border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start gap-2 flex-1">
+                            <span
+                              className={`w-5 h-5 rounded-full flex items-center justify-center font-black text-[10px] text-white shrink-0 mt-0.5 ${
+                                pin.category === 'craft_detail'
+                                  ? 'bg-amber-500'
+                                  : 'bg-teal-600'
+                              }`}
+                            >
+                              {pin.pin_number}
+                            </span>
+                            <div>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="font-bold text-slate-900">
+                                  {pin.short_label_hi || pin.short_label}
+                                </span>
+                                <span
+                                  className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full ${
+                                    pin.category === 'craft_detail'
+                                      ? 'bg-amber-100 text-amber-800'
+                                      : 'bg-teal-100 text-teal-800'
+                                  }`}
+                                >
+                                  {pin.category === 'craft_detail' ? 'कारीगरी खूबी' : 'प्राकृतिक भिन्नता'}
+                                </span>
+                              </div>
+                              <p className="text-slate-600 text-[11px] mt-0.5 leading-snug">
+                                {pin.full_description_hi || pin.full_description}
+                              </p>
+                            </div>
+                          </div>
+
+                          {pin.audio_url && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                togglePlayAudio(pin.audio_url);
+                              }}
+                              className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition ${
+                                playingAudioUrl === pin.audio_url
+                                  ? 'bg-amber-500 text-white'
+                                  : 'bg-slate-100 text-amber-700 hover:bg-amber-100'
+                              }`}
+                              title="Listen to artisan voice"
+                            >
+                              {playingAudioUrl === pin.audio_url ? (
+                                <Pause className="w-3.5 h-3.5" />
+                              ) : (
+                                <Play className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Core Craft Dossier */}
           <div className="p-5 space-y-4">

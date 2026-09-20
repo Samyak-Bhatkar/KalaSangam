@@ -167,6 +167,84 @@ export function ArtisanProvider({ children }) {
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
 
+  // Annotated Flattened Image for ONDC / E-Commerce Syndication
+  const [annotatedImageUrl, setAnnotatedImageUrl] = useState(null);
+
+  // Craft Honesty & Authenticity Pins (Tap-to-Annotate Details & Natural Variations)
+  const [craftPins, setCraftPins] = useState([
+    {
+      id: 'pin_sample_1',
+      pin_number: 1,
+      x: 42.0,
+      y: 64.5,
+      x_pct: 42.0,
+      y_pct: 64.5,
+      category: 'imperfection',
+      bank_term: 'Hairline Crack',
+      short_label: 'Hairline Crack',
+      short_label_hi: 'प्राकृतिक हेयरलाइन दरार',
+      short_label_en: 'Hairline Crack',
+      one_line_summary: 'Natural surface nuance from kiln firing, characteristic of hand-turned earth.',
+      label_angle: 215.0,
+      full_description: 'पकाने के दौरान मिट्टी के प्राकृतिक स्वभाव के कारण हल्की सी सतह दरार, जो प्रामाणिक हस्तशिल्प की पहचान है।',
+      full_description_hi: 'पकाने के दौरान मिट्टी के प्राकृतिक स्वभाव के कारण हल्की सी सतह दरार, जो प्रामाणिक हस्तशिल्प की पहचान है।',
+      full_description_en: 'Slight hairline surface nuance from kiln firing, characteristic of authentic hand-turned terracotta earth.',
+      audio_url: null,
+      language: 'hi',
+    },
+    {
+      id: 'pin_sample_2',
+      pin_number: 2,
+      x: 58.0,
+      y: 32.0,
+      x_pct: 58.0,
+      y_pct: 32.0,
+      category: 'craft_detail',
+      bank_term: 'Traditional Motif',
+      short_label: 'Traditional Motif',
+      short_label_hi: 'पारंपरिक चाक नक्काशी',
+      short_label_en: 'Traditional Motif',
+      one_line_summary: 'Hand-carved concentric wheel motif passed down across master potter generations.',
+      label_angle: 35.0,
+      full_description: 'कुम्हार के चाक पर हाथ से उकेरी गई पारंपरिक पहिया नक्काशी जो हमारे परिवार की 3 पीढ़ियों की पहचान है।',
+      full_description_hi: 'कुम्हार के चाक पर हाथ से उकेरी गई पारंपरिक पहिया नक्काशी जो हमारे परिवार की 3 पीढ़ियों की पहचान है।',
+      full_description_en: 'Hand-carved concentric wheel motif passed down across three generations of master potter lineage.',
+      audio_url: null,
+      language: 'hi',
+    }
+  ]);
+
+  const addCraftPin = (newPin) => {
+    setCraftPins(prev => {
+      const pinNum = prev.length + 1;
+      const formatted = {
+        ...newPin,
+        pin_number: newPin.pin_number || pinNum,
+        x: newPin.x ?? newPin.x_pct ?? 50,
+        y: newPin.y ?? newPin.y_pct ?? 50,
+        x_pct: newPin.x_pct ?? newPin.x ?? 50,
+        y_pct: newPin.y_pct ?? newPin.y ?? 50,
+        label_angle: newPin.label_angle !== undefined ? newPin.label_angle : (pinNum * 90) % 360,
+        bank_term: newPin.bank_term || newPin.short_label_en || (newPin.category === 'imperfection' ? 'Hairline Crack' : 'Traditional Motif'),
+        short_label_en: newPin.short_label_en || newPin.bank_term || (newPin.category === 'imperfection' ? 'Hairline Crack' : 'Traditional Motif'),
+        one_line_summary: newPin.one_line_summary || newPin.full_description_en || newPin.full_description || 'Authentic handcrafted craft trait.',
+        id: newPin.id || `pin_${Date.now()}_${pinNum}`
+      };
+      return [...prev, formatted];
+    });
+  };
+
+  const updateCraftPin = (pinId, updatedFields) => {
+    setCraftPins(prev => prev.map(p => p.id === pinId ? { ...p, ...updatedFields } : p));
+  };
+
+  const deleteCraftPin = (pinId) => {
+    setCraftPins(prev => {
+      const filtered = prev.filter(p => p.id !== pinId);
+      return filtered.map((p, idx) => ({ ...p, pin_number: idx + 1 }));
+    });
+  };
+
   // Active Innovation Modals
   const [activeModal, setActiveModal] = useState(null); // 'reel' | 'bargain' | 'watermark' | 'ondc' | 'published'
 
@@ -385,6 +463,8 @@ export function ArtisanProvider({ children }) {
         raw_image_url: rawImageUrl || '',
         studio_image_url: studioImageUrl || '',
         lifestyle_image_url: lifestyleImageUrl || '',
+        annotated_image_url: annotatedImageUrl || '',
+        craft_pins: craftPins,
       };
       const res = await saveProductDraft(payload);
       setProductStatus('draft');
@@ -426,6 +506,8 @@ export function ArtisanProvider({ children }) {
         raw_image_url: rawImageUrl || '',
         studio_image_url: studioImageUrl || '',
         lifestyle_image_url: lifestyleImageUrl || '',
+        annotated_image_url: annotatedImageUrl || '',
+        craft_pins: craftPins,
       };
       const res = await publishProduct(productId, {
         productData: payload,
@@ -462,6 +544,9 @@ export function ArtisanProvider({ children }) {
     if (draft.lifestyle_image_url) {
       setLifestyleImageUrl(draft.lifestyle_image_url);
       setLifestyleImageBase64(draft.lifestyle_image_url);
+    }
+    if (draft.craft_pins && Array.isArray(draft.craft_pins)) {
+      setCraftPins(draft.craft_pins);
     }
     setCatalogData({
       title_hi: draft.title_hi,
@@ -589,6 +674,13 @@ export function ArtisanProvider({ children }) {
     processCaptureAndVoice,
     updatePricing,
     resetFlow,
+    craftPins,
+    setCraftPins,
+    addCraftPin,
+    updateCraftPin,
+    deleteCraftPin,
+    annotatedImageUrl,
+    setAnnotatedImageUrl,
     currentUser,
     loginWithPhone,
     logout,

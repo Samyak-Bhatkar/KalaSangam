@@ -77,6 +77,10 @@ def init_db() -> None:
             cursor.execute("ALTER TABLE products ADD COLUMN correction_log TEXT DEFAULT '[]'")
         if "lifestyle_image_url" not in existing_cols:
             cursor.execute("ALTER TABLE products ADD COLUMN lifestyle_image_url TEXT DEFAULT ''")
+        if "craft_pins" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN craft_pins TEXT DEFAULT '[]'")
+        if "annotated_image_url" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN annotated_image_url TEXT DEFAULT ''")
 
         # If old table had restrictive status CHECK constraint, recreate table cleanly
         cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='products'")
@@ -192,13 +196,16 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(correction_log, list):
             correction_log = json.dumps(correction_log)
 
+        raw_craft_pins = product.get("craft_pins", [])
+        craft_pins_json = json.dumps([p.dict() if hasattr(p, "dict") else p for p in raw_craft_pins]) if raw_craft_pins else "[]"
+
         cursor.execute("""
             INSERT INTO products (
                 id, title_hi, title_en, description_hi, description_en,
                 craft_category, technique, raw_cost, labor_hours,
                 b2c_price, b2b_price, gem_price, artisan_name,
                 beneficiary_id, cluster_pin, raw_image_url,
-                studio_image_url, lifestyle_image_url, watermarked_image_url, status,
+                studio_image_url, lifestyle_image_url, watermarked_image_url, annotated_image_url, craft_pins, status,
                 qr_code_url, channel, original_transcript,
                 rejection_reason, correction_log, created_at, published_at
             ) VALUES (
@@ -206,7 +213,7 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
                 :craft_category, :technique, :raw_cost, :labor_hours,
                 :b2c_price, :b2b_price, :gem_price, :artisan_name,
                 :beneficiary_id, :cluster_pin, :raw_image_url,
-                :studio_image_url, :lifestyle_image_url, :watermarked_image_url, :status,
+                :studio_image_url, :lifestyle_image_url, :watermarked_image_url, :annotated_image_url, :craft_pins, :status,
                 NULL, :channel, :original_transcript,
                 :rejection_reason, :correction_log, CURRENT_TIMESTAMP, NULL
             )
@@ -229,6 +236,8 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
                 studio_image_url = excluded.studio_image_url,
                 lifestyle_image_url = CASE WHEN excluded.lifestyle_image_url != '' THEN excluded.lifestyle_image_url ELSE products.lifestyle_image_url END,
                 watermarked_image_url = excluded.watermarked_image_url,
+                annotated_image_url = CASE WHEN excluded.annotated_image_url != '' THEN excluded.annotated_image_url ELSE products.annotated_image_url END,
+                craft_pins = excluded.craft_pins,
                 status = excluded.status,
                 channel = excluded.channel,
                 original_transcript = excluded.original_transcript,
@@ -255,6 +264,8 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
             "studio_image_url": product.get("studio_image_url", ""),
             "lifestyle_image_url": product.get("lifestyle_image_url", ""),
             "watermarked_image_url": product.get("watermarked_image_url", ""),
+            "annotated_image_url": product.get("annotated_image_url", ""),
+            "craft_pins": craft_pins_json,
             "status": target_status,
             "channel": target_channel,
             "original_transcript": original_transcript,
@@ -286,6 +297,9 @@ def publish_product(
         
         beckn_str = json.dumps(beckn_payload) if beckn_payload else None
 
+        raw_craft_pins = product_data.get("craft_pins") if product_data else None
+        craft_pins_json = json.dumps([p.dict() if hasattr(p, "dict") else p for p in raw_craft_pins]) if raw_craft_pins is not None else None
+
         if not exists and product_data:
             cursor.execute("""
                 INSERT INTO products (
@@ -293,14 +307,14 @@ def publish_product(
                     craft_category, technique, raw_cost, labor_hours,
                     b2c_price, b2b_price, gem_price, artisan_name,
                     beneficiary_id, cluster_pin, raw_image_url,
-                    studio_image_url, lifestyle_image_url, watermarked_image_url, status,
+                    studio_image_url, lifestyle_image_url, watermarked_image_url, annotated_image_url, craft_pins, status,
                     qr_code_url, beckn_payload, created_at, published_at
                 ) VALUES (
                     :id, :title_hi, :title_en, :description_hi, :description_en,
                     :craft_category, :technique, :raw_cost, :labor_hours,
                     :b2c_price, :b2b_price, :gem_price, :artisan_name,
                     :beneficiary_id, :cluster_pin, :raw_image_url,
-                    :studio_image_url, :lifestyle_image_url, :watermarked_image_url, 'published',
+                    :studio_image_url, :lifestyle_image_url, :watermarked_image_url, :annotated_image_url, :craft_pins, 'published',
                     :qr_code_url, :beckn_payload, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
                 )
             """, {
@@ -323,6 +337,8 @@ def publish_product(
                 "studio_image_url": product_data.get("studio_image_url", ""),
                 "lifestyle_image_url": product_data.get("lifestyle_image_url", ""),
                 "watermarked_image_url": product_data.get("watermarked_image_url", ""),
+                "annotated_image_url": product_data.get("annotated_image_url", ""),
+                "craft_pins": craft_pins_json or "[]",
                 "qr_code_url": qr_code_url,
                 "beckn_payload": beckn_str
             })
@@ -348,6 +364,8 @@ def publish_product(
                         studio_image_url = COALESCE(:studio_image_url, studio_image_url),
                         lifestyle_image_url = COALESCE(:lifestyle_image_url, lifestyle_image_url),
                         watermarked_image_url = COALESCE(:watermarked_image_url, watermarked_image_url),
+                        annotated_image_url = COALESCE(:annotated_image_url, annotated_image_url),
+                        craft_pins = COALESCE(:craft_pins, craft_pins),
                         status = 'published',
                         qr_code_url = :qr_code_url,
                         beckn_payload = COALESCE(:beckn_payload, beckn_payload),
@@ -373,6 +391,8 @@ def publish_product(
                     "studio_image_url": product_data.get("studio_image_url"),
                     "lifestyle_image_url": product_data.get("lifestyle_image_url"),
                     "watermarked_image_url": product_data.get("watermarked_image_url"),
+                    "annotated_image_url": product_data.get("annotated_image_url"),
+                    "craft_pins": craft_pins_json,
                     "qr_code_url": qr_code_url,
                     "beckn_payload": beckn_str
                 })
@@ -404,6 +424,13 @@ def get_product_by_id(product_id: str) -> Optional[Dict[str, Any]]:
                 res["beckn_payload"] = json.loads(res["beckn_payload"])
             except Exception:
                 pass
+        if res.get("craft_pins"):
+            try:
+                res["craft_pins"] = json.loads(res["craft_pins"]) if isinstance(res["craft_pins"], str) else res["craft_pins"]
+            except Exception:
+                res["craft_pins"] = []
+        else:
+            res["craft_pins"] = []
         return res
 
 def list_artisan_products(include_drafts: bool = True, perform_cleanup: bool = True) -> List[Dict[str, Any]]:
@@ -436,6 +463,13 @@ def list_artisan_products(include_drafts: bool = True, perform_cleanup: bool = T
                     d["beckn_payload"] = json.loads(d["beckn_payload"])
                 except Exception:
                     pass
+            if d.get("craft_pins"):
+                try:
+                    d["craft_pins"] = json.loads(d["craft_pins"]) if isinstance(d["craft_pins"], str) else d["craft_pins"]
+                except Exception:
+                    d["craft_pins"] = []
+            else:
+                d["craft_pins"] = []
             result.append(d)
         return result
 

@@ -209,10 +209,106 @@ class WatermarkVerifyResponse(BaseModel):
     payload_raw: Optional[str] = None
     status_message: str
 
+from pydantic import BaseModel, Field, model_validator
+
 # Beckn / ONDC Schemas
 class BecknCatalogPayload(BaseModel):
     context: Dict[str, Any]
     message: Dict[str, Any]
+
+# Craft Honesty & Authenticity Pins (Tap-to-Annotate Details & Natural Variations)
+class CraftPin(BaseModel):
+    id: str
+    pin_number: int = 1
+    x: Optional[float] = None
+    y: Optional[float] = None
+    x_pct: Optional[float] = None
+    y_pct: Optional[float] = None
+    category: str = "craft_detail"  # "imperfection" | "craft_detail"
+    short_label: Optional[str] = None
+    short_label_hi: Optional[str] = None
+    short_label_en: Optional[str] = None
+    bank_term: Optional[str] = None
+    one_line_summary: Optional[str] = None
+    label_angle: Optional[float] = 0.0  # 0 - 360 degrees radial orientation
+    full_description: Optional[str] = None
+    full_description_hi: Optional[str] = None
+    full_description_en: Optional[str] = None
+    transcript: Optional[str] = ""
+    audio_url: Optional[str] = None
+    language: Optional[str] = "hi"
+
+    @model_validator(mode='before')
+    @classmethod
+    def reconcile_pin_fields(cls, values):
+        if not isinstance(values, dict):
+            return values
+        # Coordinate harmonization
+        x_val = values.get('x') if values.get('x') is not None else values.get('x_pct', 50.0)
+        y_val = values.get('y') if values.get('y') is not None else values.get('y_pct', 50.0)
+        values['x'] = float(x_val)
+        values['x_pct'] = float(x_val)
+        values['y'] = float(y_val)
+        values['y_pct'] = float(y_val)
+
+        # Label harmonization
+        lbl = values.get('short_label') or values.get('short_label_hi') or values.get('short_label_en') or "हस्तशिल्प विवरण"
+        values['short_label'] = lbl
+        values['short_label_hi'] = values.get('short_label_hi') or lbl
+        values['short_label_en'] = values.get('short_label_en') or values.get('short_label') or "Craft Detail"
+        values['bank_term'] = values.get('bank_term') or values.get('short_label_en') or "Craft Detail"
+
+        # Description harmonization
+        desc = values.get('full_description') or values.get('full_description_hi') or values.get('transcript') or ""
+        values['full_description'] = desc
+        values['full_description_hi'] = values.get('full_description_hi') or desc
+        values['full_description_en'] = values.get('full_description_en') or values.get('full_description') or desc
+        values['one_line_summary'] = values.get('one_line_summary') or values.get('full_description_en') or desc
+        values['label_angle'] = float(values.get('label_angle') if values.get('label_angle') is not None else 0.0)
+        return values
+
+class AnnotatePinVoiceRequest(BaseModel):
+    transcript: Optional[str] = None
+    language: str = "hi"
+    category_hint: Optional[str] = None
+    pin_number: int = 1
+    x: Optional[float] = None
+    y: Optional[float] = None
+    x_pct: Optional[float] = None
+    y_pct: Optional[float] = None
+    audio_url: Optional[str] = None
+    label_angle: Optional[float] = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def harmonize_coordinates(cls, values):
+        if isinstance(values, dict):
+            x_val = values.get('x') if values.get('x') is not None else values.get('x_pct', 50.0)
+            y_val = values.get('y') if values.get('y') is not None else values.get('y_pct', 50.0)
+            values['x'] = float(x_val)
+            values['x_pct'] = float(x_val)
+            values['y'] = float(y_val)
+            values['y_pct'] = float(y_val)
+        return values
+
+class AnnotatePinVoiceResponse(BaseModel):
+    status: str = "success"
+    pin: CraftPin
+    raw_transcript: Optional[str] = ""
+
+class ExportAnnotatedImageRequest(BaseModel):
+    product_id: Optional[str] = None
+    image_url: Optional[str] = None
+    image_base64: Optional[str] = None
+    pins: List[CraftPin] = []
+    canvas_size: Optional[int] = 1080
+
+class ExportAnnotatedImageResponse(BaseModel):
+    status: str = "success"
+    annotated_image_url: str
+    annotated_image_base64: str
+    format: str = "JPEG"
+    message: str = "ONDC-compliant flattened JPEG generated successfully"
 
 # Product Lifecycle Schemas (Draft-First & QR Code Lifecycle)
 class ProductDraftSaveRequest(BaseModel):
@@ -235,6 +331,8 @@ class ProductDraftSaveRequest(BaseModel):
     studio_image_url: Optional[str] = ""
     lifestyle_image_url: Optional[str] = ""
     watermarked_image_url: Optional[str] = ""
+    annotated_image_url: Optional[str] = ""
+    craft_pins: Optional[List[CraftPin]] = []
 
 class ProductPublishRequest(BaseModel):
     product_data: Optional[ProductDraftSaveRequest] = None
@@ -262,6 +360,8 @@ class ProductResponse(BaseModel):
     studio_image_url: Optional[str] = None
     lifestyle_image_url: Optional[str] = None
     watermarked_image_url: Optional[str] = None
+    annotated_image_url: Optional[str] = None
+    craft_pins: Optional[List[CraftPin]] = []
     status: str  # 'draft' | 'pending' | 'approved' | 'rejected' | 'published'
     qr_code_url: Optional[str] = None
     channel: Optional[str] = "camera"
@@ -287,6 +387,8 @@ class ProductPublicVerifyResponse(BaseModel):
     cluster_pin: Optional[str] = None
     studio_image_url: Optional[str] = None
     watermarked_image_url: Optional[str] = None
+    annotated_image_url: Optional[str] = None
+    craft_pins: Optional[List[CraftPin]] = []
     published_at: Optional[str] = None
     qr_code_url: Optional[str] = None
     ondc_buy_url: str

@@ -51,8 +51,18 @@ from .models.schemas import (
     LifestyleCompositeResponse,
     StudioClearSpotRequest,
     StudioClearSpotResponse,
+    CraftPin,
+    AnnotatePinVoiceRequest,
+    AnnotatePinVoiceResponse,
+    ExportAnnotatedImageRequest,
+    ExportAnnotatedImageResponse,
 )
 from .models.mock_data import CRAFT_FIXTURES
+from .services.craft_pin_service import (
+    classify_and_format_pin_callout,
+    save_pin_audio_file,
+    composite_annotated_buyer_image,
+)
 from .services.ivr_service import process_ivr_step_audio, create_ivr_draft_listing
 from .services.image_studio import (
     process_studio_image,
@@ -474,6 +484,172 @@ async def composite_lifestyle_endpoint(req: LifestyleCompositeRequest):
     except Exception as e:
         logger.error(f"Lifestyle composite error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to composite lifestyle scene: {str(e)}")
+
+# ==============================================================================
+# MODULE 2D: CRAFT HONESTY & AUTHENTICITY PINS (VOICE CALLOUTS)
+# ==============================================================================
+@app.post("/api/v1/studio/annotate-pin-voice", response_model=AnnotatePinVoiceResponse)
+@app.post("/api/studio/annotate-pin-voice", response_model=AnnotatePinVoiceResponse)
+async def annotate_studio_pin_voice(
+    audio: Optional[UploadFile] = File(None),
+    transcript: Optional[str] = Form(None),
+    language: str = Form("hi"),
+    category_hint: Optional[str] = Form(None),
+    pin_number: int = Form(1),
+    x_pct: float = Form(...),
+    y_pct: float = Form(...),
+    label_angle: Optional[float] = Form(0.0)
+):
+    """
+    POST /api/v1/studio/annotate-pin-voice or /api/studio/annotate-pin-voice
+    Processes an artisan's tap-to-annotate voice callout:
+    1. Saves uploaded voice audio to static/uploads/ for buyer playback.
+    2. Transcribes voice audio using existing Bhashini / Gemini transcription pipeline.
+    3. Analyzes transcript with Gemini to classify into curated word banks (defect or craft highlight).
+    4. Generates concise short label (<6-8 words) while retaining the full vernacular story.
+    """
+    try:
+        effective_transcript = (transcript or "").strip()
+        audio_url = None
+
+        if audio is not None:
+            audio_bytes = await audio.read()
+            mime_type = audio.content_type or "audio/webm"
+            # Persist audio file for buyer playback and authenticity verification
+            audio_url = save_pin_audio_file(audio_bytes, mime_type=mime_type)
+
+            if not effective_transcript:
+                trans_res = transcribe_audio_bytes(
+                    audio_bytes=audio_bytes,
+                    mime_type=mime_type,
+                    language=language,
+                    category_hint=category_hint
+                )
+                effective_transcript = trans_res.get("transcript", "").strip()
+
+        if not effective_transcript:
+            if category_hint:
+                effective_transcript = fallback_craft_transcript(category_hint)
+            else:
+                effective_transcript = "यह हस्तनिर्मित शिल्प का स्वाभाविक विवरण है।"
+
+        # Classify and format callout using Gemini / curated word-bank fallback
+        classification = classify_and_format_pin_callout(
+            transcript=effective_transcript,
+            language=language,
+            category_hint=category_hint
+        )
+
+        pin_id = f"pin_{int(time.time() * 1000)}_{pin_number}"
+        craft_pin = CraftPin(
+            id=pin_id,
+            pin_number=pin_number,
+            x=round(float(x_pct), 2),
+            y=round(float(y_pct), 2),
+            category=classification.get("category", "craft_detail"),
+            short_label=classification.get("short_label", "हस्तशिल्प विवरण"),
+            short_label_hi=classification.get("short_label_hi"),
+            short_label_en=classification.get("short_label_en"),
+            bank_term=classification.get("bank_term"),
+            one_line_summary=classification.get("one_line_summary"),
+            label_angle=float(label_angle if label_angle is not None else 0.0),
+            full_description=classification.get("full_description", effective_transcript),
+            full_description_hi=classification.get("full_description_hi", effective_transcript),
+            full_description_en=classification.get("full_description_en"),
+            audio_url=audio_url,
+            language=language
+        )
+
+        return AnnotatePinVoiceResponse(
+            status="success",
+            pin=craft_pin,
+            raw_transcript=effective_transcript
+        )
+    except Exception as e:
+        logger.error(f"Pin voice annotation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Voice callout processing failed: {str(e)}")
+
+@app.post("/api/v1/studio/annotate-pin-voice-json", response_model=AnnotatePinVoiceResponse)
+async def annotate_studio_pin_voice_json(req: AnnotatePinVoiceRequest):
+    """JSON variant for testing or direct text callouts."""
+    try:
+        classification = classify_and_format_pin_callout(
+            transcript=req.transcript,
+            language=req.language,
+            category_hint=req.category_hint
+        )
+        pin_id = f"pin_{int(time.time() * 1000)}_{req.pin_number}"
+        craft_pin = CraftPin(
+            id=pin_id,
+            pin_number=req.pin_number,
+            x=round(float(req.x), 2),
+            y=round(float(req.y), 2),
+            category=classification.get("category", "craft_detail"),
+            short_label=classification.get("short_label", "हस्तशिल्प विवरण"),
+            short_label_hi=classification.get("short_label_hi"),
+            short_label_en=classification.get("short_label_en"),
+            bank_term=classification.get("bank_term"),
+            one_line_summary=classification.get("one_line_summary"),
+            label_angle=float(req.label_angle if req.label_angle is not None else 0.0),
+            full_description=classification.get("full_description", req.transcript),
+            full_description_hi=classification.get("full_description_hi", req.transcript),
+            full_description_en=classification.get("full_description_en"),
+            audio_url=req.audio_url,
+            language=req.language
+        )
+        return AnnotatePinVoiceResponse(
+            status="success",
+            pin=craft_pin,
+            raw_transcript=req.transcript
+        )
+    except Exception as e:
+        logger.error(f"Pin JSON annotation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/studio/export-annotated-image", response_model=ExportAnnotatedImageResponse)
+async def export_annotated_image(req: ExportAnnotatedImageRequest):
+    """
+    Generates a flattened, non-interactive JPEG image with dot markers,
+    two-segment jogged elbow leader lines (#000000), and short callout cards burned directly
+    into the pixels using Pillow for ONDC/Beckn marketplace syndication.
+    """
+    try:
+        source = req.image_base64 or req.image_url
+        if not source and req.product_id:
+            db_prod = get_product_by_id(req.product_id)
+            if db_prod:
+                source = db_prod.get("studio_image_url") or db_prod.get("raw_image_url")
+        if not source:
+            source = "https://shilpsetu.gov.in/static/uploads/default_studio.jpg"
+
+        pins_to_draw = req.pins
+        if not pins_to_draw and req.product_id:
+            db_prod = get_product_by_id(req.product_id)
+            if db_prod:
+                pins_to_draw = db_prod.get("craft_pins") or []
+
+        file_url, b64_url = composite_annotated_buyer_image(
+            image_source=source,
+            pins=pins_to_draw,
+            canvas_size=req.canvas_size or 1080
+        )
+
+        if req.product_id:
+            db_prod = get_product_by_id(req.product_id)
+            if db_prod:
+                db_prod["annotated_image_url"] = file_url
+                save_product_draft(req.product_id, db_prod)
+
+        return ExportAnnotatedImageResponse(
+            status="success",
+            annotated_image_url=file_url,
+            annotated_image_base64=b64_url,
+            format="JPEG",
+            message="ONDC-compliant flattened JPEG generated successfully"
+        )
+    except Exception as e:
+        logger.error(f"Annotated image export failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Image compositing failed: {str(e)}")
 
 # ==============================================================================
 # MODULE 3: MULTIMODAL VOICE-TO-CATALOG ENDPOINT
@@ -912,6 +1088,7 @@ async def verify_product_public_endpoint(product_id: str):
         cluster_pin=product.get("cluster_pin"),
         studio_image_url=product.get("studio_image_url"),
         watermarked_image_url=product.get("watermarked_image_url"),
+        craft_pins=product.get("craft_pins") or [],
         published_at=str(product.get("published_at") or ""),
         qr_code_url=product.get("qr_code_url"),
         ondc_buy_url=ondc_url,

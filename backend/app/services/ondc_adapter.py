@@ -45,9 +45,13 @@ def generate_beckn_catalog_payload(
 
     studio_url = product_data.get("studio_url") or product_data.get("studio_image_url") or product_data.get("raw_image_url", "https://shilpsetu.gov.in/static/uploads/default_studio.jpg")
     lifestyle_url = product_data.get("lifestyle_image_url") or product_data.get("lifestyle_url")
+    annotated_url = product_data.get("annotated_image_url") or product_data.get("callout_image_url")
+
     catalog_images = [studio_url]
     if lifestyle_url and lifestyle_url != studio_url:
         catalog_images.append(lifestyle_url)
+    if annotated_url and annotated_url not in catalog_images:
+        catalog_images.append(annotated_url)
 
     location_id = f"loc_{cluster_pin}"
 

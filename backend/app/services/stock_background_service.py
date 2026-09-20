@@ -403,13 +403,33 @@ def load_image_from_source(source_str: str) -> Image.Image:
         raw_bytes = base64.b64decode(clean_b64)
         return Image.open(io.BytesIO(raw_bytes))
     elif source_str.startswith("http://") or source_str.startswith("https://"):
-        req = urllib.request.Request(
-            source_str,
-            headers={"User-Agent": "ShilpSetu/1.0 (MoSJE Rural Artisan AI)"}
-        )
-        with urllib.request.urlopen(req, timeout=10) as response:
-            data = response.read()
-            return Image.open(io.BytesIO(data))
+        try:
+            req = urllib.request.Request(
+                source_str,
+                headers={"User-Agent": "ShilpSetu/1.0 (MoSJE Rural Artisan AI)"}
+            )
+            with urllib.request.urlopen(req, timeout=5) as response:
+                data = response.read()
+                return Image.open(io.BytesIO(data))
+        except Exception as net_err:
+            logger.debug(f"Remote URL load failed for {source_str}: {net_err}. Checking local fallback.")
+            base_name = os.path.basename(source_str.split("?")[0])
+            from pathlib import Path
+            for folder in [
+                settings.UPLOAD_DIR,
+                Path("static/samples"),
+                Path("backend/static/samples"),
+                Path("../backend/static/samples"),
+                Path("../frontend/public"),
+                Path("frontend/public"),
+                Path("../frontend/dist"),
+                Path("frontend/dist"),
+            ]:
+                candidate = Path(folder) / base_name
+                if candidate.exists():
+                    return Image.open(candidate)
+            # If still not found, return clean neutral canvas
+            return Image.new("RGBA", (1080, 1080), (248, 249, 250, 255))
     elif os.path.exists(source_str):
         return Image.open(source_str)
     else:

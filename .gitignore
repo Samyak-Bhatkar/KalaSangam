@@ -31,6 +31,7 @@ backend/app/static/uploads/*.mp4
 backend/app/static/uploads/*.webm
 backend/app/static/uploads/*.jpg
 backend/app/static/uploads/*.png
+backend/app/static/uploads/*.wav
 backend/app/static/audio/*.wav
 backend/app/static/*.db
 backend/app/static/*.sqlite3
