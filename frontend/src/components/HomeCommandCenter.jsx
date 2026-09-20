@@ -45,6 +45,7 @@ export default function HomeCommandCenter() {
   // Carousel State & Refs
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [speakingSlideIndex, setSpeakingSlideIndex] = useState(null);
   const carouselRef = useRef(null);
 
   // Slide 2: Trust Score State
@@ -126,36 +127,52 @@ export default function HomeCommandCenter() {
     }
   };
 
-  // Auto-advance Carousel every 7.5 seconds when not paused
+  // Auto-advance Carousel every 7.5 seconds ONLY when not paused, modal closed, and NOT speaking
+  // Once the speaker finishes speaking, speakingSlideIndex resets to null and timer starts fresh
   useEffect(() => {
-    if (isPaused || showPriceModal) return;
+    if (isPaused || showPriceModal || speakingSlideIndex !== null) return;
     const interval = setInterval(() => {
       const nextIndex = (activeSlideIndex + 1) % 3;
       scrollToSlide(nextIndex);
     }, 7500);
     return () => clearInterval(interval);
-  }, [activeSlideIndex, isPaused, showPriceModal]);
+  }, [activeSlideIndex, isPaused, showPriceModal, speakingSlideIndex]);
 
-  // Voice Readout Functions for Each Slide
-  const handleEarningsAudio = () => {
-    const text = language === 'hi'
-      ? 'आपकी इस महीने की सीधी कमाई अठारह हज़ार चार सौ पचास रुपये है, जो बिचौलियों से अड़तीस प्रतिशत अधिक है!'
-      : 'Your monthly direct net earnings are ₹18,450, 38% higher than middleman sales!';
-    speakVoice(text, language === 'hi' ? 'hi-IN' : 'en-IN');
-  };
+  // If user manually swipes away from the speaking slide, stop the audio cleanly
+  useEffect(() => {
+    if (speakingSlideIndex !== null && speakingSlideIndex !== activeSlideIndex) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      setSpeakingSlideIndex(null);
+    }
+  }, [activeSlideIndex, speakingSlideIndex]);
 
-  const handleTrustAudio = () => {
-    const text = language === 'hi'
-      ? (trustScoreData.voice_narration_hi || 'आपका भरोसा स्कोर 620 है, चांदी स्तर। आपकी क्रेडिट सीमा ₹15,000 है!')
-      : (trustScoreData.voice_narration_en || 'Your trust score is 620, Silver Tier. Your micro-credit limit is ₹15,000!');
-    speakVoice(text, language === 'hi' ? 'hi-IN' : 'en-IN');
-  };
+  // Clean up ongoing speech if component unmounts
+  useEffect(() => {
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
-  const handleRealityAudio = () => {
-    const text = language === 'hi'
-      ? (realityCheckData.voice_narration_hi || 'इस हफ्ते 214 लोगों ने देखा पर कोई बिक्री नहीं हुई। बहुत लोग देख रहे हैं पर खरीद नहीं रहे — AI कीमत सुझाव लें।')
-      : (realityCheckData.voice_narration_en || '214 views this week with zero sales. Many people are viewing but not buying — check your price.');
-    speakVoice(text, language === 'hi' ? 'hi-IN' : 'en-IN');
+  // Unified Voice Readout with Auto-Advance Freeze
+  const speakSlideAudio = (slideIdx, text, langCode = 'hi-IN') => {
+    // If clicking on currently active speech, toggle it off
+    if (speakingSlideIndex === slideIdx) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      setSpeakingSlideIndex(null);
+      return;
+    }
+
+    setSpeakingSlideIndex(slideIdx);
+    speakVoice(text, langCode, () => {
+      // Audio speech completed: release lock so the auto-advance timer starts fresh
+      setSpeakingSlideIndex(null);
+    });
   };
 
   const handleApplyPriceSuggestion = () => {
@@ -215,11 +232,21 @@ export default function HomeCommandCenter() {
               </div>
 
               <button
-                onClick={handleEarningsAudio}
+                onClick={() => speakSlideAudio(
+                  0,
+                  language === 'hi'
+                    ? 'आपकी इस महीने की सीधी कमाई अठारह हज़ार चार सौ पचास रुपये है, जो बिचौलियों से अड़तीस प्रतिशत अधिक है!'
+                    : 'Your monthly direct net earnings are ₹18,450, 38% higher than middleman sales!',
+                  language === 'hi' ? 'hi-IN' : 'en-IN'
+                )}
                 aria-label="Listen to monthly earnings aloud"
-                className="w-10 h-10 rounded-full bg-white text-[#1E3A8A] flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer shrink-0 mt-1 hover:bg-slate-50"
+                className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all cursor-pointer shrink-0 mt-1 ${
+                  speakingSlideIndex === 0
+                    ? 'bg-amber-400 text-slate-950 ring-4 ring-white/60 animate-pulse scale-105'
+                    : 'bg-white text-[#1E3A8A] hover:bg-slate-50'
+                }`}
               >
-                <Volume2 className="w-5 h-5" />
+                <Volume2 className={`w-5 h-5 ${speakingSlideIndex === 0 ? 'animate-bounce' : ''}`} />
               </button>
             </div>
 
@@ -273,11 +300,21 @@ export default function HomeCommandCenter() {
               </div>
 
               <button
-                onClick={handleTrustAudio}
+                onClick={() => speakSlideAudio(
+                  1,
+                  language === 'hi'
+                    ? (trustScoreData.voice_narration_hi || 'आपका भरोसा स्कोर 620 है, चांदी स्तर। आपकी क्रेडिट सीमा ₹15,000 है!')
+                    : (trustScoreData.voice_narration_en || 'Your trust score is 620, Silver Tier. Your micro-credit limit is ₹15,000!'),
+                  language === 'hi' ? 'hi-IN' : 'en-IN'
+                )}
                 aria-label="Listen to trust score aloud"
-                className="w-10 h-10 rounded-full bg-white text-[#78350F] flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer shrink-0 mt-1 hover:bg-slate-50"
+                className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all cursor-pointer shrink-0 mt-1 ${
+                  speakingSlideIndex === 1
+                    ? 'bg-amber-400 text-slate-950 ring-4 ring-white/60 animate-pulse scale-105'
+                    : 'bg-white text-[#78350F] hover:bg-slate-50'
+                }`}
               >
-                <Volume2 className="w-5 h-5" />
+                <Volume2 className={`w-5 h-5 ${speakingSlideIndex === 1 ? 'animate-bounce' : ''}`} />
               </button>
             </div>
 
@@ -368,11 +405,21 @@ export default function HomeCommandCenter() {
               </div>
 
               <button
-                onClick={handleRealityAudio}
+                onClick={() => speakSlideAudio(
+                  2,
+                  language === 'hi'
+                    ? (realityCheckData.voice_narration_hi || 'इस हफ्ते 214 लोगों ने देखा पर कोई बिक्री नहीं हुई। बहुत लोग देख रहे हैं पर खरीद नहीं रहे — AI कीमत सुझाव लें।')
+                    : (realityCheckData.voice_narration_en || '214 views this week with zero sales. Many people are viewing but not buying — check your price.'),
+                  language === 'hi' ? 'hi-IN' : 'en-IN'
+                )}
                 aria-label="Listen to price reality check aloud"
-                className="w-10 h-10 rounded-full bg-white text-[#0E4957] flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer shrink-0 mt-1 hover:bg-slate-50"
+                className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all cursor-pointer shrink-0 mt-1 ${
+                  speakingSlideIndex === 2
+                    ? 'bg-amber-400 text-slate-950 ring-4 ring-white/60 animate-pulse scale-105'
+                    : 'bg-white text-[#0E4957] hover:bg-slate-50'
+                }`}
               >
-                <Volume2 className="w-5 h-5" />
+                <Volume2 className={`w-5 h-5 ${speakingSlideIndex === 2 ? 'animate-bounce' : ''}`} />
               </button>
             </div>
 

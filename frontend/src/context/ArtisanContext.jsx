@@ -195,8 +195,11 @@ export function ArtisanProvider({ children }) {
   };
 
   // Automated Text to Speech (TTS)
-  const speakVoice = (text, langCode = 'hi-IN') => {
-    if (!('speechSynthesis' in window)) return;
+  const speakVoice = (text, langCode = 'hi-IN', onEnd = null) => {
+    if (!('speechSynthesis' in window)) {
+      if (onEnd) onEnd();
+      return;
+    }
     window.speechSynthesis.cancel(); // cancel any ongoing speech
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.92;
@@ -208,7 +211,14 @@ export function ArtisanProvider({ children }) {
     if (voice) {
       utterance.voice = voice;
     }
+
+    if (onEnd) {
+      utterance.onend = () => onEnd();
+      utterance.onerror = () => onEnd();
+    }
+
     window.speechSynthesis.speak(utterance);
+    return utterance;
   };
 
   // Run End-to-End AI Enhancement and Catalog Generation
