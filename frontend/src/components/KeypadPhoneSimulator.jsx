@@ -463,6 +463,41 @@ export default function KeypadPhoneSimulator({ onClose }) {
       let isLowPrice = false;
       let detectedPriceVal = 450;
 
+      if (stepIndex === 2) {
+        let parsed = Number(resp.extractedValue);
+        if (isNaN(parsed) || parsed <= 0) {
+          // Client-side fallback extraction from transcript / translatedText
+          const combined = `${resp.transcript || ''} ${resp.translatedText || ''}`.toLowerCase();
+          const devanagariDigits = { '०': '0', '१': '1', '२': '2', '३': '3', '४': '4', '५': '5', '६': '6', '७': '7', '८': '8', '९': '9' };
+          const normalized = combined.replace(/[०-९]/g, d => devanagariDigits[d] || d);
+
+          const digitMatch = normalized.match(/(?:₹|rs\.?|inr|रुपये|रु\.?)?\s*(\d+(?:\.\d+)?)/i);
+          if (digitMatch && digitMatch[1]) {
+            const dVal = parseFloat(digitMatch[1]);
+            if (!isNaN(dVal) && dVal > 0) parsed = dVal;
+          } else {
+            const wordMap = {
+              'one hundred': 100, 'hundred': 100, 'two hundred': 200, 'three hundred': 300,
+              'four hundred': 400, 'five hundred': 500, 'six hundred': 600, 'seven hundred': 700,
+              'eight hundred': 800, 'nine hundred': 900, 'one thousand': 1000, 'thousand': 1000,
+              'fifty': 50, 'one fifty': 150, 'two fifty': 250, 'three fifty': 350, 'four fifty': 450,
+              'एक सौ पचास': 150, 'साढ़े चार सौ': 450, 'साढ़े तीन सौ': 350, 'ढाई सौ': 250, 'डेढ़ सौ': 150,
+              'एक सौ': 100, 'सौ': 100, 'दो सौ': 200, 'तीन सौ': 300, 'चार सौ': 400, 'पांच सौ': 500,
+              'शंभर': 100, 'एकशे': 100, 'दोनशे': 200, 'तीनशे': 300, 'चारशे': 400, 'पाचशे': 500,
+            };
+            for (const [phrase, priceVal] of Object.entries(wordMap)) {
+              if (normalized.includes(phrase)) {
+                parsed = priceVal;
+                break;
+              }
+            }
+          }
+        }
+
+        detectedPriceVal = (!isNaN(parsed) && parsed > 0) ? parsed : 450;
+        isLowPrice = detectedPriceVal < 450;
+      }
+
       setFormData(prev => {
         const next = { ...prev };
         if (stepIndex === 0) {
@@ -474,15 +509,7 @@ export default function KeypadPhoneSimulator({ onClose }) {
           next.raw_transcripts.material = resp.transcript;
           next.translated_texts.material = resp.translatedText;
         } else if (stepIndex === 2) {
-          const rawNum = Number(resp.extractedValue);
-          const parsed = (!isNaN(rawNum) && rawNum > 0) ? rawNum : 450;
-          detectedPriceVal = parsed;
-          if (parsed < 450) {
-            isLowPrice = true;
-            next.price = 450; // Automatically select 450 baseline
-          } else {
-            next.price = parsed;
-          }
+          next.price = isLowPrice ? 450 : detectedPriceVal;
           next.raw_transcripts.price = resp.transcript;
           next.translated_texts.price = resp.translatedText;
         }
@@ -499,7 +526,7 @@ export default function KeypadPhoneSimulator({ onClose }) {
         // All 3 questions answered!
         if (isLowPrice) {
           setLowPriceWarning({ spoken: detectedPriceVal, recommended: 450 });
-          logTelemetry('VOICE', `BargainGuard Disclaimer: Spoken price ₹${detectedPriceVal} < fair market minimum ₹450.`);
+          logTelemetry('VOICE', `BargainGuard Disclaimer Triggered: Spoken price ₹${detectedPriceVal} < fair minimum ₹450.`);
           setTimeout(() => {
             triggerPriceWarning(detectedPriceVal, 450, lang);
           }, 1200);

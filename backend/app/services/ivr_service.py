@@ -45,45 +45,46 @@ BHASHINI_LANG_CODES = {
 def extract_price_from_text(text: str) -> float:
     """
     Extracts numerical price value from spoken vernacular transcript.
-    Handles Hindi words, currency symbols, and numeric digits.
+    Handles Hindi, Marathi, and English words, currency symbols, and numeric digits.
     """
     if not text:
         return 0.0
 
+    # Convert Devanagari numerals ०-९ to standard 0-9
+    devanagari_to_western = str.maketrans("०१२३४५६७८९", "0123456789")
+    normalized = text.translate(devanagari_to_western)
+
     # 1. Check for standard numeric digits
-    digit_match = re.findall(r"(?:₹|rs\.?|inr|रुपये|रु\.?)?\s*(\d+(?:,\d+)*(?:\.\d+)?)", text, re.IGNORECASE)
+    digit_match = re.findall(r"(?:₹|rs\.?|inr|रुपये|रु\.?)?\s*(\d+(?:,\d+)*(?:\.\d+)?)", normalized, re.IGNORECASE)
     if digit_match:
         try:
             val_str = digit_match[-1].replace(",", "")
-            return float(val_str)
+            val = float(val_str)
+            if val > 0:
+                return val
         except ValueError:
             pass
 
-    # 2. Hindi word-to-number heuristics for common artisan price denominations
-    hindi_number_map = {
-        "सौ": 100,
-        "दो सौ": 200,
-        "तीन सौ": 300,
-        "चार सौ": 400,
-        "पांच सौ": 500,
-        "पाँच सौ": 500,
-        "छह सौ": 600,
-        "सात सौ": 700,
-        "आठ सौ": 800,
-        "नौ सौ": 900,
-        "हजार": 1000,
-        "हज़ार": 1000,
-        "दो हजार": 2000,
-        "तीन हजार": 3000,
-        "पचास": 50,
-        "डेढ़ सौ": 150,
-        "ढाई सौ": 250,
-        "साढ़े तीन सौ": 350,
-        "साढ़े चार सौ": 450,
+    # 2. Multilingual word-to-number heuristics (Hindi, Marathi, English)
+    number_map = {
+        # English
+        "one hundred": 100, "hundred": 100, "two hundred": 200, "three hundred": 300,
+        "four hundred": 400, "five hundred": 500, "six hundred": 600, "seven hundred": 700,
+        "eight hundred": 800, "nine hundred": 900, "one thousand": 1000, "thousand": 1000,
+        "fifty": 50, "one fifty": 150, "two fifty": 250, "three fifty": 350, "four fifty": 450,
+        # Hindi
+        "एक सौ पचास": 150, "साढ़े चार सौ": 450, "साढ़े तीन सौ": 350, "ढाई सौ": 250, "डेढ़ सौ": 150,
+        "एक सौ": 100, "सौ": 100, "दो सौ": 200, "तीन सौ": 300, "चार सौ": 400,
+        "पांच सौ": 500, "पाँच सौ": 500, "छह सौ": 600, "सात सौ": 700, "आठ सौ": 800, "नौ सौ": 900,
+        "हजार": 1000, "हज़ार": 1000, "दो हजार": 2000, "तीन हजार": 3000, "पचास": 50,
+        # Marathi
+        "शंभर": 100, "एकशे": 100, "दोनशे": 200, "तीनशे": 300, "चारशे": 400, "पाचशे": 500,
+        "सहाशे": 600, "सातशे": 700, "आठशे": 800, "नऊशे": 900, "हजार": 1000,
+        "दीडशे": 150, "अडीचशे": 250, "साडेतीनशे": 350, "साडेचारशे": 450,
     }
 
-    t_lower = text.lower()
-    for phrase, num_val in sorted(hindi_number_map.items(), key=lambda x: -len(x[0])):
+    t_lower = normalized.lower()
+    for phrase, num_val in sorted(number_map.items(), key=lambda x: -len(x[0])):
         if phrase in t_lower:
             return float(num_val)
 
@@ -298,33 +299,43 @@ Format your output strictly as valid JSON:
 {{"transcript": "Devanagari text", "translatedText": "English translation"}}
 Output ONLY valid JSON."""
 
-        response = client.models.generate_content(
-            model="gemini-3.5-flash-lite",
-            contents=[prompt, audio_part],
-            config=types.GenerateContentConfig(
-                temperature=0.1,
-                response_mime_type="application/json"
-            )
-        )
+        candidate_models = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-flash-latest"]
+        last_model_err = None
+        for model_name in candidate_models:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=[prompt, audio_part],
+                    config=types.GenerateContentConfig(
+                        temperature=0.1,
+                        response_mime_type="application/json"
+                    )
+                )
 
-        import json
-        raw_text = (response.text or "").strip()
-        raw_text = re.sub(r"^```(?:json)?\s*", "", raw_text)
-        raw_text = re.sub(r"\s*```$", "", raw_text)
+                import json
+                raw_text = (response.text or "").strip()
+                raw_text = re.sub(r"^```(?:json)?\s*", "", raw_text)
+                raw_text = re.sub(r"\s*```$", "", raw_text)
 
-        try:
-            data = json.loads(raw_text)
-            transcript = data.get("transcript", "").strip()
-            translated_text = data.get("translatedText", transcript).strip()
-        except Exception:
-            transcript = raw_text
-            translated_text = raw_text
+                try:
+                    data = json.loads(raw_text)
+                    transcript = data.get("transcript", "").strip()
+                    translated_text = data.get("translatedText", transcript).strip()
+                except Exception:
+                    transcript = raw_text
+                    translated_text = raw_text
 
-        if not transcript or len(transcript) < 2:
-            raise ValueError("Empty transcription from model")
+                if transcript and len(transcript) >= 2:
+                    latency = round((time.time() - t_start) * 1000, 1)
+                    return transcript, translated_text, latency
+            except Exception as model_err:
+                last_model_err = model_err
+                logger.warning(f"IVR Gemini model {model_name} failed: {model_err}")
+                continue
 
-        latency = round((time.time() - t_start) * 1000, 1)
-        return transcript, translated_text, latency
+        if last_model_err:
+            raise last_model_err
+        raise ValueError("Empty transcription from all candidate models")
 
     except Exception as err:
         logger.warning(f"Audio transcription engine note ({err}), applying zero-fail MoSJE craft response.")
