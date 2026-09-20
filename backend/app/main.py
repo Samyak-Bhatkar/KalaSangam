@@ -467,9 +467,7 @@ async def composite_lifestyle_endpoint(req: LifestyleCompositeRequest):
             width=1080,
             height=1080,
             shadow_applied=True,
-            rotation_deg=rot,
-            size_pct=size_pct,
-            bottom_cushion_pct=cushion_pct
+            rotation_deg=rot
         )
     except HTTPException:
         raise

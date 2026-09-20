@@ -52,7 +52,7 @@ export default function StudioReviewCard() {
         const compRes = await compositeLifestyleImage({
           backgroundUrl: activeBg.url,
           cutoutBase64: newCutout || effectiveCutout,
-          rawImageBase64: rawImageBase64,
+          rawImageBase64: rawImageBase64 || rawSrc,
           rotationDeg,
         });
         if (compRes && compRes.lifestyle_url) {
@@ -87,7 +87,7 @@ export default function StudioReviewCard() {
 
   const rawSrc = rawImageBase64 || rawImageUrl || selectedPreset?.raw_image_url || selectedPreset?.sample_image_url || '/terracotta_pot_raw.png';
   const studioSrc = studioImageBase64 || studioImageUrl || selectedPreset?.clean_image_url || '/terracotta_pot_clean.png';
-  const effectiveCutout = cutoutBase64 || studioImageBase64 || rawImageBase64;
+  const effectiveCutout = cutoutBase64 || studioImageBase64 || rawImageBase64 || studioSrc || rawSrc;
 
   const effectiveQuery = suggestedBackgroundQuery ||
     catalogData?.suggested_background_query ||
@@ -127,7 +127,7 @@ export default function StudioReviewCard() {
           shotAngle: activeShotInfo.shotAngle,
           tiltDegrees: activeShotInfo.tiltDegrees,
           cutoutBase64: effectiveCutout,
-          rawImageBase64: rawImageBase64,
+          rawImageBase64: rawImageBase64 || rawSrc,
         });
 
         if (!isCancelled && res && res.options) {
@@ -143,6 +143,11 @@ export default function StudioReviewCard() {
 
           // Find recommended option
           const rec = res.options.find(o => o.recommended) || res.options[0];
+
+          // Auto-select recommended option by default
+          if (rec && !selectedBgId) {
+            setSelectedBgId(rec.id);
+          }
 
           // Auto-trigger live composites for all candidates so artisan sees real previews
           if (effectiveCutout) {
@@ -174,16 +179,23 @@ export default function StudioReviewCard() {
         const compRes = await compositeLifestyleImage({
           backgroundUrl: opt.url,
           cutoutBase64: cutout,
-          rawImageBase64: rawImageBase64,
+          rawImageBase64: rawImageBase64 || rawSrc,
           rotationDeg: customRot,
         });
 
         if (compRes && compRes.lifestyle_url) {
-          newCache[opt.id] = {
+          const entry = {
             url: compRes.lifestyle_url,
             base64: compRes.lifestyle_base64 || compRes.lifestyle_url,
           };
+          newCache[opt.id] = entry;
           setCompositeCache({ ...newCache });
+
+          // If this is the recommended/selected option, immediately populate lifestyle image
+          if (opt.id === (selectedBgId || recommendedOption?.id)) {
+            setLifestyleImageUrl(compRes.lifestyle_url);
+            setLifestyleImageBase64(compRes.lifestyle_base64 || compRes.lifestyle_url);
+          }
         }
       } catch (e) {
         console.warn(`Composite failed for ${opt.id}:`, e);
@@ -193,15 +205,16 @@ export default function StudioReviewCard() {
   };
 
   const handleSelectBackground = async (opt) => {
+    if (!opt) return;
     setSelectedBgId(opt.id);
     setHasSkipped(false);
+    setActiveViewTab('lifestyle');
 
     // If already composited in cache, apply immediately
     if (compositeCache[opt.id]) {
       const cached = compositeCache[opt.id];
       setLifestyleImageUrl(cached.url);
       setLifestyleImageBase64(cached.base64);
-      setActiveViewTab('lifestyle');
       return;
     }
 
@@ -211,7 +224,7 @@ export default function StudioReviewCard() {
       const compRes = await compositeLifestyleImage({
         backgroundUrl: opt.url,
         cutoutBase64: effectiveCutout,
-        rawImageBase64: rawImageBase64,
+        rawImageBase64: rawImageBase64 || rawSrc,
         rotationDeg: lifestyleRotationDeg,
       });
 
@@ -225,7 +238,6 @@ export default function StudioReviewCard() {
         }));
         setLifestyleImageUrl(compRes.lifestyle_url);
         setLifestyleImageBase64(compRes.lifestyle_base64 || compRes.lifestyle_url);
-        setActiveViewTab('lifestyle');
       }
     } catch (err) {
       console.error('Error selecting background:', err);
@@ -242,10 +254,11 @@ export default function StudioReviewCard() {
     setActiveViewTab('studio');
   };
 
-  const activeLifestyleDisplay = lifestyleImageBase64 ||
-    lifestyleImageUrl ||
+  const activeLifestyleDisplay =
     (selectedBgId && compositeCache[selectedBgId]?.base64) ||
-    (selectedBgId && compositeCache[selectedBgId]?.url);
+    (selectedBgId && compositeCache[selectedBgId]?.url) ||
+    lifestyleImageBase64 ||
+    lifestyleImageUrl;
 
   return (
     <div className="w-full rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-2xl">
@@ -263,33 +276,39 @@ export default function StudioReviewCard() {
           <div className="flex items-center gap-1 p-0.5 bg-slate-900 rounded-full border border-slate-800 text-[11px]">
             <button
               onClick={() => setActiveViewTab('studio')}
-              className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${activeViewTab === 'studio'
+              className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                activeViewTab === 'studio'
                   ? 'bg-emerald-500 text-white shadow-xs'
                   : 'text-slate-400 hover:text-slate-200'
-                }`}
+              }`}
             >
               {language === 'hi' ? 'प्राथमिक स्टूडियो' : 'Primary Studio'}
             </button>
             <button
               onClick={() => {
-                if (activeLifestyleDisplay) {
-                  setActiveViewTab('lifestyle');
-                } else if (backgroundCandidates.length > 0) {
-                  const rec = backgroundCandidates.find(o => o.recommended) || backgroundCandidates[0];
+                setActiveViewTab('lifestyle');
+                const rec = backgroundCandidates.find(o => o.recommended) || backgroundCandidates[0];
+                if (!selectedBgId && rec) {
                   handleSelectBackground(rec);
+                } else if (selectedBgId) {
+                  const current = backgroundCandidates.find(o => o.id === selectedBgId);
+                  if (current && !compositeCache[selectedBgId] && !isCompositing) {
+                    handleSelectBackground(current);
+                  }
                 }
               }}
-              disabled={!activeLifestyleDisplay && backgroundCandidates.length === 0}
-              className={`px-3 py-1 rounded-full font-bold transition-all flex items-center gap-1.5 ${(!activeLifestyleDisplay && backgroundCandidates.length === 0)
-                  ? 'opacity-40 cursor-not-allowed text-slate-500'
-                  : activeViewTab === 'lifestyle'
-                    ? 'bg-amber-500 text-slate-950 shadow-xs font-black cursor-pointer'
-                    : 'text-amber-400 hover:text-amber-300 cursor-pointer'
-                }`}
+              disabled={backgroundCandidates.length === 0 && !isLoadingOptions}
+              className={`px-3 py-1 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeViewTab === 'lifestyle'
+                  ? 'bg-emerald-500 text-white shadow-xs'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
             >
-              <Sparkles className="w-3 h-3" />
+              <Sparkles className={`w-3 h-3 ${activeViewTab === 'lifestyle' ? 'text-white' : 'text-amber-400'}`} />
               <span>{language === 'hi' ? 'लाइफस्टाइल (2nd)' : 'Lifestyle (2nd)'}</span>
-              {activeLifestyleDisplay && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+              {activeLifestyleDisplay && (
+                <span className={`w-1.5 h-1.5 rounded-full ${activeViewTab === 'lifestyle' ? 'bg-white' : 'bg-emerald-400'}`} />
+              )}
             </button>
           </div>
         ) : (
@@ -327,11 +346,20 @@ export default function StudioReviewCard() {
       ) : (
         /* Secondary Lifestyle Preview Screen */
         <div className="relative w-full aspect-square max-h-[340px] bg-slate-950 overflow-hidden flex items-center justify-center select-none">
-          <img
-            src={activeLifestyleDisplay}
-            alt="Lifestyle Contextual Render"
-            className="w-full h-full object-cover"
-          />
+          {activeLifestyleDisplay ? (
+            <img
+              src={activeLifestyleDisplay}
+              alt="Lifestyle Contextual Render"
+              className="w-full h-full object-cover transition-all duration-300"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-3 text-slate-400 p-6 text-center">
+              <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
+              <p className="text-xs font-semibold text-slate-300">
+                {language === 'hi' ? 'लाइफस्टाइल दृश्य तैयार किया जा रहा है...' : 'Compositing lifestyle scene...'}
+              </p>
+            </div>
+          )}
           <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-amber-400/40 text-amber-300 text-[10px] font-extrabold shadow-md flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>{language === 'hi' ? 'वैकल्पिक द्वितीयक लाइफस्टाइल शॉट' : 'Optional Secondary Lifestyle Shot'}</span>
@@ -486,17 +514,18 @@ export default function StudioReviewCard() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {backgroundCandidates.map((opt) => {
-                const isSelected = selectedBgId === opt.id || (lifestyleImageUrl && lifestyleImageUrl === compositeCache[opt.id]?.url);
+                const isSelected = selectedBgId === opt.id || (!selectedBgId && opt.recommended);
                 const previewSrc = compositeCache[opt.id]?.base64 || compositeCache[opt.id]?.url || opt.thumbnail_url;
 
                 return (
                   <div
                     key={opt.id}
                     onClick={() => handleSelectBackground(opt)}
-                    className={`group relative aspect-square rounded-2xl overflow-hidden cursor-pointer border-2 transition-all duration-200 active:scale-95 ${isSelected
-                        ? 'border-amber-400 ring-3 ring-amber-400/30 shadow-xl shadow-amber-500/20 scale-[1.02]'
+                    className={`group relative aspect-square rounded-2xl overflow-hidden cursor-pointer border-2 transition-all duration-200 active:scale-95 ${
+                      isSelected
+                        ? 'border-emerald-400 ring-3 ring-emerald-400/30 shadow-xl shadow-emerald-500/20 scale-[1.02]'
                         : 'border-slate-800 hover:border-slate-600 bg-slate-900/60'
-                      }`}
+                    }`}
                   >
                     {/* Background Image / Live Composited Preview */}
                     <img

@@ -413,10 +413,22 @@ def load_image_from_source(source_str: str) -> Image.Image:
     elif os.path.exists(source_str):
         return Image.open(source_str)
     else:
-        # Check static uploads directory
-        local_candidate = settings.UPLOAD_DIR / os.path.basename(source_str)
-        if local_candidate.exists():
-            return Image.open(local_candidate)
+        # Check static uploads, samples, or frontend public directory
+        base_name = os.path.basename(source_str)
+        from pathlib import Path
+        for folder in [
+            settings.UPLOAD_DIR,
+            Path("static/samples"),
+            Path("backend/static/samples"),
+            Path("../backend/static/samples"),
+            Path("../frontend/public"),
+            Path("frontend/public"),
+            Path("../frontend/dist"),
+            Path("frontend/dist"),
+        ]:
+            candidate = Path(folder) / base_name
+            if candidate.exists():
+                return Image.open(candidate)
         raise FileNotFoundError(f"Could not load image source: {source_str[:60]}")
 
 
@@ -451,6 +463,18 @@ def composite_lifestyle_scene(
         cutout = Image.open(cutout_img).convert("RGBA")
     else:
         raise ValueError("Invalid cutout image provided.")
+
+    # If the cutout does not have transparency (e.g. solid white studio background from preset),
+    # make near-white studio background pixels transparent so it composites seamlessly:
+    try:
+        alpha_min = min(cutout.split()[3].getextrema())
+        if alpha_min == 255:
+            arr = np.array(cutout)
+            is_white_bg = (arr[:, :, 0] > 225) & (arr[:, :, 1] > 225) & (arr[:, :, 2] > 220)
+            arr[is_white_bg, 3] = 0
+            cutout = Image.fromarray(arr, mode="RGBA")
+    except Exception as e:
+        logger.warning(f"Could not convert white background transparency: {e}")
 
     bbox = cutout.getbbox()
     if bbox:
