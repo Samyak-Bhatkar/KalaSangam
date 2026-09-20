@@ -21,7 +21,10 @@ import {
   PhoneCall,
   LogOut,
   UserCheck,
-  Store
+  Store,
+  ChevronDown,
+  ShieldCheck,
+  X
 } from 'lucide-react';
 import { useArtisan, SUPPORTED_LANGUAGES } from './context/ArtisanContext';
 import HomeCommandCenter from './components/HomeCommandCenter';
@@ -59,6 +62,9 @@ export default function App() {
     currentUser,
     logout,
   } = useArtisan();
+
+  // Slide-over Profile Drawer State
+  const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
 
   // Support public buyer storefront route with NO login (?view=storefront or ?storefront=true)
   const [publicStorefront, setPublicStorefront] = useState(() => {
@@ -147,151 +153,159 @@ export default function App() {
       <div className="relative w-full md:max-w-[430px] h-screen md:h-[900px] md:max-h-[95vh] bg-[#FDFBF7] md:rounded-[40px] md:border md:border-slate-200/80 shadow-[0_20px_50px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden">
         
         {/* ==================================================================== */}
-        {/* PERSISTENT STAKEHOLDER SESSION BAR & LOGOUT                          */}
+        {/* REFINED 56px HEADER (Minimal, Verified Trust Badge, Language Pill, Avatar) */}
         {/* ==================================================================== */}
-        <div className="z-40 px-3.5 py-1.5 flex items-center justify-between text-[11px] font-bold bg-[#2A1810] text-amber-200 border-b border-amber-950">
-          <div className="flex items-center gap-1.5 truncate">
-            <UserCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span className="truncate">
-              Logged in as <strong className="text-white">Artisan</strong> — <span className="font-mono text-amber-300">{currentUser.phone}</span>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={() => {
-                window.history.pushState({}, '', '?view=storefront');
-                setPublicStorefront(true);
-              }}
-              title="View Public Marketplace Storefront"
-              className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center gap-1 cursor-pointer transition-colors"
-            >
-              <Store className="w-3 h-3 text-amber-300" />
-              <span className="hidden sm:inline">Store</span>
-            </button>
-
-            <button
-              onClick={logout}
-              title="Log out and return to Phone + OTP screen"
-              className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 border border-red-500/30 flex items-center gap-1 cursor-pointer transition-colors active:scale-95"
-            >
-              <LogOut className="w-3 h-3" />
-              <span>Log out</span>
-            </button>
-          </div>
-        </div>
-
-        {/* ==================================================================== */}
-        {/* TOP STATUS BAR & MoSJE GOVT EMBLEM HEADER                           */}
-        {/* ==================================================================== */}
-        <header className="z-30 px-4 pt-3 pb-2.5 bg-white/95 backdrop-blur-md border-b border-slate-200/80 flex items-center justify-between shrink-0 shadow-xs">
-          <div className="flex items-center gap-2.5">
-            {/* ShilpSetu Brand Emblem */}
+        <header className="z-30 h-14 px-3.5 bg-[#FBF9F5]/95 backdrop-blur-md border-b border-black/[0.06] flex items-center justify-between shrink-0 shadow-xs">
+          {/* Left: Brand Emblem + Title + Single Consolidated Verified Badge */}
+          <div className="flex items-center gap-2">
             <img
               src="/brand_emblem.png"
               alt="ShilpSetu Emblem"
-              className="w-8 h-8 rounded-full border border-amber-500/40 object-cover shrink-0 shadow-xs"
+              className="w-7 h-7 rounded-full ring-1 ring-amber-500/20 object-cover shrink-0 shadow-xs"
             />
-
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-sm font-black tracking-tight text-slate-900 flex items-center gap-1">
-                  <span>ShilpSetu AI</span>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-50 text-amber-800 font-mono font-bold border border-amber-200">
-                    MoSJE
-                  </span>
-                </h1>
-              </div>
-              <p className="text-[9px] text-slate-500 font-medium tracking-tight">
-                NBCFDC / NSFDC Virtual Business Manager
-              </p>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[15px] font-black tracking-tight text-stone-900 font-sans">
+                ShilpSetu
+              </span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200/80 shadow-2xs">
+                <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
+                <span>सत्यापित कारीगर</span>
+              </span>
             </div>
           </div>
 
-          {/* Quick Header Launchers */}
-          <div className="flex items-center gap-1.5">
-            {/* Zero-Smartphone Voice-IVR Launcher */}
+          {/* Right: Quick IVR + Language Pill + Return + Tappable Avatar with Menu */}
+          <div className="flex items-center gap-2">
+            {/* Quick Missed-Call / IVR Launcher */}
             <button
               onClick={() => setActiveModal('ivr')}
-              title="Zero-Smartphone IVR (Keypad Phone Simulator)"
-              className="py-1 px-2.5 rounded-full bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-300 text-emerald-800 font-bold text-[11px] flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-xs"
+              title="बिना इंटरनेट ऑर्डर - IVR (Keypad Phone)"
+              className="w-8 h-8 rounded-full bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-300/80 text-emerald-800 flex items-center justify-center cursor-pointer transition-all active:scale-95 shadow-xs"
             >
-              <PhoneCall className="w-3 h-3 text-emerald-600 animate-pulse" />
-              <span className="font-extrabold">IVR</span>
+              <PhoneCall className="w-3.5 h-3.5 text-emerald-700" />
             </button>
 
-            {/* Regional Dialect / Language Selector */}
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              aria-label="Select Language"
-              className="py-1 px-2 rounded-full bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-slate-800 font-bold text-xs focus:outline-none focus:border-amber-500 cursor-pointer transition-colors"
-            >
-              {SUPPORTED_LANGUAGES.map(lang => (
-                <option key={lang.code} value={lang.code} className="bg-white text-slate-900">
-                  {lang.name} ({lang.label})
-                </option>
-              ))}
-            </select>
+            {/* Language Selector Pill */}
+            <div className="relative inline-flex items-center rounded-full bg-white border border-stone-200 shadow-2xs px-2.5 py-1 text-xs font-semibold text-stone-700 hover:border-amber-400 transition-colors">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                aria-label="Select Language"
+                className="bg-transparent text-stone-800 font-bold text-xs focus:outline-none cursor-pointer pr-4 appearance-none"
+              >
+                {SUPPORTED_LANGUAGES.map(lang => (
+                  <option key={lang.code} value={lang.code} className="bg-white text-stone-900">
+                    {lang.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3 h-3 text-stone-400 pointer-events-none absolute right-2" />
+            </div>
 
+            {/* Back/Reset when in deeper steps */}
             {currentStep > 0 && (
               <button
                 onClick={resetFlow}
                 title="Return to Home / Restart Flow"
-                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-all cursor-pointer shadow-xs"
+                className="w-8 h-8 rounded-full bg-white hover:bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-600 hover:text-stone-900 transition-all cursor-pointer shadow-xs active:scale-95"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
             )}
+
+            {/* Tappable Artisan Avatar */}
+            <button
+              onClick={() => setIsProfileDrawerOpen(true)}
+              title="Artisan Profile & Settings"
+              className="relative w-8 h-8 rounded-full ring-2 ring-white border border-stone-300 shadow-xs cursor-pointer active:scale-95 transition-transform overflow-visible shrink-0"
+            >
+              <img
+                src="/artisan_shanti_devi.png"
+                alt="Profile"
+                className="w-full h-full rounded-full object-cover"
+              />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full" />
+            </button>
           </div>
         </header>
 
-        {/* ==================================================================== */}
-        {/* 4-STAGE WORKFLOW STEPPER (Stitch Screen 1 -> 2 -> 3 -> 4)            */}
-        {/* ==================================================================== */}
-        <nav className="z-20 px-3 py-2 bg-white border-b border-slate-200/70 flex items-center justify-between shrink-0 shadow-xs">
-          {[
-            { step: 0, label: language === 'hi' ? 'होम' : 'Home', icon: Home },
-            { step: 1, label: language === 'hi' ? 'फोटो' : '1. Snap', icon: Camera },
-            { step: 2, label: language === 'hi' ? 'आवाज' : '2. Speak', icon: Mic },
-            { step: 3, label: language === 'hi' ? 'प्रसारण' : '3. Price', icon: CheckCircle },
-          ].map((item, idx) => {
-            const Icon = item.icon;
-            const isActive = currentStep === item.step;
-            const isDone = currentStep > item.step;
-            return (
-              <React.Fragment key={item.step}>
+        {/* Slide-over Profile & Session Drawer */}
+        {isProfileDrawerOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/40 backdrop-blur-xs animate-fadeIn">
+            <div className="relative w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl border border-stone-200 text-stone-900 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                <div className="flex items-center gap-2">
+                  <UserCheck className="w-4 h-4 text-[#C85A32]" />
+                  <h3 className="text-sm font-black text-stone-900">कारीगर प्रोफ़ाइल (Profile)</h3>
+                </div>
                 <button
-                  onClick={() => setCurrentStep(item.step)}
-                  className={`flex items-center gap-1 cursor-pointer transition-all ${
-                    isActive ? 'text-amber-700 font-extrabold' : isDone ? 'text-emerald-700 font-semibold' : 'text-slate-400 hover:text-slate-600'
-                  }`}
+                  onClick={() => setIsProfileDrawerOpen(false)}
+                  className="w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 flex items-center justify-center cursor-pointer transition-colors"
                 >
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all ${
-                      isActive
-                        ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
-                        : isDone
-                        ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
-                        : 'bg-slate-100 text-slate-400 border-slate-200'
-                    }`}
-                  >
-                    <Icon className="w-3 h-3" />
-                  </div>
-                  <span className="text-[10px] font-bold tracking-tight">{item.label}</span>
+                  <X className="w-3.5 h-3.5" />
                 </button>
-                {idx < 3 && (
-                  <div className={`flex-1 h-0.5 mx-1.5 rounded-full ${isDone ? 'bg-emerald-500' : 'bg-slate-200'}`} />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </nav>
+              </div>
+
+              {/* Artisan Summary */}
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#FBF9F5] border border-stone-200/80">
+                <img
+                  src="/artisan_shanti_devi.png"
+                  alt="Shanti Devi"
+                  className="w-12 h-12 rounded-full border-2 border-amber-400 object-cover shadow-sm shrink-0"
+                />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs font-black text-stone-900">शांति देवी</span>
+                    <span className="px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">सत्यापित</span>
+                  </div>
+                  <p className="text-[11px] font-mono text-stone-500">{currentUser.phone}</p>
+                  <p className="text-[10px] text-[#C85A32] font-semibold">NBCFDC #8492 • गोरखपुर शिल्पकार</p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="space-y-2 pt-1">
+                <button
+                  onClick={() => {
+                    setIsProfileDrawerOpen(false);
+                    window.history.pushState({}, '', '?view=storefront');
+                    setPublicStorefront(true);
+                  }}
+                  className="w-full py-2.5 px-3.5 rounded-2xl bg-stone-100 hover:bg-stone-200/80 text-stone-800 font-bold text-xs flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Store className="w-4 h-4 text-[#C85A32]" />
+                    <span>सार्वजनिक दुकान देखें (View Store)</span>
+                  </div>
+                  <span className="text-[10px] text-stone-400">दुकान लिंक &rarr;</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsProfileDrawerOpen(false);
+                    logout();
+                  }}
+                  className="w-full py-2.5 px-3.5 rounded-2xl bg-rose-50 hover:bg-rose-100/80 text-rose-700 font-bold text-xs flex items-center justify-between border border-rose-200/60 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <LogOut className="w-4 h-4 text-rose-600" />
+                    <span>लॉग आउट करें (Log out)</span>
+                  </div>
+                  <span className="text-[10px] text-rose-400">सत्र समाप्त</span>
+                </button>
+              </div>
+
+              <div className="pt-2 text-center text-[10px] text-stone-400">
+                सामाजिक न्याय और अधिकारिता मंत्रालय (MoSJE) • भारत सरकार
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ==================================================================== */}
         {/* MAIN WORKFLOW SCREENS                                                */}
         {/* ==================================================================== */}
-        <main className="flex-1 relative overflow-y-auto">
+        <main className="flex-1 relative overflow-y-auto pb-24">
           {currentStep === 0 && <HomeCommandCenter />}
           {currentStep === 1 && <CameraViewfinder />}
           {currentStep === 2 && <VoiceRecorder />}
@@ -455,14 +469,47 @@ export default function App() {
         {activeModal === 'ivr' && <KeypadPhoneSimulator onClose={() => setActiveModal(null)} />}
         {activeModal === 'coordinator' && <CoordinatorReviewPanel onClose={() => setActiveModal(null)} />}
 
-        {/* Bottom Ambient Footer Bar */}
-        <footer className="z-20 py-2.5 px-4 bg-white/95 border-t border-slate-200/80 text-center text-[10px] text-slate-500 flex items-center justify-between shrink-0 shadow-xs">
-          <span className="font-semibold text-slate-700">MoSJE GoI • NSFDC / NBCFDC</span>
-          <span className="flex items-center gap-1.5 text-emerald-700 font-bold">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-            Zero-Text Voice UI Active
-          </span>
-        </footer>
+        {/* ==================================================================== */}
+        {/* FLOATING BOTTOM NAVIGATION DOCK (Thumb-Friendly, Large Targets)      */}
+        {/* ==================================================================== */}
+        <nav
+          aria-label="Workflow Navigation"
+          className="absolute bottom-3 left-3 right-3 z-30 bg-white/95 backdrop-blur-xl rounded-full border border-stone-200/90 shadow-[0_8px_30px_rgba(0,0,0,0.12)] px-2 py-1.5 flex items-center justify-around"
+        >
+          {[
+            { step: 0, label: language === 'hi' ? 'होम' : 'Home', icon: Home },
+            { step: 1, label: language === 'hi' ? 'फ़ोटो' : 'Snap', icon: Camera },
+            { step: 2, label: language === 'hi' ? 'आवाज' : 'Speak', icon: Mic },
+            { step: 3, label: language === 'hi' ? 'प्रसारण' : 'Price', icon: CheckCircle },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = currentStep === item.step;
+            const isDone = currentStep > item.step;
+            return (
+              <button
+                key={item.step}
+                onClick={() => setCurrentStep(item.step)}
+                className={`flex-1 py-1.5 px-1 rounded-full flex flex-col items-center justify-center gap-0.5 min-w-[56px] transition-all cursor-pointer select-none active:scale-95 ${
+                  isActive
+                    ? 'text-[#C85A32] font-black bg-[#C85A32]/10 scale-105 shadow-2xs'
+                    : isDone
+                    ? 'text-emerald-700 font-semibold hover:text-emerald-800'
+                    : 'text-stone-400 hover:text-stone-600 font-medium'
+                }`}
+              >
+                <div className="relative">
+                  <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
+                  {isDone && !isActive && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500" />
+                  )}
+                </div>
+                <span className="text-[10px] tracking-tight leading-none">
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );
