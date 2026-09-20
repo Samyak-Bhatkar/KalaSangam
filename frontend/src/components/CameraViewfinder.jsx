@@ -21,7 +21,8 @@ import {
   Minimize2,
   Check,
   Eye,
-  Sliders
+  Sliders,
+  Loader2
 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 import {
@@ -55,6 +56,7 @@ export default function CameraViewfinder() {
 
   // Camera stream state
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isStartingCamera, setIsStartingCamera] = useState(false);
   const [facingMode, setFacingMode] = useState('environment'); // 'environment' | 'user'
   const [cameraError, setCameraError] = useState(null); // null | 'denied' | 'unavailable'
   const [isShutterFlashing, setIsShutterFlashing] = useState(false);
@@ -123,7 +125,11 @@ export default function CameraViewfinder() {
       animationFrameIdRef.current = null;
     }
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
+      try {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      } catch (e) {
+        console.warn('Track stop note:', e);
+      }
       streamRef.current = null;
     }
     if (videoRef.current) {
@@ -132,35 +138,84 @@ export default function CameraViewfinder() {
     setIsStreaming(false);
   }, []);
 
-  // Request & start live camera stream
-  const startLiveCamera = useCallback(async (desiredFacing = facingMode) => {
+  // Multi-tier progressive getUserMedia fallback
+  const getMediaStreamWithFallback = async (desiredFacing) => {
+    // Strategy 1: Ideal HD + facingMode (ideal for mobile and HD webcams)
+    try {
+      return await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: desiredFacing ? { ideal: desiredFacing } : undefined,
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+    } catch (err1) {
+      console.warn('Strategy 1 (HD + Facing) failed, trying Strategy 2:', err1);
+    }
+
+    // Strategy 2: Simple facingMode constraint without dimension restrictions
+    try {
+      return await navigator.mediaDevices.getUserMedia({
+        video: desiredFacing ? { facingMode: desiredFacing } : true,
+        audio: false,
+      });
+    } catch (err2) {
+      console.warn('Strategy 2 (Facing only) failed, trying Strategy 3:', err2);
+    }
+
+    // Strategy 3: Universal video fallback (ensures desktop PC webcams and USB cams open)
+    return await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false,
+    });
+  };
+
+  // Request & start live camera stream with self-healing stream binding
+  const startLiveCamera = useCallback(async (desiredFacing = facingMode, forceRestart = false) => {
+    // If stream is already active and healthy, and we are not forcing lens switch, keep it running!
+    if (!forceRestart && streamRef.current && streamRef.current.active) {
+      const activeTrack = streamRef.current.getVideoTracks().find((t) => t.readyState === 'live');
+      if (activeTrack && videoRef.current) {
+        if (videoRef.current.srcObject !== streamRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+        }
+        try {
+          await videoRef.current.play();
+          setIsStreaming(true);
+          setCameraError(null);
+          return;
+        } catch (playErr) {
+          console.warn('Re-play on existing stream note:', playErr);
+        }
+      }
+    }
+
     stopMediaStream();
     setCameraError(null);
+    setIsStartingCamera(true);
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setCameraError('unavailable');
+      setIsStartingCamera(false);
       return;
     }
 
     try {
-      const constraints = {
-        video: {
-          facingMode: { ideal: desiredFacing },
-          width: { ideal: 1920, min: 720 },
-          height: { ideal: 1080, min: 720 },
-        },
-        audio: false,
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      const stream = await getMediaStreamWithFallback(desiredFacing);
       streamRef.current = stream;
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play().catch((e) => console.warn('Autoplay prevented:', e));
-        };
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.setAttribute('webkit-playsinline', 'true');
+        try {
+          await videoRef.current.play();
+        } catch (playErr) {
+          console.warn('Autoplay waiting for user gesture or metadata:', playErr);
+        }
       }
+
       setIsStreaming(true);
       setCameraError(null);
     } catch (err) {
@@ -171,6 +226,8 @@ export default function CameraViewfinder() {
         setCameraError('unavailable');
       }
       setIsStreaming(false);
+    } finally {
+      setIsStartingCamera(false);
     }
   }, [facingMode, stopMediaStream]);
 
@@ -193,20 +250,28 @@ export default function CameraViewfinder() {
     };
   }, []);
 
-  // Start live camera cleanly on mount (quiet, distraction-free)
+  // Start live camera cleanly on mount
   useEffect(() => {
-    startLiveCamera(facingMode);
+    startLiveCamera(facingMode, false);
 
     return () => {
       stopMediaStream();
     };
   }, []);
 
+  // Self-healing: if videoRef mounts/updates while stream is ready, ensure stream is bound
+  useEffect(() => {
+    if (videoRef.current && streamRef.current && videoRef.current.srcObject !== streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [isStreaming]);
+
   // Flip between front and rear camera
   const toggleCameraFacing = () => {
     const nextFacing = facingMode === 'environment' ? 'user' : 'environment';
     setFacingMode(nextFacing);
-    startLiveCamera(nextFacing);
+    startLiveCamera(nextFacing, true);
   };
 
   // Real-time on-device computer vision loop (15-20 FPS)
@@ -558,44 +623,84 @@ export default function CameraViewfinder() {
             : 'border-2 border-white/20 bg-slate-950 ring-2 ring-white/10 shadow-black'
         }`}>
 
-          {/* 1. Live Video Stream */}
-          {isStreaming ? (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-full object-cover"
-            />
-          ) : rawImageUrl ? (
-            /* 2. Static Preset Demo Photo */
-            <div className="relative w-full h-full overflow-hidden bg-slate-900">
-              <img
-                src={rawImageUrl}
-                alt="Craft Frame"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/80 border border-amber-400/60 text-[10px] text-amber-300 font-bold backdrop-blur-md flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span>{language === 'hi' ? 'डेमो कार्यशाला नमूना' : 'Demo Sample'}</span>
-              </div>
+          {/* 1. Live Hardware Video Pipeline (Always Mounted to prevent ref nullification) */}
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            onPlaying={() => {
+              setIsStreaming(true);
+              setIsStartingCamera(false);
+            }}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${
+              isStreaming ? 'opacity-100' : 'opacity-0 absolute inset-0 pointer-events-none'
+            }`}
+          />
+
+          {/* 2. Loading Indicator */}
+          {isStartingCamera && !isStreaming && (
+            <div className="absolute inset-0 z-20 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center text-white gap-2 p-4 text-center">
+              <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+              <span className="text-xs font-bold text-slate-200">
+                {language === 'hi' ? 'कैमरा शुरू हो रहा है...' : 'Starting camera...'}
+              </span>
             </div>
-          ) : (
-            /* 3. Camera Error / Permission Fallback */
-            <div className="text-center p-6 text-white space-y-3">
-              <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center mx-auto text-amber-400">
-                <AlertCircle className="w-7 h-7" />
+          )}
+
+          {/* 3. Fallback View: Demo Preset OR Camera Permission / Device Error */}
+          {!isStreaming && !isStartingCamera && (
+            rawImageUrl && !cameraError ? (
+              /* Static Preset Demo Photo */
+              <div className="relative w-full h-full overflow-hidden bg-slate-900 flex items-center justify-center">
+                <img
+                  src={rawImageUrl}
+                  alt="Craft Frame"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/80 border border-amber-400/60 text-[10px] text-amber-300 font-bold backdrop-blur-md flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  <span>{language === 'hi' ? 'डेमो कार्यशाला नमूना' : 'Demo Sample'}</span>
+                </div>
+                {/* Switch to Live Camera CTA */}
+                <button
+                  onClick={() => startLiveCamera(facingMode, true)}
+                  className="absolute bottom-4 py-2 px-4 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-xl active:scale-95 flex items-center gap-1.5 cursor-pointer z-10"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>{language === 'hi' ? 'लाइव कैमरा चालू करें' : 'Switch to Live Camera'}</span>
+                </button>
               </div>
-              <p className="text-xs text-slate-300 max-w-[220px] mx-auto">
-                {language === 'hi' ? 'शिल्प की स्पष्ट फोटो के लिए कैमरा चालू करें' : 'Start camera to capture craft photo'}
-              </p>
-              <button
-                onClick={() => startLiveCamera()}
-                className="py-2 px-5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-lg active:scale-95"
-              >
-                {language === 'hi' ? 'कैमरा शुरू करें' : 'Open Camera'}
-              </button>
-            </div>
+            ) : (
+              /* Camera Error / Permission Fallback */
+              <div className="text-center p-6 text-white space-y-3 z-10">
+                <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center mx-auto text-amber-400">
+                  <AlertCircle className="w-7 h-7" />
+                </div>
+                <h4 className="text-sm font-black text-white">
+                  {cameraError === 'denied'
+                    ? (language === 'hi' ? 'कैमरा अनुमति आवश्यक है' : 'Camera Permission Needed')
+                    : (language === 'hi' ? 'कैमरा लोड नहीं हुआ' : 'Camera Not Available')}
+                </h4>
+                <p className="text-xs text-slate-300 max-w-[240px] mx-auto leading-relaxed">
+                  {cameraError === 'denied'
+                    ? (language === 'hi'
+                        ? 'कृपया ब्राउज़र सेटिंग्स या एड्रेस बार में कैमरा की अनुमति दें।'
+                        : 'Please allow camera permission in browser settings.')
+                    : (language === 'hi'
+                        ? 'शिल्प की स्पष्ट फोटो के लिए कैमरा चालू करें या गैलरी से चुनें।'
+                        : 'Start camera to capture craft photo or upload from gallery.')}
+                </p>
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <button
+                    onClick={() => startLiveCamera(facingMode, true)}
+                    className="py-2 px-5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-lg active:scale-95 cursor-pointer"
+                  >
+                    {language === 'hi' ? 'कैमरा शुरू करें' : 'Start Camera'}
+                  </button>
+                </div>
+              </div>
+            )
           )}
 
           {/* Minimalist Apple Camera Corner Brackets (Always Clean & Visible) */}
@@ -835,7 +940,7 @@ export default function CameraViewfinder() {
 
         {/* 1. Camera Flip / Re-open Lens */}
         <button
-          onClick={isStreaming ? toggleCameraFacing : () => startLiveCamera()}
+          onClick={isStreaming ? toggleCameraFacing : () => startLiveCamera(facingMode, true)}
           title="Flip Camera"
           className="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition-all cursor-pointer group"
         >
@@ -900,11 +1005,11 @@ export default function CameraViewfinder() {
         qualityResult={qualityResult}
         onRetake={() => {
           setIsReviewModalOpen(false);
-          startLiveCamera();
+          startLiveCamera(facingMode, false);
         }}
         onCompleteAngle={(nextIdx) => {
           setIsReviewModalOpen(false);
-          startLiveCamera();
+          startLiveCamera(facingMode, false);
         }}
       />
     </div>

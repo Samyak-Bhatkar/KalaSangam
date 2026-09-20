@@ -8,19 +8,19 @@ import { useArtisan } from '../context/ArtisanContext';
 
 // ─── Bhashini ASR Config ────────────────────────────────────────────────────
 // Set VITE_BHASHINI_API_KEY and VITE_BHASHINI_USER_ID in frontend/.env.local
-const BHASHINI_API_KEY   = import.meta.env.VITE_BHASHINI_API_KEY   || '';
-const BHASHINI_USER_ID   = import.meta.env.VITE_BHASHINI_USER_ID   || '';
+const BHASHINI_API_KEY = import.meta.env.VITE_BHASHINI_API_KEY || '';
+const BHASHINI_USER_ID = import.meta.env.VITE_BHASHINI_USER_ID || '';
 const BHASHINI_PIPELINE_ID = import.meta.env.VITE_BHASHINI_PIPELINE_ID || 'ai4bharat/conformer-hi-gpu--t4';
 
 // Bhashini language codes for each dialect
 const BHASHINI_LANG_CODES = {
-  hi:        'hi',
-  bhojpuri:  'bho',
-  bundeli:   'hi',   // mapped to hi — closest supported
-  malwi:     'hi',
-  mr:        'mr',
-  bn:        'bn',
-  en:        'en',
+  hi: 'hi',
+  bhojpuri: 'bho',
+  bundeli: 'hi',   // mapped to hi — closest supported
+  malwi: 'hi',
+  mr: 'mr',
+  bn: 'bn',
+  en: 'en',
 };
 
 /**
@@ -47,14 +47,14 @@ async function callBhashiniASR(audioBlob, langCode = 'hi') {
 
     if (!configRes.ok) return null;
     const configData = await configRes.json();
-    const serviceUrl  = configData?.pipelineInferenceAPIEndPoint?.inferenceApiEndPoint?.callbackUrl;
+    const serviceUrl = configData?.pipelineInferenceAPIEndPoint?.inferenceApiEndPoint?.callbackUrl;
     const callbackKey = configData?.pipelineInferenceAPIEndPoint?.inferenceApiEndPoint?.authorizationKey;
 
     if (!serviceUrl) return null;
 
     // Step 2: Convert audio blob to base64
     const arrayBuffer = await audioBlob.arrayBuffer();
-    const base64Audio  = btoa(
+    const base64Audio = btoa(
       new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
     );
 
@@ -99,13 +99,13 @@ async function checkMicPermission() {
 
 // ─── Dialect definitions ─────────────────────────────────────────────────────
 const DIALECTS = [
-  { code: 'hi',       label: 'Hindi',    badge: 'हि',   langCode: 'hi-IN', region: 'मानक हिन्दी' },
+  { code: 'hi', label: 'Hindi', badge: 'हि', langCode: 'hi-IN', region: 'मानक हिन्दी' },
   { code: 'bhojpuri', label: 'Bhojpuri', badge: 'भोज', langCode: 'hi-IN', region: 'गोरखपुर / पूर्वांचल' },
-  { code: 'bundeli',  label: 'Bundeli',  badge: 'बु',  langCode: 'hi-IN', region: 'चंदेरी / बुंदेलखंड' },
-  { code: 'malwi',    label: 'Malwi',    badge: 'म',   langCode: 'hi-IN', region: 'मालवा / मध्य प्रदेश' },
-  { code: 'mr',       label: 'Marathi',  badge: 'मरा', langCode: 'mr-IN', region: 'महाराष्ट्र' },
-  { code: 'bn',       label: 'Bengali',  badge: 'বাং', langCode: 'bn-IN', region: 'पश्चिम बंगाल' },
-  { code: 'en',       label: 'English',  badge: 'EN',  langCode: 'en-IN', region: 'Export Pitch' },
+  { code: 'bundeli', label: 'Bundeli', badge: 'बु', langCode: 'hi-IN', region: 'चंदेरी / बुंदेलखंड' },
+  { code: 'malwi', label: 'Malwi', badge: 'म', langCode: 'hi-IN', region: 'मालवा / मध्य प्रदेश' },
+  { code: 'mr', label: 'Marathi', badge: 'मरा', langCode: 'mr-IN', region: 'महाराष्ट्र' },
+  { code: 'bn', label: 'Bengali', badge: 'বাং', langCode: 'bn-IN', region: 'पश्चिम बंगाल' },
+  { code: 'en', label: 'English', badge: 'EN', langCode: 'en-IN', region: 'Export Pitch' },
 ];
 
 // ─── Craft voice presets ──────────────────────────────────────────────────────
@@ -213,46 +213,46 @@ export default function VoiceRecorder() {
   } = useArtisan();
 
   // ── State ──────────────────────────────────────────────────────────────────
-  const [isListening,        setIsListening]        = useState(false);
-  const [micState,           setMicState]           = useState('idle'); // 'idle'|'requesting'|'live'|'recording'|'processing'|'error'
-  const [micError,           setMicError]           = useState(null);   // null | MIC_ERRORS.*
-  const [audioLevels,        setAudioLevels]        = useState(Array(10).fill(4));
-  const [micVolumePct,       setMicVolumePct]       = useState(0);      // Real-time input volume 0-100%
-  const [micDeviceName,      setMicDeviceName]      = useState('');     // Active microphone device label
-  const [availableMics,      setAvailableMics]      = useState([]);     // Available hardware microphones
-  const [selectedMicId,      setSelectedMicId]      = useState(() => {
+  const [isListening, setIsListening] = useState(false);
+  const [micState, setMicState] = useState('idle'); // 'idle'|'requesting'|'live'|'recording'|'processing'|'error'
+  const [micError, setMicError] = useState(null);   // null | MIC_ERRORS.*
+  const [audioLevels, setAudioLevels] = useState(Array(10).fill(4));
+  const [micVolumePct, setMicVolumePct] = useState(0);      // Real-time input volume 0-100%
+  const [micDeviceName, setMicDeviceName] = useState('');     // Active microphone device label
+  const [availableMics, setAvailableMics] = useState([]);     // Available hardware microphones
+  const [selectedMicId, setSelectedMicId] = useState(() => {
     return (typeof window !== 'undefined' && localStorage.getItem('shilpsetu_preferred_mic')) || '';
   });
-  const [isZeroVolumeAlert,  setIsZeroVolumeAlert]  = useState(false);  // True if mic volume stays 0% while listening
+  const [isZeroVolumeAlert, setIsZeroVolumeAlert] = useState(false);  // True if mic volume stays 0% while listening
   const [isTranscribingAudio, setIsTranscribingAudio] = useState(false); // True during Gemini audio transcription
   const [speechEngineStatus, setSpeechEngineStatus] = useState('');     // Real-time speech engine event status
-  const [recordedAudioUrl,   setRecordedAudioUrl]   = useState(null);   // Actual audio recorded from mic
-  const [isPlayingRecorded,  setIsPlayingRecorded]  = useState(false);
-  const [activeDialect,      setActiveDialect]      = useState('hi');
-  const [hasSpeechResult,    setHasSpeechResult]    = useState(false);
-  const [isCustomSpoken,     setIsCustomSpoken]     = useState(false);  // true once user speaks real vernacular words
-  const [liveInterim,        setLiveInterim]        = useState('');     // real-time in-flight speech string
-  const [bhashiniMode,       setBhashiniMode]       = useState(false);  // switched to Bhashini recording
-  const [bhashiniStatus,     setBhashiniStatus]     = useState('');
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState(null);   // Actual audio recorded from mic
+  const [isPlayingRecorded, setIsPlayingRecorded] = useState(false);
+  const [activeDialect, setActiveDialect] = useState('hi');
+  const [hasSpeechResult, setHasSpeechResult] = useState(false);
+  const [isCustomSpoken, setIsCustomSpoken] = useState(false);  // true once user speaks real vernacular words
+  const [liveInterim, setLiveInterim] = useState('');     // real-time in-flight speech string
+  const [bhashiniMode, setBhashiniMode] = useState(false);  // switched to Bhashini recording
+  const [bhashiniStatus, setBhashiniStatus] = useState('');
 
   // ── Refs (Engine Architecture: Zero Stale Closures) ────────────────────────
-  const isListeningRef         = useRef(false);
-  const isRecognizingRef       = useRef(false);
-  const finalTranscriptRef     = useRef('');
-  const recognitionRef         = useRef(null);
-  const mediaRecorderRef       = useRef(null);
-  const localRecorderRef       = useRef(null);
-  const localChunksRef         = useRef([]);
-  const audioContextRef        = useRef(null);
-  const analyserRef            = useRef(null);
-  const animFrameRef           = useRef(null);
-  const streamRef              = useRef(null);
-  const bhashiniChunksRef      = useRef([]);
-  const zeroVolumeTimerRef     = useRef(null);
+  const isListeningRef = useRef(false);
+  const isRecognizingRef = useRef(false);
+  const finalTranscriptRef = useRef('');
+  const recognitionRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const localRecorderRef = useRef(null);
+  const localChunksRef = useRef([]);
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const animFrameRef = useRef(null);
+  const streamRef = useRef(null);
+  const bhashiniChunksRef = useRef([]);
+  const zeroVolumeTimerRef = useRef(null);
   const consecutiveNoSpeechRef = useRef(0);
-  const hasSpeechResultRef     = useRef(false);
-  const recordedBlobRef        = useRef(null);
-  const selectedMicIdRef       = useRef(selectedMicId);
+  const hasSpeechResultRef = useRef(false);
+  const recordedBlobRef = useRef(null);
+  const selectedMicIdRef = useRef(selectedMicId);
 
   // Sync refs with state changes
   useEffect(() => {
@@ -266,10 +266,10 @@ export default function VoiceRecorder() {
   // ── Derived helpers ────────────────────────────────────────────────────────
   const getActiveCraftType = () => {
     const cat = (selectedPreset?.craft_category || '').toLowerCase();
-    const id  = (selectedPreset?.id || '').toLowerCase();
-    if (cat.includes('textile') || id.includes('001') || cat.includes('saree'))   return 'saree';
-    if (cat.includes('metal')   || id.includes('003') || cat.includes('dhokra'))  return 'dhokra';
-    if (cat.includes('paint')   || id.includes('004') || cat.includes('madhubani')) return 'madhubani';
+    const id = (selectedPreset?.id || '').toLowerCase();
+    if (cat.includes('textile') || id.includes('001') || cat.includes('saree')) return 'saree';
+    if (cat.includes('metal') || id.includes('003') || cat.includes('dhokra')) return 'dhokra';
+    if (cat.includes('paint') || id.includes('004') || cat.includes('madhubani')) return 'madhubani';
     return 'terracotta';
   };
 
@@ -316,7 +316,7 @@ export default function VoiceRecorder() {
       }
       cleanupAll();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Real audio visualizer with True Decibel Level & Device Tracking ─────
@@ -335,7 +335,7 @@ export default function VoiceRecorder() {
 
       const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
       const audioCtx = new AudioCtxClass();
-      
+
       // CRITICAL: Resume AudioContext under Chromium autoplay policy
       if (audioCtx.state === 'suspended') {
         await audioCtx.resume();
@@ -348,9 +348,9 @@ export default function VoiceRecorder() {
       source.connect(analyser);
 
       audioContextRef.current = audioCtx;
-      analyserRef.current     = analyser;
+      analyserRef.current = analyser;
 
-      const dataArray     = new Uint8Array(analyser.frequencyBinCount);
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
       const updateWaveform = () => {
         analyser.getByteFrequencyData(dataArray);
         const levels = Array.from(dataArray.slice(0, 10)).map(v => Math.max(4, Math.min(48, v / 4)));
@@ -396,7 +396,7 @@ export default function VoiceRecorder() {
       animFrameRef.current = null;
     }
     if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current.close().catch(() => { });
       audioContextRef.current = null;
     }
     zeroVolumeTimerRef.current = null;
@@ -419,7 +419,7 @@ export default function VoiceRecorder() {
     selectedMicIdRef.current = newDeviceId;
     try {
       localStorage.setItem('shilpsetu_preferred_mic', newDeviceId);
-    } catch {}
+    } catch { }
 
     // If currently listening, switch stream smoothly without interrupting recording session
     if (isListeningRef.current) {
@@ -498,17 +498,17 @@ export default function VoiceRecorder() {
     isRecognizingRef.current = false;
     // Stop Web Speech
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch {}
+      try { recognitionRef.current.stop(); } catch { }
       recognitionRef.current = null;
     }
     // Stop Local MediaRecorder
     if (localRecorderRef.current && localRecorderRef.current.state !== 'inactive') {
-      try { localRecorderRef.current.stop(); } catch {}
+      try { localRecorderRef.current.stop(); } catch { }
       localRecorderRef.current = null;
     }
     // Stop MediaRecorder (Bhashini)
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      try { mediaRecorderRef.current.stop(); } catch {}
+      try { mediaRecorderRef.current.stop(); } catch { }
       mediaRecorderRef.current = null;
     }
     stopAudioVisualizer();
@@ -807,11 +807,11 @@ export default function VoiceRecorder() {
         stopBhashiniRecording();
       } else {
         if (recognitionRef.current) {
-          try { recognitionRef.current.stop(); } catch {}
+          try { recognitionRef.current.stop(); } catch { }
           recognitionRef.current = null;
         }
         if (localRecorderRef.current && localRecorderRef.current.state !== 'inactive') {
-          try { localRecorderRef.current.stop(); } catch {}
+          try { localRecorderRef.current.stop(); } catch { }
         }
         stopAudioVisualizer();
         stopMicStream();
@@ -1083,11 +1083,10 @@ export default function VoiceRecorder() {
               <button
                 key={d.code}
                 onClick={() => handleDialectChange(d)}
-                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all active:scale-95 cursor-pointer ${
-                  activeDialect === d.code
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all active:scale-95 cursor-pointer ${activeDialect === d.code
                     ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
                     : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <span className="w-4 h-4 rounded-full bg-black/10 flex items-center justify-center text-[10px]">
                   {d.badge}
@@ -1101,11 +1100,10 @@ export default function VoiceRecorder() {
           {(hasBhashini || isRegionalDialect) && (
             <button
               onClick={() => setBhashiniMode(v => !v)}
-              className={`mt-2 text-[10px] font-bold px-3 py-1 rounded-full border transition-all cursor-pointer ${
-                bhashiniMode || (hasBhashini && isRegionalDialect)
+              className={`mt-2 text-[10px] font-bold px-3 py-1 rounded-full border transition-all cursor-pointer ${bhashiniMode || (hasBhashini && isRegionalDialect)
                   ? 'bg-indigo-100 text-indigo-800 border-indigo-300'
                   : 'bg-slate-100 text-slate-600 border-slate-200'
-              }`}
+                }`}
             >
               {bhashiniMode || (hasBhashini && isRegionalDialect)
                 ? '🇮🇳 Bhashini ASR Active (Regional)'
@@ -1137,15 +1135,14 @@ export default function VoiceRecorder() {
             onClick={toggleListening}
             disabled={micState === 'processing'}
             aria-label={isListening ? 'Stop Recording' : 'Start Speaking'}
-            className={`relative w-28 h-28 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 active:scale-95 cursor-pointer disabled:cursor-not-allowed ${
-              micState === 'error'
+            className={`relative w-28 h-28 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 active:scale-95 cursor-pointer disabled:cursor-not-allowed ${micState === 'error'
                 ? 'bg-gradient-to-tr from-rose-700 to-red-500 ring-8 ring-rose-500/30 shadow-rose-600/40'
                 : micState === 'live'
-                ? 'bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 ring-8 ring-rose-500/30 shadow-rose-500/40'
-                : micState === 'processing'
-                ? 'bg-gradient-to-tr from-indigo-600 to-blue-500 ring-8 ring-indigo-500/30 shadow-indigo-500/40'
-                : 'bg-gradient-to-tr from-amber-500 via-amber-600 to-orange-600 ring-8 ring-amber-500/20 shadow-amber-500/30'
-            }`}
+                  ? 'bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 ring-8 ring-rose-500/30 shadow-rose-500/40'
+                  : micState === 'processing'
+                    ? 'bg-gradient-to-tr from-indigo-600 to-blue-500 ring-8 ring-indigo-500/30 shadow-indigo-500/40'
+                    : 'bg-gradient-to-tr from-amber-500 via-amber-600 to-orange-600 ring-8 ring-amber-500/20 shadow-amber-500/30'
+              }`}
           >
             {micState === 'requesting' ? (
               <Loader2 className="w-12 h-12 text-white animate-spin" />
@@ -1167,13 +1164,12 @@ export default function VoiceRecorder() {
             <div
               key={idx}
               style={{ height: `${micState === 'live' ? lvl : 4}px` }}
-              className={`w-2 rounded-full transition-all duration-75 ${
-                micState === 'live'
+              className={`w-2 rounded-full transition-all duration-75 ${micState === 'live'
                   ? 'bg-gradient-to-t from-emerald-500 via-amber-500 to-orange-600'
                   : micState === 'processing'
-                  ? 'bg-indigo-300'
-                  : 'bg-slate-200'
-              }`}
+                    ? 'bg-indigo-300'
+                    : 'bg-slate-200'
+                }`}
             />
           ))}
         </div>
@@ -1245,11 +1241,11 @@ export default function VoiceRecorder() {
               <p className="text-amber-800 mt-0.5 font-medium">
                 {micDeviceName?.toLowerCase().includes('iriun')
                   ? (language === 'hi'
-                      ? 'Iriun Webcam चुना हुआ है। कृपया अपने फ़ोन में Iriun ऐप चालू रखें अथवा ऊपर मेन्यू से दूसरा माइक चुनें।'
-                      : 'Iriun Webcam is selected. Keep Iriun app active on your phone or select another mic above.')
+                    ? 'Iriun Webcam चुना हुआ है। कृपया अपने फ़ोन में Iriun ऐप चालू रखें अथवा ऊपर मेन्यू से दूसरा माइक चुनें।'
+                    : 'Iriun Webcam is selected. Keep Iriun app active on your phone or select another mic above.')
                   : (language === 'hi'
-                      ? 'कृपया थोड़ा ज़ोर से बोलें अथवा ऊपर मेन्यू से अपना मुख्य माइक्रोफ़ोन चुनें।'
-                      : 'Please speak louder or select your working microphone from the menu above.')}
+                    ? 'कृपया थोड़ा ज़ोर से बोलें अथवा ऊपर मेन्यू से अपना मुख्य माइक्रोफ़ोन चुनें।'
+                    : 'Please speak louder or select your working microphone from the menu above.')}
               </p>
             </div>
           </div>
@@ -1317,11 +1313,10 @@ export default function VoiceRecorder() {
 
       {/* ── Transcript Box ────────────────────────────────────────────────── */}
       <div>
-        <div className={`p-3.5 rounded-2xl bg-white border transition-all shadow-xs mb-3 ${
-          isListening
+        <div className={`p-3.5 rounded-2xl bg-white border transition-all shadow-xs mb-3 ${isListening
             ? 'border-amber-500 ring-4 ring-amber-500/10'
             : 'border-slate-200'
-        }`}>
+          }`}>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px] font-black tracking-wider uppercase text-slate-800 flex items-center gap-1">
@@ -1390,11 +1385,10 @@ export default function VoiceRecorder() {
                 setIsCustomSpoken(true);
               }}
               rows={3}
-              className={`w-full text-xs font-medium text-slate-800 rounded-xl p-2.5 leading-relaxed focus:outline-none transition-all resize-none shadow-inner ${
-                isListening
+              className={`w-full text-xs font-medium text-slate-800 rounded-xl p-2.5 leading-relaxed focus:outline-none transition-all resize-none shadow-inner ${isListening
                   ? 'bg-amber-50/60 border-2 border-amber-500 ring-2 ring-amber-500/20'
                   : 'bg-slate-50 border border-slate-200 focus:border-amber-600 focus:bg-white'
-              }`}
+                }`}
               placeholder={
                 isListening
                   ? (language === 'hi' ? '🎤 बोलना शुरू करें... आपकी हिंदी आवाज़ यहाँ तुरंत लाइव टाइप होगी...' : '🎤 Speak now... your live speech will stream here in real time...')
@@ -1437,11 +1431,10 @@ export default function VoiceRecorder() {
                   setHasSpeechResult(true);
                   if ('vibrate' in navigator) navigator.vibrate(20);
                 }}
-                className={`flex items-start gap-1.5 p-2 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${
-                  transcript === chip.text
+                className={`flex items-start gap-1.5 p-2 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${transcript === chip.text
                     ? 'bg-amber-100/80 border-amber-500 ring-2 ring-amber-500/20 shadow-xs'
                     : 'bg-white hover:bg-amber-50/50 border-slate-200'
-                }`}
+                  }`}
               >
                 <span className="text-base leading-none shrink-0">{chip.icon}</span>
                 <div className="min-w-0 flex-1">
