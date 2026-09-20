@@ -27,6 +27,7 @@ import {
 import { useArtisan } from '../context/ArtisanContext';
 import {
   calculateTiltLevel,
+  classifyShotAngle,
   analyzeFrameLuminance,
   estimateSubjectSaliencyAndCoverage,
   computeBackgroundClutterScore,
@@ -101,11 +102,13 @@ export default function CameraViewfinder() {
     });
   };
 
-  // Post-capture quality review modal
+  // Post-capture quality review modal & tilt metadata
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [capturedFrameBase64, setCapturedFrameBase64] = useState(null);
+  const [capturedShotAngleInfo, setCapturedShotAngleInfo] = useState(null);
   const [qualityResult, setQualityResult] = useState(null);
 
+  const latestOrientationRef = useRef({ beta: 90, gamma: 0 });
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -231,11 +234,12 @@ export default function CameraViewfinder() {
     }
   }, [facingMode, stopMediaStream]);
 
-  // Handle device orientation for tilt / level bubble
+  // Handle device orientation for tilt / level bubble and angle tagging
   useEffect(() => {
     const handleOrientation = (e) => {
       const gamma = e.gamma !== null ? e.gamma : 0;
-      const beta = e.beta !== null ? e.beta : 0;
+      const beta = e.beta !== null ? e.beta : 90;
+      latestOrientationRef.current = { beta, gamma };
       const tilt = calculateTiltLevel(gamma, beta);
       setTiltState(tilt);
     };
@@ -415,6 +419,11 @@ export default function CameraViewfinder() {
       return;
     }
 
+    // Compute capture-time shot angle and perspective classification
+    const { beta, gamma } = latestOrientationRef.current;
+    const angleInfo = classifyShotAngle(beta, gamma);
+    setCapturedShotAngleInfo(angleInfo);
+
     setCapturedFrameBase64(b64);
     setIsReviewModalOpen(true);
     setQualityResult(null);
@@ -446,6 +455,8 @@ export default function CameraViewfinder() {
     const reader = new FileReader();
     reader.onload = async () => {
       const b64 = reader.result;
+      const angleInfo = classifyShotAngle(90, 0); // Default level shot for uploaded photo
+      setCapturedShotAngleInfo(angleInfo);
       setCapturedFrameBase64(b64);
       setIsReviewModalOpen(true);
       setQualityResult(null);
@@ -472,6 +483,8 @@ export default function CameraViewfinder() {
   // Switch to demo preset craft
   const handleSelectPreset = (craft) => {
     stopMediaStream();
+    const angleInfo = classifyShotAngle(90, 0);
+    setCapturedShotAngleInfo(angleInfo);
     applyPreset(craft);
   };
 
@@ -996,12 +1009,13 @@ export default function CameraViewfinder() {
       </div>
 
       {/* ==================================================================== */}
-      {/* POST-CAPTURE QUALITY CHECK & ENHANCEMENT REVIEW MODAL                */}
+      {/* POST-CAPTURE QUALITY CHECK & ENHANCEMENT REVIEW MODAL */}
       {/* ==================================================================== */}
       <StudioQualityReviewModal
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
         rawPhotoBase64={capturedFrameBase64}
+        shotAngleInfo={capturedShotAngleInfo}
         qualityResult={qualityResult}
         onRetake={() => {
           setIsReviewModalOpen(false);

@@ -45,6 +45,7 @@ backend/test_images/
 backend/test_dataset/
 benchmarks/
 *.benchmark.html
+scratch/
 
 
 # Node.js & React (Frontend)

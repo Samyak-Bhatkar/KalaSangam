@@ -36,6 +36,70 @@ export function calculateTiltLevel(gamma = 0, beta = 0) {
 }
 
 /**
+ * 1B. Capture-Time Device Tilt & Shot Angle Classification
+ * @param {number} beta - Device pitch (-180 to +180). Upright portrait is ~90 deg.
+ * @param {number} gamma - Device roll (-90 to +90).
+ * @returns {{
+ *   tiltDegrees: number, // Degrees tilted away from upright vertical (0° = straight-on, 90° = flat lay)
+ *   shotAngle: 'eye_level'|'flat_lay'|'angled',
+ *   isLifestyleEligible: boolean,
+ *   angleLabel_en: string,
+ *   angleLabel_hi: string
+ * }}
+ */
+export function classifyShotAngle(beta = 90, gamma = 0) {
+  // If no gyro data provided (e.g. desktop or gallery upload), default to standard level shot
+  if (typeof beta !== 'number' || isNaN(beta)) {
+    return {
+      tiltDegrees: 0,
+      shotAngle: 'eye_level',
+      isLifestyleEligible: true,
+      angleLabel_en: 'Front View',
+      angleLabel_hi: 'सामने का दृश्य',
+    };
+  }
+
+  // Degrees from vertical: 0° when upright (|beta| = 90°), 90° when flat (|beta| = 0°)
+  const absBeta = Math.abs(beta);
+  const tiltFromVertical = Math.max(0, Math.min(90, Math.abs(90 - absBeta)));
+  const tiltDegrees = Math.round(tiltFromVertical);
+
+  let shotAngle = 'eye_level';
+  let isLifestyleEligible = true;
+  let angleLabel_en = 'Front View';
+  let angleLabel_hi = 'सामने का दृश्य';
+
+  if (tiltFromVertical < 20) {
+    // Near-vertical / straight-on (< 20° tilt)
+    shotAngle = 'eye_level';
+    isLifestyleEligible = true;
+    angleLabel_en = 'Front View';
+    angleLabel_hi = 'सामने का दृश्य';
+  } else if (tiltFromVertical > 60) {
+    // Near top-down (> 60° tilt)
+    shotAngle = 'flat_lay';
+    isLifestyleEligible = true;
+    angleLabel_en = 'Top View (Flat Lay)';
+    angleLabel_hi = 'ऊपर से दृश्य (फ़्लैट ले)';
+  } else {
+    // In between (20° to 60°): steep/ambiguous oblique angle
+    // Guardrail: 2D perspective mismatch is high, so disable lifestyle option
+    shotAngle = 'angled';
+    isLifestyleEligible = false;
+    angleLabel_en = 'Angled (Oblique)';
+    angleLabel_hi = 'तिरछा दृश्य';
+  }
+
+  return {
+    tiltDegrees,
+    shotAngle,
+    isLifestyleEligible,
+    angleLabel_en,
+    angleLabel_hi,
+  };
+}
+
+/**
  * 2. Real-time Luminance Histogram Analysis
  * Computes mean luminance, shadow underexposure, and glare overexposure.
  * @param {ImageData} imageData - Grayscale or RGBA image data from downsampled canvas

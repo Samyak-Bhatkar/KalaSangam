@@ -656,7 +656,14 @@ export async function trackProductView(productId) {
   }
 }
 
-export async function fetchBackgroundOptions({ suggestedBackgroundQuery, limit = 4 }) {
+export async function fetchBackgroundOptions({
+  suggestedBackgroundQuery,
+  limit = 4,
+  shotAngle = null,
+  tiltDegrees = null,
+  cutoutBase64 = null,
+  rawImageBase64 = null,
+}) {
   try {
     const res = await fetch(`${API_BASE}/studio/background-options`, {
       method: 'POST',
@@ -664,17 +671,49 @@ export async function fetchBackgroundOptions({ suggestedBackgroundQuery, limit =
       body: JSON.stringify({
         suggested_background_query: suggestedBackgroundQuery || 'neutral wooden surface',
         limit,
+        shot_angle: shotAngle || null,
+        tilt_degrees: tiltDegrees !== null ? tiltDegrees : null,
+        cutout_base64: cutoutBase64 || null,
+        raw_image_base64: rawImageBase64 || null,
       }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch (err) {
     console.warn('API fetchBackgroundOptions fallback to curated options:', err);
+    const isFlatLay = shotAngle === 'flat_lay';
     return {
       status: 'fallback',
       query: suggestedBackgroundQuery || 'neutral wooden surface',
+      shot_angle: shotAngle,
+      lifestyle_eligible: shotAngle !== 'angled',
       source: 'curated',
-      options: [
+      options: isFlatLay ? [
+        {
+          id: 'curated-wood-flatlay',
+          url: 'https://images.pexels.com/photos/129731/pexels-photo-129731.jpeg?auto=compress&cs=tinysrgb&w=1080',
+          thumbnail_url: 'https://images.pexels.com/photos/129731/pexels-photo-129731.jpeg?auto=compress&cs=tinysrgb&w=350',
+          title: 'Rustic Natural Wood Flat Lay',
+          source: 'curated',
+          recommended: true,
+        },
+        {
+          id: 'curated-stone-flatlay',
+          url: 'https://images.pexels.com/photos/164005/pexels-photo-164005.jpeg?auto=compress&cs=tinysrgb&w=1080',
+          thumbnail_url: 'https://images.pexels.com/photos/164005/pexels-photo-164005.jpeg?auto=compress&cs=tinysrgb&w=350',
+          title: 'Minimalist Stone Surface Top View',
+          source: 'curated',
+          recommended: false,
+        },
+        {
+          id: 'curated-craft-mat-flatlay',
+          url: 'https://images.pexels.com/photos/279719/pexels-photo-279719.jpeg?auto=compress&cs=tinysrgb&w=1080',
+          thumbnail_url: 'https://images.pexels.com/photos/279719/pexels-photo-279719.jpeg?auto=compress&cs=tinysrgb&w=350',
+          title: 'Natural Handloom Weave Backdrop',
+          source: 'curated',
+          recommended: false,
+        },
+      ] : [
         {
           id: 'curated-wood-table',
           url: 'https://images.pexels.com/photos/129731/pexels-photo-129731.jpeg?auto=compress&cs=tinysrgb&w=1080',
@@ -712,7 +751,14 @@ export async function fetchBackgroundOptions({ suggestedBackgroundQuery, limit =
   }
 }
 
-export async function compositeLifestyleImage({ backgroundUrl, cutoutBase64, rawImageBase64 }) {
+export async function compositeLifestyleImage({
+  backgroundUrl,
+  cutoutBase64,
+  rawImageBase64,
+  rotationDeg = 0,
+  sizePct = 58,
+  bottomCushionPct = 8,
+}) {
   try {
     const res = await fetch(`${API_BASE}/studio/composite-lifestyle`, {
       method: 'POST',
@@ -721,6 +767,9 @@ export async function compositeLifestyleImage({ backgroundUrl, cutoutBase64, raw
         background_url: backgroundUrl,
         cutout_base64: cutoutBase64 || null,
         raw_image_base64: rawImageBase64 || null,
+        rotation_deg: rotationDeg || 0.0,
+        size_pct: typeof sizePct === 'number' ? sizePct : 58.0,
+        bottom_cushion_pct: typeof bottomCushionPct === 'number' ? bottomCushionPct : 8.0,
       }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

@@ -9,7 +9,10 @@ import {
   Palette,
   Contrast,
   Loader2,
-  MousePointerClick
+  MousePointerClick,
+  Compass,
+  Maximize2,
+  MoveVertical,
 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 import { clearSpotAtPoint, enhanceImage } from '../services/api';
@@ -20,6 +23,9 @@ export default function FineTuneStudioModal({
   initialStudioSrc,
   initialCutoutSrc,
   rawSrc,
+  initialSizePct = 58,
+  initialBottomCushionPct = 8,
+  initialRotationDeg = 0,
   onApply,
 }) {
   const { speakVoice, language } = useArtisan();
@@ -40,10 +46,15 @@ export default function FineTuneStudioModal({
     rawTonesStudio: null,
   });
 
-  // 3 Adjustment sliders (percentages, baseline 100)
+  // Photo adjustment sliders (percentages)
   const [brightness, setBrightness] = useState(100);
   const [saturation, setSaturation] = useState(100);
   const [contrast, setContrast] = useState(100);
+
+  // Manual Adjustments (Size, Vertical Position, Rotation)
+  const [sizePct, setSizePct] = useState(initialSizePct || 58); // 40% - 75%
+  const [bottomCushionPct, setBottomCushionPct] = useState(initialBottomCushionPct || 8); // 2% - 20%
+  const [rotationDeg, setRotationDeg] = useState(initialRotationDeg || 0); // -15° to +15°
 
   // Single-tap hole removal state
   const [isClearingSpot, setIsClearingSpot] = useState(false);
@@ -64,10 +75,13 @@ export default function FineTuneStudioModal({
       setBrightness(100);
       setSaturation(100);
       setContrast(100);
+      setSizePct(initialSizePct || 58);
+      setBottomCushionPct(initialBottomCushionPct || 8);
+      setRotationDeg(initialRotationDeg || 0);
       setTapRipple(null);
       setFeedbackMsg(null);
     }
-  }, [isOpen, initialStudioSrc, initialCutoutSrc]);
+  }, [isOpen, initialStudioSrc, initialCutoutSrc, initialSizePct, initialBottomCushionPct, initialRotationDeg]);
 
   if (!isOpen) return null;
 
@@ -75,8 +89,8 @@ export default function FineTuneStudioModal({
   const playAudioGuideTip = () => {
     const tipText =
       language === 'hi'
-        ? 'अगर कोई हिस्सा छूट गया है, फोटो पर उस जगह टैप करें। असली रंग वापस पाने के लिए ऊपर वाला बटन दबाएं।'
-        : 'If an enclosed spot was missed, tap on that spot on the photo. Tap the button above to switch to original colors.';
+        ? 'अगर कोई हिस्सा छूट गया है, फोटो पर उस जगह टैप करें। आकार, ऊंचाई और कोण बदलने के लिए नीचे दिए गए मैनुअल स्लाइडर का उपयोग करें।'
+        : 'If an enclosed spot was missed, tap on that spot on the photo. Use the manual sliders below to adjust product size, vertical height, and rotation angle.';
     speakVoice(tipText, language === 'hi' ? 'hi-IN' : 'en-IN');
   };
 
@@ -89,6 +103,12 @@ export default function FineTuneStudioModal({
       msg = language === 'hi' ? `रंग का गाढ़ापन: ${saturation} प्रतिशत` : `Color richness: ${saturation} percent`;
     } else if (type === 'contrast') {
       msg = language === 'hi' ? `गहराई और कंट्रास्ट: ${contrast} प्रतिशत` : `Contrast depth: ${contrast} percent`;
+    } else if (type === 'size') {
+      msg = language === 'hi' ? `उत्पाद आकार: ${sizePct} प्रतिशत` : `Product size: ${sizePct} percent`;
+    } else if (type === 'verticalPosition') {
+      msg = language === 'hi' ? `ऊंचाई समायोजन कुशन: ${bottomCushionPct} प्रतिशत` : `Vertical bottom cushion: ${bottomCushionPct} percent`;
+    } else if (type === 'rotation') {
+      msg = language === 'hi' ? `कोण घुमाव: ${rotationDeg} डिग्री` : `Angle rotation: ${rotationDeg} degrees`;
     }
     speakVoice(msg, language === 'hi' ? 'hi-IN' : 'en-IN');
   };
@@ -202,6 +222,9 @@ export default function FineTuneStudioModal({
     setBrightness(100);
     setSaturation(100);
     setContrast(100);
+    setSizePct(58);
+    setBottomCushionPct(8);
+    setRotationDeg(0);
     setTapRipple(null);
     setFeedbackMsg(language === 'hi' ? 'मूल एआई रूप में रीसेट किया गया' : 'Reset to AI Original');
     setTimeout(() => setFeedbackMsg(null), 2500);
@@ -213,8 +236,8 @@ export default function FineTuneStudioModal({
 
   // Commit changes and close
   const handleApply = async () => {
-    // If sliders are modified, bake CSS filters into a 1080x1080 canvas
-    if (brightness !== 100 || saturation !== 100 || contrast !== 100) {
+    // If photo filters or rotation are modified, bake CSS filters and rotation into a 1080x1080 canvas
+    if (brightness !== 100 || saturation !== 100 || contrast !== 100 || rotationDeg !== 0) {
       try {
         const canvas = document.createElement('canvas');
         canvas.width = 1080;
@@ -225,7 +248,13 @@ export default function FineTuneStudioModal({
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
-          ctx.drawImage(img, 0, 0, 1080, 1080);
+          if (rotationDeg !== 0) {
+            ctx.translate(540, 540);
+            ctx.rotate((rotationDeg * Math.PI) / 180);
+            ctx.drawImage(img, -540, -540, 1080, 1080);
+          } else {
+            ctx.drawImage(img, 0, 0, 1080, 1080);
+          }
           const bakedBase64 = canvas.toDataURL('image/jpeg', 0.95);
           onApply({
             studioBase64: bakedBase64,
@@ -234,6 +263,9 @@ export default function FineTuneStudioModal({
             brightness,
             saturation,
             contrast,
+            sizePct,
+            bottomCushionPct,
+            rotationDeg,
           });
           onClose();
         };
@@ -245,6 +277,9 @@ export default function FineTuneStudioModal({
             brightness,
             saturation,
             contrast,
+            sizePct,
+            bottomCushionPct,
+            rotationDeg,
           });
           onClose();
         };
@@ -262,6 +297,9 @@ export default function FineTuneStudioModal({
       brightness,
       saturation,
       contrast,
+      sizePct,
+      bottomCushionPct,
+      rotationDeg,
     });
     onClose();
   };
@@ -347,8 +385,10 @@ export default function FineTuneStudioModal({
                 alt="Studio Fine-Tune Live Preview"
                 style={{
                   filter: `brightness(${brightness}%) saturate(${saturation}%) contrast(${contrast}%)`,
+                  transform: `scale(${sizePct / 58.0}) translateY(${(8.0 - bottomCushionPct) * 1.5}px) rotate(${rotationDeg}deg)`,
+                  transformOrigin: 'bottom center',
                 }}
-                className="w-full h-full object-contain p-2 transition-[filter] duration-100"
+                className="w-full h-full object-contain p-2 transition-[filter,transform] duration-75"
               />
 
               {/* Tap Ripple Indicator */}
@@ -400,11 +440,10 @@ export default function FineTuneStudioModal({
               <button
                 type="button"
                 onClick={() => handleToggleColorTone(false)}
-                className={`min-h-[48px] py-2 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 ${
-                  !preserveOriginalTones
+                className={`min-h-[48px] py-2 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 ${!preserveOriginalTones
                     ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-md'
                     : 'text-slate-400 hover:text-slate-200'
-                }`}
+                  }`}
               >
                 <Sparkles className="w-4 h-4 text-amber-300" />
                 <span>✨ AI 6500K</span>
@@ -414,11 +453,10 @@ export default function FineTuneStudioModal({
               <button
                 type="button"
                 onClick={() => handleToggleColorTone(true)}
-                className={`min-h-[48px] py-2 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 ${
-                  preserveOriginalTones
+                className={`min-h-[48px] py-2 px-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 ${preserveOriginalTones
                     ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-md'
                     : 'text-slate-400 hover:text-slate-200'
-                }`}
+                  }`}
               >
                 <span>🏺</span>
                 <span>{language === 'hi' ? 'असली रंग' : 'Original Color'}</span>
@@ -523,6 +561,153 @@ export default function FineTuneStudioModal({
                   onChange={(e) => setContrast(Number(e.target.value))}
                   className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-400"
                   aria-label="कंट्रास्ट स्लाइडर"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION D2: MANUAL ADJUSTMENTS (SIZE, VERTICAL POSITION, ROTATION) */}
+          <div className="space-y-3.5 p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>{language === 'hi' ? 'मैनुअल समायोजन (Manual Adjustments)' : 'Manual Adjustments'}</span>
+              </span>
+              <span className="text-[10px] text-slate-400">
+                {language === 'hi' ? 'स्वचालित-प्रथम, मैन्युअल-वैकल्पिक' : 'Auto-first, manual-optional'}
+              </span>
+            </div>
+
+            {/* Manual Slider 1: Size (40% - 75%, default: 58%) */}
+            <div className="space-y-1.5 border-t border-slate-800/80 pt-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <Maximize2 className="w-4 h-4 text-emerald-400" />
+                  <span className="font-bold text-slate-200">
+                    {language === 'hi' ? 'आकार (Size)' : 'आकार (Size)'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => speakSliderLabel('size')}
+                    className="min-h-[48px] min-w-[48px] p-2 text-slate-400 hover:text-emerald-400 cursor-pointer flex items-center justify-center"
+                    aria-label="आकार का विवरण सुनें"
+                  >
+                    <Volume2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-emerald-300 text-xs font-bold">{sizePct}%</span>
+                  {sizePct !== 58 && (
+                    <button
+                      type="button"
+                      onClick={() => setSizePct(58)}
+                      className="text-[10px] text-amber-400 hover:underline cursor-pointer"
+                    >
+                      Reset 58%
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="min-h-[48px] flex items-center">
+                <input
+                  type="range"
+                  min="40"
+                  max="75"
+                  step="1"
+                  value={sizePct}
+                  onChange={(e) => setSizePct(Number(e.target.value))}
+                  className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+                  aria-label="आकार स्लाइडर"
+                />
+              </div>
+            </div>
+
+            {/* Manual Slider 2: Vertical Position / Bottom Cushion (2% - 20%, default: 8%) */}
+            <div className="space-y-1.5 border-t border-slate-800/80 pt-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <MoveVertical className="w-4 h-4 text-cyan-400" />
+                  <span className="font-bold text-slate-200">
+                    {language === 'hi' ? 'ऊंचाई समायोजन (Vertical Position)' : 'ऊंचाई समायोजन (Vertical Position)'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => speakSliderLabel('verticalPosition')}
+                    className="min-h-[48px] min-w-[48px] p-2 text-slate-400 hover:text-cyan-400 cursor-pointer flex items-center justify-center"
+                    aria-label="ऊंचाई समायोजन सुनें"
+                  >
+                    <Volume2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-cyan-300 text-xs font-bold">{bottomCushionPct}%</span>
+                  {bottomCushionPct !== 8 && (
+                    <button
+                      type="button"
+                      onClick={() => setBottomCushionPct(8)}
+                      className="text-[10px] text-amber-400 hover:underline cursor-pointer"
+                    >
+                      Reset 8%
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="min-h-[48px] flex items-center">
+                <input
+                  type="range"
+                  min="2"
+                  max="20"
+                  step="1"
+                  value={bottomCushionPct}
+                  onChange={(e) => setBottomCushionPct(Number(e.target.value))}
+                  className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                  aria-label="ऊंचाई समायोजन स्लाइडर"
+                />
+              </div>
+            </div>
+
+            {/* Manual Slider 3: Rotation Nudge (-15° to +15°, default: 0°) */}
+            <div className="space-y-1.5 border-t border-slate-800/80 pt-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-purple-400" />
+                  <span className="font-bold text-slate-200">
+                    {language === 'hi' ? '📐 कोण घुमाव (Angle Nudge)' : '📐 Angle Nudge'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => speakSliderLabel('rotation')}
+                    className="min-h-[48px] min-w-[48px] p-2 text-slate-400 hover:text-purple-400 cursor-pointer flex items-center justify-center"
+                    aria-label="कोण घुमाव सुनें"
+                  >
+                    <Volume2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-purple-300 text-xs font-bold">
+                    {rotationDeg > 0 ? `+${rotationDeg}°` : `${rotationDeg}°`}
+                  </span>
+                  {rotationDeg !== 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setRotationDeg(0)}
+                      className="text-[10px] text-amber-400 hover:underline cursor-pointer"
+                    >
+                      Reset 0°
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="min-h-[48px] flex items-center">
+                <input
+                  type="range"
+                  min="-15"
+                  max="15"
+                  step="1"
+                  value={rotationDeg}
+                  onChange={(e) => setRotationDeg(Number(e.target.value))}
+                  className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-400"
+                  aria-label="कोण घुमाव स्लाइडर"
                 />
               </div>
             </div>

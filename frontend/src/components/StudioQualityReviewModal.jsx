@@ -26,6 +26,7 @@ export default function StudioQualityReviewModal({
   isOpen,
   onClose,
   rawPhotoBase64,
+  shotAngleInfo,
   qualityResult,
   onRetake,
   onCompleteAngle,
@@ -111,6 +112,7 @@ export default function StudioQualityReviewModal({
           rawBase64: base64Img,
           studioBase64: res.processed_base64 || res.studio_url,
           quality: qualityResult,
+          shotAngleInfo,
         });
 
         // Haptic feedback
@@ -120,6 +122,12 @@ export default function StudioQualityReviewModal({
       console.warn('Enhancement error, using fallback studio render:', err);
       setReviewState('enhanced');
       setIsEnhancing(false);
+      saveAnglePhoto(activeAngleIndex, {
+        rawBase64: base64Img,
+        studioBase64: base64Img,
+        quality: qualityResult,
+        shotAngleInfo,
+      });
     }
   };
 

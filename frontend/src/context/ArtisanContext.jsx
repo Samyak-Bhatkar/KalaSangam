@@ -103,15 +103,22 @@ export function ArtisanProvider({ children }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processStatusText, setProcessStatusText] = useState('');
 
+  // Capture-time Tilt & Perspective Classification
+  const [shotAngleInfo, setShotAngleInfo] = useState({
+    tiltDegrees: 0,
+    shotAngle: 'eye_level',
+    isLifestyleEligible: true,
+  });
+
   // Multi-Angle Workflow: 0 = Hero Front, 1 = Side 45°, 2 = Back/Detail
   const [activeAngleIndex, setActiveAngleIndex] = useState(0);
   const [anglePhotos, setAnglePhotos] = useState([
-    { id: 'hero', key: 'hero', title_en: 'Front View (Hero)', title_hi: 'सामने का मुख्य दृश्य', rawBase64: null, studioBase64: null, quality: null },
-    { id: 'side', key: 'side', title_en: 'Side Profile (45°)', title_hi: 'किनारे का दृश्य (45°)', rawBase64: null, studioBase64: null, quality: null },
-    { id: 'detail', key: 'detail', title_en: 'Back / Detail', title_hi: 'पीछे / बारीक विवरण', rawBase64: null, studioBase64: null, quality: null },
+    { id: 'hero', key: 'hero', title_en: 'Front View (Hero)', title_hi: 'सामने का मुख्य दृश्य', rawBase64: null, studioBase64: null, quality: null, shotAngleInfo: null },
+    { id: 'side', key: 'side', title_en: 'Side Profile (45°)', title_hi: 'किनारे का दृश्य (45°)', rawBase64: null, studioBase64: null, quality: null, shotAngleInfo: null },
+    { id: 'detail', key: 'detail', title_en: 'Back / Detail', title_hi: 'पीछे / बारीक विवरण', rawBase64: null, studioBase64: null, quality: null, shotAngleInfo: null },
   ]);
 
-  const saveAnglePhoto = (index, { rawBase64, studioBase64, quality }) => {
+  const saveAnglePhoto = (index, { rawBase64, studioBase64, quality, shotAngleInfo: newAngleInfo }) => {
     setAnglePhotos(prev => {
       const next = [...prev];
       if (next[index]) {
@@ -120,10 +127,15 @@ export function ArtisanProvider({ children }) {
           rawBase64: rawBase64 !== undefined ? rawBase64 : next[index].rawBase64,
           studioBase64: studioBase64 !== undefined ? studioBase64 : next[index].studioBase64,
           quality: quality !== undefined ? quality : next[index].quality,
+          shotAngleInfo: newAngleInfo !== undefined ? newAngleInfo : next[index].shotAngleInfo,
         };
       }
       return next;
     });
+
+    if (newAngleInfo) {
+      setShotAngleInfo(newAngleInfo);
+    }
 
     if (index === 0) {
       if (rawBase64) {
@@ -508,6 +520,7 @@ export function ArtisanProvider({ children }) {
     setProductStatus('session');
     setPublishedProduct(null);
     setCurrentProductId(`ART-${Date.now()}`);
+    setShotAngleInfo({ tiltDegrees: 0, shotAngle: 'eye_level', isLifestyleEligible: true });
   };
 
   const value = {
@@ -541,6 +554,8 @@ export function ArtisanProvider({ children }) {
     anglePhotos,
     setAnglePhotos,
     saveAnglePhoto,
+    shotAngleInfo,
+    setShotAngleInfo,
     isProcessing,
     processStatusText,
     transcript,

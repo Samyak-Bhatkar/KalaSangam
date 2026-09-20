@@ -386,12 +386,18 @@ async def get_studio_background_options(payload: BackgroundOptionsRequest):
     """
     POST /api/studio/background-options or /api/v1/studio/background-options
     Retrieves 3-4 contextual background options using Pexels first, falling back to Pixabay.
-    The single top result is marked recommended: true.
+    Biased by:
+    - Dominant color extraction & HSL hue-wheel complementary/analogous matching (zero-AI cost)
+    - Capture-time shot_angle (flat_lay -> top view, eye_level -> front view).
     """
     try:
+        cutout_source = payload.cutout_base64 or payload.raw_image_base64
         res = get_background_options(
             query=payload.suggested_background_query,
-            limit=payload.limit or 4
+            limit=payload.limit or 4,
+            shot_angle=payload.shot_angle,
+            tilt_degrees=payload.tilt_degrees,
+            cutout_source=cutout_source
         )
         return res
     except Exception as e:
@@ -400,10 +406,20 @@ async def get_studio_background_options(payload: BackgroundOptionsRequest):
 
 @app.get("/api/v1/studio/background-options", response_model=BackgroundOptionsResponse)
 @app.get("/api/studio/background-options", response_model=BackgroundOptionsResponse)
-async def get_studio_background_options_get(query: Optional[str] = "neutral wooden surface", limit: int = 4):
+async def get_studio_background_options_get(
+    query: Optional[str] = "neutral wooden surface",
+    limit: int = 4,
+    shot_angle: Optional[str] = None,
+    tilt_degrees: Optional[float] = None
+):
     """GET query alternative for background options retrieval."""
     try:
-        return get_background_options(query=query, limit=limit)
+        return get_background_options(
+            query=query,
+            limit=limit,
+            shot_angle=shot_angle,
+            tilt_degrees=tilt_degrees
+        )
     except Exception as e:
         logger.error(f"Error fetching background options: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -414,9 +430,11 @@ async def composite_lifestyle_endpoint(req: LifestyleCompositeRequest):
     """
     POST /api/studio/composite-lifestyle or /api/v1/studio/composite-lifestyle
     Composites the product cutout onto the chosen stock background:
-    - Scales cutout so product occupies bottom 55-65% of the canvas (resting on surface)
+    - Scales cutout according to size_pct (40%-75% of canvas height, default 58%)
+    - Positions cutout resting on bottom surface with bottom_cushion_pct (2%-20%, default 8%)
     - Applies realistic surface drop shadow: alpha duplicate, black, Gaussian blur, 40% opacity
     - Composites in order: background -> blurred shadow -> product cutout
+    - Supports manual rotation nudge (-15 to +15 deg)
     """
     try:
         cutout_source = req.cutout_base64
@@ -432,10 +450,13 @@ async def composite_lifestyle_endpoint(req: LifestyleCompositeRequest):
         if not cutout_source:
             raise HTTPException(status_code=400, detail="Product cutout_base64 or raw_image_base64 is required.")
 
+        rot = float(req.rotation_deg or 0.0)
+
         _, lifestyle_url, lifestyle_b64 = composite_lifestyle_scene(
             cutout_img=cutout_source,
             background_source=req.background_url,
-            canvas_size=1080
+            canvas_size=1080,
+            rotation_deg=rot
         )
 
         return LifestyleCompositeResponse(
@@ -445,7 +466,10 @@ async def composite_lifestyle_endpoint(req: LifestyleCompositeRequest):
             background_url=req.background_url,
             width=1080,
             height=1080,
-            shadow_applied=True
+            shadow_applied=True,
+            rotation_deg=rot,
+            size_pct=size_pct,
+            bottom_cushion_pct=cushion_pct
         )
     except HTTPException:
         raise

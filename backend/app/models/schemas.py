@@ -89,18 +89,29 @@ class BackgroundOption(BaseModel):
 class BackgroundOptionsRequest(BaseModel):
     suggested_background_query: Optional[str] = "neutral wooden surface"
     limit: Optional[int] = 4
+    shot_angle: Optional[str] = None  # "eye_level" | "flat_lay" | "angled"
+    tilt_degrees: Optional[float] = None
+    cutout_base64: Optional[str] = None
+    raw_image_base64: Optional[str] = None
 
 class BackgroundOptionsResponse(BaseModel):
     status: str = "success"
     query: str
+    effective_query: Optional[str] = None
+    shot_angle: Optional[str] = None
     source: str
     options: List[BackgroundOption]
+    lifestyle_eligible: bool = True
+    dominant_color_hex: Optional[str] = None
+    color_pairing_strategy: Optional[str] = None  # "complementary" | "analogous" | "neutral"
+    color_modifier: Optional[str] = None
 
 class LifestyleCompositeRequest(BaseModel):
     background_url: str
     cutout_base64: Optional[str] = None
     raw_image_base64: Optional[str] = None
     product_id: Optional[str] = None
+    rotation_deg: Optional[float] = 0.0
 
 class LifestyleCompositeResponse(BaseModel):
     status: str = "success"
@@ -110,6 +121,7 @@ class LifestyleCompositeResponse(BaseModel):
     width: int = 1080
     height: int = 1080
     shadow_applied: bool = True
+    rotation_deg: float = 0.0
 
 # Pricing Engine Schemas
 class PricingCalculationRequest(BaseModel):
