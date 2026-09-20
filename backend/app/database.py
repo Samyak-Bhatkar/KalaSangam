@@ -75,6 +75,8 @@ def init_db() -> None:
             cursor.execute("ALTER TABLE products ADD COLUMN rejection_reason TEXT DEFAULT ''")
         if "correction_log" not in existing_cols:
             cursor.execute("ALTER TABLE products ADD COLUMN correction_log TEXT DEFAULT '[]'")
+        if "lifestyle_image_url" not in existing_cols:
+            cursor.execute("ALTER TABLE products ADD COLUMN lifestyle_image_url TEXT DEFAULT ''")
 
         # If old table had restrictive status CHECK constraint, recreate table cleanly
         cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='products'")
@@ -196,7 +198,7 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
                 craft_category, technique, raw_cost, labor_hours,
                 b2c_price, b2b_price, gem_price, artisan_name,
                 beneficiary_id, cluster_pin, raw_image_url,
-                studio_image_url, watermarked_image_url, status,
+                studio_image_url, lifestyle_image_url, watermarked_image_url, status,
                 qr_code_url, channel, original_transcript,
                 rejection_reason, correction_log, created_at, published_at
             ) VALUES (
@@ -204,7 +206,7 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
                 :craft_category, :technique, :raw_cost, :labor_hours,
                 :b2c_price, :b2b_price, :gem_price, :artisan_name,
                 :beneficiary_id, :cluster_pin, :raw_image_url,
-                :studio_image_url, :watermarked_image_url, :status,
+                :studio_image_url, :lifestyle_image_url, :watermarked_image_url, :status,
                 NULL, :channel, :original_transcript,
                 :rejection_reason, :correction_log, CURRENT_TIMESTAMP, NULL
             )
@@ -225,6 +227,7 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
                 cluster_pin = excluded.cluster_pin,
                 raw_image_url = excluded.raw_image_url,
                 studio_image_url = excluded.studio_image_url,
+                lifestyle_image_url = CASE WHEN excluded.lifestyle_image_url != '' THEN excluded.lifestyle_image_url ELSE products.lifestyle_image_url END,
                 watermarked_image_url = excluded.watermarked_image_url,
                 status = excluded.status,
                 channel = excluded.channel,
@@ -250,6 +253,7 @@ def save_draft_product(product: Dict[str, Any]) -> Dict[str, Any]:
             "cluster_pin": product.get("cluster_pin", "273001"),
             "raw_image_url": product.get("raw_image_url", ""),
             "studio_image_url": product.get("studio_image_url", ""),
+            "lifestyle_image_url": product.get("lifestyle_image_url", ""),
             "watermarked_image_url": product.get("watermarked_image_url", ""),
             "status": target_status,
             "channel": target_channel,
@@ -289,14 +293,14 @@ def publish_product(
                     craft_category, technique, raw_cost, labor_hours,
                     b2c_price, b2b_price, gem_price, artisan_name,
                     beneficiary_id, cluster_pin, raw_image_url,
-                    studio_image_url, watermarked_image_url, status,
+                    studio_image_url, lifestyle_image_url, watermarked_image_url, status,
                     qr_code_url, beckn_payload, created_at, published_at
                 ) VALUES (
                     :id, :title_hi, :title_en, :description_hi, :description_en,
                     :craft_category, :technique, :raw_cost, :labor_hours,
                     :b2c_price, :b2b_price, :gem_price, :artisan_name,
                     :beneficiary_id, :cluster_pin, :raw_image_url,
-                    :studio_image_url, :watermarked_image_url, 'published',
+                    :studio_image_url, :lifestyle_image_url, :watermarked_image_url, 'published',
                     :qr_code_url, :beckn_payload, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
                 )
             """, {
@@ -317,6 +321,7 @@ def publish_product(
                 "cluster_pin": product_data.get("cluster_pin", "273001"),
                 "raw_image_url": product_data.get("raw_image_url", ""),
                 "studio_image_url": product_data.get("studio_image_url", ""),
+                "lifestyle_image_url": product_data.get("lifestyle_image_url", ""),
                 "watermarked_image_url": product_data.get("watermarked_image_url", ""),
                 "qr_code_url": qr_code_url,
                 "beckn_payload": beckn_str
@@ -341,6 +346,7 @@ def publish_product(
                         cluster_pin = COALESCE(:cluster_pin, cluster_pin),
                         raw_image_url = COALESCE(:raw_image_url, raw_image_url),
                         studio_image_url = COALESCE(:studio_image_url, studio_image_url),
+                        lifestyle_image_url = COALESCE(:lifestyle_image_url, lifestyle_image_url),
                         watermarked_image_url = COALESCE(:watermarked_image_url, watermarked_image_url),
                         status = 'published',
                         qr_code_url = :qr_code_url,
@@ -365,6 +371,7 @@ def publish_product(
                     "cluster_pin": product_data.get("cluster_pin"),
                     "raw_image_url": product_data.get("raw_image_url"),
                     "studio_image_url": product_data.get("studio_image_url"),
+                    "lifestyle_image_url": product_data.get("lifestyle_image_url"),
                     "watermarked_image_url": product_data.get("watermarked_image_url"),
                     "qr_code_url": qr_code_url,
                     "beckn_payload": beckn_str

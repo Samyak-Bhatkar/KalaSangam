@@ -32,7 +32,8 @@ Extract and format the product into a verified e-commerce listing conforming str
   "estimated_hours": <integer: hours extracted from audio, or conservative visual estimate if unmentioned>,
   "raw_material_cost_estimate_inr": <float: estimated material cost based on Indian rural market benchmarks>,
   "seo_keywords": ["5 to 8 high-volume search tags"],
-  "gi_tag_eligible": <boolean: true if craft matches a recognized Indian Geographical Indication>
+  "gi_tag_eligible": <boolean: true if craft matches a recognized Indian Geographical Indication>,
+  "suggested_background_query": "2-3 word English search phrase describing a realistic lifestyle or surface setting implied by the craft or artisan voice (e.g. 'wooden craft table', 'festive living room', 'rustic wooden surface'). Default to 'neutral wooden surface' if unmentioned."
 }}
 Return ONLY valid JSON matching this schema."""
 
@@ -212,6 +213,10 @@ def process_voice_and_catalog(
     gemini_data = call_gemini_multimodal(image_base64, effective_transcript, language)
 
     if gemini_data and isinstance(gemini_data, dict):
+        bg_q = gemini_data.get("suggested_background_query")
+        if not bg_q or not str(bg_q).strip():
+            bg_q = "neutral wooden surface"
+
         return CatalogItemResponse(
             title_en=gemini_data.get("title_en", "Handcrafted Artisan Specialty"),
             title_hi=gemini_data.get("title_hi", "पारंपरिक हस्तनिर्मित शिल्प"),
@@ -225,7 +230,8 @@ def process_voice_and_catalog(
             seo_keywords=gemini_data.get("seo_keywords", ["handicraft", "vocal for local", "handmade", "artisan india"]),
             gi_tag_eligible=bool(gemini_data.get("gi_tag_eligible", False)),
             source_language=language,
-            transcription=effective_transcript
+            transcription=effective_transcript,
+            suggested_background_query=str(bg_q).strip()
         )
 
     # Hackathon Zero-Fail Mode with authentic fixtures & intelligent vernacular entity extraction
@@ -233,6 +239,18 @@ def process_voice_and_catalog(
     
     extracted_hours = extract_hours_from_vernacular(effective_transcript, fixture["estimated_hours"])
     extracted_cost = extract_cost_from_vernacular(effective_transcript, fixture["raw_material_cost_estimate_inr"])
+
+    t_lower = (effective_transcript or "").lower()
+    if any(w in t_lower for w in ["terracotta", "pot", "clay", "mitti", "kalash"]):
+        fallback_bg = "rustic wooden table"
+    elif any(w in t_lower for w in ["saree", "silk", "chanderi", "handloom"]):
+        fallback_bg = "silk fabric aesthetic surface"
+    elif any(w in t_lower for w in ["dhokra", "brass", "metal"]):
+        fallback_bg = "carved wooden shelf"
+    elif any(w in t_lower for w in ["painting", "madhubani", "mithila"]):
+        fallback_bg = "minimalist interior wall"
+    else:
+        fallback_bg = "neutral wooden surface"
 
     return CatalogItemResponse(
         title_en=fixture["title_en"],
@@ -247,5 +265,6 @@ def process_voice_and_catalog(
         seo_keywords=fixture["seo_keywords"],
         gi_tag_eligible=fixture["gi_tag_eligible"],
         source_language=language,
-        transcription=effective_transcript
+        transcription=effective_transcript,
+        suggested_background_query=fallback_bg
     )

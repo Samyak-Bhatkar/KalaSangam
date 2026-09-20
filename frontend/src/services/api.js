@@ -612,6 +612,81 @@ export async function trackProductView(productId) {
   }
 }
 
+export async function fetchBackgroundOptions({ suggestedBackgroundQuery, limit = 4 }) {
+  try {
+    const res = await fetch(`${API_BASE}/studio/background-options`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        suggested_background_query: suggestedBackgroundQuery || 'neutral wooden surface',
+        limit,
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('API fetchBackgroundOptions fallback to curated options:', err);
+    return {
+      status: 'fallback',
+      query: suggestedBackgroundQuery || 'neutral wooden surface',
+      source: 'curated',
+      options: [
+        {
+          id: 'curated-wood-table',
+          url: 'https://images.pexels.com/photos/129731/pexels-photo-129731.jpeg?auto=compress&cs=tinysrgb&w=1080',
+          thumbnail_url: 'https://images.pexels.com/photos/129731/pexels-photo-129731.jpeg?auto=compress&cs=tinysrgb&w=350',
+          title: 'Rustic Natural Wood Surface',
+          source: 'curated',
+          recommended: true,
+        },
+        {
+          id: 'curated-warm-festive',
+          url: 'https://images.pexels.com/photos/572897/pexels-photo-572897.jpeg?auto=compress&cs=tinysrgb&w=1080',
+          thumbnail_url: 'https://images.pexels.com/photos/572897/pexels-photo-572897.jpeg?auto=compress&cs=tinysrgb&w=350',
+          title: 'Warm Ambient Festive Room',
+          source: 'curated',
+          recommended: false,
+        },
+        {
+          id: 'curated-stone-craft',
+          url: 'https://images.pexels.com/photos/164005/pexels-photo-164005.jpeg?auto=compress&cs=tinysrgb&w=1080',
+          thumbnail_url: 'https://images.pexels.com/photos/164005/pexels-photo-164005.jpeg?auto=compress&cs=tinysrgb&w=350',
+          title: 'Minimalist Artisan Surface',
+          source: 'curated',
+          recommended: false,
+        },
+        {
+          id: 'curated-decor-shelf',
+          url: 'https://images.pexels.com/photos/279719/pexels-photo-279719.jpeg?auto=compress&cs=tinysrgb&w=1080',
+          thumbnail_url: 'https://images.pexels.com/photos/279719/pexels-photo-279719.jpeg?auto=compress&cs=tinysrgb&w=350',
+          title: 'Heritage Living Display',
+          source: 'curated',
+          recommended: false,
+        },
+      ],
+    };
+  }
+}
+
+export async function compositeLifestyleImage({ backgroundUrl, cutoutBase64, rawImageBase64 }) {
+  try {
+    const res = await fetch(`${API_BASE}/studio/composite-lifestyle`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        background_url: backgroundUrl,
+        cutout_base64: cutoutBase64 || null,
+        raw_image_base64: rawImageBase64 || null,
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.error('compositeLifestyleImage error:', err);
+    throw err;
+  }
+}
+
 
 
 

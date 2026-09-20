@@ -28,6 +28,8 @@ class StudioEnhanceResponse(BaseModel):
     height: int
     lighting_normalized: bool
     drop_shadow_applied: bool
+    cutout_url: Optional[str] = None
+    cutout_base64: Optional[str] = None
 
 # Catalog Engine Schemas
 class CatalogVoiceProcessRequest(BaseModel):
@@ -51,6 +53,41 @@ class CatalogItemResponse(BaseModel):
     source_language: str
     transcription: str
     tts_audio_url: Optional[str] = None
+    suggested_background_query: Optional[str] = "neutral wooden surface"
+
+# Stock Background & Lifestyle Compositing Schemas
+class BackgroundOption(BaseModel):
+    id: str
+    url: str
+    thumbnail_url: str
+    title: str
+    source: str  # "pexels" | "pixabay" | "curated"
+    recommended: bool = False
+
+class BackgroundOptionsRequest(BaseModel):
+    suggested_background_query: Optional[str] = "neutral wooden surface"
+    limit: Optional[int] = 4
+
+class BackgroundOptionsResponse(BaseModel):
+    status: str = "success"
+    query: str
+    source: str
+    options: List[BackgroundOption]
+
+class LifestyleCompositeRequest(BaseModel):
+    background_url: str
+    cutout_base64: Optional[str] = None
+    raw_image_base64: Optional[str] = None
+    product_id: Optional[str] = None
+
+class LifestyleCompositeResponse(BaseModel):
+    status: str = "success"
+    lifestyle_url: str
+    lifestyle_base64: str
+    background_url: str
+    width: int = 1080
+    height: int = 1080
+    shadow_applied: bool = True
 
 # Pricing Engine Schemas
 class PricingCalculationRequest(BaseModel):
@@ -162,6 +199,7 @@ class ProductDraftSaveRequest(BaseModel):
     cluster_pin: Optional[str] = "273001"
     raw_image_url: Optional[str] = ""
     studio_image_url: Optional[str] = ""
+    lifestyle_image_url: Optional[str] = ""
     watermarked_image_url: Optional[str] = ""
 
 class ProductPublishRequest(BaseModel):
@@ -188,6 +226,7 @@ class ProductResponse(BaseModel):
     cluster_pin: Optional[str] = None
     raw_image_url: Optional[str] = None
     studio_image_url: Optional[str] = None
+    lifestyle_image_url: Optional[str] = None
     watermarked_image_url: Optional[str] = None
     status: str  # 'draft' | 'pending' | 'approved' | 'rejected' | 'published'
     qr_code_url: Optional[str] = None

@@ -303,6 +303,9 @@ def process_studio_image(raw_bytes: bytes) -> tuple[Image.Image, Image.Image, di
     # Paste centered 85% product with alpha
     studio_canvas.paste(craft_resized, (craft_x, craft_y), craft_resized)
 
+    # Save transparent cutout base64 for optional lifestyle scene compositing
+    cutout_b64 = image_to_base64(cutout, format="PNG")
+
     # Return raw image, enhanced studio image, and metadata
     metadata = {
         "width": target_canvas_size,
@@ -314,7 +317,8 @@ def process_studio_image(raw_bytes: bytes) -> tuple[Image.Image, Image.Image, di
         "drop_shadow_applied": True,
         "shadow_type": "Dual-Tier Occlusion & Floor Penumbra",
         "amazon_compliant": True,
-        "segmentation_engine": "rembg-BiRefNet" if REMBG_AVAILABLE else "opencv-saliency-grabcut"
+        "segmentation_engine": "rembg-BiRefNet" if REMBG_AVAILABLE else "opencv-saliency-grabcut",
+        "cutout_base64": cutout_b64
     }
 
     return raw_img, studio_canvas, metadata

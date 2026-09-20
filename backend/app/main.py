@@ -43,10 +43,16 @@ from .models.schemas import (
     CoordinatorDraftRejectRequest,
     CoordinatorDraftListResponse,
     CoordinatorPhotoUploadResponse,
+    BackgroundOption,
+    BackgroundOptionsRequest,
+    BackgroundOptionsResponse,
+    LifestyleCompositeRequest,
+    LifestyleCompositeResponse,
 )
 from .models.mock_data import CRAFT_FIXTURES
 from .services.ivr_service import process_ivr_step_audio, create_ivr_draft_listing
 from .services.image_studio import process_studio_image, image_to_base64, assess_photo_quality
+from .services.stock_background_service import get_background_options, composite_lifestyle_scene
 from .services.catalog_engine import process_voice_and_catalog
 from .services.pricing_engine import calculate_living_wage_pricing
 from .services.reel_generator import render_vertical_reel, generate_published_product_qr
@@ -258,6 +264,19 @@ async def enhance_studio_image(
 
         processed_b64 = image_to_base64(studio_canvas, format="JPEG")
 
+        cutout_b64 = metadata.get("cutout_base64")
+        cutout_filename = f"cutout_{timestamp}.png"
+        cutout_url = None
+        if cutout_b64:
+            try:
+                c_data = cutout_b64.split(",")[1] if "," in cutout_b64 else cutout_b64
+                cutout_path = settings.UPLOAD_DIR / cutout_filename
+                with open(cutout_path, "wb") as f:
+                    f.write(base64.b64decode(c_data))
+                cutout_url = f"/static/uploads/{cutout_filename}"
+            except Exception as e_cutout:
+                logger.warning(f"Could not save cutout file: {e_cutout}")
+
         return StudioEnhanceResponse(
             status="success",
             original_url=f"/static/uploads/{raw_filename}",
@@ -266,11 +285,89 @@ async def enhance_studio_image(
             width=metadata["width"],
             height=metadata["height"],
             lighting_normalized=metadata["lighting_normalized"],
-            drop_shadow_applied=metadata["drop_shadow_applied"]
+            drop_shadow_applied=metadata["drop_shadow_applied"],
+            cutout_url=cutout_url,
+            cutout_base64=cutout_b64
         )
     except Exception as e:
         logger.error(f"Studio enhancement error: {e}")
         raise HTTPException(status_code=500, detail=f"Image enhancement failed: {str(e)}")
+
+# ==============================================================================
+# MODULE 2B: LIFESTYLE STOCK BACKGROUND RETRIEVAL & COMPOSITING
+# ==============================================================================
+@app.post("/api/v1/studio/background-options", response_model=BackgroundOptionsResponse)
+@app.post("/api/studio/background-options", response_model=BackgroundOptionsResponse)
+async def get_studio_background_options(payload: BackgroundOptionsRequest):
+    """
+    POST /api/studio/background-options or /api/v1/studio/background-options
+    Retrieves 3-4 contextual background options using Pexels first, falling back to Pixabay.
+    The single top result is marked recommended: true.
+    """
+    try:
+        res = get_background_options(
+            query=payload.suggested_background_query,
+            limit=payload.limit or 4
+        )
+        return res
+    except Exception as e:
+        logger.error(f"Error fetching background options: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/studio/background-options", response_model=BackgroundOptionsResponse)
+@app.get("/api/studio/background-options", response_model=BackgroundOptionsResponse)
+async def get_studio_background_options_get(query: Optional[str] = "neutral wooden surface", limit: int = 4):
+    """GET query alternative for background options retrieval."""
+    try:
+        return get_background_options(query=query, limit=limit)
+    except Exception as e:
+        logger.error(f"Error fetching background options: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/studio/composite-lifestyle", response_model=LifestyleCompositeResponse)
+@app.post("/api/studio/composite-lifestyle", response_model=LifestyleCompositeResponse)
+async def composite_lifestyle_endpoint(req: LifestyleCompositeRequest):
+    """
+    POST /api/studio/composite-lifestyle or /api/v1/studio/composite-lifestyle
+    Composites the product cutout onto the chosen stock background:
+    - Scales cutout so product occupies bottom 55-65% of the canvas (resting on surface)
+    - Applies realistic surface drop shadow: alpha duplicate, black, Gaussian blur, 40% opacity
+    - Composites in order: background -> blurred shadow -> product cutout
+    """
+    try:
+        cutout_source = req.cutout_base64
+        if not cutout_source and req.raw_image_base64:
+            # Fallback: process raw image through studio pipeline to generate cutout
+            clean_b64 = req.raw_image_base64
+            if "," in clean_b64:
+                clean_b64 = clean_b64.split(",")[1]
+            raw_bytes = base64.b64decode(clean_b64)
+            _, _, meta = process_studio_image(raw_bytes)
+            cutout_source = meta.get("cutout_base64")
+
+        if not cutout_source:
+            raise HTTPException(status_code=400, detail="Product cutout_base64 or raw_image_base64 is required.")
+
+        _, lifestyle_url, lifestyle_b64 = composite_lifestyle_scene(
+            cutout_img=cutout_source,
+            background_source=req.background_url,
+            canvas_size=1080
+        )
+
+        return LifestyleCompositeResponse(
+            status="success",
+            lifestyle_url=lifestyle_url,
+            lifestyle_base64=lifestyle_b64,
+            background_url=req.background_url,
+            width=1080,
+            height=1080,
+            shadow_applied=True
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Lifestyle composite error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to composite lifestyle scene: {str(e)}")
 
 # ==============================================================================
 # MODULE 3: MULTIMODAL VOICE-TO-CATALOG ENDPOINT

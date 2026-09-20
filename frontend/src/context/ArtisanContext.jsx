@@ -95,6 +95,11 @@ export function ArtisanProvider({ children }) {
   const [rawImageUrl, setRawImageUrl] = useState(null);
   const [studioImageBase64, setStudioImageBase64] = useState(null);
   const [studioImageUrl, setStudioImageUrl] = useState(null);
+  const [lifestyleImageUrl, setLifestyleImageUrl] = useState(null);
+  const [lifestyleImageBase64, setLifestyleImageBase64] = useState(null);
+  const [cutoutBase64, setCutoutBase64] = useState(null);
+  const [cutoutUrl, setCutoutUrl] = useState(null);
+  const [suggestedBackgroundQuery, setSuggestedBackgroundQuery] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processStatusText, setProcessStatusText] = useState('');
 
@@ -252,6 +257,8 @@ export function ArtisanProvider({ children }) {
       const cleanUrl = studioRes.studio_url || selectedPreset?.clean_image_url || '/terracotta_pot_clean.png';
       setStudioImageBase64(studioRes.processed_base64);
       setStudioImageUrl(cleanUrl);
+      if (studioRes.cutout_base64) setCutoutBase64(studioRes.cutout_base64);
+      if (studioRes.cutout_url) setCutoutUrl(studioRes.cutout_url);
 
       setProcessStatusText('2. Multimodal Cataloger: Generating MoSJE bilingual listing with Gemini 2.5 Flash...');
 
@@ -272,6 +279,9 @@ export function ArtisanProvider({ children }) {
         categoryHint: determinedHint,
       });
       setCatalogData(catRes);
+      if (catRes?.suggested_background_query) {
+        setSuggestedBackgroundQuery(catRes.suggested_background_query);
+      }
 
       setProcessStatusText('3. Pricing Engine: Calculating statutory living wage & channel tiers...');
 
@@ -362,6 +372,7 @@ export function ArtisanProvider({ children }) {
         cluster_pin: selectedPreset?.cluster_pin || '273001',
         raw_image_url: rawImageUrl || '',
         studio_image_url: studioImageUrl || '',
+        lifestyle_image_url: lifestyleImageUrl || '',
       };
       const res = await saveProductDraft(payload);
       setProductStatus('draft');
@@ -402,6 +413,7 @@ export function ArtisanProvider({ children }) {
         cluster_pin: selectedPreset?.cluster_pin || '273001',
         raw_image_url: rawImageUrl || '',
         studio_image_url: studioImageUrl || '',
+        lifestyle_image_url: lifestyleImageUrl || '',
       };
       const res = await publishProduct(productId, {
         productData: payload,
@@ -435,6 +447,10 @@ export function ArtisanProvider({ children }) {
     setProductStatus('draft');
     setStudioImageUrl(draft.studio_image_url || draft.raw_image_url);
     setRawImageUrl(draft.raw_image_url);
+    if (draft.lifestyle_image_url) {
+      setLifestyleImageUrl(draft.lifestyle_image_url);
+      setLifestyleImageBase64(draft.lifestyle_image_url);
+    }
     setCatalogData({
       title_hi: draft.title_hi,
       title_en: draft.title_en,
@@ -473,6 +489,11 @@ export function ArtisanProvider({ children }) {
     setCurrentStep(0);
     setStudioImageBase64(null);
     setStudioImageUrl(null);
+    setLifestyleImageUrl(null);
+    setLifestyleImageBase64(null);
+    setCutoutBase64(null);
+    setCutoutUrl(null);
+    setSuggestedBackgroundQuery(null);
     setRawImageBase64(null);
     setRawImageUrl(null);
     setActiveAngleIndex(0);
@@ -505,6 +526,16 @@ export function ArtisanProvider({ children }) {
     studioImageUrl,
     setStudioImageBase64,
     setStudioImageUrl,
+    lifestyleImageUrl,
+    setLifestyleImageUrl,
+    lifestyleImageBase64,
+    setLifestyleImageBase64,
+    cutoutBase64,
+    setCutoutBase64,
+    cutoutUrl,
+    setCutoutUrl,
+    suggestedBackgroundQuery,
+    setSuggestedBackgroundQuery,
     activeAngleIndex,
     setActiveAngleIndex,
     anglePhotos,

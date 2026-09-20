@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     BHASHINI_USER_ID: str = os.getenv("BHASHINI_USER_ID", "")
     BHASHINI_PIPELINE_ID: str = os.getenv("BHASHINI_PIPELINE_ID", "")
 
+    # Stock Photo API Keys for Contextual Lifestyle Shots
+    PEXELS_API_KEY: str = os.getenv("PEXELS_API_KEY", "03gz3rA1ythrx2XSv8vhMOcLCy1dsvPpaZ0X3Pc5V0XmY3XFimOYBAcT")
+    PIXABAY_API_KEY: str = os.getenv("PIXABAY_API_KEY", "57662365-27a04b66add52a04837b5a1e9")
+
     # MoSJE Fair Wage & Pricing Parameters
     STATUTORY_FAIR_WAGE_PER_HOUR: float = 120.0  # Statutory skilled artisan wage floor (INR/hour)
     WORKSHOP_OVERHEAD_RATE: float = 0.10          # 10% overhead for electricity, tools, studio space

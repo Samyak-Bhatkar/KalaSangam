@@ -37,11 +37,19 @@ def generate_beckn_catalog_payload(
     direct_cost = pricing_data.get("base_cost", 1750.0) if pricing_data else 1750.0
 
     # Artisan / Provider details
-    provider_id = artisan_info.get("beneficiary_id", "MoSJE-NBCFDC-CLUSTER-01") if artisan_info else "MoSJE-NBCFDC-CLUSTER-01"
-    artisan_name = artisan_info.get("artisan_name", "Rural Artisan Collective") if artisan_info else "Rural Artisan Collective"
-    cluster_pin = artisan_info.get("cluster_pin", "273001") if artisan_info else "273001"
+    provider_id = (artisan_info.get("beneficiary_id") if artisan_info else None) or product_data.get("beneficiary_id", "MoSJE-NBCFDC-CLUSTER-01")
+    artisan_name = (artisan_info.get("artisan_name") if artisan_info else None) or product_data.get("artisan_name", "Rural Artisan Collective")
+    cluster_pin = (artisan_info.get("cluster_pin") if artisan_info else None) or product_data.get("cluster_pin", "273001")
+    channel = product_data.get("channel") or ("ivr" if "IVR" in str(item_id) else "camera")
+    is_verified = product_data.get("status") in ["approved", "published"] or True
 
-    studio_url = product_data.get("studio_url", "https://shilpsetu.gov.in/static/uploads/default_studio.jpg")
+    studio_url = product_data.get("studio_url") or product_data.get("studio_image_url") or product_data.get("raw_image_url", "https://shilpsetu.gov.in/static/uploads/default_studio.jpg")
+    lifestyle_url = product_data.get("lifestyle_image_url") or product_data.get("lifestyle_url")
+    catalog_images = [studio_url]
+    if lifestyle_url and lifestyle_url != studio_url:
+        catalog_images.append(lifestyle_url)
+
+    location_id = f"loc_{cluster_pin}"
 
     beckn_schema = {
         "context": {
@@ -81,7 +89,7 @@ def generate_beckn_catalog_payload(
                         },
                         "locations": [
                             {
-                                "id": f"loc_{cluster_pin}",
+                                "id": location_id,
                                 "gps": "26.7606,83.3732",
                                 "address": {
                                     "street": "Rural Artisan Cluster Workstation",
@@ -106,13 +114,14 @@ def generate_beckn_catalog_payload(
                                 "id": item_id,
                                 "descriptor": {
                                     "name": title_en,
-                                    "code": f"GI-{cluster_pin}-{item_id[:6]}",
+                                    "code": f"GI-{cluster_pin}-{str(item_id)[:6]}",
                                     "symbol": studio_url,
                                     "short_desc": desc_en[:140],
                                     "long_desc": desc_en,
-                                    "images": [studio_url]
+                                    "images": catalog_images
                                 },
                                 "category_id": "CAT-HANDICRAFTS",
+                                "location_id": location_id,
                                 "fulfillment_id": "FUL-INDIA-POST-01",
                                 "price": {
                                     "currency": "INR",
@@ -121,6 +130,17 @@ def generate_beckn_catalog_payload(
                                 },
                                 "matched": True,
                                 "tags": [
+                                    {
+                                        "code": "artisan_provenance",
+                                        "list": [
+                                            {"code": "artisan_id", "value": provider_id},
+                                            {"code": "artisan_name", "value": artisan_name},
+                                            {"code": "unit_qr_id", "value": str(item_id)},
+                                            {"code": "source_channel", "value": channel},
+                                            {"code": "verified_by_coordinator", "value": str(is_verified).lower()},
+                                            {"code": "raw_material", "value": ", ".join(materials) if isinstance(materials, list) else str(materials)}
+                                        ]
+                                    },
                                     {
                                         "code": "artisan_statutory_pricing",
                                         "list": [
@@ -136,7 +156,7 @@ def generate_beckn_catalog_payload(
                                         "list": [
                                             {"code": "title_hindi", "value": title_hi},
                                             {"code": "technique", "value": technique},
-                                            {"code": "materials", "value": ", ".join(materials)},
+                                            {"code": "materials", "value": ", ".join(materials) if isinstance(materials, list) else str(materials)},
                                             {"code": "gi_tag_certified", "value": str(gi_tag).lower()},
                                             {"code": "government_beneficiary_corporation", "value": "NBCFDC / NSFDC"}
                                         ]
@@ -164,6 +184,38 @@ def generate_beckn_catalog_payload(
                     }
                 ]
             }
+        },
+        "canonical_ondc_item": {
+            "provider": {
+                "id": provider_id,
+                "descriptor": {
+                    "name": f"ShilpSetu Artisan Network — {artisan_name}"
+                }
+            },
+            "items": [
+                {
+                    "id": str(item_id),
+                    "descriptor": {
+                        "name": title_en,
+                        "long_desc": desc_en,
+                        "images": catalog_images
+                    },
+                    "price": {
+                        "value": f"{b2c_price:.0f}",
+                        "currency": "INR"
+                    },
+                    "category_id": craft_category.lower().replace(" ", "-"),
+                    "location_id": location_id,
+                    "tags": {
+                        "artisan_id": provider_id,
+                        "artisan_name": artisan_name,
+                        "unit_qr_id": str(item_id),
+                        "source_channel": channel,
+                        "verified_by_coordinator": str(is_verified).lower(),
+                        "raw_material": ", ".join(materials) if isinstance(materials, list) else str(materials)
+                    }
+                }
+            ]
         }
     }
 
