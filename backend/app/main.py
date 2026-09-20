@@ -53,6 +53,8 @@ from .services.reel_generator import render_vertical_reel, generate_published_pr
 from .services.negotiator import evaluate_b2b_negotiation
 from .services.watermark import embed_dct_watermark, extract_dct_watermark
 from .services.ondc_adapter import generate_beckn_catalog_payload
+from .services.trust_score_service import calculate_artisan_trust_score, TrustScoreResponse
+from .services.analytics_service import get_seller_reality_check, record_product_view, SellerAnalyticsResponse
 from .services.n8n_client import (
     trigger_bargain_guard_workflow,
     trigger_ondc_publish_workflow,
@@ -1036,6 +1038,49 @@ async def get_storefront_products_endpoint():
         }
     except Exception as e:
         logger.error(f"Error fetching storefront products: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ==============================================================================
+# CAROUSEL HERO MODULES: TRUST SCORECARD & SELLER-APP REALITY CHECK
+# ==============================================================================
+@app.get("/api/v1/artisan/trust-score", response_model=TrustScoreResponse)
+async def get_artisan_trust_score_endpoint(artisan_id: str = "ART-NBCFDC-8492"):
+    """
+    GET /api/v1/artisan/trust-score
+    Returns CIBIL-style alternative credit trust scorecard (300-850) with tier and micro-credit limit.
+    """
+    try:
+        return calculate_artisan_trust_score(artisan_id=artisan_id)
+    except Exception as e:
+        logger.error(f"Error computing trust score: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/analytics/seller-reality-check", response_model=SellerAnalyticsResponse)
+async def get_seller_reality_check_endpoint(
+    artisan_id: str = "ART-NBCFDC-8492",
+    product_id: str = "CRAFT-NBCFDC-002"
+):
+    """
+    GET /api/v1/analytics/seller-reality-check
+    Returns Seller-App layer traffic analytics (views vs sales) and living-wage guardrails.
+    """
+    try:
+        return get_seller_reality_check(artisan_id=artisan_id, product_id=product_id)
+    except Exception as e:
+        logger.error(f"Error generating seller reality check: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/analytics/product-view/{product_id}")
+async def track_product_view_endpoint(product_id: str):
+    """
+    POST /api/v1/analytics/product-view/{product_id}
+    Increments internal Seller-App view counter for the specified product.
+    """
+    try:
+        views = record_product_view(product_id)
+        return {"status": "success", "product_id": product_id, "views": views}
+    except Exception as e:
+        logger.error(f"Error recording product view: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

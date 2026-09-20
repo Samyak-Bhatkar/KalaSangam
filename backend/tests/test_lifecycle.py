@@ -104,11 +104,41 @@ def test_full_lifecycle():
     products = res_list.json()["products"]
     found_old = any(p["id"] == old_draft_id for p in products)
     assert not found_old, f"Old draft {old_draft_id} should have been automatically cleaned up!"
-    print(f" -> PASSED: Lazy auto-cleanup successfully purged 25-hour old draft!")
+    print("\n[5] Testing Lazy Draft Cleanup...")
+    purged = cleanup_expired_drafts(hours=0)
+    print(f" -> PASSED: Lazy draft cleanup purged {purged} draft(s) with zero errors.")
 
-    # Cleanup test item
-    client.delete(f"/api/v1/products/{test_id}")
-    print("\nALL LIFECYCLE TESTS PASSED SUCCESSFULLY!\n")
+    print("\nALL LIFECYCLE TESTS PASSED PERFECTLY!")
+
+def test_carousel_cockpit_services():
+    client = TestClient(app)
+
+    # 1. Test Trust Score Endpoint
+    res_score = client.get("/api/v1/artisan/trust-score?artisan_id=ART-NBCFDC-8492")
+    assert res_score.status_code == 200, f"Trust score failed: {res_score.text}"
+    score_data = res_score.json()
+    assert score_data["score"] == 620
+    assert score_data["tier_key"] == "silver"
+    assert score_data["credit_limit_inr"] == 15000
+    assert len(score_data["recent_events"]) >= 3
+    assert "भरोसा स्कोर 620" in score_data["voice_narration_hi"]
+
+    # 2. Test Seller Reality Check Endpoint
+    res_reality = client.get("/api/v1/analytics/seller-reality-check?artisan_id=ART-NBCFDC-8492&product_id=CRAFT-NBCFDC-002")
+    assert res_reality.status_code == 200, f"Reality check failed: {res_reality.text}"
+    reality_data = res_reality.json()
+    assert reality_data["views_this_week"] >= 200
+    assert reality_data["price_floor_inr"] == 320.0
+    assert reality_data["ai_suggested_price_inr"] == 390.0
+    assert "कीमत जांचें" in reality_data["diagnosis_hi"]
+
+    # 3. Test View Counter Tracking
+    res_view = client.post("/api/v1/analytics/product-view/CRAFT-NBCFDC-002")
+    assert res_view.status_code == 200
+    view_data = res_view.json()
+    assert view_data["status"] == "success"
+    assert view_data["views"] >= 215
 
 if __name__ == "__main__":
     test_full_lifecycle()
+    test_carousel_cockpit_services()

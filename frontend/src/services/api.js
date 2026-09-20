@@ -529,5 +529,89 @@ export async function fetchStorefrontProducts() {
   return await res.json();
 }
 
+export async function fetchArtisanTrustScore(artisanId = 'ART-NBCFDC-8492') {
+  try {
+    const res = await fetch(`${API_BASE}/artisan/trust-score?artisan_id=${encodeURIComponent(artisanId)}`);
+    if (!res.ok) throw new Error('Failed to fetch trust score');
+    return await res.json();
+  } catch (err) {
+    console.warn('Using fallback trust score:', err);
+    return {
+      artisan_id: artisanId,
+      score: 620,
+      tier_key: 'silver',
+      tier_name_hi: 'चांदी स्तर (Silver)',
+      tier_name_en: 'Silver Tier',
+      credit_limit_inr: 15000,
+      next_tier_name_hi: 'स्वर्ण स्तर (Gold)',
+      next_tier_name_en: 'Gold Tier (₹30,000 Limit)',
+      next_tier_threshold: 750,
+      points_to_next_tier: 130,
+      voice_narration_hi: 'आपका कारीगर भरोसा स्कोर 620 है, चांदी स्तर (Silver)। आपकी आसान माइक्रो-क्रेडिट सीमा ₹15,000 है! अगले स्वर्ण स्तर के लिए 130 अंक बाकी हैं।',
+      voice_narration_en: 'Your Karigar Trust Score is 620, Silver Tier. Your micro-credit limit is ₹15,000. You need 130 more points to unlock Gold Tier.',
+      recent_events: [
+        {
+          id: 'EVT-01',
+          timestamp: '3 दिन पहले',
+          delta: 20,
+          title_hi: '+20: 30 दिनों में 4+ नई कलाकृतियां जोड़ीं',
+          title_en: '+20: Active cataloging bonus (4+ listings)'
+        },
+        {
+          id: 'EVT-02',
+          timestamp: '5 दिन पहले',
+          delta: 15,
+          title_hi: '+15: 24 घंटे में समय पर शिपिंग',
+          title_en: '+15: Fast dispatch within 24hrs'
+        },
+        {
+          id: 'EVT-03',
+          timestamp: '1 सप्ताह पहले',
+          delta: 10,
+          title_hi: '+10: 5-स्टार खरीदार संतुष्टि',
+          title_en: '+10: 5-star verified buyer review'
+        }
+      ]
+    };
+  }
+}
+
+export async function fetchSellerRealityCheck(artisanId = 'ART-NBCFDC-8492', productId = 'CRAFT-NBCFDC-002') {
+  try {
+    const res = await fetch(`${API_BASE}/analytics/seller-reality-check?artisan_id=${encodeURIComponent(artisanId)}&product_id=${encodeURIComponent(productId)}`);
+    if (!res.ok) throw new Error('Failed to fetch seller reality check');
+    return await res.json();
+  } catch (err) {
+    console.warn('Using fallback seller analytics:', err);
+    return {
+      artisan_id: artisanId,
+      views_this_week: 214,
+      sales_this_week: 0,
+      diagnosis_hi: 'बहुत लोग देख रहे हैं पर खरीद नहीं रहे — कीमत जांचें',
+      diagnosis_en: 'Many people are viewing but not buying — check your price',
+      price_floor_inr: 320.0,
+      current_product_price_inr: 450.0,
+      ai_suggested_price_inr: 390.0,
+      is_rare_item: true,
+      rare_benchmark_range_inr: '₹800–₹1,200',
+      voice_narration_hi: 'इस हफ्ते 214 खरीदारों ने आपका शिल्प देखा, पर कोई बिक्री नहीं हुई। बहुत लोग देख रहे हैं पर खरीद नहीं रहे — कीमत जांचें। आपकी न्यूनतम उचित लागत ₹320 है, और AI का सुझाव ₹390 है।',
+      voice_narration_en: '214 buyers viewed your craft this week with zero sales. Many people are viewing but not buying — check your price. Your fair living-wage floor is ₹320, and the AI suggests adjusting to ₹390.'
+    };
+  }
+}
+
+export async function trackProductView(productId) {
+  try {
+    const res = await fetch(`${API_BASE}/analytics/product-view/${encodeURIComponent(productId)}`, {
+      method: 'POST'
+    });
+    return await res.json();
+  } catch (err) {
+    console.warn('Failed to track product view:', err);
+    return null;
+  }
+}
+
+
 
 
