@@ -25,7 +25,7 @@ export default function ReelPreviewModal() {
   const videoRef = useRef(null);
 
   const effectiveTitleEn = catalogData?.title_en || selectedPreset?.title_en || 'Handcrafted Gorakhpur Terracotta Traditional Bell-Clay Cooking Handi Pot';
-  const effectiveTitleHi = catalogData?.title_hi || selectedPreset?.title_hi || 'पारंपरिक हाथ से बना गोरखपुर टेराकोटा मिट्टी का कलश और हांडी';
+  const effectiveTitleHi = catalogData?.title_hi || selectedPreset?.title_hi || 'हाथ से बनी टेराकोटा मटका वर्ली पेंटिंग के साथ';
   const effectiveStoryEn = catalogData?.description_en || selectedPreset?.description_en || 'Authentic GI-tagged terracotta cookware handcrafted from riverbed clay.';
   const effectiveStoryHi = catalogData?.description_hi || selectedPreset?.description_hi || 'भौगोलिक उपदर्शन (GI) प्रमाणित गोरखपुर का पारंपरिक टेराकोटा शिल्प।';
 
@@ -89,14 +89,17 @@ export default function ReelPreviewModal() {
 
   const effectiveId = selectedPreset?.id || catalogData?.id || 'CRAFT-NBCFDC-002';
   const getShareableUrl = () => {
-    const origin = (typeof window !== 'undefined' && window.location.origin) ? window.location.origin : 'http://localhost:5173';
-    return `${origin}/item/${effectiveId}`;
+    return `https://shilpsetu.gov.in/item/${effectiveId}`;
   };
 
   const handleShareWhatsApp = () => {
+    const shareTitle = (selectedPreset?.id === 'CRAFT-NBCFDC-002' || !selectedPreset?.id)
+      ? 'हाथ से बनी टेराकोटा मटका वर्ली पेंटिंग के साथ'
+      : (selectedPreset?.title_hi || catalogData?.title_hi || title || 'हाथ से बनी टेराकोटा मटका वर्ली पेंटिंग के साथ');
+    const artisan = artisanName || 'Sunil Kumar Prajapati';
     const shareUrl = getShareableUrl();
     const text = encodeURIComponent(
-      `Check out this 100% authentic handcrafted ${title} by ${artisanName} on ONDC! Direct-from-artisan fair wage certified: ${shareUrl}`
+      `Check out this 100% authentic handcrafted ${shareTitle} by ${artisan} on ONDC! Direct-from-artisan fair wage certified: ${shareUrl}`
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };
