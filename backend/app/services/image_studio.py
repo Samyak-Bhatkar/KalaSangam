@@ -9,6 +9,9 @@ import os
 import time
 import base64
 import logging
+import hashlib
+import threading
+from collections import OrderedDict
 from typing import Optional, Tuple, Dict, Any, Union
 import numpy as np
 from PIL import Image, ImageOps, ImageFilter, ImageEnhance
@@ -16,6 +19,30 @@ import cv2
 from ..config import settings
 
 logger = logging.getLogger("ShilpSetu.ImageStudio")
+
+# Thread-safe in-memory cache for segmentation cutouts to avoid redundant rembg computation
+_SEGMENT_CACHE_LOCK = threading.Lock()
+_SEGMENT_CACHE: OrderedDict[str, Image.Image] = OrderedDict()
+_MAX_SEGMENT_CACHE_SIZE = 32
+
+def _get_image_hash(raw_bytes: bytes) -> str:
+    return hashlib.sha256(raw_bytes).hexdigest()
+
+def get_cached_cutout(raw_bytes: bytes) -> Optional[Image.Image]:
+    key = _get_image_hash(raw_bytes)
+    with _SEGMENT_CACHE_LOCK:
+        if key in _SEGMENT_CACHE:
+            _SEGMENT_CACHE.move_to_end(key)
+            return _SEGMENT_CACHE[key].copy()
+    return None
+
+def cache_cutout(raw_bytes: bytes, cutout: Image.Image) -> None:
+    key = _get_image_hash(raw_bytes)
+    with _SEGMENT_CACHE_LOCK:
+        _SEGMENT_CACHE[key] = cutout.copy()
+        _SEGMENT_CACHE.move_to_end(key)
+        if len(_SEGMENT_CACHE) > _MAX_SEGMENT_CACHE_SIZE:
+            _SEGMENT_CACHE.popitem(last=False)
 
 REMBG_AVAILABLE = False
 session = None
@@ -292,7 +319,11 @@ def process_studio_image(
     raw_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
     
     # 1. Preliminary segmentation pass to isolate craft vs background reference
-    raw_cutout = segment_craft(raw_img)
+    # Reuse cached cutout from quality gate if available, otherwise compute and cache
+    raw_cutout = get_cached_cutout(raw_bytes)
+    if raw_cutout is None:
+        raw_cutout = segment_craft(raw_img)
+        cache_cutout(raw_bytes, raw_cutout)
     alpha_mask = np.array(raw_cutout.split()[3])
     bg_mask = (alpha_mask <= 40)
     
@@ -591,44 +622,11 @@ def assess_photo_quality(
     overexposed_ratio = float(np.sum(gray > 245)) / float(gray.size)
     underexposed_ratio = float(np.sum(gray < 20)) / float(gray.size)
 
-    # 3. Framing & Subject Contour Margin
-    # Downscale for fast contour analysis
+    # 3. Background clutter: edge density in peripheral boundary (15% outer frame)
     scale = min(1.0, 480.0 / max(w, h))
     small_gray = cv2.resize(gray, (max(1, int(w * scale)), max(1, int(h * scale))))
     sh, sw = small_gray.shape[:2]
 
-    # Otsu thresholding + edge detection
-    blur = cv2.GaussianBlur(small_gray, (5, 5), 0)
-    _, thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    touch_left = False
-    touch_right = False
-    touch_top = False
-    touch_bottom = False
-    coverage_pct = 50.0
-
-    if contours:
-        # Find the largest contour
-        largest_cnt = max(contours, key=cv2.contourArea)
-        cx, cy, cw, ch = cv2.boundingRect(largest_cnt)
-        coverage_pct = float((cw * ch) / (sw * sh) * 100.0)
-
-        # Check if subject cuts into borders (within 3% margin)
-        margin_x = int(sw * 0.03)
-        margin_y = int(sh * 0.03)
-        if cx <= margin_x:
-            touch_left = True
-        if cy <= margin_y:
-            touch_top = True
-        if cx + cw >= (sw - margin_x):
-            touch_right = True
-        if cy + ch >= (sh - margin_y):
-            touch_bottom = True
-
-    is_cut_off = (touch_left or touch_right or touch_top or touch_bottom) and (coverage_pct > 65.0)
-
-    # 4. Background clutter: edge density in peripheral boundary (15% outer frame)
     edges = cv2.Canny(small_gray, 50, 150)
     mask_perimeter = np.ones((sh, sw), dtype=np.uint8)
     inner_mx, inner_my = int(sw * 0.15), int(sh * 0.15)
@@ -636,27 +634,65 @@ def assess_photo_quality(
     perimeter_edges = cv2.bitwise_and(edges, edges, mask=mask_perimeter)
     clutter_density = float(np.sum(perimeter_edges > 0)) / float(max(1, np.sum(mask_perimeter > 0)))
 
-    # Evaluate heuristic dominance
+    # Evaluate heuristic dominance according to strict priority hierarchy:
+    # 1. Blur has highest priority
     dominant_issue = None
     issue_icon = "check"
+    is_cut_off = False
+    coverage_pct = 50.0
 
-    # Strict thresholds:
-    # Blur has highest priority
     if lap_var < 65.0:
         dominant_issue = "blurry"
         issue_icon = "shake"
-    elif is_cut_off:
-        dominant_issue = "cut_off"
-        issue_icon = "crop"
-    elif mean_lum < 45.0 or underexposed_ratio > 0.45:
-        dominant_issue = "too_dark"
-        issue_icon = "moon"
-    elif mean_lum > 220.0 or overexposed_ratio > 0.35:
-        dominant_issue = "too_bright"
-        issue_icon = "sun_high"
-    elif clutter_density > 0.28:
-        dominant_issue = "cluttered"
-        issue_icon = "layers"
+    else:
+        # 2. Framing & Cut-Off: only evaluated if blur check passes.
+        # Uses true craft silhouette alpha mask from segment_craft() instead of noisy Otsu contours.
+        raw_cutout = get_cached_cutout(raw_bytes)
+        if raw_cutout is None:
+            raw_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
+            raw_cutout = segment_craft(raw_img)
+            cache_cutout(raw_bytes, raw_cutout)
+
+        alpha_channel = raw_cutout.split()[3]
+        alpha_bbox = alpha_channel.getbbox()
+
+        touch_left = False
+        touch_right = False
+        touch_top = False
+        touch_bottom = False
+
+        if alpha_bbox:
+            cx, cy, right, bottom = alpha_bbox
+            cw = right - cx
+            ch = bottom - cy
+            coverage_pct = float((cw * ch) / (w * h) * 100.0)
+
+            # Check if subject cuts into borders (within 3% margin)
+            margin_x = int(w * 0.03)
+            margin_y = int(h * 0.03)
+            if cx <= margin_x:
+                touch_left = True
+            if cy <= margin_y:
+                touch_top = True
+            if cx + cw >= (w - margin_x):
+                touch_right = True
+            if cy + ch >= (h - margin_y):
+                touch_bottom = True
+
+        is_cut_off = (touch_left or touch_right or touch_top or touch_bottom) and (coverage_pct > 65.0)
+
+        if is_cut_off:
+            dominant_issue = "cut_off"
+            issue_icon = "crop"
+        elif mean_lum < 45.0 or underexposed_ratio > 0.45:
+            dominant_issue = "too_dark"
+            issue_icon = "moon"
+        elif mean_lum > 220.0 or overexposed_ratio > 0.35:
+            dominant_issue = "too_bright"
+            issue_icon = "sun_high"
+        elif clutter_density > 0.28:
+            dominant_issue = "cluttered"
+            issue_icon = "layers"
 
     # Optional: Cross-verify with Gemini Vision if API key is active
     if settings.GEMINI_API_KEY:
@@ -683,15 +719,18 @@ def assess_photo_quality(
                 if parsed.get("passed") is False and parsed.get("dominant_issue"):
                     gem_issue = parsed["dominant_issue"]
                     if gem_issue in ["blurry", "cut_off", "too_dark", "too_bright", "cluttered"]:
-                        dominant_issue = gem_issue
-                        icon_map = {
-                            "blurry": "shake",
-                            "cut_off": "crop",
-                            "too_dark": "moon",
-                            "too_bright": "sun_high",
-                            "cluttered": "layers"
-                        }
-                        issue_icon = icon_map.get(dominant_issue, "shake")
+                        if gem_issue == "cut_off" and not is_cut_off:
+                            pass
+                        else:
+                            dominant_issue = gem_issue
+                            icon_map = {
+                                "blurry": "shake",
+                                "cut_off": "crop",
+                                "too_dark": "moon",
+                                "too_bright": "sun_high",
+                                "cluttered": "layers"
+                            }
+                            issue_icon = icon_map.get(dominant_issue, "shake")
                 elif parsed.get("passed") is True and lap_var >= 50.0 and 50.0 <= mean_lum <= 225.0:
                     dominant_issue = None
                     issue_icon = "check"

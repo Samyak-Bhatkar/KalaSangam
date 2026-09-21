@@ -221,12 +221,12 @@ export default function HomeCommandCenter({ onNavigateToVyaparNiti }) {
                       NBCFDC #8492
                     </span>
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-emerald-500/25 text-emerald-200 text-[9px] font-bold">
-                      सत्यापित
+                      {language === 'hi' ? 'सत्यापित' : 'Verified'}
                     </span>
                   </div>
 
                   <h2 className="text-base font-extrabold text-white tracking-tight mt-0.5 flex items-center gap-1">
-                    <span>नमस्ते, शांति देवी</span>
+                    <span>{language === 'hi' ? 'नमस्ते, शांति देवी' : 'Namaste, Shanti Devi'}</span>
                   </h2>
                 </div>
               </div>
@@ -253,7 +253,7 @@ export default function HomeCommandCenter({ onNavigateToVyaparNiti }) {
             {/* Central Earnings Metric */}
             <div className="mt-4 pt-3 relative z-10 border-t border-white/10 flex flex-col gap-1">
               <span className="text-xs text-blue-200 font-medium">
-                इस महीने की कुल सीधी कमाई (Monthly Net)
+                {language === 'hi' ? 'इस महीने की कुल सीधी कमाई (Monthly Net)' : 'Total direct earnings this month (Monthly Net)'}
               </span>
               <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-3xl font-black text-white tracking-tight">
@@ -261,14 +261,14 @@ export default function HomeCommandCenter({ onNavigateToVyaparNiti }) {
                 </span>
                 <span className="text-xs text-emerald-300 font-semibold flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  सीधे बैंक खाते में जमा
+                  {language === 'hi' ? 'सीधे बैंक खाते में जमा' : 'Directly deposited to bank'}
                 </span>
               </div>
 
               {/* Trend Pill */}
               <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md self-start text-white text-[11px] font-bold">
                 <TrendingUp className="w-4 h-4 text-amber-300" />
-                <span>+38% मुनाफ़ा (बिचौलियों से सीधे ONDC पर बचत)</span>
+                <span>{language === 'hi' ? '+38% मुनाफ़ा (बिचौलियों से सीधे ONDC पर बचत)' : '+38% Profit (Saved directly on ONDC from middlemen)'}</span>
               </div>
             </div>
           </div>
@@ -608,11 +608,14 @@ export default function HomeCommandCenter({ onNavigateToVyaparNiti }) {
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-5 bg-[#C85A32] rounded-full" />
             <h3 className="text-base font-extrabold text-slate-900">
-              तुरंत नया सामान जोड़ें <span className="text-xs font-normal text-slate-500">(1-टैप एक्शन)</span>
+              {language === 'hi' ? 'तुरंत नया सामान जोड़ें ' : 'Add new item instantly '}
+              <span className="text-xs font-normal text-slate-500">
+                {language === 'hi' ? '(1-टैप एक्शन)' : '(1-Tap Action)'}
+              </span>
             </h3>
           </div>
           <span className="text-[10px] text-[#C85A32] font-bold bg-[#FFDBCF] px-2.5 py-0.5 rounded-full">
-            सुपर-फ़ास्ट
+            {language === 'hi' ? 'सुपर-फ़ास्ट' : 'Super-Fast'}
           </span>
         </div>
 
@@ -628,19 +631,19 @@ export default function HomeCommandCenter({ onNavigateToVyaparNiti }) {
                 <Camera className="w-6 h-6 text-white" />
               </div>
               <span className="px-2 py-0.5 rounded-full bg-[#FFDBCF] text-[#390C00] text-[10px] font-extrabold">
-                AI स्टूडियो
+                {language === 'hi' ? 'AI स्टूडियो' : 'AI Studio'}
               </span>
             </div>
 
             <div className="relative z-10 mt-auto">
               <div className="text-xl font-black text-white leading-tight">
-                फोटो लें
+                {language === 'hi' ? 'फोटो लें' : 'Take Photo'}
               </div>
               <div className="text-xs font-bold text-amber-200">
                 Snap Craft
               </div>
               <p className="text-[10px] text-white/90 mt-1 line-clamp-1">
-                पृष्ठभूमि खुद हट जाएगी
+                {language === 'hi' ? 'पृष्ठभूमि खुद हट जाएगी' : 'Background removed automatically'}
               </p>
             </div>
 
@@ -660,19 +663,19 @@ export default function HomeCommandCenter({ onNavigateToVyaparNiti }) {
               </div>
               <span className="px-2 py-0.5 rounded-full bg-white text-slate-900 text-[10px] font-extrabold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
-                लाइव माइक
+                {language === 'hi' ? 'लाइव माइक' : 'Live Mic'}
               </span>
             </div>
 
             <div className="relative z-10 mt-auto">
               <div className="text-xl font-black text-white leading-tight">
-                बोलकर बताएं
+                {language === 'hi' ? 'बोलकर बताएं' : 'Speak to detail'}
               </div>
               <div className="text-xs font-bold text-amber-100">
                 Hold & Speak
               </div>
               <p className="text-[10px] text-white/90 mt-1 line-clamp-1 font-medium">
-                हिन्दी, बुंदेली, मालवी
+                {language === 'hi' ? 'हिन्दी, बुंदेली, मालवी' : 'Hindi, Bundeli, Malvi'}
               </p>
             </div>
 
@@ -698,19 +701,19 @@ export default function HomeCommandCenter({ onNavigateToVyaparNiti }) {
             <div>
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-sm font-black text-stone-900">
-                  बिना इंटरनेट ऑर्डर पाएं — मिस्ड कॉल दें
+                  {language === 'hi' ? 'बिना इंटरनेट ऑर्डर पाएं — मिस्ड कॉल दें' : 'Get offline orders — Give a missed call'}
                 </span>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[9px] font-bold border border-emerald-200">
-                  सादा कीपैड फोन
+                  {language === 'hi' ? 'सादा कीपैड फोन' : 'Basic keypad phone'}
                 </span>
               </div>
               <p className="text-[11px] text-stone-600 line-clamp-1 mt-0.5 font-medium">
-                1800-208-SHILP पर कॉल करें • केवल बोलकर नया सामान जोड़ें
+                {language === 'hi' ? '1800-208-SHILP पर कॉल करें • केवल बोलकर नया सामान जोड़ें' : 'Call 1800-208-SHILP • Add items just by speaking...'}
               </p>
               <div className="flex items-center gap-2 mt-1 text-[10px] text-emerald-700 font-bold">
-                <span>मुफ़्त सेवा</span>
+                <span>{language === 'hi' ? 'मुफ़्त सेवा' : 'Free service'}</span>
                 <span>•</span>
-                <span>बिना स्मार्टफोन या इंटरनेट काम करे</span>
+                <span>{language === 'hi' ? 'बिना स्मार्टफोन या इंटरनेट काम करे' : 'Works without smartphone or internet'}</span>
               </div>
             </div>
           </div>
@@ -827,7 +830,7 @@ export default function HomeCommandCenter({ onNavigateToVyaparNiti }) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 mb-0.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">ONDC पर लाइव</span>
+                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">{language === 'hi' ? 'ONDC पर लाइव' : 'Live on ONDC'}</span>
               </div>
               <h4 className="text-sm font-bold text-stone-900 truncate">
                 शाही नीली चंदेरी सिल्क ज़री साड़ी

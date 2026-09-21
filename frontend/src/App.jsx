@@ -180,7 +180,7 @@ export default function App() {
               </span>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200/80 shadow-2xs">
                 <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
-                <span>सत्यापित कारीगर</span>
+                <span>{language === 'hi' ? 'सत्यापित कारीगर' : 'Verified Artisan'}</span>
               </span>
             </div>
           </div>
