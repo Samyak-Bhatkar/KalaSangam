@@ -94,6 +94,27 @@ export async function getCraftPresets() {
   }
 }
 
+// Silent Network & Hardware Detection for Adaptive Compute Tier
+export const detectClientComputeTier = () => {
+  if (typeof navigator === 'undefined') return 'high';
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const effectiveType = connection?.effectiveType; // 'slow-2g', '2g', '3g', '4g'
+  const saveData = connection?.saveData; // Data saver mode
+  const deviceMemory = navigator.deviceMemory; // RAM in GB (if supported)
+
+  // Route to fast tier if client has weak network or very constrained RAM
+  if (
+    saveData === true ||
+    effectiveType === 'slow-2g' ||
+    effectiveType === '2g' ||
+    effectiveType === '3g' ||
+    (deviceMemory && deviceMemory < 2)
+  ) {
+    return 'low';
+  }
+  return 'high';
+};
+
 export async function checkPhotoQuality({ file, imageBase64, language = 'hi', categoryHint }) {
   try {
     const formData = new FormData();
@@ -107,6 +128,9 @@ export async function checkPhotoQuality({ file, imageBase64, language = 'hi', ca
 
     const res = await fetch(`${API_BASE}/studio/quality-check`, {
       method: 'POST',
+      headers: {
+        'X-Compute-Tier': detectClientComputeTier(),
+      },
       body: formData,
     });
 
@@ -146,6 +170,9 @@ export async function enhanceImage({ file, imageBase64, preserveOriginalTones = 
 
     const res = await fetch(`${API_BASE}/studio/enhance`, {
       method: 'POST',
+      headers: {
+        'X-Compute-Tier': detectClientComputeTier(),
+      },
       body: formData,
     });
 

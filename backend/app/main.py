@@ -12,7 +12,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 from PIL import Image
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, BackgroundTasks
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, BackgroundTasks, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
@@ -192,7 +192,8 @@ async def check_studio_photo_quality(
     file: Optional[UploadFile] = File(None),
     image_base64: Optional[str] = Form(None),
     language: str = Form("hi"),
-    category_hint: Optional[str] = Form(None)
+    category_hint: Optional[str] = Form(None),
+    x_compute_tier: Optional[str] = Header("high", alias="X-Compute-Tier")
 ):
     """
     POST /api/v1/studio/quality-check
@@ -211,7 +212,12 @@ async def check_studio_photo_quality(
         else:
             raise HTTPException(status_code=400, detail="Either file or image_base64 is required.")
 
-        res = assess_photo_quality(raw_bytes=raw_bytes, language=language, category_hint=category_hint)
+        res = assess_photo_quality(
+            raw_bytes=raw_bytes,
+            language=language,
+            category_hint=category_hint,
+            compute_tier=x_compute_tier or "high"
+        )
         return StudioQualityCheckResponse(**res)
     except HTTPException:
         raise
@@ -233,7 +239,8 @@ async def check_studio_photo_quality(
 
 @app.post("/api/v1/studio/quality-check-json", response_model=StudioQualityCheckResponse)
 async def check_studio_photo_quality_json(
-    payload: StudioQualityCheckRequest
+    payload: StudioQualityCheckRequest,
+    x_compute_tier: Optional[str] = Header("high", alias="X-Compute-Tier")
 ):
     """JSON variant of quality-check for lightweight single-payload client calls."""
     if not payload.image_base64:
@@ -245,7 +252,8 @@ async def check_studio_photo_quality_json(
     res = assess_photo_quality(
         raw_bytes=raw_bytes,
         language=payload.language or "hi",
-        category_hint=payload.category_hint
+        category_hint=payload.category_hint,
+        compute_tier=x_compute_tier or "high"
     )
     return StudioQualityCheckResponse(**res)
 
@@ -257,7 +265,8 @@ async def check_studio_photo_quality_json(
 async def enhance_studio_image(
     file: Optional[UploadFile] = File(None),
     image_base64: Optional[str] = Form(None),
-    preserve_original_tones: Optional[bool] = Form(False)
+    preserve_original_tones: Optional[bool] = Form(False),
+    x_compute_tier: Optional[str] = Header("high", alias="X-Compute-Tier")
 ):
     """
     POST /api/v1/studio/enhance or /api/studio/enhance
@@ -281,7 +290,8 @@ async def enhance_studio_image(
 
         raw_img, studio_canvas, metadata = process_studio_image(
             raw_bytes,
-            preserve_original_tones=bool(preserve_original_tones)
+            preserve_original_tones=bool(preserve_original_tones),
+            compute_tier=x_compute_tier or "high"
         )
 
         # Save to static uploads

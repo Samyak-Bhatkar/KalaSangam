@@ -12,6 +12,7 @@ import logging
 import hashlib
 import threading
 from collections import OrderedDict
+from pathlib import Path
 from typing import Optional, Tuple, Dict, Any, Union
 import numpy as np
 from PIL import Image, ImageOps, ImageFilter, ImageEnhance
@@ -45,23 +46,101 @@ def cache_cutout(raw_bytes: bytes, cutout: Image.Image) -> None:
             _SEGMENT_CACHE.popitem(last=False)
 
 REMBG_AVAILABLE = False
-session = None
+session_studio = None
+session_fast = None
+_STUDIO_SESSION_ATTEMPTED = False
+_FAST_SESSION_ATTEMPTED = False
+_SESSION_LOCK = threading.Lock()
 
-def get_rembg_session():
-    """Lazily and safely initializes rembg session without crashing if onnxruntime is missing."""
-    global REMBG_AVAILABLE, session
-    if session is not None:
-        return session
-    try:
-        import onnxruntime
-        from rembg import new_session
-        session = new_session("u2netp")
-        REMBG_AVAILABLE = True
-        return session
-    except Exception:
-        REMBG_AVAILABLE = False
-        session = None
-        return None
+def get_fast_session():
+    """Lazily and safely initializes the fast lightweight rembg session (u2netp)."""
+    global REMBG_AVAILABLE, session_fast, _FAST_SESSION_ATTEMPTED
+    if session_fast is not None:
+        return session_fast
+    with _SESSION_LOCK:
+        if session_fast is not None:
+            return session_fast
+        if _FAST_SESSION_ATTEMPTED:
+            return None
+        _FAST_SESSION_ATTEMPTED = True
+        try:
+            import onnxruntime
+            from rembg import new_session
+            session_fast = new_session("u2netp")
+            REMBG_AVAILABLE = True
+            logger.info("Initialized rembg fast tier session: u2netp")
+            return session_fast
+        except Exception as e:
+            logger.warning(f"Unable to initialize rembg fast session: {e}")
+            return None
+
+def get_studio_session():
+    """
+    Lazily and safely initializes the studio-grade rembg session.
+    Checks candidates in order: 'birefnet-general' -> 'bria-rmbg' -> 'u2net'.
+    If high-tier models cannot be loaded or would block with huge downloads,
+    silently fails over so requests never crash or hang.
+    """
+    global session_studio, _STUDIO_SESSION_ATTEMPTED
+    if session_studio is not None:
+        return session_studio
+    with _SESSION_LOCK:
+        if session_studio is not None:
+            return session_studio
+        if _STUDIO_SESSION_ATTEMPTED:
+            return None
+        _STUDIO_SESSION_ATTEMPTED = True
+        try:
+            import onnxruntime
+            from rembg import new_session
+            
+            # Check ~/.rembg/models or ~/.u2net to see if onnx weights exist locally
+            rembg_dir = Path.home() / ".rembg" / "models"
+            u2net_dir = Path.home() / ".u2net"
+            
+            def has_local_model(name: str) -> bool:
+                # Check rembg cache directory
+                model_dir = rembg_dir / name
+                if model_dir.exists() and any(f.name.endswith(".onnx") for f in model_dir.iterdir()):
+                    return True
+                # Check u2net cache directory
+                if u2net_dir.exists() and (u2net_dir / f"{name}.onnx").exists():
+                    return True
+                return False
+
+            candidates = ["birefnet-general", "bria-rmbg", "u2net"]
+            
+            # Check which candidates have local onnx weights available
+            local_candidates = [m for m in candidates if has_local_model(m)]
+            if not local_candidates:
+                logger.info("No high-tier model weights found locally on disk; falling back gracefully to fast tier (u2netp).")
+                return None
+
+            for model_name in local_candidates:
+                try:
+                    logger.info(f"Attempting to initialize high-tier rembg session: {model_name}")
+                    sess = new_session(model_name)
+                    if sess is not None:
+                        session_studio = sess
+                        logger.info(f"Successfully initialized high-tier rembg studio session: {model_name}")
+                        return session_studio
+                except Exception as ex:
+                    logger.warning(f"High-tier rembg candidate '{model_name}' failed to load: {ex}")
+            return None
+        except Exception as e:
+            logger.warning(f"Unable to initialize high-tier rembg studio session: {e}")
+            return None
+
+def get_rembg_session(compute_tier: str = "high"):
+    """
+    Legacy wrapper & tier router: returns the appropriate session for the requested compute tier.
+    """
+    if compute_tier == "low":
+        return get_fast_session()
+    studio = get_studio_session()
+    if studio is not None:
+        return studio
+    return get_fast_session()
 
 
 STUDIO_BG_COLOR = (248, 249, 250, 255)  # Off-white studio #F8F9FA
@@ -168,20 +247,52 @@ def segment_craft_fallback(pil_img: Image.Image) -> Image.Image:
     return Image.fromarray(rgba)
 
 
-def segment_craft(pil_img: Image.Image) -> Image.Image:
+def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Image:
     """
-    Segments craft using rembg (ISNet/BiRefNet/u2net) with 2.5s timeout / fallback.
+    Dual-Tier Adaptive Segmentation Engine:
+    1. Low tier: Directly calls fast session (u2netp) for instant sub-second response on slow connections.
+    2. High tier: Attempts studio-grade session (BiRefNet / RMBG-1.4 / u2net).
+       If high-tier encounters OOM, latency, or model exception, silently falls back to fast session.
+    3. If all rembg sessions fail, gracefully degrades to GrabCut fallback.
     """
-    sess = get_rembg_session()
-    if sess is not None:
+    tier = str(compute_tier or "high").lower().strip()
+    
+    # 1. Direct Low-Resource / Fast Tier
+    if tier == "low":
+        fast_sess = get_fast_session()
+        if fast_sess is not None:
+            try:
+                from rembg import remove
+                cutout = remove(pil_img, session=fast_sess)
+                if cutout is not None:
+                    return cutout
+            except Exception as e:
+                logger.warning(f"Fast tier rembg execution error: {e}")
+        return segment_craft_fallback(pil_img)
+
+    # 2. Standard / Studio High-Precision Tier
+    studio_sess = get_studio_session()
+    if studio_sess is not None:
         try:
             from rembg import remove
-            start_t = time.time()
-            cutout = remove(pil_img, session=sess)
+            cutout = remove(pil_img, session=studio_sess)
             if cutout is not None:
                 return cutout
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"High-tier studio rembg error or OOM ({e}), degrading to fast tier...")
+
+    # Fallback to fast tier if studio tier failed or was unavailable
+    fast_sess = get_fast_session()
+    if fast_sess is not None:
+        try:
+            from rembg import remove
+            cutout = remove(pil_img, session=fast_sess)
+            if cutout is not None:
+                return cutout
+        except Exception as e:
+            logger.warning(f"Fast-tier fallback rembg execution error: {e}")
+
+    # Ultimate fallback: Classical GrabCut
     return segment_craft_fallback(pil_img)
 
 def filter_salient_main_body(cutout_img: Image.Image) -> Image.Image:
@@ -303,7 +414,8 @@ def synthesize_ecom_ground_shadow(craft_img: Image.Image, canvas_size: int, craf
 
 def process_studio_image(
     raw_bytes: bytes,
-    preserve_original_tones: bool = False
+    preserve_original_tones: bool = False,
+    compute_tier: str = "high"
 ) -> tuple[Image.Image, Image.Image, dict]:
     """
     Amazon / GeM Flagship Studio Pipeline:
@@ -322,7 +434,7 @@ def process_studio_image(
     # Reuse cached cutout from quality gate if available, otherwise compute and cache
     raw_cutout = get_cached_cutout(raw_bytes)
     if raw_cutout is None:
-        raw_cutout = segment_craft(raw_img)
+        raw_cutout = segment_craft(raw_img, compute_tier=compute_tier)
         cache_cutout(raw_bytes, raw_cutout)
     alpha_mask = np.array(raw_cutout.split()[3])
     bg_mask = (alpha_mask <= 40)
@@ -579,7 +691,8 @@ def image_to_base64(img: Image.Image, format: str = "JPEG") -> str:
 def assess_photo_quality(
     raw_bytes: bytes,
     language: str = "hi",
-    category_hint: Optional[str] = None
+    category_hint: Optional[str] = None,
+    compute_tier: str = "high"
 ) -> dict:
     """
     Evaluates photo quality across:
@@ -650,7 +763,7 @@ def assess_photo_quality(
         raw_cutout = get_cached_cutout(raw_bytes)
         if raw_cutout is None:
             raw_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
-            raw_cutout = segment_craft(raw_img)
+            raw_cutout = segment_craft(raw_img, compute_tier=compute_tier)
             cache_cutout(raw_bytes, raw_cutout)
 
         alpha_channel = raw_cutout.split()[3]

@@ -2,7 +2,7 @@ import pytest
 import io
 import base64
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -187,4 +187,36 @@ def test_quality_check_and_enhance_caching():
     data2 = res2.json()
     assert data2["status"] == "success"
     assert data2["width"] == 1080
+
+
+def test_adaptive_compute_tier_routing():
+    """Verify X-Compute-Tier low routes directly to fast tier without error."""
+    buf = io.BytesIO()
+    img = Image.new("RGB", (200, 200), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([50, 50, 150, 150], fill=(20, 20, 20))
+    img.save(buf, format="JPEG")
+    b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+
+    # Quality check with X-Compute-Tier: low
+    res_low = client.post(
+        "/api/v1/studio/quality-check-json",
+        json={"image_base64": b64, "language": "hi"},
+        headers={"X-Compute-Tier": "low"}
+    )
+    assert res_low.status_code == 200
+    data_low = res_low.json()
+    assert data_low["status"] == "success"
+
+    # Enhance with X-Compute-Tier: low
+    res_enh = client.post(
+        "/api/v1/studio/enhance",
+        data={"image_base64": b64},
+        headers={"X-Compute-Tier": "low"}
+    )
+    assert res_enh.status_code == 200
+    data_enh = res_enh.json()
+    assert data_enh["status"] == "success"
+    assert data_enh["width"] == 1080
+
 
