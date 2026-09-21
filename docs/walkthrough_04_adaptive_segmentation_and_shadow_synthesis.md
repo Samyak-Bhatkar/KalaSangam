@@ -77,18 +77,28 @@ This document permanently records the technical architecture, design decisions, 
 
 ---
 
-## 🔬 Deep-Dive 1: Background Segmentation Engine
+### Dynamic Network & Hardware-Adaptive Tiering
+To ensure rural artisans on 2G/3G connections or sub-$100 Android smartphones never experience frozen viewfinders or request timeouts, the frontend and backend dynamically negotiate compute tiers:
 
-### Why Replace Otsu/U2Net with BiRefNet (RMBG-1.4)?
-1. **Semantic Understanding vs. Pixel Contrast**:
-   - Standard salient object detection (`u2net`) and Otsu thresholding only evaluate high-contrast borders. In dark-on-dark photos (e.g., black sunglasses or metallic brass on textured wooden tables), standard models group table textures with the product, destroying the silhouette.
-   - **BiRefNet (Bilateral Reference Network) & RMBG-1.4** are explicitly trained on high-resolution commercial product catalogs. They understand hollow handles, wireframes, thin sunglasses arms, and textile fringes with sub-pixel matte boundaries.
-2. **Graceful Adaptive Degradation**:
-   - Large vision models require significant memory and inference time. On mobile connections or constrained cloud servers, synchronous large downloads can cause network timeouts.
-   - **ShilpSetu Solution**: Implements two persistent singleton sessions:
-     - `session_studio`: Tries `birefnet-general` -> `bria-rmbg` -> `u2net` (checks local disk availability first).
-     - `session_fast`: `u2netp` (4.7 MB, ultra-low latency).
-   - If high tier fails or encounters OOM/latency, it instantly and silently executes `u2netp` or GrabCut without raising 500 errors.
+1. **Client-Side Silent Telemetry (`detectClientComputeTier()`)**:
+   - The browser inspects native Web APIs with zero performance overhead:
+     - `navigator.connection.effectiveType` (`'slow-2g'`, `'2g'`, `'3g'`, `'4g'`)
+     - `navigator.connection.saveData` (User's browser data-saver mode toggle)
+     - `navigator.deviceMemory` (RAM capacity in GB)
+   - **Trigger Conditions for Fast Tier (`low`)**:
+     - Client is on `2g`, `3g`, or `slow-2g` network.
+     - User has Data Saver enabled (`saveData === true`).
+     - Device has $< 2\text{ GB}$ RAM.
+   - Otherwise, requests default to high tier (`'high'`).
+
+2. **Zero-UI Disruption Negotiation**:
+   - The computed value is passed silently via the HTTP request header:
+     `X-Compute-Tier: low` (or `high`).
+   - No warning modals, banners, or popups interrupt the artisan.
+
+3. **Backend Adaptive Routing**:
+   - When `X-Compute-Tier: low` is received, the backend immediately bypasses heavy neural models and routes the photo directly to `session_fast` (`u2netp`), delivering sub-second ($<800\text{ ms}$) segmentation.
+   - When `X-Compute-Tier: high` is received, the backend uses `session_studio` (`birefnet-general`), but still maintains an instant failover catch to `session_fast` if an unexpected OOM or latency spike occurs.
 
 ### LRU Mask Caching
 To prevent executing neural background segmentation twice for the same photo (once during `/quality-check` and again during `/enhance`), ShilpSetu computes a `hashlib.sha256(raw_bytes)` key and stores cutouts in a thread-safe `_SEGMENT_CACHE` (OrderedDict LRU, max 32 items). When `/enhance` is invoked, the cutout is retrieved from memory in `0 ms`.
