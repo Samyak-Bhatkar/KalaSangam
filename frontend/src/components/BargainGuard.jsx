@@ -34,11 +34,11 @@ export default function BargainGuard() {
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [counterSent, setCounterSent] = useState(false);
 
-  if (activeModal !== 'bargain' || !pricingData) {
+  if (activeModal !== 'bargain') {
     return null;
   }
 
-  const baseCost = pricingData.base_cost;
+  const baseCost = pricingData?.base_cost || 668;
 
   const handleEvaluate = async (e) => {
     if (e) e.preventDefault();

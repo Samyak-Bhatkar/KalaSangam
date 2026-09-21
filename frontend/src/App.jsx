@@ -41,6 +41,7 @@ import KeypadPhoneSimulator from './components/KeypadPhoneSimulator';
 import CoordinatorReviewPanel from './components/CoordinatorReviewPanel';
 import AuthLoginScreen from './components/AuthLoginScreen';
 import BuyerStorefrontScreen from './components/BuyerStorefrontScreen';
+import VyaparNitiScreen from './components/VyaparNitiScreen';
 
 export default function App() {
   const {
@@ -73,26 +74,31 @@ export default function App() {
     return params.get('view') === 'storefront' || params.get('storefront') === 'true';
   });
 
-  // Support public QR verification route /verify/:id or ?verify=:id
+  // Support public item & QR verification route (/item/:id, /verify/:id, ?item=:id, ?verify=:id, ?id=:id)
   const [verifyId, setVerifyId] = useState(() => {
     if (typeof window === 'undefined') return null;
     const pathname = window.location.pathname;
     if (pathname.startsWith('/verify/')) {
       return pathname.replace('/verify/', '').replace(/\/$/, '');
     }
+    if (pathname.startsWith('/item/')) {
+      return pathname.replace('/item/', '').replace(/\/$/, '');
+    }
     const params = new URLSearchParams(window.location.search);
-    return params.get('verify') || params.get('id') || null;
+    return params.get('item') || params.get('verify') || params.get('id') || null;
   });
 
-  // Support ?view=coordinator direct link
+  // Support ?view=coordinator and ?view=vyapar-niti direct links
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('view') === 'coordinator') {
         setActiveModal('coordinator');
+      } else if (params.get('view') === 'vyapar-niti' || params.get('view') === 'pricing') {
+        setCurrentStep('vyapar-niti');
       }
     }
-  }, [setActiveModal]);
+  }, [setActiveModal, setCurrentStep]);
 
   // 1. PUBLIC BUYER STOREFRONT (Zero login required)
   if (publicStorefront) {
@@ -106,7 +112,7 @@ export default function App() {
     );
   }
 
-  // 2. PUBLIC QR VERIFICATION ROUTE (Zero login required)
+  // 2. PUBLIC QR VERIFICATION / ITEM DOSSIER ROUTE (Zero login required)
   if (verifyId) {
     return (
       <PublicVerifyScreen
@@ -114,6 +120,11 @@ export default function App() {
         onBack={() => {
           window.history.pushState({}, '', '/');
           setVerifyId(null);
+        }}
+        onBrowseStorefront={() => {
+          window.history.pushState({}, '', '?view=storefront');
+          setVerifyId(null);
+          setPublicStorefront(true);
         }}
       />
     );
@@ -306,7 +317,12 @@ export default function App() {
         {/* MAIN WORKFLOW SCREENS                                                */}
         {/* ==================================================================== */}
         <main className="flex-1 relative overflow-y-auto pb-24">
-          {currentStep === 0 && <HomeCommandCenter />}
+          {currentStep === 0 && (
+            <HomeCommandCenter onNavigateToVyaparNiti={() => setCurrentStep('vyapar-niti')} />
+          )}
+          {currentStep === 'vyapar-niti' && (
+            <VyaparNitiScreen onBack={() => setCurrentStep(0)} />
+          )}
           {currentStep === 1 && <CameraViewfinder />}
           {currentStep === 2 && <VoiceRecorder />}
           {currentStep === 3 && (
@@ -472,44 +488,46 @@ export default function App() {
         {/* ==================================================================== */}
         {/* FLOATING BOTTOM NAVIGATION DOCK (Thumb-Friendly, Large Targets)      */}
         {/* ==================================================================== */}
-        <nav
-          aria-label="Workflow Navigation"
-          className="absolute bottom-3 left-3 right-3 z-30 bg-white/95 backdrop-blur-xl rounded-full border border-stone-200/90 shadow-[0_8px_30px_rgba(0,0,0,0.12)] px-2 py-1.5 flex items-center justify-around"
-        >
-          {[
-            { step: 0, label: language === 'hi' ? 'होम' : 'Home', icon: Home },
-            { step: 1, label: language === 'hi' ? 'फ़ोटो' : 'Snap', icon: Camera },
-            { step: 2, label: language === 'hi' ? 'आवाज' : 'Speak', icon: Mic },
-            { step: 3, label: language === 'hi' ? 'प्रसारण' : 'Price', icon: CheckCircle },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isActive = currentStep === item.step;
-            const isDone = currentStep > item.step;
-            return (
-              <button
-                key={item.step}
-                onClick={() => setCurrentStep(item.step)}
-                className={`flex-1 py-1.5 px-1 rounded-full flex flex-col items-center justify-center gap-0.5 min-w-[56px] transition-all cursor-pointer select-none active:scale-95 ${
-                  isActive
-                    ? 'text-[#C85A32] font-black bg-[#C85A32]/10 scale-105 shadow-2xs'
-                    : isDone
-                    ? 'text-emerald-700 font-semibold hover:text-emerald-800'
-                    : 'text-stone-400 hover:text-stone-600 font-medium'
-                }`}
-              >
-                <div className="relative">
-                  <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
-                  {isDone && !isActive && (
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500" />
-                  )}
-                </div>
-                <span className="text-[10px] tracking-tight leading-none">
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
-        </nav>
+        {currentStep !== 'vyapar-niti' && (
+          <nav
+            aria-label="Workflow Navigation"
+            className="absolute bottom-3 left-3 right-3 z-30 bg-white/95 backdrop-blur-xl rounded-full border border-stone-200/90 shadow-[0_8px_30px_rgba(0,0,0,0.12)] px-2 py-1.5 flex items-center justify-around"
+          >
+            {[
+              { step: 0, label: language === 'hi' ? 'होम' : 'Home', icon: Home },
+              { step: 1, label: language === 'hi' ? 'फ़ोटो' : 'Snap', icon: Camera },
+              { step: 2, label: language === 'hi' ? 'आवाज' : 'Speak', icon: Mic },
+              { step: 3, label: language === 'hi' ? 'प्रसारण' : 'Price', icon: CheckCircle },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = currentStep === item.step;
+              const isDone = currentStep > item.step;
+              return (
+                <button
+                  key={item.step}
+                  onClick={() => setCurrentStep(item.step)}
+                  className={`flex-1 py-1.5 px-1 rounded-full flex flex-col items-center justify-center gap-0.5 min-w-[56px] transition-all cursor-pointer select-none active:scale-95 ${
+                    isActive
+                      ? 'text-[#C85A32] font-black bg-[#C85A32]/10 scale-105 shadow-2xs'
+                      : isDone
+                      ? 'text-emerald-700 font-semibold hover:text-emerald-800'
+                      : 'text-stone-400 hover:text-stone-600 font-medium'
+                  }`}
+                >
+                  <div className="relative">
+                    <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
+                    {isDone && !isActive && (
+                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500" />
+                    )}
+                  </div>
+                  <span className="text-[10px] tracking-tight leading-none">
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        )}
       </div>
     </div>
   );

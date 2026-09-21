@@ -272,8 +272,47 @@ export function ArtisanProvider({ children }) {
   const applyPreset = async (craft) => {
     setSelectedPreset(craft);
     const rawUrl = craft.raw_image_url || craft.sample_image_url || '/terracotta_pot_raw.png';
+    const cleanUrl = craft.clean_image_url || '/terracotta_pot_clean.png';
     setRawImageUrl(rawUrl);
+    setStudioImageUrl(cleanUrl);
     setTranscript(craft.sample_transcript_hi || craft.sample_transcript_en || '');
+
+    // Pre-populate catalog data from preset
+    const hours = craft.estimated_hours || 6;
+    const rawCost = craft.raw_material_cost_estimate_inr || 180;
+    const laborCost = Math.round(hours * 81.25);
+    const baseCost = laborCost + rawCost;
+    const b2cPrice = Math.round(baseCost * 1.55);
+    const b2bPrice = Math.round(baseCost * 1.22);
+    const exportPrice = Math.round(baseCost * 2.30);
+
+    setCatalogData({
+      title_en: craft.title_en || 'Handcrafted Gorakhpur Terracotta Traditional Bell-Clay Cooking Handi Pot',
+      title_hi: craft.title_hi || 'पारंपरिक हाथ से बना गोरखपुर टेराकोटा मिट्टी का कलश और हांडी',
+      description_en: craft.description_en || 'Authentic GI-tagged terracotta cookware handcrafted from riverbed clay, featuring natural heat retention.',
+      description_hi: craft.description_hi || 'भौगोलिक उपदर्शन (GI) प्रमाणित गोरखपुर का पारंपरिक टेराकोटा शिल्प, जो शुद्ध प्राकृतिक मिट्टी से तैयार किया गया है।',
+      materials_used: craft.materials_used || ['Natural Terracotta Clay', 'Natural Riverbed Silt'],
+      technique: craft.technique || 'Traditional Potter Wheel (Chak) & Pit Kiln Firing',
+      estimated_hours: hours,
+      raw_material_cost_estimate_inr: rawCost,
+      craft_category: craft.craft_category || 'Terracotta & Pottery',
+      gi_tag_eligible: craft.gi_tag_eligible ?? true,
+      gi_tag_serial: craft.gi_tag_serial || 'GI-0687-0105',
+    });
+
+    setPricingData({
+      statutory_daily_wage: 650,
+      hourly_rate: 81.25,
+      labor_cost: laborCost,
+      raw_cost: rawCost,
+      base_cost: baseCost,
+      b2c_price: b2cPrice,
+      b2b_price: b2bPrice,
+      export_price: exportPrice,
+      currency: 'INR',
+      living_wage_multiplier: 1.0,
+      fair_wage_certified: true
+    });
     
     // Fetch image and convert to base64
     try {

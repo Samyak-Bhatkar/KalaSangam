@@ -459,4 +459,24 @@ class CoordinatorPhotoUploadResponse(BaseModel):
     processed_base64: str
     message: str = "Craft photo enhanced and studio grounded successfully"
 
+# Vyapar-Niti (व्यापार-नीति) Pricing Intelligence Schemas
+class VisualCompsRequest(BaseModel):
+    image_url: Optional[str] = None
+    category: Optional[str] = None
+    top_k: int = 4
+
+class KarigarBazaarIndexRequest(BaseModel):
+    category: Optional[str] = "Terracotta & Clay Art"
+    material: Optional[str] = None
+
+class PriceSimulationRequest(BaseModel):
+    candidate_price: float
+    statutory_floor: Optional[float] = 320.0
+    category: Optional[str] = "Terracotta & Clay Art"
+    product_id: Optional[str] = "CRAFT-NBCFDC-002"
+
+class PriceApplyRequest(BaseModel):
+    product_id: str
+    price: float
+
 

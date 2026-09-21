@@ -56,6 +56,10 @@ from .models.schemas import (
     AnnotatePinVoiceResponse,
     ExportAnnotatedImageRequest,
     ExportAnnotatedImageResponse,
+    VisualCompsRequest,
+    KarigarBazaarIndexRequest,
+    PriceSimulationRequest,
+    PriceApplyRequest,
 )
 from .models.mock_data import CRAFT_FIXTURES
 from .services.craft_pin_service import (
@@ -74,6 +78,12 @@ from .services.image_studio import (
 from .services.stock_background_service import get_background_options, composite_lifestyle_scene
 from .services.catalog_engine import process_voice_and_catalog
 from .services.pricing_engine import calculate_living_wage_pricing
+from .services.vyapar_niti_service import (
+    find_visual_comps,
+    compute_karigar_bazaar_index,
+    simulate_price_impact,
+    get_full_vyapar_niti_analysis,
+)
 from .services.reel_generator import render_vertical_reel, generate_published_product_qr
 from .services.negotiator import evaluate_b2b_negotiation
 from .services.watermark import embed_dct_watermark, extract_dct_watermark
@@ -1065,6 +1075,82 @@ async def verify_product_public_endpoint(product_id: str):
     """
     product = get_product_by_id(product_id)
     if not product or product.get("status") != "published":
+        # Check canonical fixtures (e.g. CRAFT-NBCFDC-002 Gorakhpur Terracotta Pot)
+        fixture = None
+        for k, f in CRAFT_FIXTURES.items():
+            if f.get("id") == product_id or k == product_id:
+                fixture = f
+                break
+        
+        if fixture:
+            b2c_map = {
+                "CRAFT-NBCFDC-002": 2461.25,
+                "CRAFT-NSFDC-001": 3250.0,
+                "CRAFT-NBCFDC-003": 1450.0,
+                "CRAFT-NSFDC-004": 850.0
+            }
+            price = b2c_map.get(fixture["id"], 480.0)
+            img = fixture.get("clean_image_url") or fixture.get("sample_image_url") or fixture.get("raw_image_url")
+            ondc_url = f"ondc://beckn.retail.org/discover?item_id={fixture['id']}&provider=MoSJE-Artisans"
+            return ProductPublicVerifyResponse(
+                status="verified",
+                id=fixture["id"],
+                title_hi=fixture.get("title_hi"),
+                title_en=fixture.get("title_en"),
+                description_hi=fixture.get("description_hi"),
+                description_en=fixture.get("description_en"),
+                craft_category=fixture.get("craft_category"),
+                technique=fixture.get("technique"),
+                b2c_price=price,
+                gem_price=round(price * 0.88, 2),
+                artisan_name=fixture.get("artisan_name", "Rural Master Artisan"),
+                beneficiary_id=fixture.get("beneficiary_id", "NBCFDC-UP-18492"),
+                cluster_pin=fixture.get("cluster_pin", "273001"),
+                studio_image_url=img,
+                watermarked_image_url=img,
+                craft_pins=[
+                    CraftPin(
+                        id="pin_1",
+                        pin_number=1,
+                        x=48.0,
+                        y=52.0,
+                        x_pct=48.0,
+                        y_pct=52.0,
+                        category="craft_detail",
+                        bank_term="Traditional Motif",
+                        short_label="पारंपरिक चाक नक्काशी",
+                        short_label_hi="पारंपरिक चाक नक्काशी",
+                        short_label_en="Hand Carved Traditional Motif",
+                        full_description="हस्तनिर्मित चाक पर गढ़ी गई पारंपरिक नक्काशी",
+                        full_description_hi="हस्तनिर्मित चाक पर गढ़ी गई पारंपरिक नक्काशी",
+                        full_description_en="Traditional wheel-turned clay etching.",
+                        language="hi"
+                    ),
+                    CraftPin(
+                        id="pin_2",
+                        pin_number=2,
+                        x=35.0,
+                        y=68.0,
+                        x_pct=35.0,
+                        y_pct=68.0,
+                        category="imperfection",
+                        bank_term="Kiln Color Variation",
+                        short_label="प्राकृतिक भट्टी रंग भेद",
+                        short_label_hi="प्राकृतिक भट्टी रंग भेद",
+                        short_label_en="Natural Kiln Firing Variation",
+                        full_description="पारंपरिक लकड़ी की भट्टी में धीमी आंच से उपजा प्राकृतिक रंग भेद।",
+                        full_description_hi="पारंपरिक लकड़ी की भट्टी में धीमी आंच से उपजा प्राकृतिक रंग भेद।",
+                        full_description_en="Organic color shade variation from traditional wood kiln firing.",
+                        language="hi"
+                    )
+                ],
+                published_at="2026-09-20 10:00:00",
+                qr_code_url=f"/static/uploads/qr_{fixture['id']}.png",
+                ondc_buy_url=ondc_url,
+                fair_wage_guarantee="₹120/hr statutory floor compliant (NBCFDC/NSFDC)",
+                authenticity_seal=f"MoSJE GI Certified Authentic Handcrafted Indian Product ({fixture.get('gi_tag_name', 'GI Certified')})"
+            )
+
         # Raise generic 404 without leaking whether a draft exists
         raise HTTPException(
             status_code=404,
@@ -1462,5 +1548,132 @@ async def track_product_view_endpoint(product_id: str):
     except Exception as e:
         logger.error(f"Error recording product view: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==============================================================================
+# VYAPAR-NITI (व्यापार-नीति): 3-SIGNAL PRICING INTELLIGENCE SYSTEM
+# ==============================================================================
+@app.post("/api/v1/pricing/visual-comps")
+@app.post("/api/pricing/visual-comps")
+async def get_visual_comps_endpoint(req: VisualCompsRequest):
+    """
+    POST /api/v1/pricing/visual-comps
+    Visual Comp Engine:
+    Computes CPU brute-force cosine similarity over precomputed 512-dim visual embeddings.
+    Returns top 3-5 nearest comparable crafts sold with price, region, and similarity.
+    Zero external API calls at inference time.
+    """
+    try:
+        comps = find_visual_comps(
+            image_url=req.image_url,
+            category=req.category,
+            top_k=req.top_k
+        )
+        return {
+            "status": "success",
+            "count": len(comps),
+            "comps": comps
+        }
+    except Exception as e:
+        logger.error(f"Error in visual comps engine: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/pricing/karigar-bazaar-index")
+@app.get("/api/pricing/karigar-bazaar-index")
+async def get_karigar_bazaar_index_endpoint(
+    category: Optional[str] = "Terracotta & Clay Art",
+    material: Optional[str] = None
+):
+    """
+    GET /api/v1/pricing/karigar-bazaar-index
+    Karigar Bazaar Index:
+    First-party network pricing aggregations with transparent confidence labeling
+    (seed_data -> growing_network -> network_verified).
+    Blends network median with visual comps benchmark and statutory wage floor.
+    """
+    try:
+        bazaar = compute_karigar_bazaar_index(category=category, material=material)
+        return {
+            "status": "success",
+            "index": bazaar
+        }
+    except Exception as e:
+        logger.error(f"Error in Karigar Bazaar Index: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/pricing/simulate")
+@app.post("/api/pricing/simulate")
+async def simulate_price_endpoint(req: PriceSimulationRequest):
+    """
+    POST /api/v1/pricing/simulate
+    What-If Price Simulator Engine:
+    Accepts candidate price, clamps hard at statutory living wage floor,
+    and returns estimated monthly sales count and gross income via price elasticity.
+    """
+    try:
+        simulation = simulate_price_impact(
+            candidate_price=req.candidate_price,
+            statutory_floor=req.statutory_floor or 320.0,
+            category=req.category or "Terracotta & Clay Art",
+            product_id=req.product_id or "CRAFT-NBCFDC-002"
+        )
+        return {
+            "status": "success",
+            "simulation": simulation
+        }
+    except Exception as e:
+        logger.error(f"Error in price simulation: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/pricing/full-analysis/{product_id}")
+@app.get("/api/pricing/full-analysis/{product_id}")
+async def get_full_analysis_endpoint(
+    product_id: str,
+    category: Optional[str] = "Terracotta & Clay Art"
+):
+    """
+    GET /api/v1/pricing/full-analysis/{product_id}
+    Unified Vyapar-Niti intelligence payload: Visual comps + Bazaar index + Default simulation.
+    """
+    try:
+        prod = get_product_by_id(product_id)
+        prod_cat = (prod.get("craft_category") if prod else None) or category or "Terracotta & Clay Art"
+        analysis = get_full_vyapar_niti_analysis(product_id=product_id, category=prod_cat)
+        if prod:
+            analysis["product"] = prod
+        return {
+            "status": "success",
+            "analysis": analysis
+        }
+    except Exception as e:
+        logger.error(f"Error fetching full analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/pricing/apply")
+@app.post("/api/pricing/apply")
+async def apply_pricing_endpoint(req: PriceApplyRequest):
+    """
+    POST /api/v1/pricing/apply
+    Commits the artisan's approved price back to the listing in the database.
+    """
+    try:
+        from .database import get_db_connection
+        with get_db_connection() as conn:
+            conn.execute("UPDATE products SET b2c_price = ? WHERE id = ?", (float(req.price), req.product_id))
+            conn.commit()
+        updated_prod = get_product_by_id(req.product_id)
+        return {
+            "status": "success",
+            "message": f"कीमत ₹{req.price:,.0f} सफलतापूर्वक लागू की गई",
+            "product": updated_prod
+        }
+    except Exception as e:
+        logger.error(f"Error applying price: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 

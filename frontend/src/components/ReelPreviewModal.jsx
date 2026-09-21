@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Play, Pause, Volume2, VolumeX, Share2, Download, Sparkles, QrCode } from 'lucide-react';
+import { X, Play, Pause, Volume2, VolumeX, Share2, Download, Sparkles, QrCode, Copy, Check } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 import { generateMarketingReel } from '../services/api';
 
@@ -24,25 +24,28 @@ export default function ReelPreviewModal() {
   const audioRef = useRef(null);
   const videoRef = useRef(null);
 
-  if (activeModal !== 'reel' || !catalogData) {
-    return null;
-  }
+  const effectiveTitleEn = catalogData?.title_en || selectedPreset?.title_en || 'Handcrafted Gorakhpur Terracotta Traditional Bell-Clay Cooking Handi Pot';
+  const effectiveTitleHi = catalogData?.title_hi || selectedPreset?.title_hi || 'पारंपरिक हाथ से बना गोरखपुर टेराकोटा मिट्टी का कलश और हांडी';
+  const effectiveStoryEn = catalogData?.description_en || selectedPreset?.description_en || 'Authentic GI-tagged terracotta cookware handcrafted from riverbed clay.';
+  const effectiveStoryHi = catalogData?.description_hi || selectedPreset?.description_hi || 'भौगोलिक उपदर्शन (GI) प्रमाणित गोरखपुर का पारंपरिक टेराकोटा शिल्प।';
 
-  const title = language === 'hi' ? catalogData.title_hi : catalogData.title_en;
-  const story = language === 'hi' ? catalogData.description_hi : catalogData.description_en;
-  const artisanName = selectedPreset?.artisan_name || 'Ramesh Kumar';
-  const cluster = selectedPreset?.artisan_community || 'MoSJE Handicraft Cluster';
+  const title = language === 'hi' ? effectiveTitleHi : effectiveTitleEn;
+  const story = language === 'hi' ? effectiveStoryHi : effectiveStoryEn;
+  const artisanName = selectedPreset?.artisan_name || 'Sunil Kumar Prajapati';
+  const cluster = selectedPreset?.artisan_community || 'Gorakhpur Terracotta Cluster, UP';
+  const heroImage = studioImageBase64 || rawImageUrl || selectedPreset?.clean_image_url || selectedPreset?.raw_image_url || '/terracotta_pot_clean.png';
 
   // Request reel from backend on open
   useEffect(() => {
+    if (activeModal !== 'reel') return;
     let cancelled = false;
     async function loadReel() {
       setIsGenerating(true);
       try {
         const res = await generateMarketingReel({
           productId: selectedPreset?.id || 'CRAFT-001',
-          title: catalogData.title_en,
-          studioImageBase64: studioImageBase64 || rawImageUrl,
+          title: effectiveTitleEn,
+          studioImageBase64: heroImage,
           storyText: story,
           artisanName,
           craftCluster: cluster,
@@ -58,11 +61,11 @@ export default function ReelPreviewModal() {
     }
     loadReel();
     return () => { cancelled = true; };
-  }, []);
+  }, [activeModal, selectedPreset?.id, effectiveTitleEn, heroImage, story, artisanName, cluster]);
 
   // 15s Timer Progress Loop
   useEffect(() => {
-    if (!isPlaying) return;
+    if (activeModal !== 'reel' || !isPlaying) return;
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -72,7 +75,9 @@ export default function ReelPreviewModal() {
       });
     }, 100);
     return () => clearInterval(interval);
-  }, [isPlaying]);
+  }, [activeModal, isPlaying]);
+
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
@@ -82,12 +87,32 @@ export default function ReelPreviewModal() {
     }
   };
 
+  const effectiveId = selectedPreset?.id || catalogData?.id || 'CRAFT-NBCFDC-002';
+  const getShareableUrl = () => {
+    const origin = (typeof window !== 'undefined' && window.location.origin) ? window.location.origin : 'http://localhost:5173';
+    return `${origin}/item/${effectiveId}`;
+  };
+
   const handleShareWhatsApp = () => {
+    const shareUrl = getShareableUrl();
     const text = encodeURIComponent(
-      `Check out this 100% authentic handcrafted ${title} by ${artisanName} on ONDC! Direct-from-artisan fair wage certified: https://shilpsetu.gov.in/item/${selectedPreset?.id}`
+      `Check out this 100% authentic handcrafted ${title} by ${artisanName} on ONDC! Direct-from-artisan fair wage certified: ${shareUrl}`
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };
+
+  const handleCopyLink = () => {
+    const shareUrl = getShareableUrl();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(shareUrl);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
+  };
+
+  if (activeModal !== 'reel') {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
@@ -129,7 +154,7 @@ export default function ReelPreviewModal() {
             className="w-full h-full flex items-center justify-center p-4"
           >
             <img
-              src={studioImageBase64 || rawImageUrl}
+              src={heroImage}
               alt="Craft Hero"
               className="max-h-[62%] object-contain drop-shadow-2xl"
             />
@@ -175,7 +200,7 @@ export default function ReelPreviewModal() {
                 </p>
                 <div className="pt-1 flex items-center gap-2">
                   <span className="text-xs font-extrabold text-emerald-400">
-                    ₹{pricingData?.b2c_price}
+                    ₹{pricingData?.b2c_price || 1150}
                   </span>
                   <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
                     Fair Wage Certified
@@ -208,17 +233,27 @@ export default function ReelPreviewModal() {
         <div className="p-3.5 bg-slate-950 border-t border-slate-800 flex items-center justify-between gap-2">
           <button
             onClick={handleShareWhatsApp}
-            className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+            className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg cursor-pointer active:scale-95 transition-all"
+            title="Share verified listing to WhatsApp Status & Chats"
           >
             <Share2 className="w-4 h-4" />
             <span>WhatsApp Status</span>
+          </button>
+
+          <button
+            onClick={handleCopyLink}
+            className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-700 cursor-pointer active:scale-95 transition-all"
+            title="Copy direct product link"
+          >
+            {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            <span>{copiedLink ? 'Copied!' : 'Link'}</span>
           </button>
 
           {reelData?.reel_url && (
             <a
               href={reelData.reel_url}
               download="artisan_reel.mp4"
-              className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-700"
+              className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-700"
             >
               <Download className="w-4 h-4" />
               <span>MP4</span>

@@ -147,6 +147,114 @@ def init_db() -> None:
 
         conn.commit()
     logger.info(f"Initialized SQLite database at {DB_PATH}")
+    seed_canonical_fixtures()
+
+def seed_canonical_fixtures() -> None:
+    """Seeds canonical craft presets into products table if not present so public buyer dossier and storefront always work."""
+    from .models.mock_data import CRAFT_FIXTURES
+    sample_pins = {
+        "CRAFT-NBCFDC-002": [
+            {
+                "id": "pin_1",
+                "pin_number": 1,
+                "x": 48.0,
+                "y": 52.0,
+                "x_pct": 48.0,
+                "y_pct": 52.0,
+                "category": "craft_detail",
+                "bank_term": "Traditional Motif",
+                "short_label": "पारंपरिक चाक नक्काशी",
+                "short_label_hi": "पारंपरिक चाक नक्काशी",
+                "short_label_en": "Hand Carved Traditional Motif",
+                "full_description": "हस्तनिर्मित चाक पर गढ़ी गई पारंपरिक नक्काशी",
+                "full_description_hi": "हस्तनिर्मित चाक पर गढ़ी गई पारंपरिक नक्काशी",
+                "full_description_en": "Traditional wheel-turned clay etching with Warli folk motifs.",
+                "audio_url": None,
+                "language": "hi"
+            },
+            {
+                "id": "pin_2",
+                "pin_number": 2,
+                "x": 35.0,
+                "y": 68.0,
+                "x_pct": 35.0,
+                "y_pct": 68.0,
+                "category": "imperfection",
+                "bank_term": "Kiln Color Variation",
+                "short_label": "प्राकृतिक भट्टी रंग भेद",
+                "short_label_hi": "प्राकृतिक भट्टी रंग भेद",
+                "short_label_en": "Natural Kiln Firing Variation",
+                "full_description": "पारंपरिक लकड़ी की भट्टी में धीमी आंच से उपजा प्राकृतिक रंग भेद।",
+                "full_description_hi": "पारंपरिक लकड़ी की भट्टी में धीमी आंच से उपजा प्राकृतिक रंग भेद।",
+                "full_description_en": "Organic color shade variation from traditional wood kiln firing.",
+                "audio_url": None,
+                "language": "hi"
+            }
+        ]
+    }
+    preset_prices = {
+        "CRAFT-NBCFDC-002": (2461.25, 1850.0, 2165.90),
+        "CRAFT-NSFDC-001": (3250.0, 2600.0, 2860.0),
+        "CRAFT-NBCFDC-003": (1450.0, 1100.0, 1276.0),
+        "CRAFT-NSFDC-004": (850.0, 650.0, 748.0),
+    }
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        for key, fixture in CRAFT_FIXTURES.items():
+            pid = fixture.get("id")
+            if not pid:
+                continue
+            cursor.execute("SELECT id FROM products WHERE id = ?", (pid,))
+            if not cursor.fetchone():
+                b2c, b2b, gem = preset_prices.get(pid, (480.0, 380.0, 420.0))
+                pins = sample_pins.get(pid, [])
+                img = fixture.get("clean_image_url") or fixture.get("sample_image_url") or fixture.get("raw_image_url")
+                cursor.execute("""
+                    INSERT INTO products (
+                        id, title_hi, title_en, description_hi, description_en,
+                        craft_category, technique, raw_cost, labor_hours,
+                        b2c_price, b2b_price, gem_price, artisan_name,
+                        beneficiary_id, cluster_pin, raw_image_url,
+                        studio_image_url, lifestyle_image_url, watermarked_image_url, annotated_image_url, craft_pins, status,
+                        qr_code_url, created_at, published_at, channel, original_transcript
+                    ) VALUES (
+                        ?, ?, ?, ?, ?,
+                        ?, ?, ?, ?,
+                        ?, ?, ?, ?,
+                        ?, ?, ?,
+                        ?, ?, ?, ?, ?, 'published',
+                        ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'camera', ?
+                    )
+                """, (
+                    pid,
+                    fixture.get("title_hi", ""),
+                    fixture.get("title_en", ""),
+                    fixture.get("description_hi", ""),
+                    fixture.get("description_en", ""),
+                    fixture.get("craft_category", "Traditional Craft"),
+                    fixture.get("technique", "Handmade"),
+                    float(fixture.get("raw_material_cost_estimate_inr") or 180.0),
+                    float(fixture.get("estimated_hours") or 6.0),
+                    b2c, b2b, gem,
+                    fixture.get("artisan_name", "Rural Master Artisan"),
+                    fixture.get("beneficiary_id", "NBCFDC-UP-18492"),
+                    fixture.get("cluster_pin", "273001"),
+                    fixture.get("raw_image_url", img),
+                    img, img, img, img,
+                    json.dumps(pins),
+                    f"/static/uploads/qr_{pid}.png",
+                    fixture.get("sample_transcript_hi", "")
+                ))
+
+                # Ensure high-res QR code PNG exists on disk
+                qr_file = settings.UPLOAD_DIR / f"qr_{pid}.png"
+                if not qr_file.exists():
+                    try:
+                        from .services.reel_generator import generate_published_product_qr
+                        generate_published_product_qr(pid, fixture.get("title_en", "Craft"), "http://localhost:5173")
+                    except Exception as qr_err:
+                        logger.warning(f"Could not generate QR for {pid}: {qr_err}")
+        conn.commit()
 
 def cleanup_expired_drafts(hours: int = 24) -> int:
     """

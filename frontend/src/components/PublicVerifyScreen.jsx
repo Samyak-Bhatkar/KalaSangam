@@ -19,10 +19,11 @@ import {
   EyeOff,
   Play,
   Pause,
+  Store,
 } from 'lucide-react';
 import { verifyPublicProduct } from '../services/api';
 
-export default function PublicVerifyScreen({ productId, onBack }) {
+export default function PublicVerifyScreen({ productId, onBack, onBrowseStorefront }) {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,6 +31,7 @@ export default function PublicVerifyScreen({ productId, onBack }) {
   const [showCraftPins, setShowCraftPins] = useState(false);
   const [activePinId, setActivePinId] = useState(null);
   const [playingAudioUrl, setPlayingAudioUrl] = useState(null);
+  const [showOndcModal, setShowOndcModal] = useState(false);
   const audioRef = useRef(null);
 
   const togglePlayAudio = (url) => {
@@ -407,16 +409,40 @@ export default function PublicVerifyScreen({ productId, onBack }) {
                 </div>
               </div>
 
-              <a
-                href={product.ondc_buy_url}
+              <button
+                type="button"
+                onClick={() => setShowOndcModal(true)}
                 className="flex-1 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-600/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider text-center"
               >
                 <span>Buy via ONDC</span>
                 <ExternalLink className="w-4 h-4" />
-              </a>
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Explore Full Marketplace Banner */}
+        {onBrowseStorefront && (
+          <button
+            onClick={onBrowseStorefront}
+            className="w-full p-4 rounded-3xl bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 text-xs font-bold flex items-center justify-between shadow-xs cursor-pointer active:scale-98 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-[#C85A32]">
+                <Store className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <div className="font-extrabold text-slate-900 group-hover:text-[#C85A32] transition-colors">
+                  शिल्पसेतु बाज़ार में और शिल्प देखें
+                </div>
+                <div className="text-[10px] text-slate-500">
+                  Explore full marketplace of verified artisan crafts
+                </div>
+              </div>
+            </div>
+            <span className="text-[#C85A32] font-black text-sm pr-1">&rarr;</span>
+          </button>
+        )}
 
         {/* QR Code Verification Seal Card */}
         {product.qr_code_url && (
@@ -431,6 +457,59 @@ export default function PublicVerifyScreen({ productId, onBack }) {
               <p className="text-[11px] text-slate-500 leading-tight">
                 Scan with any smartphone camera to inspect government beneficiary certification and provenance.
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* ONDC Buyer Modal Dialog */}
+        {showOndcModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
+            <div className="relative w-full max-w-sm rounded-3xl bg-white p-5 shadow-2xl border border-slate-200 text-slate-900 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  <h3 className="text-sm font-black text-slate-900">ONDC Direct Buy</h3>
+                </div>
+                <button
+                  onClick={() => setShowOndcModal(false)}
+                  className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center cursor-pointer transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 space-y-1.5">
+                <div className="font-bold flex items-center gap-1.5 text-emerald-800">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>ONDC Beckn Protocol Active</span>
+                </div>
+                <p className="text-[11px] text-emerald-800 leading-relaxed">
+                  This craft is registered on Open Network for Digital Commerce (ONDC). You can purchase it directly through any ONDC buyer app (Paytm, Pincode by PhonePe, Magicpin) or via our direct fair marketplace.
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-1">
+                {onBrowseStorefront && (
+                  <button
+                    onClick={() => {
+                      setShowOndcModal(false);
+                      onBrowseStorefront();
+                    }}
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98 transition-all"
+                  >
+                    <Store className="w-4 h-4" />
+                    <span>शिल्पसेतु बाज़ार में ऑर्डर करें (Order in Store)</span>
+                  </button>
+                )}
+
+                <a
+                  href={product.ondc_buy_url}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Open in ONDC Buyer App Protocol</span>
+                </a>
+              </div>
             </div>
           </div>
         )}
