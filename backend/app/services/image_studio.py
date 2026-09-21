@@ -263,7 +263,15 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
         if fast_sess is not None:
             try:
                 from rembg import remove
-                cutout = remove(pil_img, session=fast_sess)
+                cutout = remove(
+                    pil_img,
+                    session=fast_sess,
+                    alpha_matting=True,
+                    alpha_matting_foreground_threshold=240,
+                    alpha_matting_background_threshold=10,
+                    alpha_matting_erode_size=5,
+                    post_process_mask=True
+                )
                 if cutout is not None:
                     return cutout
             except Exception as e:
@@ -275,7 +283,15 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
     if studio_sess is not None:
         try:
             from rembg import remove
-            cutout = remove(pil_img, session=studio_sess)
+            cutout = remove(
+                pil_img,
+                session=studio_sess,
+                alpha_matting=True,
+                alpha_matting_foreground_threshold=240,
+                alpha_matting_background_threshold=10,
+                alpha_matting_erode_size=5,
+                post_process_mask=True
+            )
             if cutout is not None:
                 return cutout
         except Exception as e:
@@ -286,7 +302,15 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
     if fast_sess is not None:
         try:
             from rembg import remove
-            cutout = remove(pil_img, session=fast_sess)
+            cutout = remove(
+                pil_img,
+                session=fast_sess,
+                alpha_matting=True,
+                alpha_matting_foreground_threshold=240,
+                alpha_matting_background_threshold=10,
+                alpha_matting_erode_size=5,
+                post_process_mask=True
+            )
             if cutout is not None:
                 return cutout
         except Exception as e:
