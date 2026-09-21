@@ -20,7 +20,6 @@ import colorsys
 import numpy as np
 from typing import List, Dict, Any, Optional, Tuple
 from PIL import Image, ImageOps, ImageFilter
-from sklearn.cluster import KMeans
 from ..config import settings
 from ..models.schemas import BackgroundOption, BackgroundOptionsResponse
 
