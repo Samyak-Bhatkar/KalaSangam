@@ -1180,7 +1180,8 @@ export default function VoiceRecorder() {
           </button>
         </div>
 
-        {/* Craft Thumbnail */}
+        {/* Craft Thumbnail (Temporarily hidden) */}
+        {/*
         <div className="p-3 rounded-2xl bg-white border border-slate-200/90 mb-3 flex items-center gap-3 shadow-xs">
           <img
             src={craftImageSrc}
@@ -1200,6 +1201,7 @@ export default function VoiceRecorder() {
             </h4>
           </div>
         </div>
+        */}
 
         {/* Dialect Pills */}
         <div className="mb-3">
@@ -1467,12 +1469,6 @@ export default function VoiceRecorder() {
                 </span>
               )}
 
-              {!isListening && isCustomSpoken && transcript && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  <CheckCircle className="w-3 h-3 text-emerald-600" />
-                  {language === 'hi' ? 'आपकी आवाज़ दर्ज' : 'Voice Captured'}
-                </span>
-              )}
 
               {!isCustomSpoken && transcript && !isListening && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
@@ -1673,7 +1669,8 @@ export default function VoiceRecorder() {
           )}
         </div>
 
-        {/* ── 1-Tap Instant Vernacular Craft Narrative Chips ────────────────── */}
+        {/* ── 1-Tap Instant Vernacular Craft Narrative Chips (Temporarily hidden) ── */}
+        {/*
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1.5 px-0.5">
             <span className="text-[11px] font-black text-slate-700 flex items-center gap-1">
@@ -1710,6 +1707,7 @@ export default function VoiceRecorder() {
             ))}
           </div>
         </div>
+        */}
 
         {/* Processing Indicator */}
         {isProcessing && (
