@@ -247,6 +247,34 @@ def segment_craft_fallback(pil_img: Image.Image) -> Image.Image:
     return Image.fromarray(rgba)
 
 
+def _safe_rembg_remove(pil_img: Image.Image, session, use_matting: bool) -> Image.Image:
+    """
+    Safely executes rembg segmentation with automatic failover if closed-form
+    alpha matting triggers an out-of-memory or allocation error.
+    """
+    from rembg import remove
+    if use_matting:
+        try:
+            return remove(
+                pil_img,
+                session=session,
+                alpha_matting=True,
+                alpha_matting_foreground_threshold=240,
+                alpha_matting_background_threshold=10,
+                alpha_matting_erode_size=5,
+                post_process_mask=True
+            )
+        except Exception as matting_err:
+            logger.warning(f"rembg alpha matting allocation failed ({matting_err}), falling back safely to standard neural mask without matting.")
+
+    return remove(
+        pil_img,
+        session=session,
+        alpha_matting=False,
+        post_process_mask=True
+    )
+
+
 def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Image:
     """
     Dual-Tier Adaptive Segmentation Engine:
@@ -257,25 +285,16 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
     """
     tier = str(compute_tier or "high").lower().strip()
     
-    # Optimize matting: Closed-form alpha matting creates huge NxN linear systems for high-res images (>1600px).
-    # For large images, native deep learning mask + post_process_mask provides crisp edges sub-second.
-    use_matting = max(pil_img.size) <= 1600
+    # Optimize matting: Closed-form alpha matting creates huge NxN linear systems for high-res images (>1024px or >1M pixels).
+    # Guard against OOM: only enable matting on images <= 1024x1024 and <= 1.05M total pixels.
+    use_matting = (pil_img.width * pil_img.height) <= (1024 * 1024) and max(pil_img.size) <= 1024
 
     # 1. Direct Low-Resource / Fast Tier
     if tier == "low":
         fast_sess = get_fast_session()
         if fast_sess is not None:
             try:
-                from rembg import remove
-                cutout = remove(
-                    pil_img,
-                    session=fast_sess,
-                    alpha_matting=use_matting,
-                    alpha_matting_foreground_threshold=240,
-                    alpha_matting_background_threshold=10,
-                    alpha_matting_erode_size=5,
-                    post_process_mask=True
-                )
+                cutout = _safe_rembg_remove(pil_img, fast_sess, use_matting)
                 if cutout is not None:
                     return cutout
             except Exception as e:
@@ -286,16 +305,7 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
     studio_sess = get_studio_session()
     if studio_sess is not None:
         try:
-            from rembg import remove
-            cutout = remove(
-                pil_img,
-                session=studio_sess,
-                alpha_matting=use_matting,
-                alpha_matting_foreground_threshold=240,
-                alpha_matting_background_threshold=10,
-                alpha_matting_erode_size=5,
-                post_process_mask=True
-            )
+            cutout = _safe_rembg_remove(pil_img, studio_sess, use_matting)
             if cutout is not None:
                 return cutout
         except Exception as e:
@@ -305,16 +315,7 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
     fast_sess = get_fast_session()
     if fast_sess is not None:
         try:
-            from rembg import remove
-            cutout = remove(
-                pil_img,
-                session=fast_sess,
-                alpha_matting=use_matting,
-                alpha_matting_foreground_threshold=240,
-                alpha_matting_background_threshold=10,
-                alpha_matting_erode_size=5,
-                post_process_mask=True
-            )
+            cutout = _safe_rembg_remove(pil_img, fast_sess, use_matting)
             if cutout is not None:
                 return cutout
         except Exception as e:
@@ -323,12 +324,53 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
     # Ultimate fallback: Classical GrabCut
     return segment_craft_fallback(pil_img)
 
+
+def analyze_skeleton_topology(candidate_mask: np.ndarray, reference_core: np.ndarray) -> dict:
+    """
+    Analyzes skeleton endpoint topology and multi-point connectivity to classify an appendage:
+    - Handle signature: Touches the main body at >=2 distinct attachment points (bridge/arch)
+      OR forms a closed loop (0 endpoints).
+    - Wire signature: Exactly 1 attachment point to the main body AND >=1 free skeleton endpoints
+      dangling into empty space (open line).
+    """
+    from skimage.morphology import skeletonize
+    skel = skeletonize(candidate_mask > 0).astype(np.uint8)
+
+    # Count 8-connected neighbors for every skeleton pixel
+    neighbor_kernel = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=np.uint8)
+    neighbors = cv2.filter2D(skel, -1, neighbor_kernel)
+    endpoints = (skel > 0) & (neighbors == 1)
+    num_endpoints = int(np.sum(endpoints))
+
+    # Evaluate attachment points to reference_core
+    core_dilated = cv2.dilate(reference_core, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7)))
+    touching_pixels = (candidate_mask > 0) & (core_dilated > 0)
+
+    num_touch_comps, _, _, _ = cv2.connectedComponentsWithStats(touching_pixels.astype(np.uint8))
+    num_attachments = max(0, num_touch_comps - 1)
+
+    is_closed_loop = (num_endpoints == 0) and (np.sum(skel) > 0)
+    is_bridge = (num_attachments >= 2)
+    is_handle = is_closed_loop or is_bridge
+    is_wire = (num_attachments <= 1) and (num_endpoints >= 1)
+
+    classification = "HANDLE" if is_handle else ("WIRE" if is_wire else "DEBRIS")
+
+    return {
+        "num_endpoints": num_endpoints,
+        "num_attachments": num_attachments,
+        "is_closed_loop": is_closed_loop,
+        "is_bridge": is_bridge,
+        "classification": classification
+    }
+
+
 def filter_salient_main_body(cutout_img: Image.Image) -> Image.Image:
     """
     Senior CV E-Commerce Pipeline:
     Isolates primary craft/product mass and severs trailing wires, charger cables,
-    cords, USB leads, and stray artifacts using distance-transform skeletal core analysis
-    and geodesic morphological reconstruction.
+    and stray artifacts using skeleton-topology-gated multi-component retention
+    and bounded iterative geodesic reconstruction.
     """
     rgba = np.array(cutout_img)
     alpha = rgba[:, :, 3]
@@ -343,34 +385,64 @@ def filter_salient_main_body(cutout_img: Image.Image) -> Image.Image:
     d_max = float(dist.max())
 
     if d_max > 8.0:
-        # A cable/wire typically has thickness < 10-14px (radius < 5-7px),
-        # while real products have a substantial internal mass radius
+        # Distance threshold identifying substantial interior body
         core_thresh = max(6.0, min(24.0, 0.12 * d_max))
         core = (dist > core_thresh).astype(np.uint8) * 255
 
-        # Extract primary product component
+        # Extract primary body component
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(core, connectivity=8)
         if num_labels > 1:
             areas = stats[1:, cv2.CC_STAT_AREA]
             max_label = 1 + int(np.argmax(areas))
             main_core = (labels == max_label).astype(np.uint8) * 255
+            reconstruction_seed = main_core.copy()
 
-            # Geodesic reconstruction: dilate core back out bounded by original mask
-            # Restores true outer product facets without reviving the thin disconnected cable
-            k_size = int(core_thresh * 2.2) | 1
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k_size, k_size))
-            reconstructed = cv2.dilate(main_core, kernel)
-            reconstructed = np.minimum(reconstructed, mask)
+            # Candidate pool: all pixels in original mask outside the main core
+            candidate_pool = ((mask > 0) & (main_core == 0)).astype(np.uint8) * 255
+            num_cands, cand_labels, cand_stats, cand_centroids = cv2.connectedComponentsWithStats(candidate_pool, connectivity=8)
 
-            # Accept reconstruction if it retains the primary craft mass
+            logger.info(
+                f"[TopologyFilter] Core d_max={d_max:.1f}px, core_thresh={core_thresh:.1f}px, "
+                f"main_core_area={stats[max_label, cv2.CC_STAT_AREA]}, candidates_to_evaluate={num_cands - 1}"
+            )
+
+            for k in range(1, num_cands):
+                c_area = cand_stats[k, cv2.CC_STAT_AREA]
+                if c_area < 15:  # skip isolated sub-pixel noise
+                    continue
+
+                c_mask = (cand_labels == k).astype(np.uint8) * 255
+                topo = analyze_skeleton_topology(c_mask, main_core)
+
+                logger.info(
+                    f"[TopologyDecision] Component #{k}: Area={c_area}px, Centroid={cand_centroids[k].round(1)}, "
+                    f"Attachments={topo['num_attachments']}, Endpoints={topo['num_endpoints']}, "
+                    f"ClosedLoop={topo['is_closed_loop']}, Bridge={topo['is_bridge']} -> Decision={topo['classification']}"
+                )
+
+                if topo["classification"] == "HANDLE":
+                    reconstruction_seed = np.maximum(reconstruction_seed, c_mask)
+
+            # Bounded Iterative Geodesic Reconstruction (re-grows legitimate craft contours, max 50 iterations)
+            kernel_unit = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+            reconstructed = reconstruction_seed.copy()
+            for it in range(50):
+                dilated = cv2.dilate(reconstructed, kernel_unit, iterations=2)
+                dilated = np.minimum(dilated, mask)
+                if np.array_equal(dilated, reconstructed):
+                    logger.info(f"[GeodesicReconstruction] Converged in {it + 1} iterations.")
+                    break
+                reconstructed = dilated
+
+            # Accept reconstruction if it retains primary craft mass
             if np.sum(reconstructed > 0) > 0.45 * np.sum(mask > 0):
                 mask = reconstructed
 
-    # 2. Trim spatial outlier fringes (stray specks, floating dust, thin cable tips)
+    # 2. Trim spatial outlier fringes (stray specks, floating dust) using safe bounds
     ys, xs = np.where(mask > 0)
     if len(xs) > 100:
-        x0, x1 = int(np.percentile(xs, 0.2)), int(np.percentile(xs, 99.8))
-        y0, y1 = int(np.percentile(ys, 0.2)), int(np.percentile(ys, 99.8))
+        x0, x1 = int(np.percentile(xs, 0.05)), int(np.percentile(xs, 99.95))
+        y0, y1 = int(np.percentile(ys, 0.05)), int(np.percentile(ys, 99.95))
         mask[:max(0, y0), :] = 0
         mask[min(mask.shape[0], y1 + 1):, :] = 0
         mask[:, :max(0, x0)] = 0
