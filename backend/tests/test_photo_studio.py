@@ -415,32 +415,112 @@ def test_regression_step7_handle_thickness_invariance():
     assert delta_px <= 2, f"Handle thickness varied by {delta_px}px (> 2px threshold)!"
 
 
-def test_regression_step7_runtime_guard_missing_ximgproc(caplog):
+def test_regression_step7_alpha_ramp_width_constraint():
     """
-    Regression Test 7: Guided Filter Missing cv2.ximgproc Runtime Fallback Guard.
-    Verifies that if cv2.ximgproc is absent at runtime, apply_guided_alpha_filter:
-    1. Does NOT crash with an unhandled AttributeError/Exception.
-    2. Logs a clear warning message.
-    3. Safely returns the input alpha mask unchanged.
+    Regression Test 7: Alpha Ramp Width Constraint (< 3.5% of Foreground Area).
+    Verifies that Step 7 Savgol contour smoothing with Gaussian sub-pixel anti-aliasing
+    maintains a tight boundary transition band (10 <= alpha <= 245) strictly under 3.5%
+    of total foreground area, preventing broad translucent halo rings from forming.
     """
-    import unittest.mock as mock
-    from app.services.image_studio import apply_guided_alpha_filter
+    from PIL import Image
     import cv2
+    from app.services.image_studio import filter_salient_main_body
 
-    dummy_alpha = np.ones((100, 100), dtype=np.uint8) * 200
-    dummy_rgb = np.ones((100, 100, 3), dtype=np.uint8) * 128
+    # Construct standard-scale craft fixture with subtle boundary jitter
+    h, w = 500, 500
+    rgba = np.zeros((h, w, 4), dtype=np.uint8)
+    rgba[:, :, :3] = [180, 170, 160]  # Ambient background
+    cv2.circle(rgba, (250, 250), 160, (35, 35, 35, 255), -1)
 
-    orig_hasattr = hasattr
-    def mock_hasattr(obj, name):
-        if obj is cv2 and name == 'ximgproc':
-            return False
-        return orig_hasattr(obj, name)
+    for deg in range(0, 360, 6):
+        rad = np.deg2rad(deg)
+        cx = int(250 + 160 * np.cos(rad))
+        cy = int(250 + 160 * np.sin(rad))
+        if deg % 12 == 0:
+            cv2.circle(rgba, (cx, cy), 3, (35, 35, 35, 255), -1)
 
-    with mock.patch('builtins.hasattr', side_effect=mock_hasattr):
-        with caplog.at_level("WARNING"):
-            result = apply_guided_alpha_filter(dummy_alpha, dummy_rgb)
-            assert np.array_equal(result, dummy_alpha)
-            assert any("cv2.ximgproc.guidedFilter not available" in record.message for record in caplog.records)
+    pil_in = Image.fromarray(rgba)
+    filtered = filter_salient_main_body(pil_in)
+    out_arr = np.array(filtered)
+    alpha = out_arr[:, :, 3]
+
+    trans_pixels = np.sum((alpha >= 10) & (alpha <= 245))
+    fg_pixels = np.sum(alpha >= 10)
+    assert fg_pixels > 0, "Foreground body must be retained"
+    ramp_pct = (trans_pixels / fg_pixels) * 100.0
+
+    assert ramp_pct < 3.5, f"Transitional alpha ramp width {ramp_pct:.2f}% exceeds strict 3.5% limit!"
+
+
+def test_regression_step7_white_composite_border_luminance_integrity():
+    """
+    Regression Test 8: White Composite Border-Band Luminance Integrity.
+    Verifies zero/near-zero border-band luminance contamination when a dark craft
+    is composited onto a pure white studio background (255, 255, 255).
+    Guarantees:
+    1. Monotonic luminance transition: foreground craft luminance <= transitional <= background white.
+    2. Absence of elevated bright ring/halo artifacts.
+    """
+    from PIL import Image
+    import cv2
+    from app.services.image_studio import filter_salient_main_body
+
+    h, w = 500, 500
+    rgba = np.zeros((h, w, 4), dtype=np.uint8)
+    rgba[:, :, :3] = [160, 150, 140]  # Ambient warm workshop background
+    # Dark product craft (luminance ~35)
+    cv2.circle(rgba, (250, 250), 160, (35, 35, 35, 255), -1)
+
+    pil_in = Image.fromarray(rgba)
+    filtered = filter_salient_main_body(pil_in)
+    out_arr = np.array(filtered)
+    alpha = out_arr[:, :, 3]
+
+    # Composite onto pure white studio backdrop
+    alpha_norm = (alpha.astype(np.float32) / 255.0)[:, :, None]
+    comp_white = (out_arr[:, :, :3].astype(np.float32) * alpha_norm + 255.0 * (1.0 - alpha_norm)).astype(np.uint8)
+    comp_lum = cv2.cvtColor(comp_white, cv2.COLOR_RGB2GRAY)
+
+    trans_mask = (alpha >= 10) & (alpha <= 245)
+    fg_mask = (alpha > 245)
+    bg_mask = (alpha < 10)
+
+    mean_fg_lum = float(comp_lum[fg_mask].mean())
+    mean_trans_lum = float(comp_lum[trans_mask].mean())
+    mean_bg_lum = float(comp_lum[bg_mask].mean())
+
+    # Monotonic transition without inverted halo spikes
+    assert mean_fg_lum < mean_trans_lum < mean_bg_lum, (
+        f"Luminance inversion detected: FG={mean_fg_lum:.1f}, Trans={mean_trans_lum:.1f}, BG={mean_bg_lum:.1f}"
+    )
+
+    # Check that pure white background is preserved
+    pure_bg_lum = float(comp_lum[alpha == 0].mean())
+    assert abs(pure_bg_lum - 255.0) < 1e-5, f"Pure background must remain 255.0 white, got {pure_bg_lum:.2f}"
+    assert mean_bg_lum >= 254.9, f"Sub-threshold background must remain near-pure white, got {mean_bg_lum:.2f}"
+
+
+def test_regression_step7_opencv_headless_runtime_compatibility():
+    """
+    Regression Test 9: Clean Dependency Integrity (Plain opencv-python-headless).
+    Verifies that the entire segmentation and Step 7 smoothing pipeline runs smoothly
+    with standard OpenCV headless without any dependency on cv2.ximgproc or contrib modules.
+    """
+    import cv2
+    from PIL import Image
+    from app.services.image_studio import filter_salient_main_body
+
+    # cv2.ximgproc should NOT be required or present
+    assert not hasattr(cv2, 'ximgproc'), "Runtime environment must use plain opencv-python-headless without ximgproc"
+
+    # Execution must succeed without error
+    test_img = Image.new("RGBA", (200, 200), (0, 0, 0, 0))
+    draw_arr = np.array(test_img)
+    cv2.circle(draw_arr, (100, 100), 50, (100, 100, 100, 255), -1)
+    result = filter_salient_main_body(Image.fromarray(draw_arr))
+    assert result is not None
+    assert result.size == (200, 200)
+
 
 
 

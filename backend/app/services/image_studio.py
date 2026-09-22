@@ -432,40 +432,6 @@ def smooth_mask_contours(mask: np.ndarray, max_window: int = 11) -> np.ndarray:
     return smoothed_mask
 
 
-def apply_guided_alpha_filter(alpha: np.ndarray, rgb_guide: np.ndarray, radius: int = 8, eps: float = 1e-3) -> np.ndarray:
-    """
-    Applies Fast Guided Filter to alpha channel using high-res RGB image as guide.
-    Refines boundary edges and feathers transitions to match photographic contours.
-    Gated by runtime check for cv2.ximgproc availability with graceful warning fallback.
-    """
-    if not hasattr(cv2, 'ximgproc') or not hasattr(cv2.ximgproc, 'guidedFilter'):
-        logger.warning(
-            "[Step7] cv2.ximgproc.guidedFilter not available in runtime OpenCV build. "
-            "Falling back cleanly to parametric smoothed contour mask."
-        )
-        return alpha
-
-    try:
-        gh, gw = rgb_guide.shape[:2]
-        ah, aw = alpha.shape[:2]
-        if (gh, gw) != (ah, aw):
-            rgb_guide = cv2.resize(rgb_guide, (aw, ah), interpolation=cv2.INTER_LINEAR)
-
-        guide_f32 = rgb_guide.astype(np.float32) / 255.0
-        alpha_f32 = alpha.astype(np.float32) / 255.0
-
-        refined_f32 = cv2.ximgproc.guidedFilter(guide=guide_f32, src=alpha_f32, radius=radius, eps=eps)
-        refined_u8 = np.clip(refined_f32 * 255.0, 0, 255).astype(np.uint8)
-        return refined_u8
-    except Exception as e:
-        logger.warning(
-            f"[Step7] Guided filtering encountered runtime exception: {e}. "
-            f"Gracefully falling back to parametric smoothed alpha without failing request.",
-            exc_info=True
-        )
-        return alpha
-
-
 def filter_salient_main_body(cutout_img: Image.Image) -> Image.Image:
     """
     Senior CV E-Commerce Pipeline (Steps 5 & 7):
@@ -551,17 +517,18 @@ def filter_salient_main_body(cutout_img: Image.Image) -> Image.Image:
         mask[:, :max(0, x0)] = 0
         mask[:, min(mask.shape[1], x1 + 1):] = 0
 
-    # 3. Step 7: Arc-length Parametric Contour Smoothing (eliminates scalloping/faceting)
+    # 3. Step 7: Arc-length Parametric Contour Smoothing with Sub-pixel Anti-Aliasing
+    # Savgol-alone contour smoothing (window <= 11) resolves scalloping while strictly preserving
+    # narrow junctions/cords. Gaussian sigma=0.5 (3x3 kernel) provides razor-sharp sub-pixel
+    # edge anti-aliasing without widening the transitional alpha band or introducing background bleed.
     smoothed_mask = smooth_mask_contours(mask, max_window=11)
     if np.sum(smoothed_mask > 0) > 0.80 * np.sum(mask > 0):
         mask = smoothed_mask
 
-    # 4. Step 7 (Part 2): RGB-Guided Alpha Edge Matting with Runtime Guard
-    # Uses high-resolution photographic RGB guide to feather and lock boundary transitions
-    rgb_guide = rgba[:, :, :3]
-    refined_alpha = apply_guided_alpha_filter(mask, rgb_guide, radius=8, eps=1e-3)
+    # Anti-alias alpha mask with Gaussian sub-pixel filtering (sigma=0.5, 3x3)
+    final_alpha = cv2.GaussianBlur(mask, (3, 3), 0.5)
 
-    rgba[:, :, 3] = refined_alpha
+    rgba[:, :, 3] = final_alpha
     return Image.fromarray(rgba)
 
 def synthesize_ecom_ground_shadow(craft_img: Image.Image, canvas_size: int, craft_x: int, craft_y: int) -> Image.Image:
