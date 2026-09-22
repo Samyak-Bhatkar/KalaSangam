@@ -27,12 +27,11 @@ ENV/
 env/
 .venv/
 .pytest_cache/
-backend/app/static/uploads/*.mp4
-backend/app/static/uploads/*.webm
-backend/app/static/uploads/*.jpg
-backend/app/static/uploads/*.png
-backend/app/static/uploads/*.wav
+# User uploads & media (never commit personal or testing photos/videos)
+backend/app/static/uploads/*
+!backend/app/static/uploads/.gitkeep
 backend/app/static/audio/*.wav
+!backend/app/static/audio/ambient_folk.wav
 backend/app/static/*.db
 backend/app/static/*.sqlite3
 *.db

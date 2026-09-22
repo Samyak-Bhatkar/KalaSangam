@@ -117,22 +117,48 @@ export const detectClientComputeTier = () => {
 
 export async function checkPhotoQuality({ file, imageBase64, language = 'hi', categoryHint }) {
   try {
-    const formData = new FormData();
+    let res;
     if (file) {
+      const formData = new FormData();
       formData.append('file', file);
-    } else if (imageBase64) {
-      formData.append('image_base64', imageBase64);
-    }
-    formData.append('language', language);
-    if (categoryHint) formData.append('category_hint', categoryHint);
+      formData.append('language', language);
+      if (categoryHint) formData.append('category_hint', categoryHint);
 
-    const res = await fetch(`${API_BASE}/studio/quality-check`, {
-      method: 'POST',
-      headers: {
-        'X-Compute-Tier': detectClientComputeTier(),
-      },
-      body: formData,
-    });
+      res = await fetch(`${API_BASE}/studio/quality-check`, {
+        method: 'POST',
+        headers: {
+          'X-Compute-Tier': detectClientComputeTier(),
+        },
+        body: formData,
+      });
+    } else {
+      res = await fetch(`${API_BASE}/studio/quality-check-json`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Compute-Tier': detectClientComputeTier(),
+        },
+        body: JSON.stringify({
+          image_base64: imageBase64,
+          language,
+          category_hint: categoryHint,
+        }),
+      });
+
+      if (!res.ok && res.status === 404) {
+        const formData = new FormData();
+        formData.append('image_base64', imageBase64);
+        formData.append('language', language);
+        if (categoryHint) formData.append('category_hint', categoryHint);
+        res = await fetch(`${API_BASE}/studio/quality-check`, {
+          method: 'POST',
+          headers: {
+            'X-Compute-Tier': detectClientComputeTier(),
+          },
+          body: formData,
+        });
+      }
+    }
 
     if (!res.ok) {
       throw new Error(`HTTP quality check error ${res.status}`);
@@ -158,23 +184,50 @@ export async function checkPhotoQuality({ file, imageBase64, language = 'hi', ca
 
 export async function enhanceImage({ file, imageBase64, preserveOriginalTones = false }) {
   try {
-    const formData = new FormData();
+    let res;
     if (file) {
+      const formData = new FormData();
       formData.append('file', file);
-    } else if (imageBase64) {
-      formData.append('image_base64', imageBase64);
-    }
-    if (preserveOriginalTones !== undefined) {
-      formData.append('preserve_original_tones', preserveOriginalTones ? 'true' : 'false');
-    }
+      if (preserveOriginalTones !== undefined) {
+        formData.append('preserve_original_tones', preserveOriginalTones ? 'true' : 'false');
+      }
 
-    const res = await fetch(`${API_BASE}/studio/enhance`, {
-      method: 'POST',
-      headers: {
-        'X-Compute-Tier': detectClientComputeTier(),
-      },
-      body: formData,
-    });
+      res = await fetch(`${API_BASE}/studio/enhance`, {
+        method: 'POST',
+        headers: {
+          'X-Compute-Tier': detectClientComputeTier(),
+        },
+        body: formData,
+      });
+    } else {
+      // Direct JSON POST avoids multipart field size limits completely
+      res = await fetch(`${API_BASE}/studio/enhance-json`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Compute-Tier': detectClientComputeTier(),
+        },
+        body: JSON.stringify({
+          image_base64: imageBase64,
+          preserve_original_tones: Boolean(preserveOriginalTones),
+        }),
+      });
+
+      if (!res.ok && res.status === 404) {
+        const formData = new FormData();
+        formData.append('image_base64', imageBase64);
+        if (preserveOriginalTones !== undefined) {
+          formData.append('preserve_original_tones', preserveOriginalTones ? 'true' : 'false');
+        }
+        res = await fetch(`${API_BASE}/studio/enhance`, {
+          method: 'POST',
+          headers: {
+            'X-Compute-Tier': detectClientComputeTier(),
+          },
+          body: formData,
+        });
+      }
+    }
 
     if (!res.ok) {
       throw new Error(`HTTP error ${res.status}`);
@@ -182,15 +235,15 @@ export async function enhanceImage({ file, imageBase64, preserveOriginalTones = 
 
     return await res.json();
   } catch (err) {
-    console.warn('API enhanceImage fallback to pristine studio asset:', err);
+    console.warn('API enhanceImage fallback to uploaded craft render:', err);
     return {
-      status: 'success',
-      studio_url: '/terracotta_pot_clean.png',
-      processed_base64: null,
+      status: 'fallback',
+      studio_url: imageBase64 || null,
+      processed_base64: imageBase64 || null,
       width: 1080,
       height: 1080,
-      lighting_normalized: true,
-      drop_shadow_applied: true,
+      lighting_normalized: false,
+      drop_shadow_applied: false,
       preserve_original_tones: Boolean(preserveOriginalTones),
     };
   }

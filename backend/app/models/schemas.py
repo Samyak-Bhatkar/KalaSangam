@@ -19,6 +19,10 @@ class StudioQualityCheckResponse(BaseModel):
     coverage_pct: float
     is_removable_bg: bool
 
+class StudioEnhanceRequest(BaseModel):
+    image_base64: Optional[str] = None
+    preserve_original_tones: Optional[bool] = False
+
 class StudioEnhanceResponse(BaseModel):
     status: str = "success"
     original_url: str

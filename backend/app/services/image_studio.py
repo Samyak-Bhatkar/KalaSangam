@@ -257,6 +257,10 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
     """
     tier = str(compute_tier or "high").lower().strip()
     
+    # Optimize matting: Closed-form alpha matting creates huge NxN linear systems for high-res images (>1600px).
+    # For large images, native deep learning mask + post_process_mask provides crisp edges sub-second.
+    use_matting = max(pil_img.size) <= 1600
+
     # 1. Direct Low-Resource / Fast Tier
     if tier == "low":
         fast_sess = get_fast_session()
@@ -266,7 +270,7 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
                 cutout = remove(
                     pil_img,
                     session=fast_sess,
-                    alpha_matting=True,
+                    alpha_matting=use_matting,
                     alpha_matting_foreground_threshold=240,
                     alpha_matting_background_threshold=10,
                     alpha_matting_erode_size=5,
@@ -286,7 +290,7 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
             cutout = remove(
                 pil_img,
                 session=studio_sess,
-                alpha_matting=True,
+                alpha_matting=use_matting,
                 alpha_matting_foreground_threshold=240,
                 alpha_matting_background_threshold=10,
                 alpha_matting_erode_size=5,
@@ -305,7 +309,7 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
             cutout = remove(
                 pil_img,
                 session=fast_sess,
-                alpha_matting=True,
+                alpha_matting=use_matting,
                 alpha_matting_foreground_threshold=240,
                 alpha_matting_background_threshold=10,
                 alpha_matting_erode_size=5,
@@ -452,7 +456,9 @@ def process_studio_image(
     6. Dual-tier realistic ground contact shadow (Ambient Occlusion + Floor Penumbra).
     7. Composition on pure studio backdrop.
     """
-    raw_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
+    from PIL import ImageOps
+    raw_img = Image.open(io.BytesIO(raw_bytes))
+    raw_img = ImageOps.exif_transpose(raw_img).convert("RGB")
     
     # 1. Preliminary segmentation pass to isolate craft vs background reference
     # Reuse cached cutout from quality gate if available, otherwise compute and cache
@@ -732,8 +738,15 @@ def assess_photo_quality(
     import re
     from ..config import settings
 
-    np_arr = np.frombuffer(raw_bytes, np.uint8)
-    cv_img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    cv_img = None
+    try:
+        from PIL import ImageOps
+        pil_raw = Image.open(io.BytesIO(raw_bytes))
+        pil_raw = ImageOps.exif_transpose(pil_raw).convert("RGB")
+        cv_img = cv2.cvtColor(np.array(pil_raw), cv2.COLOR_RGB2BGR)
+    except Exception:
+        np_arr = np.frombuffer(raw_bytes, np.uint8)
+        cv_img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
     if cv_img is None:
         return {

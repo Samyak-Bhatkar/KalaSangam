@@ -452,6 +452,8 @@ export default function CameraViewfinder() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    stopMediaStream();
+
     const reader = new FileReader();
     reader.onload = async () => {
       const b64 = reader.result;
@@ -463,6 +465,7 @@ export default function CameraViewfinder() {
 
       try {
         const qRes = await checkPhotoQuality({
+          file,
           imageBase64: b64,
           language,
           categoryHint: activeCategoryMode,
@@ -472,12 +475,15 @@ export default function CameraViewfinder() {
         setQualityResult({
           passed: true,
           dominant_issue: null,
-          voice_prompt_hi: 'फोटो स्पष्ट है।',
-          voice_prompt_en: 'Photo verified.',
+          voice_prompt_hi: 'फोटो स्पष्ट है। स्टूडियो तैयार किया जा रहा है।',
+          voice_prompt_en: 'Photo verified. Proceeding to studio enhancement.',
         });
       }
     };
     reader.readAsDataURL(file);
+
+    // Reset input so artisan can re-select the same or another photo
+    if (e.target) e.target.value = '';
   };
 
   // Switch to demo preset craft

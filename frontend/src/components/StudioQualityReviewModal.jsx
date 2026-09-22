@@ -107,10 +107,17 @@ export default function StudioQualityReviewModal({
         setReviewState('enhanced');
         setIsEnhancing(false);
 
+        const effectiveStudio =
+          (res.processed_base64 && res.processed_base64 !== '/terracotta_pot_clean.png')
+            ? res.processed_base64
+            : (res.studio_url && res.studio_url !== '/terracotta_pot_clean.png')
+            ? res.studio_url
+            : base64Img;
+
         // Save into active angle
         saveAnglePhoto(activeAngleIndex, {
           rawBase64: base64Img,
-          studioBase64: res.processed_base64 || res.studio_url,
+          studioBase64: effectiveStudio,
           quality: qualityResult,
           shotAngleInfo,
         });
@@ -321,7 +328,13 @@ export default function StudioQualityReviewModal({
               {/* Clean Studio Enhanced Image (Base Layer) */}
               <div className="absolute inset-0 flex items-center justify-center bg-[#F8F9FA]">
                 <img
-                  src={enhancedResult?.processed_base64 || enhancedResult?.studio_url || rawPhotoBase64}
+                  src={
+                    (enhancedResult?.processed_base64 && enhancedResult.processed_base64 !== '/terracotta_pot_clean.png')
+                      ? enhancedResult.processed_base64
+                      : (enhancedResult?.studio_url && enhancedResult.studio_url !== '/terracotta_pot_clean.png')
+                      ? enhancedResult.studio_url
+                      : rawPhotoBase64
+                  }
                   alt="Enhanced Studio Output"
                   className="w-full h-full object-contain p-2"
                 />

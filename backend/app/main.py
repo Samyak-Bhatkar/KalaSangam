@@ -16,11 +16,20 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, Backgr
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+import starlette.formparsers
+import starlette.requests
+
+# Increase Starlette multipart max field size to 50MB to support high-res phone uploads without HTTP 400
+starlette.formparsers.MultiPartParser.max_part_size = 50 * 1024 * 1024
+starlette.formparsers.MultiPartParser.spool_max_size = 50 * 1024 * 1024
+if hasattr(starlette.requests.Request.form, "__kwdefaults__") and starlette.requests.Request.form.__kwdefaults__:
+    starlette.requests.Request.form.__kwdefaults__["max_part_size"] = 50 * 1024 * 1024
 
 from .config import settings
 from .models.schemas import (
     StudioQualityCheckRequest,
     StudioQualityCheckResponse,
+    StudioEnhanceRequest,
     StudioEnhanceResponse,
     CatalogItemResponse,
     CatalogVoiceProcessRequest,
@@ -338,6 +347,22 @@ async def enhance_studio_image(
     except Exception as e:
         logger.error(f"Studio enhancement error: {e}")
         raise HTTPException(status_code=500, detail=f"Image enhancement failed: {str(e)}")
+
+@app.post("/api/v1/studio/enhance-json", response_model=StudioEnhanceResponse)
+@app.post("/api/studio/enhance-json", response_model=StudioEnhanceResponse)
+async def enhance_studio_image_json(
+    payload: StudioEnhanceRequest,
+    x_compute_tier: Optional[str] = Header("high", alias="X-Compute-Tier")
+):
+    """JSON variant of studio enhance for direct high-payload calls without multipart overhead."""
+    if not payload.image_base64:
+        raise HTTPException(status_code=400, detail="image_base64 is required.")
+    return await enhance_studio_image(
+        file=None,
+        image_base64=payload.image_base64,
+        preserve_original_tones=payload.preserve_original_tones,
+        x_compute_tier=x_compute_tier
+    )
 
 # ==============================================================================
 # MODULE 2C: SINGLE-TAP HOLE REMOVAL ENDPOINT (TIERED ARCHITECTURE)
