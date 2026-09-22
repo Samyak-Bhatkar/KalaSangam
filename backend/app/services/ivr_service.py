@@ -126,7 +126,7 @@ async def call_bhashini_asr_pipeline(
     """
     api_key = bhashini_key or settings.BHASHINI_API_KEY
     user_id = bhashini_user_id or settings.BHASHINI_USER_ID
-    pipeline_id = bhashini_pipeline_id or settings.BHASHINI_PIPELINE_ID or "ai4bharat/conformer-hi-gpu--t4"
+    pipeline_id = bhashini_pipeline_id or settings.BHASHINI_PIPELINE_ID or "64392f96daac500b55c543cd"
 
     if not api_key or not user_id:
         raise HTTPException(
@@ -168,9 +168,28 @@ async def call_bhashini_asr_pipeline(
                 )
 
             config_data = config_resp.json()
-            endpoint_info = config_data.get("pipelineInferenceAPIEndPoint", {}).get("inferenceApiEndPoint", {})
+            endpoint_info = config_data.get("pipelineInferenceAPIEndPoint", {})
             callback_url = endpoint_info.get("callbackUrl")
-            callback_key = endpoint_info.get("authorizationKey")
+            auth_val = (
+                endpoint_info.get("inferenceApiKey", {}).get("value")
+                or endpoint_info.get("authorizationKey")
+                or settings.BHASHINI_INFERENCE_KEY
+                or api_key
+            )
+            auth_name = endpoint_info.get("inferenceApiKey", {}).get("name", "Authorization")
+
+            # Extract dynamic serviceIds for ASR and Translation
+            asr_service_id = None
+            trans_service_id = None
+            for p in config_data.get("pipelineResponseConfig", []):
+                if p.get("taskType") == "asr":
+                    c_list = p.get("config", [])
+                    if c_list:
+                        asr_service_id = c_list[0].get("serviceId")
+                elif p.get("taskType") == "translation":
+                    c_list = p.get("config", [])
+                    if c_list:
+                        trans_service_id = c_list[0].get("serviceId")
 
             if not callback_url:
                 raise HTTPException(
@@ -186,16 +205,20 @@ async def call_bhashini_asr_pipeline(
         # 2. Encode audio
         base64_audio = base64.b64encode(audio_bytes).decode("utf-8")
 
-        # 3. Call ASR inference
+        # 3. Call ASR inference via Dhruva
         try:
+            asr_config = {
+                "language": {"sourceLanguage": bhashini_lang},
+                "audioFormat": "wav",
+                "samplingRate": 16000
+            }
+            if asr_service_id:
+                asr_config["serviceId"] = asr_service_id
+
             asr_payload = {
                 "pipelineTasks": [{
                     "taskType": "asr",
-                    "config": {
-                        "language": {"sourceLanguage": bhashini_lang},
-                        "audioFormat": "wav",
-                        "samplingRate": 16000
-                    }
+                    "config": asr_config
                 }],
                 "inputData": {
                     "audio": [{"audioContent": base64_audio}]
@@ -203,7 +226,7 @@ async def call_bhashini_asr_pipeline(
             }
             asr_headers = {
                 "Content-Type": "application/json",
-                "Authorization": callback_key or api_key
+                auth_name: auth_val
             }
             asr_resp = await client.post(callback_url, json=asr_payload, headers=asr_headers)
             if asr_resp.status_code != 200:
@@ -234,15 +257,19 @@ async def call_bhashini_asr_pipeline(
         translated_text = transcript
         if transcript and bhashini_lang != "en":
             try:
+                trans_config = {
+                    "language": {
+                        "sourceLanguage": bhashini_lang,
+                        "targetLanguage": "en"
+                    }
+                }
+                if trans_service_id:
+                    trans_config["serviceId"] = trans_service_id
+
                 trans_payload = {
                     "pipelineTasks": [{
                         "taskType": "translation",
-                        "config": {
-                            "language": {
-                                "sourceLanguage": bhashini_lang,
-                                "targetLanguage": "en"
-                            }
-                        }
+                        "config": trans_config
                     }],
                     "inputData": {
                         "input": [{"source": transcript}]
@@ -365,7 +392,7 @@ async def process_ivr_step_audio(
     """
     has_bhashini = bool(bhashini_key or (settings.BHASHINI_API_KEY and settings.BHASHINI_USER_ID))
 
-    if has_bhashini and not (settings.BHASHINI_API_KEY and settings.BHASHINI_API_KEY.startswith("ulca_live_")):
+    if has_bhashini:
         try:
             transcript, translated_text, latency = await call_bhashini_asr_pipeline(
                 audio_bytes=audio_bytes,

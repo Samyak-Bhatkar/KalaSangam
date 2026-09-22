@@ -23,7 +23,8 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     BHASHINI_API_KEY: str = os.getenv("BHASHINI_API_KEY", "")
     BHASHINI_USER_ID: str = os.getenv("BHASHINI_USER_ID", "")
-    BHASHINI_PIPELINE_ID: str = os.getenv("BHASHINI_PIPELINE_ID", "")
+    BHASHINI_INFERENCE_KEY: str = os.getenv("BHASHINI_INFERENCE_KEY", "")
+    BHASHINI_PIPELINE_ID: str = os.getenv("BHASHINI_PIPELINE_ID", "64392f96daac500b55c543cd")
 
     # Stock Photo API Keys for Contextual Lifestyle Shots
     PEXELS_API_KEY: str = os.getenv("PEXELS_API_KEY", "03gz3rA1ythrx2XSv8vhMOcLCy1dsvPpaZ0X3Pc5V0XmY3XFimOYBAcT")
