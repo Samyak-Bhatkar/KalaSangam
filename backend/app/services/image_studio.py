@@ -17,6 +17,7 @@ from typing import Optional, Tuple, Dict, Any, Union
 import numpy as np
 from PIL import Image, ImageOps, ImageFilter, ImageEnhance
 import cv2
+from scipy.signal import savgol_filter
 from ..config import settings
 
 logger = logging.getLogger("ShilpSetu.ImageStudio")
@@ -365,12 +366,114 @@ def analyze_skeleton_topology(candidate_mask: np.ndarray, reference_core: np.nda
     }
 
 
+def smooth_contour_savgol(contour: np.ndarray, max_window: int = 11, polyorder: int = 2) -> np.ndarray:
+    """
+    Applies periodic (wrap-around) Savitzky-Golay filter to parametric contour (x(s), y(s)).
+    contour: shape (N, 1, 2) or (N, 2)
+    Guardrail: Window length capped at max_window to ensure structures >= 4-5px survive intact.
+    """
+    pts = contour.reshape(-1, 2).astype(np.float64)
+    N = len(pts)
+    if N < 15:
+        return contour
+
+    # Adaptive odd window length capped at max_window to protect thin handles/spouts
+    w = min(max_window, max(5, (N // 25) | 1))
+    if w % 2 == 0:
+        w += 1
+    if w >= N:
+        w = N - 1 if (N - 1) % 2 != 0 else N - 2
+    if w < 5:
+        return contour
+
+    try:
+        x_smooth = savgol_filter(pts[:, 0], window_length=w, polyorder=polyorder, mode='wrap')
+        y_smooth = savgol_filter(pts[:, 1], window_length=w, polyorder=polyorder, mode='wrap')
+        smoothed = np.stack([x_smooth, y_smooth], axis=-1).round().astype(np.int32)
+        return smoothed.reshape(-1, 1, 2)
+    except Exception as e:
+        logger.warning(f"[Step7] Savitzky-Golay contour smoothing failed: {e}. Retaining raw contour.")
+        return contour
+
+
+def smooth_mask_contours(mask: np.ndarray, max_window: int = 11) -> np.ndarray:
+    """
+    Extracts 2-level contour hierarchy (external boundaries and internal holes/loops),
+    smoothes them in arc-length space, and reconstructs a clean, non-scalloped binary mask.
+    Preserves inner handle loops (e.g. coffee mug / mixer jar holes).
+    """
+    h, w = mask.shape[:2]
+    binary = (mask > 35).astype(np.uint8) * 255
+
+    # RETR_CCOMP provides 2-level hierarchy: outer contours vs inner holes/loops
+    contours, hierarchy = cv2.findContours(binary, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
+    if not contours or hierarchy is None:
+        return mask
+
+    hierarchy = hierarchy[0]
+    smoothed_mask = np.zeros((h, w), dtype=np.uint8)
+
+    # First pass: smooth and fill outer boundaries (hierarchy[i][3] == -1)
+    for i, cnt in enumerate(contours):
+        if hierarchy[i][3] == -1:  # Outer boundary
+            if cv2.contourArea(cnt) < 100:
+                continue
+            smoothed_cnt = smooth_contour_savgol(cnt, max_window=max_window)
+            cv2.drawContours(smoothed_mask, [smoothed_cnt], -1, 255, thickness=-1)
+
+    # Second pass: smooth and punch out inner holes (e.g. handle aperture loops)
+    for i, cnt in enumerate(contours):
+        if hierarchy[i][3] != -1:  # Inner hole
+            if cv2.contourArea(cnt) < 25:
+                continue
+            smoothed_hole = smooth_contour_savgol(cnt, max_window=max(5, max_window - 2))
+            cv2.drawContours(smoothed_mask, [smoothed_hole], -1, 0, thickness=-1)
+
+    return smoothed_mask
+
+
+def apply_guided_alpha_filter(alpha: np.ndarray, rgb_guide: np.ndarray, radius: int = 8, eps: float = 1e-3) -> np.ndarray:
+    """
+    Applies Fast Guided Filter to alpha channel using high-res RGB image as guide.
+    Refines boundary edges and feathers transitions to match photographic contours.
+    Gated by runtime check for cv2.ximgproc availability with graceful warning fallback.
+    """
+    if not hasattr(cv2, 'ximgproc') or not hasattr(cv2.ximgproc, 'guidedFilter'):
+        logger.warning(
+            "[Step7] cv2.ximgproc.guidedFilter not available in runtime OpenCV build. "
+            "Falling back cleanly to parametric smoothed contour mask."
+        )
+        return alpha
+
+    try:
+        gh, gw = rgb_guide.shape[:2]
+        ah, aw = alpha.shape[:2]
+        if (gh, gw) != (ah, aw):
+            rgb_guide = cv2.resize(rgb_guide, (aw, ah), interpolation=cv2.INTER_LINEAR)
+
+        guide_f32 = rgb_guide.astype(np.float32) / 255.0
+        alpha_f32 = alpha.astype(np.float32) / 255.0
+
+        refined_f32 = cv2.ximgproc.guidedFilter(guide=guide_f32, src=alpha_f32, radius=radius, eps=eps)
+        refined_u8 = np.clip(refined_f32 * 255.0, 0, 255).astype(np.uint8)
+        return refined_u8
+    except Exception as e:
+        logger.warning(
+            f"[Step7] Guided filtering encountered runtime exception: {e}. "
+            f"Gracefully falling back to parametric smoothed alpha without failing request.",
+            exc_info=True
+        )
+        return alpha
+
+
 def filter_salient_main_body(cutout_img: Image.Image) -> Image.Image:
     """
-    Senior CV E-Commerce Pipeline:
+    Senior CV E-Commerce Pipeline (Steps 5 & 7):
     Isolates primary craft/product mass and severs trailing wires, charger cables,
     and stray artifacts using skeleton-topology-gated multi-component retention
     and bounded iterative geodesic reconstruction.
+    Applies arc-length parametric contour smoothing and RGB-guided edge filtering
+    to permanently resolve silhouette scalloping and faceting.
     """
     rgba = np.array(cutout_img)
     alpha = rgba[:, :, 3]
@@ -448,11 +551,17 @@ def filter_salient_main_body(cutout_img: Image.Image) -> Image.Image:
         mask[:, :max(0, x0)] = 0
         mask[:, min(mask.shape[1], x1 + 1):] = 0
 
-    # 3. Alpha matte blending with smooth anti-aliased edge
-    cleaned_alpha = np.minimum(alpha, mask)
-    cleaned_alpha = cv2.GaussianBlur(cleaned_alpha, (3, 3), 0.5)
+    # 3. Step 7: Arc-length Parametric Contour Smoothing (eliminates scalloping/faceting)
+    smoothed_mask = smooth_mask_contours(mask, max_window=11)
+    if np.sum(smoothed_mask > 0) > 0.80 * np.sum(mask > 0):
+        mask = smoothed_mask
 
-    rgba[:, :, 3] = cleaned_alpha
+    # 4. Step 7 (Part 2): RGB-Guided Alpha Edge Matting with Runtime Guard
+    # Uses high-resolution photographic RGB guide to feather and lock boundary transitions
+    rgb_guide = rgba[:, :, :3]
+    refined_alpha = apply_guided_alpha_filter(mask, rgb_guide, radius=8, eps=1e-3)
+
+    rgba[:, :, 3] = refined_alpha
     return Image.fromarray(rgba)
 
 def synthesize_ecom_ground_shadow(craft_img: Image.Image, canvas_size: int, craft_x: int, craft_y: int) -> Image.Image:

@@ -338,4 +338,110 @@ def test_regression_mixer_jar_high_res_no_oom():
     assert data["drop_shadow_applied"] is True
 
 
+# ==============================================================================
+# STEP 7 REGRESSION SUITE: CONTOUR SMOOTHING, GUIDED FILTER & RUNTIME GUARDS
+# ==============================================================================
+
+def test_regression_step7_contour_smoothing_and_jaggedness_reduction():
+    """
+    Regression Test 5: Step 7 Contour Smoothing and Curvature Jaggedness Reduction.
+    Verifies that Savitzky-Golay contour smoothing
+    reduces high-frequency boundary curvature oscillation by >= 20%.
+    """
+    from app.services.image_studio import smooth_mask_contours
+    import cv2
+
+    # Create a synthetic scalloped / faceted circular craft silhouette
+    h, w = 400, 400
+    mask = np.zeros((h, w), dtype=np.uint8)
+    center = (200, 200)
+    radius = 120
+
+    # Draw a circle with high-frequency stride-2 scalloped jitter along perimeter
+    thetas = np.linspace(0, 2 * np.pi, 300, endpoint=False)
+    jitter = np.array([2.5 if i % 2 == 0 else -2.5 for i in range(len(thetas))])
+    r_scalloped = radius + jitter
+    pts = np.stack([center[0] + r_scalloped * np.cos(thetas),
+                    center[1] + r_scalloped * np.sin(thetas)], axis=-1).astype(np.int32)
+    cv2.fillPoly(mask, [pts], 255)
+
+    def measure_jaggedness(m):
+        cnts, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        if not cnts:
+            return 0.0
+        c = max(cnts, key=cv2.contourArea).reshape(-1, 2).astype(np.float64)
+        dx = np.gradient(c[:, 0])
+        dy = np.gradient(c[:, 1])
+        ddx = np.gradient(dx)
+        ddy = np.gradient(dy)
+        denom = (dx**2 + dy**2)**1.5
+        denom[denom < 1e-5] = 1e-5
+        kappa = np.abs(dx * ddy - dy * ddx) / denom
+        return float(np.mean(np.abs(np.diff(kappa))))
+
+    jag_before = measure_jaggedness(mask)
+    smoothed = smooth_mask_contours(mask, max_window=11)
+    jag_after = measure_jaggedness(smoothed)
+
+    reduction = (jag_before - jag_after) / jag_before * 100.0
+    assert reduction >= 20.0, f"Expected >=20% reduction in jaggedness, got {reduction:.1f}%"
+
+
+def test_regression_step7_handle_thickness_invariance():
+    """
+    Regression Test 6: Step 7 Handle Scanline Thickness Invariance.
+    Verifies that the window length cap ensures narrow structures (such as thin handles)
+    do not suffer erosion, maintaining handle thickness within <= 2px.
+    """
+    from app.services.image_studio import smooth_mask_contours
+    import cv2
+
+    h, w = 400, 400
+    mask = np.zeros((h, w), dtype=np.uint8)
+
+    # Solid craft body
+    cv2.circle(mask, (200, 200), 100, 255, -1)
+    # Thin handle arc (6px thickness) extending from x=290 to x=350, y=160 to 240
+    cv2.ellipse(mask, (270, 200), (60, 40), 0, -60, 60, 255, 6)
+
+    # Measure handle scanline width before smoothing at row 200
+    width_before = np.sum(mask[200, 310:350] > 0)
+    assert width_before > 0, "Synthetic handle must be present"
+
+    smoothed = smooth_mask_contours(mask, max_window=11)
+    width_after = np.sum(smoothed[200, 310:350] > 0)
+
+    delta_px = abs(width_after - width_before)
+    assert delta_px <= 2, f"Handle thickness varied by {delta_px}px (> 2px threshold)!"
+
+
+def test_regression_step7_runtime_guard_missing_ximgproc(caplog):
+    """
+    Regression Test 7: Guided Filter Missing cv2.ximgproc Runtime Fallback Guard.
+    Verifies that if cv2.ximgproc is absent at runtime, apply_guided_alpha_filter:
+    1. Does NOT crash with an unhandled AttributeError/Exception.
+    2. Logs a clear warning message.
+    3. Safely returns the input alpha mask unchanged.
+    """
+    import unittest.mock as mock
+    from app.services.image_studio import apply_guided_alpha_filter
+    import cv2
+
+    dummy_alpha = np.ones((100, 100), dtype=np.uint8) * 200
+    dummy_rgb = np.ones((100, 100, 3), dtype=np.uint8) * 128
+
+    orig_hasattr = hasattr
+    def mock_hasattr(obj, name):
+        if obj is cv2 and name == 'ximgproc':
+            return False
+        return orig_hasattr(obj, name)
+
+    with mock.patch('builtins.hasattr', side_effect=mock_hasattr):
+        with caplog.at_level("WARNING"):
+            result = apply_guided_alpha_filter(dummy_alpha, dummy_rgb)
+            assert np.array_equal(result, dummy_alpha)
+            assert any("cv2.ximgproc.guidedFilter not available" in record.message for record in caplog.records)
+
+
+
 
