@@ -15,7 +15,7 @@ from PIL import Image
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, BackgroundTasks, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 import starlette.formparsers
 import starlette.requests
 
@@ -184,6 +184,23 @@ def health_check():
             "n8n_base_url": settings.N8N_BASE_URL
         }
     }
+
+@app.get("/system_architecture_slide.html", response_class=FileResponse)
+@app.get("/architecture", response_class=FileResponse)
+def get_system_architecture_slide():
+    """Serves the interactive SIH 2026 system architecture slide directly."""
+    slide_file = Path(__file__).resolve().parent.parent.parent / "frontend" / "public" / "system_architecture_slide.html"
+    if not slide_file.exists():
+        raise HTTPException(status_code=404, detail="Architecture slide HTML not found")
+    return FileResponse(slide_file, media_type="text/html")
+
+@app.get("/ShilpSetu_System_Architecture_INVINCIBLE.png", response_class=FileResponse)
+def get_system_architecture_png():
+    """Serves the rendered 1920x1080 system architecture PNG screenshot."""
+    png_file = Path(__file__).resolve().parent.parent.parent / "frontend" / "public" / "ShilpSetu_System_Architecture_INVINCIBLE.png"
+    if not png_file.exists():
+        raise HTTPException(status_code=404, detail="Architecture PNG not found")
+    return FileResponse(png_file, media_type="image/png")
 
 @app.get("/api/v1/crafts/presets")
 def get_craft_presets():
@@ -1710,5 +1727,11 @@ async def apply_pricing_endpoint(req: PriceApplyRequest):
         logger.error(f"Error applying price: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
-
+@app.get("/architecture", response_class=FileResponse)
+@app.get("/system_architecture_slide.html", response_class=FileResponse)
+async def get_system_architecture_slide():
+    """Serve the ShilpSetu System Architecture interactive diagram slide."""
+    slide_path = Path(__file__).resolve().parent.parent.parent / "frontend" / "public" / "system_architecture_slide.html"
+    if not slide_path.exists():
+        raise HTTPException(status_code=404, detail="Architecture slide HTML file not found")
+    return FileResponse(str(slide_path), media_type="text/html")
