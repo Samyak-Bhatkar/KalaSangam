@@ -16,6 +16,7 @@ import re
 import time
 import base64
 import logging
+import asyncio
 from datetime import datetime
 from typing import Optional, Dict, Any, Tuple
 import httpx
@@ -299,18 +300,20 @@ Format your output strictly as valid JSON:
 {{"transcript": "Devanagari text", "translatedText": "English translation"}}
 Output ONLY valid JSON."""
 
-        candidate_models = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-flash-latest"]
+        candidate_models = ["gemini-3-flash-preview", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-flash-latest"]
         last_model_err = None
         for model_name in candidate_models:
             try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=[prompt, audio_part],
-                    config=types.GenerateContentConfig(
-                        temperature=0.1,
-                        response_mime_type="application/json"
+                def _invoke():
+                    return client.models.generate_content(
+                        model=model_name,
+                        contents=[prompt, audio_part],
+                        config=types.GenerateContentConfig(
+                            temperature=0.1,
+                            response_mime_type="application/json"
+                        )
                     )
-                )
+                response = await asyncio.wait_for(asyncio.to_thread(_invoke), timeout=4.5)
 
                 import json
                 raw_text = (response.text or "").strip()
