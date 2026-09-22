@@ -215,3 +215,27 @@ tests/test_photo_studio.py::test_regression_mixer_jar_high_res_no_oom PASSED
    * Assertion: Wire tip region has **$\alpha = 0$ active pixels ($100\%$ transparent)**.
 4. **Mixer Jar High-Resolution Run ($1204 \times 1600$ px)**:
    * Succeeded with HTTP 200, $1080 \times 1080$ studio canvas, drop shadow synthesized, and **zero memory errors**.
+
+---
+
+## Part 5: Silhouette Curvature & Contour Irregularities Analysis
+
+### 1. The Visual Defect: Iso-Contour Scalloping & Faceting
+On axisymmetric and quadric crafts (such as the **Black Clay Water Matka** and the **Spherical Coconut Shell**), human visual perception expects a continuous second derivative of curvature ($C^2$ continuity). In raw neural cutouts:
+* **The Black Pot**: Exhibits flat chordal cuts on the right flank and an asymmetric bulge on the left waist where the curtain leaf touches the dark clay.
+* **The Coconut Shell**: The outer perimeter breaks into faceted chords, step-aliasing, and scalloped indentations rather than an analytical sphere.
+
+### 2. The 5 Root Causes
+1. **Neural Downsampling Bottleneck**: Encoder stride-2 pooling ($1/4, 1/8, 1/16, 1/32$) captures semantic identity but discards high-frequency sub-pixel edge geometry. Decoder upsampling introduces spatial quantization wobble.
+2. **Hard-Threshold Binarization of Sigmoid Ramps**: Step-thresholding ($\alpha > 35$) across floating-point probability fields turns continuous texture noise into jagged micro-scallops.
+3. **Local Contrast Camouflage**: When dark clay meets patterned background fabric (e.g. brown leaves on curtains), low luminance gradients cause the attention map to dilate outward into background textures.
+4. **Cartesian Lattice Bias**: Discrete structuring elements on a square pixel lattice introduce directional Chebyshev/Manhattan faceting.
+5. **JPEG DCT Block Ringing**: Lossy $8 \times 8$ frequency quantization along high-contrast edges creates Gibbs ringing artifacts that neural edge-detectors lock onto.
+
+### 3. Industrial Vision Solutions (Google Lens / Apple Camera Standards)
+1. **Guided Bilateral Filter / Joint Domain Mesh**: Uses the full-resolution camera RGB image as a structural guide to transfer analog sub-pixel lens gradients onto the alpha mask.
+2. **Signed Distance Field (SDF) Level-Set Smoothing**: Converts the binary raster into a continuous Euclidean distance field and smooths the zero-level isocontour with curvature-flow penalties.
+3. **Active Contours (Snakes)**: Minimizes an energy functional with elasticity ($\alpha$) and rigidity ($\beta$) terms to enforce $C^2$ smoothness along the image gradient.
+4. **Rotational Symmetry Priors**: Leverages axisymmetry in wheel-thrown pottery to regularize asymmetric perturbations across the vertical revolution axis.
+5. **Pre-Flight Mobile Guidance**: Real-time camera viewfinder alerts advising artisans to avoid textured curtains and utilize contrasting backdrops with clean rim lighting.
+
