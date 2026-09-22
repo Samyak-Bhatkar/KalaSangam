@@ -313,7 +313,7 @@ export function ArtisanProvider({ children }) {
       living_wage_multiplier: 1.0,
       fair_wage_certified: true
     });
-    
+
     // Fetch image and convert to base64
     try {
       const response = await fetch(rawUrl);
@@ -338,7 +338,7 @@ export function ArtisanProvider({ children }) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.92;
     utterance.pitch = 1.0;
-    
+
     // Attempt to pick regional voice
     const voices = window.speechSynthesis.getVoices();
     const voice = voices.find(v => v.lang.startsWith(langCode.slice(0, 2)));

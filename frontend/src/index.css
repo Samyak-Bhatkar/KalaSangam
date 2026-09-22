@@ -94,3 +94,70 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(200, 90, 50, 0.6);
 }
+
+/* Google Search Generative AI (SGE) Continuous Multi-colored Glowing Border Animation */
+@keyframes sge-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sge-pulse-aura {
+  0%, 100% {
+    opacity: 0.75;
+    filter: blur(8px);
+  }
+  50% {
+    opacity: 1;
+    filter: blur(14px);
+  }
+}
+
+.sge-conic-border {
+  position: absolute;
+  top: -120%;
+  left: -120%;
+  width: 340%;
+  height: 340%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    #4285F4 0deg,
+    #9B51E0 55deg,
+    #E040FB 100deg,
+    #FF4081 145deg,
+    #EA4335 190deg,
+    #FBBC05 235deg,
+    #34A853 280deg,
+    #00E5FF 325deg,
+    #4285F4 360deg
+  );
+  animation: sge-rotate 3.5s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sge-conic-aura {
+  position: absolute;
+  top: -120%;
+  left: -120%;
+  width: 340%;
+  height: 340%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    #4285F4 0deg,
+    #9B51E0 55deg,
+    #E040FB 100deg,
+    #FF4081 145deg,
+    #EA4335 190deg,
+    #FBBC05 235deg,
+    #34A853 280deg,
+    #00E5FF 325deg,
+    #4285F4 360deg
+  );
+  animation: sge-rotate 3.5s linear infinite, sge-pulse-aura 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
