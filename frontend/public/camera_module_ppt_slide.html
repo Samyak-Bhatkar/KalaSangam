@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShilpSetu AI — System Architecture (Camera & AI Studio Module)</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #D9E8F5;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0F172A;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    /* Print / Presentation mode */
+    @page {
+      size: 16in 9in;
+      margin: 0;
+    }
+
+    @media print {
+      body {
+        background: #CBE0F1 !important;
+        padding: 0 !important;
+      }
+      .toolbar { display: none !important; }
+      .slide-canvas {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        border: none !important;
+      }
+    }
+
+    .toolbar {
+      width: 1240px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 8px 18px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .btn-export {
+      background: #1E293B;
+      color: #fff;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-export:hover { background: #0F172A; transform: translateY(-1px); }
+
+    /* Main 16:9 Presentation Canvas */
+    .slide-canvas {
+      width: 1240px;
+      height: 698px; /* 16:9 exact ratio */
+      background: #CBE0F1; /* Authentic light powdery blue background */
+      border: 2px solid #000;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 20px 10px 20px;
+    }
+
+    /* Top Left Project Name */
+    .project-title {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #000;
+      line-height: 1;
+    }
+
+    /* Top Right SIH Logo & Architecture Header */
+    .sih-header-group {
+      position: absolute;
+      top: 14px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .sih-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+
+    .sih-logo-img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+
+    .sih-text {
+      text-align: left;
+      font-weight: 900;
+      font-size: 11px;
+      line-height: 1.1;
+      color: #0F172A;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .system-arch-title {
+      font-size: 32px;
+      font-weight: 900;
+      font-family: serif;
+      color: #000;
+      letter-spacing: -0.5px;
+      margin-top: 2px;
+    }
+
+    /* MAIN DIAGRAM BODY */
+    .diagram-body {
+      flex: 1;
+      position: relative;
+      margin-top: 6px;
+      margin-bottom: 8px;
+    }
+
+    /* Left Stack: API Layer, Data Layer, Provenance Layer */
+    .left-stack {
+      position: absolute;
+      top: 22px;
+      left: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 124px;
+    }
+
+    .stack-subheading {
+      font-size: 12px;
+      font-weight: 800;
+      color: #000;
+      margin-bottom: -5px;
+    }
+
+    .pill-node {
+      background: #D8ECF8;
+      border: 2px solid #000;
+      border-radius: 28px;
+      width: 122px;
+      padding: 7px 6px;
+      text-align: center;
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      line-height: 1.2;
+    }
+
+    .pill-node.cyan-light { background: #CEE9F9; }
+    .pill-node small { font-size: 8.5px; font-weight: 700; color: #334155; margin-top: 2px; }
+
+    .arrow-bidirectional-v {
+      font-size: 13px;
+      font-weight: 900;
+      color: #000;
+      line-height: 1;
+    }
+
+    /* Central Input Node: Artisan Craft Image */
+    .input-craft-card {
+      position: absolute;
+      left: 165px;
+      top: 120px;
+      width: 140px;
+      height: 130px;
+      background: #8FE8F6; /* Bright cyan from Udaan design */
+      border: 2px solid #000;
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+      box-shadow: 3px 4px 0px rgba(0,0,0,0.15);
+      z-index: 5;
+    }
+
+    .craft-icon-top {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    .input-craft-card h3 {
+      font-size: 16px;
+      font-weight: 900;
+      color: #000;
+      line-height: 1.15;
+    }
+
+    .craft-atom-icon {
+      font-size: 18px;
+      margin-top: 4px;
+    }
+
+    /* 3D Pipe Cylinders (Horizontal Tubes) */
+    .pipe-container {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 4;
+    }
+
+    .pipe-container.top-pipe {
+      left: 310px;
+      top: 50px;
+      width: 250px;
+    }
+
+    .pipe-container.bottom-pipe {
+      left: 310px;
+      top: 250px;
+      width: 250px;
+    }
+
+    .pipe-title {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #000;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .cylinder-tube {
+      width: 100%;
+      height: 48px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #D8ECF8 45%, #B3D7EE 100%);
+      border: 2px solid #000;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11.5px;
+      font-weight: 800;
+      color: #000;
+      text-align: center;
+      padding: 0 16px;
+      position: relative;
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
+    }
+
+    .cylinder-tube::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 16px;
+      border-radius: 50% / 50%;
+      border-right: 2px solid #000;
+      background: #C4E2F6;
+    }
+
+    /* Big Vertical Engine Capsule (Center-Right Lavender Box) */
+    .central-engine-capsule {
+      position: absolute;
+      left: 580px;
+      top: 15px;
+      width: 165px;
+      height: 385px;
+      background: #F3E5F5; /* Soft pastel lilac */
+      border: 2px solid #000;
+      border-radius: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 8px;
+      justify-content: space-between;
+      box-shadow: 3px 5px 0px rgba(0,0,0,0.15);
+      z-index: 5;
+    }
+
+    .ensemble-badge {
+      background: #FFF;
+      border: 2px solid #000;
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #000;
+      margin-bottom: 4px;
+    }
+
+    /* Nested Models Container */
+    .models-subbox {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1.5px solid #000;
+      border-radius: 14px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .model-pill {
+      background: #F8BBD0; /* Soft pink pill */
+      border: 1.5px solid #000;
+      border-radius: 12px;
+      font-size: 9.5px;
+      font-weight: 800;
+      text-align: center;
+      padding: 2px 4px;
+      color: #000;
+    }
+
+    .engine-section-box {
+      width: 100%;
+      background: #E1BEE7;
+      border: 1.5px solid #000;
+      border-radius: 10px;
+      padding: 5px;
+      text-align: center;
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .engine-section-box small {
+      font-size: 8.5px;
+      color: #4A148C;
+      font-weight: 700;
+    }
+
+    .engine-arrow-down {
+      font-size: 12px;
+      font-weight: 900;
+      color: #000;
+      margin: -2px 0;
+    }
+
+    /* Cloud Feedback Bubbles (The Upward Loops) */
+    .cloud-callout {
+      position: absolute;
+      background: #E8D5F5;
+      border: 2px solid #000;
+      border-radius: 26px;
+      padding: 6px 12px;
+      font-size: 10px;
+      font-weight: 800;
+      text-align: center;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
+      z-index: 6;
+    }
+
+    /* Left Cloud (Upward Loop #1: Voice Feedback) */
+    .cloud-left-top {
+      left: 380px;
+      top: 110px;
+      width: 140px;
+      height: 48px;
+    }
+
+    .cloud-left-bottom {
+      left: 390px;
+      top: 175px;
+      width: 130px;
+      height: 46px;
+    }
+
+    /* Right Cloud (Interactive Human Review) */
+    .cloud-right {
+      left: 765px;
+      top: 175px;
+      width: 140px;
+      height: 60px;
+    }
+
+    /* SVG Connecting Curves (Upward Loops & Bridges) */
+    .connections-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Top Output Box: Quality Review Modal */
+    .output-box-top {
+      position: absolute;
+      left: 765px;
+      top: 35px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .output-header-tag {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: #000;
+      margin-bottom: 2px;
+    }
+
+    .output-pill-large {
+      background: #C6EBF8;
+      border: 2px solid #000;
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 11.5px;
+      font-weight: 900;
+      color: #000;
+      text-align: center;
+      line-height: 1.25;
+    }
+
+    /* Unified Master Asset Box */
+    .composite-box {
+      position: absolute;
+      left: 928px;
+      top: 165px;
+      width: 100px;
+      height: 78px;
+      background: #E0F2FE;
+      border: 2px solid #000;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 900;
+      color: #000;
+      line-height: 1.2;
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
+    }
+
+    /* Final Tier Cards (Far Right 4 Pills) */
+    .final-tiers-column {
+      position: absolute;
+      left: 1055px;
+      top: 125px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      width: 160px;
+    }
+
+    .tier-card-pill {
+      background: #EDE9FE;
+      border: 2px solid #000;
+      border-radius: 18px;
+      padding: 6px 12px;
+      text-align: center;
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #000;
+      line-height: 1.15;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+    }
+
+    .tier-card-pill small {
+      display: block;
+      font-size: 9px;
+      font-weight: 700;
+      color: #4C1D95;
+    }
+
+    /* Bottom Secondary Cyan Box: Provenance & Metadata */
+    .bottom-meta-box {
+      position: absolute;
+      left: 770px;
+      top: 260px;
+      width: 120px;
+      height: 64px;
+      background: #8FE8F6;
+      border: 2px solid #000;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 900;
+      color: #000;
+      line-height: 1.2;
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
+    }
+
+    /* Quality Report Icon / Label in middle */
+    .report-graphic-box {
+      position: absolute;
+      left: 320px;
+      top: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .report-tag {
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #000;
+      text-align: center;
+      line-height: 1.15;
+    }
+
+    .report-icon {
+      font-size: 26px;
+    }
+
+    /* =======================================================
+       BOTTOM TECH STACK RIBBON (EXACT UDAAN STYLE)
+       ======================================================= */
+    .bottom-tech-ribbon {
+      width: 100%;
+      height: 52px;
+      background: #DDD4ED; /* Soft lavender track */
+      border: 2px solid #000;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      padding: 4px 10px;
+      gap: 12px;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .tech-stack-title-pill {
+      background: #FFFFFF;
+      border: 2px solid #000;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 17px;
+      font-weight: 900;
+      color: #000;
+      letter-spacing: -0.5px;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tech-segment-group {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      justify-content: space-between;
+    }
+
+    .tech-segment {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tech-capsule {
+      background: #FFFFFF;
+      border: 2px solid #000;
+      border-radius: 20px;
+      padding: 3px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 1.5px 2px 0px rgba(0,0,0,0.1);
+    }
+
+    .tech-capsule.blue-edge { border-left: 6px solid #1E40AF; }
+    .tech-capsule.green-edge { border-left: 6px solid #059669; }
+    .tech-capsule.cyan-edge { border-left: 6px solid #0284C7; }
+    .tech-capsule.purple-edge { border-left: 6px solid #7C3AED; }
+
+    .tech-badge-label {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #000;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tech-icon-tag {
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Export Control Toolbar -->
+  <div class="toolbar">
+    <div>
+      <strong style="color: #0F172A; font-size: 13px;">🏛️ Smart India Hackathon 2026</strong>
+      <span style="margin-left: 10px; font-size: 12px; color: #475569;">System Architecture Slide (Problem ID: 26090 — ShilpSetu AI)</span>
+    </div>
+    <button class="btn-export" onclick="window.print()">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+      Export 16:9 PDF (Ctrl + P)
+    </button>
+  </div>
+
+  <!-- ==================== 16:9 PRESENTATION CANVAS ==================== -->
+  <div class="slide-canvas">
+
+    <!-- Top Left Project Title -->
+    <div class="project-title">SHILPSETU!</div>
+
+    <!-- Top Right SIH Logo & Slide Title -->
+    <div class="sih-header-group">
+      <div class="sih-badge">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="#F97316"/>
+          <path d="M12 6v6l4 2" stroke="#FFF" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="sih-text">
+          SMART INDIA<br>HACKATHON<br>2026
+        </div>
+      </div>
+      <div class="system-arch-title">System Architecture</div>
+    </div>
+
+    <!-- MAIN INTERACTIVE ARCHITECTURE CANVAS -->
+    <div class="diagram-body">
+
+      <!-- SVG BEZIER CURVES & UPWARD FEEDBACK LOOPS -->
+      <svg class="connections-svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#000"/>
+          </marker>
+          <marker id="arrow-dashed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#000"/>
+          </marker>
+        </defs>
+
+        <!-- Arrow: Left Stack to Artisan Craft Data -->
+        <path d="M 134 185 L 163 185" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <path d="M 163 185 L 134 185" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow: Craft Image -> Top Pipe -->
+        <path d="M 235 120 L 235 74 L 308 74" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow: Craft Image -> Bottom Pipe -->
+        <path d="M 235 250 L 235 274 L 308 274" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow: Top Pipe -> Central Engine -->
+        <path d="M 560 74 L 578 74" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow: Bottom Pipe -> Central Engine -->
+        <path d="M 560 274 L 578 274" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- UPWARD LOOP #1 (Dashed curved arrow from Voice Alert to Input Craft Image) -->
+        <path d="M 390 195 C 330 195, 330 215, 307 205" fill="none" stroke="#000" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)"/>
+
+        <!-- Cloud feedback arrow: Middle Engine to Cloud -->
+        <path d="M 578 190 L 522 195" fill="none" stroke="#000" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrow-dashed)"/>
+        <path d="M 578 135 L 522 135" fill="none" stroke="#000" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Flow: Central Engine -> Top Output Review Modal -->
+        <path d="M 745 60 L 763 60" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow: Quality Review Modal -> Verified Master Box -->
+        <path d="M 875 60 L 975 60 L 975 163" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- UPWARD LOOP #2 (Dashed curved loop from Review Cloud back to Input Craft Data) -->
+        <path d="M 765 205 C 730 205, 730 350, 235 350 L 235 253" fill="none" stroke="#000" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)"/>
+
+        <!-- Flow: Metadata Box -> Verified Master Box -->
+        <path d="M 890 292 L 975 292 L 975 245" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow: Verified Master Box -> Final Tiers Column -->
+        <path d="M 1030 205 L 1053 205" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+      </svg>
+
+      <!-- 1. LEFT STACK (API, DATA, PROVENANCE) -->
+      <div class="left-stack">
+        <span class="stack-subheading">API Layer</span>
+        <div class="pill-node">
+          <span>FastAPI</span>
+          <small>Async Gateway</small>
+          <span style="font-size: 8px; color: #1E40AF; margin-top: 2px;">LRU Cache (5ms)</span>
+        </div>
+        <div class="arrow-bidirectional-v">⇕</div>
+        <div class="pill-node cyan-light">
+          <span>Data Layer</span>
+          <small>SQLite 3 WAL</small>
+          <span style="font-size: 8px; color: #0284C7; margin-top: 2px;">Local State Store</span>
+        </div>
+        <div class="arrow-bidirectional-v">⇕</div>
+        <div class="pill-node">
+          <span>Provenance</span>
+          <span>Layer</span>
+          <small>SHA-256 Crypto Hash</small>
+          <span style="font-size: 7.5px; color: #047857; margin-top: 2px;">GI Anti-Piracy QR</span>
+        </div>
+      </div>
+
+      <!-- 2. CENTRAL INPUT ENTITY: ARTISAN CRAFT IMAGE -->
+      <div class="input-craft-card">
+        <div class="craft-icon-top">📷 🖼️</div>
+        <h3>Artisan Craft Image</h3>
+        <small style="font-size: 9.5px; font-weight: 700; color: #0F172A; margin-top: 4px;">Manual Shutter or Gallery Upload</small>
+        <div class="craft-atom-icon">⚛️</div>
+      </div>
+
+      <!-- 3. TOP PIPE CYLINDER: NORMALIZATION PIPELINE -->
+      <div class="pipe-container top-pipe">
+        <div class="pipe-title">Image Normalization Pipeline</div>
+        <div class="cylinder-tube">
+          <span>Preprocessing<br>and EXIF Transpose</span>
+        </div>
+      </div>
+
+      <!-- 4. BOTTOM PIPE CYLINDER: QUALITY PIPELINE -->
+      <div class="pipe-container bottom-pipe">
+        <div class="pipe-title">Quality Assessment Pipeline</div>
+        <div class="cylinder-tube">
+          <span>Laplacian Sharpness &<br>Luminance Exposure Analysis</span>
+        </div>
+      </div>
+
+      <!-- Quality Report Icon / Label in middle -->
+      <div class="report-graphic-box">
+        <span class="report-tag">Quality Report<br>with Metrics</span>
+        <div class="report-icon">📊</div>
+      </div>
+
+      <!-- 5. CLOUD CALLOUTS (UPWARD RECOVERY LOOPS) -->
+      <div class="cloud-callout cloud-left-top">
+        <span>Stabilize Framing & Exposure</span>
+      </div>
+
+      <div class="cloud-callout cloud-left-bottom">
+        <span style="color: #991B1B; font-weight: 900;">Hindi Voice Alert</span>
+        <small style="font-size: 8px;">"फोटो धुंधली है। दोबारा लें"</small>
+      </div>
+
+      <div class="cloud-callout cloud-right">
+        <span>Interactive Before/After</span>
+        <small style="font-size: 8px; color: #581C87;">Artisan Discard / Retake</small>
+      </div>
+
+      <!-- 6. LARGE CENTRAL VERTICAL CAPSULE (AI STUDIO ENSEMBLE) -->
+      <div class="central-engine-capsule">
+        <div class="ensemble-badge">Neural Ensemble</div>
+
+        <!-- Nested Model Pills -->
+        <div class="models-subbox">
+          <div class="model-pill">BiRefNet-General</div>
+          <div class="model-pill" style="background: #E1BEE7;">bria-rmbg (Studio)</div>
+          <div class="model-pill" style="background: #C8E6C9;">u2net / u2netp</div>
+        </div>
+
+        <div class="engine-arrow-down">▼</div>
+
+        <!-- 6500K Balance Stage -->
+        <div class="engine-section-box">
+          <span>OpenCV cv2</span>
+          <small>6500K Gray-World</small>
+          <small>Daylight Balancer</small>
+        </div>
+
+        <div class="engine-arrow-down">▼</div>
+
+        <!-- Shadow Stage -->
+        <div class="engine-section-box" style="background: #D1C4E9;">
+          <span>Pillow (PIL)</span>
+          <small>Gaussian Blur (σ=15)</small>
+          <small>Contact Drop Shadow</small>
+        </div>
+
+        <div class="engine-arrow-down">▼</div>
+
+        <!-- Bottom Model Box -->
+        <div class="ensemble-badge" style="background: #FFF; font-size: 9.5px; margin-bottom: 0;">
+          Composited Asset
+        </div>
+      </div>
+
+      <!-- 7. TOP OUTPUT BOX: INTERACTIVE QUALITY REVIEW MODAL -->
+      <div class="output-box-top">
+        <div class="output-header-tag">Review Gate</div>
+        <div class="output-pill-large">
+          <span>Before / After<br>Studio Quality<br>Inspection</span>
+        </div>
+      </div>
+
+      <!-- 8. BOTTOM ANGLE & FORMAT METADATA BOX -->
+      <div class="bottom-meta-box">
+        <span>Metadata & Angle</span>
+        <small style="font-size: 8px; font-weight: 700;">1:1 Cushion Margin</small>
+        <small style="font-size: 7.5px; color: #0284C7; font-weight: 700;">2D DCT Watermark</small>
+      </div>
+
+      <!-- 9. UNIFIED VERIFIED MASTER ASSET BOX -->
+      <div class="composite-box">
+        <span>Verified<br>Studio<br>Master</span>
+        <small style="font-size: 8px; color: #0369A1; font-weight: 800;">100% Quality Pass</small>
+      </div>
+
+      <!-- 10. FINAL TIERS (FAR RIGHT 4 PILLS) -->
+      <div class="final-tiers-column">
+        <div class="tier-card-pill">
+          <span>ONDC Commerce</span>
+          <small>Studio White (#F8F9FA)</small>
+        </div>
+        <div class="tier-card-pill">
+          <span>Heritage Exhibition</span>
+          <small>Warm Terracotta (#C85A32)</small>
+        </div>
+        <div class="tier-card-pill">
+          <span>Provenance Tag</span>
+          <small>Transparent PNG + 2D DCT</small>
+        </div>
+        <div class="tier-card-pill">
+          <span>GeM Procurement</span>
+          <small>Statutory Tender Specs</small>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- =======================================================
+         BOTTOM TECH STACK RIBBON (EXACT UDAAN STYLE)
+         ======================================================= -->
+    <div class="bottom-tech-ribbon">
+      <div class="tech-stack-title-pill">
+        <span>Tech Stack</span>
+        <span style="font-size: 14px;">⚡</span>
+      </div>
+
+      <div class="tech-segment-group">
+        <!-- AI ML -->
+        <div class="tech-segment">
+          <div class="tech-capsule blue-edge">
+            <span class="tech-icon-tag">🧠</span>
+            <span>rembg BiRefNet</span>
+            <span style="font-size: 10px; color: #1E40AF;">•</span>
+            <span>OpenCV (cv2)</span>
+            <span style="font-size: 10px; color: #1E40AF;">•</span>
+            <span>Pillow (PIL)</span>
+          </div>
+          <span class="tech-badge-label">AI / Computer Vision</span>
+        </div>
+
+        <!-- Backend -->
+        <div class="tech-segment">
+          <div class="tech-capsule green-edge">
+            <span class="tech-icon-tag">⚙️</span>
+            <span>FastAPI</span>
+            <span style="font-size: 10px; color: #047857;">•</span>
+            <span>Python 3.13</span>
+            <span style="font-size: 10px; color: #047857;">•</span>
+            <span>Uvicorn</span>
+          </div>
+          <span class="tech-badge-label">Backend</span>
+        </div>
+
+        <!-- Database -->
+        <div class="tech-segment">
+          <div class="tech-capsule cyan-edge">
+            <span class="tech-icon-tag">💾</span>
+            <span>SQLite 3 (WAL)</span>
+            <span style="font-size: 10px; color: #0284C7;">•</span>
+            <span>LRU Hash Cache</span>
+          </div>
+          <span class="tech-badge-label">Database & Cache</span>
+        </div>
+
+        <!-- Frontend -->
+        <div class="tech-segment">
+          <div class="tech-capsule purple-edge">
+            <span class="tech-icon-tag">⚛️</span>
+            <span>React 19</span>
+            <span style="font-size: 10px; color: #7C3AED;">•</span>
+            <span>Vite Build</span>
+            <span style="font-size: 10px; color: #7C3AED;">•</span>
+            <span>HTML5 FileReader</span>
+          </div>
+          <span class="tech-badge-label">Frontend</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
