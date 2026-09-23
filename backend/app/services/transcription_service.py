@@ -70,8 +70,7 @@ def transcribe_audio_bytes(
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
             audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=clean_mime)
 
-            # Try verified modern production models in sequence (Gemini on priority)
-            candidate_models = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-3-flash-preview"]
+            candidate_models = ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]
             last_model_err = None
             for model_name in candidate_models:
                 try:

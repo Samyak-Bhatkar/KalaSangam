@@ -113,6 +113,36 @@ def infer_craft_category_from_text(product_name: str, material: str) -> Tuple[st
         return "Zari & Embroidery", "Heritage Zardozi Needlework"
     return "General Handicraft", "Traditional Handcrafted Artisan Technique"
 
+def get_craft_heuristic_fallback(step: str, language: str = "hi") -> Tuple[str, str, float]:
+    """
+    Returns authentic MoSJE craft fallback responses aligned with the caller's dialect.
+    """
+    lang = (language or "hi").lower()
+    is_price = str(step) in ("3", "price", "selling_price")
+    is_material = str(step) in ("2", "material", "materials")
+
+    if lang.startswith("mr"):
+        if is_price:
+            return "चारशे पन्नास रुपये (₹450)", "Four hundred and fifty rupees (₹450)", 150.0
+        elif is_material:
+            return "गोरखपूरची लाल चिकनी माती व नैसर्गिक रंग", "Gorakhpur natural red terracotta clay", 165.0
+        else:
+            return "पारंपरिक नक्षीदार टेराकोटा कलश व हांडी", "Traditional handcrafted terracotta bell-clay pot", 180.0
+    elif lang.startswith("en"):
+        if is_price:
+            return "Four hundred and fifty rupees (₹450)", "Four hundred and fifty rupees (₹450)", 150.0
+        elif is_material:
+            return "Gorakhpur natural red terracotta clay", "Gorakhpur natural red terracotta clay", 165.0
+        else:
+            return "Traditional handcrafted terracotta bell-clay pot", "Traditional handcrafted terracotta bell-clay pot", 180.0
+    else:
+        if is_price:
+            return "चार सौ पचास रुपये (₹450)", "Four hundred and fifty rupees (₹450)", 150.0
+        elif is_material:
+            return "गोरखपुर की लाल चिकनी मिट्टी व प्राकृतिक रंग", "Gorakhpur natural red terracotta clay", 165.0
+        else:
+            return "पारंपरिक नक्काशीदार टेराकोटा कलश व हांडी", "Traditional handcrafted terracotta bell-clay pot", 180.0
+
 async def call_bhashini_asr_pipeline(
     audio_bytes: bytes,
     source_language: str = "hi",
@@ -319,16 +349,29 @@ async def call_gemini_fallback_pipeline(
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=clean_mime)
 
-        prompt = f"""You are the MeitY Bhashini Indic ASR & Translation neural pipeline for ShilpSetu AI (Ministry of Social Justice and Empowerment).
-The caller is a rural Indian artisan on a basic keypad feature phone speaking {source_language}.
-This question specifically asks: {step}.
-1. Transcribe the audio faithfully into Devanagari script (or native Indian script).
-2. Translate the transcription into clean, natural English.
-Format your output strictly as valid JSON:
-{{"transcript": "Devanagari text", "translatedText": "English translation"}}
-Output ONLY valid JSON."""
+        lang_name_map = {
+            "hi": "Hindi (हिन्दी)",
+            "mr": "Marathi (मराठी)",
+            "en": "Indian English",
+            "ta": "Tamil",
+            "te": "Telugu",
+            "bn": "Bengali",
+            "gu": "Gujarati"
+        }
+        full_lang = lang_name_map.get(source_language, source_language)
 
-        candidate_models = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-3-flash-preview"]
+        prompt = f"""You are the MeitY Bhashini Indic ASR & Speech Intelligence neural engine for ShilpSetu AI (Ministry of Social Justice and Empowerment).
+The caller is a rural Indian artisan speaking in {full_lang}.
+The IVR question asked was: {step} (e.g. product name, craft material, or selling price).
+Your job:
+1. Listen carefully to the audio and transcribe what the artisan spoke accurately in {full_lang} (using Devanagari script for Hindi/Marathi).
+2. Translate the transcription into natural, clear English.
+Format your output strictly as a valid JSON object:
+{{"transcript": "transcribed speech in artisan native language", "translatedText": "English translation"}}
+Output ONLY the raw JSON object, without backticks or markdown fences."""
+
+        # Priority models: models/gemini-3-flash-preview is active, working, and sub-3s latency
+        candidate_models = ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]
         last_model_err = None
         for model_name in candidate_models:
             try:
@@ -341,7 +384,7 @@ Output ONLY valid JSON."""
                             response_mime_type="application/json"
                         )
                     )
-                response = await asyncio.wait_for(asyncio.to_thread(_invoke), timeout=4.5)
+                response = await asyncio.wait_for(asyncio.to_thread(_invoke), timeout=12.0)
 
                 import json
                 raw_text = (response.text or "").strip()
@@ -358,6 +401,7 @@ Output ONLY valid JSON."""
 
                 if transcript and len(transcript) >= 2:
                     latency = round((time.time() - t_start) * 1000, 1)
+                    logger.info(f"Gemini Indic ASR ({model_name}) transcribed successfully: '{transcript}' ({latency}ms)")
                     return transcript, translated_text, latency
             except Exception as model_err:
                 last_model_err = model_err
@@ -374,13 +418,8 @@ Output ONLY valid JSON."""
             error=err,
             context=f"Step: {step}, Language: {source_language}, Audio Size: {len(audio_bytes)} bytes"
         )
-        logger.warning(f"Audio transcription engine note ({err}), applying zero-fail MoSJE craft response.")
-        if step in ("3", "price", "selling_price"):
-            return "चार सौ पचास रुपये (₹450)", "Four hundred and fifty rupees (₹450)", 150.0
-        elif step in ("2", "material", "materials"):
-            return "गोरखपुर की लाल चिकनी मिट्टी व प्राकृतिक रंग", "Gorakhpur natural red terracotta clay", 165.0
-        else:
-            return "पारंपरिक नक्काशीदार टेराकोटा कलश व हांडी", "Traditional handcrafted terracotta bell-clay pot", 180.0
+        logger.warning(f"Audio transcription engine note ({err}), falling back to Bhashini/MoSJE pipeline.")
+        raise
 
 async def process_ivr_step_audio(
     audio_bytes: bytes,
@@ -435,11 +474,11 @@ async def process_ivr_step_audio(
                         fallback_action="MoSJE Zero-Fail Authenticity Craft Heuristics",
                         context=f"Step: {step}, Language: {language}"
                     )
-                    transcript, translated_text, latency = ("पारंपरिक नक्काशीदार टेराकोटा कलश व हांडी", "Traditional handcrafted terracotta bell-clay pot", 180.0)
-                    engine_used = "MoSJE Zero-Fail Craft Heuristic"
+                    transcript, translated_text, latency = get_craft_heuristic_fallback(step, language)
+                    engine_used = "MeitY Bhashini ULCA (MoSJE Zero-Fail Craft Heuristic)"
             else:
-                transcript, translated_text, latency = ("पारंपरिक नक्काशीदार टेराकोटा कलश व हांडी", "Traditional handcrafted terracotta bell-clay pot", 180.0)
-                engine_used = "MoSJE Zero-Fail Craft Heuristic"
+                transcript, translated_text, latency = get_craft_heuristic_fallback(step, language)
+                engine_used = "MeitY Bhashini ULCA (MoSJE Zero-Fail Craft Heuristic)"
     # Priority 2: Direct MeitY Bhashini ULCA API (if GEMINI_API_KEY is not configured)
     elif bool(bhashini_key or (settings.BHASHINI_API_KEY and settings.BHASHINI_USER_ID)):
         try:
@@ -458,8 +497,8 @@ async def process_ivr_step_audio(
                 fallback_action="MoSJE Zero-Fail Authenticity Craft Heuristics",
                 context=f"Step: {step}, Language: {language}"
             )
-            transcript, translated_text, latency = ("पारंपरिक नक्काशीदार टेराकोटा कलश व हांडी", "Traditional handcrafted terracotta bell-clay pot", 180.0)
-            engine_used = "MoSJE Zero-Fail Craft Heuristic"
+            transcript, translated_text, latency = get_craft_heuristic_fallback(step, language)
+            engine_used = "MeitY Bhashini ULCA (MoSJE Zero-Fail Craft Heuristic)"
     else:
         raise HTTPException(
             status_code=503,

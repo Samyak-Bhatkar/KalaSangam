@@ -87,7 +87,7 @@ def call_gemini_multimodal(
             )
 
             response = None
-            for model_name in ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-3-flash-preview"]:
+            for model_name in ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]:
                 try:
                     response = client.models.generate_content(
                         model=model_name,
@@ -118,7 +118,7 @@ def call_gemini_multimodal(
             logger.warning(f"google-genai attempt failed ({e}), trying legacy SDK fallback")
             import google.generativeai as gai
             gai.configure(api_key=settings.GEMINI_API_KEY)
-            model = gai.GenerativeModel("gemini-2.5-flash")
+            model = gai.GenerativeModel("models/gemini-3-flash-preview")
             prompt = GEMINI_SYSTEM_DIRECTIVE.format(
                 transcript=transcript,
                 source_language=source_language

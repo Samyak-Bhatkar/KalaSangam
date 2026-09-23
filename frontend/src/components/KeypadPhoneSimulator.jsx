@@ -78,6 +78,8 @@ export default function KeypadPhoneSimulator({ onClose }) {
   const [activeStepIndex, setActiveStepIndex] = useState(0);      // 0: product, 1: material, 2: price
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0); // 0 to 100 RMS volume
+  const [audioLevels, setAudioLevels] = useState([3, 4, 5, 6, 7, 6, 5, 4, 3, 3]);
+  const lastWaveformUpdateRef = useRef(0);
 
   // Parsed Artisan Responses
   const [formData, setFormData] = useState({
@@ -114,6 +116,48 @@ export default function KeypadPhoneSimulator({ onClose }) {
   const callIntervalRef = useRef(null);
   const animFrameRef = useRef(null);
   const hasSpokenRef = useRef(false);
+  const recordingIntervalRef = useRef(null);
+  const speechSamplesCountRef = useRef(0);
+  const activeUtteranceRef = useRef(null);
+  const voiceMapRef = useRef({ hi: null, mr: null, en: null });
+
+  // ─── Voice Selection: Natural Indian Female Voice for IVR Telephony ──────────
+  useEffect(() => {
+    const updateVoices = () => {
+      if (!window.speechSynthesis) return;
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices || voices.length === 0) return;
+
+      // Detect Indian female voices across Hindi, Marathi, and Indian English
+      const hiFemale = voices.find(v => (v.lang === 'hi-IN' || v.lang.startsWith('hi')) && /female|swara|heera|neerja|google|kalpana/i.test(v.name)) ||
+                       voices.find(v => v.lang === 'hi-IN' || v.lang.startsWith('hi')) ||
+                       voices.find(v => /hindi|india/i.test(v.name));
+
+      const mrFemale = voices.find(v => (v.lang === 'mr-IN' || v.lang.startsWith('mr')) && /female|google/i.test(v.name)) ||
+                       voices.find(v => v.lang === 'mr-IN' || v.lang.startsWith('mr')) ||
+                       hiFemale;
+
+      const enFemale = voices.find(v => (v.lang === 'en-IN' || v.lang === 'en_IN') && /female|neerja|google/i.test(v.name)) ||
+                       voices.find(v => v.lang === 'en-IN' || v.lang === 'en_IN') ||
+                       voices.find(v => v.lang.startsWith('en') && /female|zira|samantha/i.test(v.name));
+
+      voiceMapRef.current = {
+        hi: hiFemale || null,
+        mr: mrFemale || hiFemale || null,
+        en: enFemale || null,
+      };
+    };
+
+    updateVoices();
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = updateVoices;
+    }
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+    };
+  }, []);
 
   // ─── Add Telemetry Log Entry ────────────────────────────────────────────────
   const logTelemetry = useCallback((type, message, data = null) => {
@@ -200,26 +244,73 @@ export default function KeypadPhoneSimulator({ onClose }) {
   const speakIvrPrompt = useCallback((text, langCode = 'hi') => {
     return new Promise((resolve) => {
       if (!window.speechSynthesis) {
-        logTelemetry('INFO', `Speech synthesis not supported, skipping spoken prompt: "${text.substring(0, 30)}..."`);
-        resolve();
+        logTelemetry('INFO', `Speech synthesis not supported, displaying prompt: "${text.substring(0, 30)}..."`);
+        setTimeout(resolve, Math.max(2500, text.length * 60));
         return;
       }
 
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.95;
-      utterance.pitch = 1.0;
+      // If already speaking, safely cancel
+      try {
+        if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+          window.speechSynthesis.cancel();
+        }
+      } catch (e) { }
 
-      const langMap = { hi: 'hi-IN', mr: 'mr-IN', en: 'en-IN' };
-      utterance.lang = langMap[langCode] || 'hi-IN';
+      // Give browser audio queue a 60ms tick to reset after cancel
+      setTimeout(() => {
+        try {
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.rate = 0.92;  // Natural spoken cadence for rural artisans
+          utterance.pitch = 1.05; // Natural female tone
 
-      utterance.onend = () => resolve();
-      utterance.onerror = (e) => {
-        console.warn('Speech synthesis warning:', e);
-        resolve();
-      };
+          const langMap = { hi: 'hi-IN', mr: 'mr-IN', en: 'en-IN' };
+          utterance.lang = langMap[langCode] || 'hi-IN';
 
-      window.speechSynthesis.speak(utterance);
+          // Assign selected Indian female voice if found
+          const voice = voiceMapRef.current[langCode] || voiceMapRef.current.hi;
+          if (voice) {
+            utterance.voice = voice;
+          }
+
+          let resolved = false;
+          const safeResolve = () => {
+            if (!resolved) {
+              resolved = true;
+              activeUtteranceRef.current = null;
+              if (window._activeUtterance === utterance) {
+                window._activeUtterance = null;
+              }
+              resolve();
+            }
+          };
+
+          utterance.onend = () => {
+            clearTimeout(fallbackTimer);
+            safeResolve();
+          };
+
+          utterance.onerror = (e) => {
+            console.warn('Speech synthesis notice:', e?.error || e);
+            clearTimeout(fallbackTimer);
+            safeResolve();
+          };
+
+          // Store reference on ref and window to prevent Chromium garbage collection
+          activeUtteranceRef.current = utterance;
+          window._activeUtterance = utterance;
+
+          // Fail-safe timeout based on text length: ~85ms/char + 4000ms minimum
+          const maxSpeechTime = Math.max(4000, text.length * 85);
+          const fallbackTimer = setTimeout(() => {
+            safeResolve();
+          }, maxSpeechTime);
+
+          window.speechSynthesis.speak(utterance);
+        } catch (err) {
+          console.warn('Speech synthesis speak error:', err);
+          setTimeout(resolve, 2000);
+        }
+      }, 60);
     });
   }, [logTelemetry]);
 
@@ -249,15 +340,25 @@ export default function KeypadPhoneSimulator({ onClose }) {
     if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     if (maxTimerRef.current) clearTimeout(maxTimerRef.current);
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    if (recordingIntervalRef.current) {
+      clearInterval(recordingIntervalRef.current);
+      recordingIntervalRef.current = null;
+    }
 
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      try { mediaRecorderRef.current.stop(); } catch (e) { }
+      try {
+        if (mediaRecorderRef.current.state === 'recording') {
+          mediaRecorderRef.current.requestData();
+        }
+        mediaRecorderRef.current.stop();
+      } catch (e) { }
     }
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach(t => t.stop());
       mediaStreamRef.current = null;
     }
     setAudioLevel(0);
+    setAudioLevels([3, 3, 3, 3, 3, 3, 3, 3, 3, 3]);
   }, []);
 
   // ─── Start Call (Answer / Dial Action) ────────────────────────────────────────
@@ -301,6 +402,9 @@ export default function KeypadPhoneSimulator({ onClose }) {
 
   // ─── Step Execution Engine: Play Prompt -> Beep -> Record ────────────────────
   const executeQuestionStep = useCallback(async (stepIndex, lang) => {
+    // Ensure any previously active audio or recording is fully stopped
+    stopAudioTracks();
+
     setActiveStepIndex(stepIndex);
     setCallState('PLAYING_PROMPT');
 
@@ -310,34 +414,63 @@ export default function KeypadPhoneSimulator({ onClose }) {
     const currentQuestion = questions[stepIndex];
 
     logTelemetry('VOICE', `Playing Voice Prompt for Step ${stepIndex + 1}/3 (${stepNames[stepIndex]}): "${currentQuestion}"`);
+    // 1. Girl's voice speaks the question prompt completely
     await speakIvrPrompt(currentQuestion, lang);
 
-    // Play Beep
+    // 2. Play Telecom 1000Hz Beep tone
     logTelemetry('INFO', 'Tone Signal: 1000Hz Beep played. Microphone opening for artisan speech...');
     await playBeep();
 
-    // Start Recording with Silence Detection
+    // 3. Microphone opens ONLY after prompt and beep are fully finished
+    setCallState('RECORDING');
     startStepRecording(stepIndex, lang);
-  }, [logTelemetry, speakIvrPrompt, playBeep]);
+  }, [logTelemetry, speakIvrPrompt, playBeep, stopAudioTracks]);
 
   // ─── Audio Recording with 3-Way Auto-Stop (Silence, Max 15s, '#' Key) ────────
   const startStepRecording = useCallback(async (stepIndex, lang) => {
     try {
+      stopAudioTracks();
+
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true }
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
       });
       mediaStreamRef.current = stream;
 
       const ctx = getAudioContext();
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+
       const source = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.3;
       source.connect(analyser);
+
+      // Connect to zero-gain node so Chromium doesn't throttle audio subgraph
+      const silentGain = ctx.createGain();
+      silentGain.gain.setValueAtTime(0, ctx.currentTime);
+      analyser.connect(silentGain);
+      silentGain.connect(ctx.destination);
+
       analyserRef.current = analyser;
 
       audioChunksRef.current = [];
       hasSpokenRef.current = false;
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      speechSamplesCountRef.current = 0;
+
+      let recorderOptions = {};
+      if (typeof MediaRecorder !== 'undefined') {
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          recorderOptions = { mimeType: 'audio/webm;codecs=opus' };
+        } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+          recorderOptions = { mimeType: 'audio/webm' };
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          recorderOptions = { mimeType: 'audio/mp4' };
+        }
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, recorderOptions);
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (e) => {
@@ -347,56 +480,87 @@ export default function KeypadPhoneSimulator({ onClose }) {
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const mime = mediaRecorder.mimeType || 'audio/webm';
+        const audioBlob = new Blob(audioChunksRef.current, { type: mime });
         logTelemetry('VOICE', `Audio Recording Captured (${(audioBlob.size / 1024).toFixed(1)} KB). Sending to Bhashini pipeline...`);
         handleProcessCapturedAudio(audioBlob, stepIndex, lang);
       };
 
       mediaRecorder.start(100);
-      setCallState('RECORDING');
       setRecordingSeconds(0);
 
-      // Recording counter
+      // Recording counter with strict 15s cap (no runaway interval)
       const startMs = Date.now();
-      const timerInterval = setInterval(() => {
-        setRecordingSeconds(Math.floor((Date.now() - startMs) / 1000));
-      }, 500);
+      recordingIntervalRef.current = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startMs) / 1000);
+        const clamped = Math.min(15, elapsed);
+        setRecordingSeconds(clamped);
+        if (elapsed >= 15) {
+          if (recordingIntervalRef.current) {
+            clearInterval(recordingIntervalRef.current);
+            recordingIntervalRef.current = null;
+          }
+          logTelemetry('VOICE', 'Max duration limit reached (15s). Stopping recording.');
+          stopAudioTracks();
+        }
+      }, 250);
 
       // Fallback 1: Max 15-second cutoff
       maxTimerRef.current = setTimeout(() => {
-        logTelemetry('VOICE', 'Max duration limit reached (15s). Stopping recording.');
-        clearInterval(timerInterval);
         stopAudioTracks();
-      }, 15000);
+      }, 15100);
 
-      // Web Audio RMS volume calculation & 2s Silence Detector
-      const pcmData = new Uint8Array(analyser.frequencyBinCount);
+      // Frequency-domain vocal energy calculation & Smart 2s Silence Detector
+      const freqData = new Uint8Array(analyser.frequencyBinCount);
       let silenceStart = null;
 
       const monitorAudio = () => {
         if (!analyserRef.current) return;
-        analyserRef.current.getByteFrequencyData(pcmData);
+        analyserRef.current.getByteFrequencyData(freqData);
 
-        let sum = 0;
-        for (let i = 0; i < pcmData.length; i++) {
-          sum += pcmData[i];
+        const now = Date.now();
+
+        // 1. Synchronized LCD Audio Waveform: Update 10 real frequency formant bars
+        // Throttled to ~32ms (~30 fps) for smooth, jank-free, real-time animation in sync with speech
+        if (now - lastWaveformUpdateRef.current > 32) {
+          lastWaveformUpdateRef.current = now;
+          const binIndices = [1, 2, 3, 5, 7, 10, 14, 18, 24, 30];
+          const newLevels = binIndices.map(binIdx => {
+            const raw = freqData[binIdx] || 0;
+            const gated = Math.max(0, raw - 8);
+            return Math.max(3, Math.min(24, Math.round((gated / 140) * 24)));
+          });
+          setAudioLevels(newLevels);
         }
-        const avg = sum / pcmData.length;
-        const normalizedLevel = Math.min(100, Math.round((avg / 128) * 100));
-        setAudioLevel(normalizedLevel);
 
-        // Check if artisan started speaking
-        if (normalizedLevel > 18) {
-          hasSpokenRef.current = true;
+        // 2. Vocal formant frequency bands (approx 180 Hz to 3500 Hz: bins 2 to 36)
+        let voiceSum = 0;
+        const startBin = 2; // skip DC/sub-bass rumble and fan hum
+        const endBin = Math.min(36, freqData.length);
+        for (let i = startBin; i < endBin; i++) {
+          voiceSum += freqData[i];
+        }
+        const voiceAvg = voiceSum / (endBin - startBin);
+
+        // Ambient noise gate: silence in quiet room is ~0 to 4
+        const activeLevel = Math.max(0, voiceAvg - 4);
+        const normalizedLevel = Math.min(100, Math.round(Math.pow(activeLevel / 35, 0.8) * 100));
+
+        const elapsedMs = now - startMs;
+
+        // Check if artisan started speaking (threshold 8)
+        if (normalizedLevel > 8) {
+          speechSamplesCountRef.current += 1;
+          if (speechSamplesCountRef.current >= 2) {
+            hasSpokenRef.current = true;
+          }
           silenceStart = null;
-        } else if (hasSpokenRef.current) {
-          // Artisan spoke earlier, now silent
+        } else if (hasSpokenRef.current && elapsedMs > 2500) {
+          // Artisan spoke earlier, now silent for >2.0s and at least 2.5s elapsed
           if (!silenceStart) {
-            silenceStart = Date.now();
-          } else if (Date.now() - silenceStart > 2000) {
-            // Fallback 2: Silence gap (~2.0 seconds) detected
-            logTelemetry('VOICE', 'Silence Gap Detected (~2.0s below threshold). Automatically stopping recording.');
-            clearInterval(timerInterval);
+            silenceStart = now;
+          } else if (now - silenceStart > 2000) {
+            logTelemetry('VOICE', 'Silence Gap Detected (~2s below threshold). Automatically stopping recording.');
             stopAudioTracks();
             return;
           }
@@ -425,14 +589,15 @@ export default function KeypadPhoneSimulator({ onClose }) {
   }, [logTelemetry, speakIvrPrompt]);
 
   // ─── Confirmation Read-Back Loop (Error Correction) ──────────────────────────
-  const triggerConfirmationReadback = useCallback(async (lang, overridePrice = null) => {
+  const triggerConfirmationReadback = useCallback(async (lang, currentFormData = null, overridePrice = null) => {
     setCallState('CONFIRMATION');
     const langPack = IVR_PROMPTS[lang] || IVR_PROMPTS.hi;
 
-    // Use current form values
-    const prod = formData.product_name || 'मिट्टी का कलश';
-    const mat = formData.material || 'टेराकोटा लाल मिट्टी';
-    const pr = overridePrice !== null ? overridePrice : (formData.price || 450);
+    // Use current form values from parameter or state
+    const activeData = currentFormData || formData;
+    const prod = activeData.product_name || (lang === 'mr' ? 'मातीचा कलश' : 'मिट्टी का कलश');
+    const mat = activeData.material || (lang === 'mr' ? 'टेराकोटा लाल माती' : 'टेराकोटा लाल मिट्टी');
+    const pr = overridePrice !== null ? overridePrice : (activeData.price || 450);
 
     const readbackText = langPack.readback(prod, mat, pr);
     logTelemetry('VOICE', `Read-Back Verification Loop: "${readbackText}"`);
@@ -507,21 +672,24 @@ export default function KeypadPhoneSimulator({ onClose }) {
         isLowPrice = detectedPriceVal < 450;
       }
 
+      // Compile latest form state immediately
+      let latestFormData = null;
       setFormData(prev => {
         const next = { ...prev };
         if (stepIndex === 0) {
-          next.product_name = resp.transcript || 'हस्तशिल्प उत्पाद';
+          next.product_name = resp.transcript || (lang === 'mr' ? 'पारंपरिक नक्षीदार टेराकोटा कलश' : 'हस्तशिल्प उत्पाद');
           next.raw_transcripts.product = resp.transcript;
           next.translated_texts.product = resp.translatedText;
         } else if (stepIndex === 1) {
-          next.material = resp.transcript || 'प्राकृतिक सामग्री';
+          next.material = resp.transcript || (lang === 'mr' ? 'नैसर्गिक चिकनी माती' : 'प्राकृतिक सामग्री');
           next.raw_transcripts.material = resp.transcript;
           next.translated_texts.material = resp.translatedText;
         } else if (stepIndex === 2) {
-          next.price = isLowPrice ? 450 : detectedPriceVal;
+          next.price = detectedPriceVal;
           next.raw_transcripts.price = resp.transcript;
           next.translated_texts.price = resp.translatedText;
         }
+        latestFormData = next;
         return next;
       });
 
@@ -540,9 +708,9 @@ export default function KeypadPhoneSimulator({ onClose }) {
             triggerPriceWarning(detectedPriceVal, 450, lang);
           }, 1200);
         } else {
-          // Proceed to standard confirmation readback
+          // Proceed to standard confirmation readback with current captured data
           setTimeout(() => {
-            triggerConfirmationReadback(lang);
+            triggerConfirmationReadback(lang, latestFormData);
           }, 1200);
         }
       }
@@ -669,10 +837,11 @@ export default function KeypadPhoneSimulator({ onClose }) {
       if (key === '1') {
         const recPrice = lowPriceWarning?.recommended || 450;
         logTelemetry('DTMF', `Artisan pressed 1: Accepted recommended fair price ₹${recPrice}. Proceeding to confirmation.`);
-        setFormData(prev => ({ ...prev, price: recPrice }));
+        const updatedData = { ...formData, price: recPrice };
+        setFormData(updatedData);
         setLowPriceWarning(null);
         setTimeout(() => {
-          triggerConfirmationReadback(selectedLanguage, recPrice);
+          triggerConfirmationReadback(selectedLanguage, updatedData, recPrice);
         }, 300);
       } else if (key === '2') {
         logTelemetry('DTMF', 'Artisan pressed 2: Re-recording Question 3 (Price)...');
@@ -847,9 +1016,9 @@ export default function KeypadPhoneSimulator({ onClose }) {
                       भाषा चुनें / Select Lang
                     </div>
                     <div className="flex justify-between px-1">
-                      <span>1: हिन्दी</span>
-                      <span className="opacity-80">2: मराठी</span>
-                      <span className="opacity-80">3: EN</span>
+                      <button type="button" onClick={() => handleKeyPress('1')} className="hover:underline cursor-pointer font-bold">1: हिन्दी</button>
+                      <button type="button" onClick={() => handleKeyPress('2')} className="opacity-80 hover:underline cursor-pointer font-bold">2: मराठी</button>
+                      <button type="button" onClick={() => handleKeyPress('3')} className="opacity-80 hover:underline cursor-pointer font-bold">3: EN</button>
                     </div>
                     <div className="text-center text-[8px] pt-1 text-[#223B1A]">
                       कीपैड पर 1, 2 या 3 दबाएं
@@ -866,10 +1035,14 @@ export default function KeypadPhoneSimulator({ onClose }) {
                     <div className="flex items-center justify-center gap-1.5 py-1">
                       <Volume2 className="w-4 h-4 animate-pulse" />
                       <span className="text-[10px] font-bold">
-                        {activeStepIndex === 0 ? 'उत्पाद का नाम' : activeStepIndex === 1 ? 'निर्माण सामग्री' : 'बिक्री मूल्य'}
+                        {activeStepIndex === 0 ? (selectedLanguage === 'mr' ? 'वस्तूचे नाव' : selectedLanguage === 'en' ? 'Product Name' : 'उत्पाद का नाम') :
+                         activeStepIndex === 1 ? (selectedLanguage === 'mr' ? 'वापरलेले साहित्य' : selectedLanguage === 'en' ? 'Craft Material' : 'निर्माण सामग्री') :
+                         (selectedLanguage === 'mr' ? 'विक्री किंमत' : selectedLanguage === 'en' ? 'Selling Price' : 'बिक्री मूल्य')}
                       </span>
                     </div>
-                    <div className="text-[8px] opacity-80">कृपया ध्यान से सुनें...</div>
+                    <div className="text-[8px] opacity-80">
+                      {selectedLanguage === 'mr' ? 'कृपया काळजीपूर्वक ऐका...' : selectedLanguage === 'en' ? 'Please listen carefully...' : 'कृपया ध्यान से सुनें...'}
+                    </div>
                   </div>
                 )}
 
@@ -886,16 +1059,13 @@ export default function KeypadPhoneSimulator({ onClose }) {
 
                     {/* LCD Live Audio Decibel Waveform */}
                     <div className="flex items-end justify-center gap-1 h-7 bg-[#557049]/30 rounded p-1">
-                      {[15, 35, 65, 85, 45, 95, 75, 40, 60, 20].map((h, i) => {
-                        const dynamicH = Math.max(3, Math.round((audioLevel / 100) * h));
-                        return (
-                          <span
-                            key={i}
-                            className="w-1.5 bg-[#142310] rounded-xs transition-all duration-75"
-                            style={{ height: `${dynamicH}px` }}
-                          />
-                        );
-                      })}
+                      {audioLevels.map((lvl, i) => (
+                        <span
+                          key={i}
+                          className="w-1.5 bg-[#142310] rounded-xs"
+                          style={{ height: `${lvl}px` }}
+                        />
+                      ))}
                     </div>
 
                     <div className="text-[8px] leading-tight">
@@ -917,14 +1087,14 @@ export default function KeypadPhoneSimulator({ onClose }) {
                 {callState === 'CONFIRMATION' && (
                   <div className="w-full space-y-0.5 text-left text-[8px] leading-tight animate-in fade-in">
                     <div className="text-center font-black text-[9px] pb-0.5 border-b border-[#557049]/30">
-                      पुष्टि करें (Confirm)
+                      {selectedLanguage === 'mr' ? 'पुष्टी करा (Confirm)' : selectedLanguage === 'en' ? 'Confirm Details' : 'पुष्टि करें (Confirm)'}
                     </div>
-                    <div className="truncate font-bold">वस्तू: {formData.product_name || 'कलश'}</div>
-                    <div className="truncate font-bold">सामग्री: {formData.material || 'मिट्टी'}</div>
-                    <div className="font-black">मूल्य: ₹{formData.price || 450}</div>
+                    <div className="truncate font-bold">{selectedLanguage === 'mr' ? 'वस्तू' : selectedLanguage === 'en' ? 'Item' : 'वस्तू'}: {formData.product_name || (selectedLanguage === 'mr' ? 'कलश' : 'कलश')}</div>
+                    <div className="truncate font-bold">{selectedLanguage === 'en' ? 'Material' : 'सामग्री'}: {formData.material || (selectedLanguage === 'mr' ? 'माती' : 'मिट्टी')}</div>
+                    <div className="font-black">{selectedLanguage === 'mr' ? 'किंमत' : selectedLanguage === 'en' ? 'Price' : 'मूल्य'}: ₹{formData.price || 450}</div>
                     <div className="flex justify-between pt-0.5 font-black text-[9px] text-[#1F3617]">
-                      <span>1: पुष्टि ✓</span>
-                      <span>2: सुधारें ↺</span>
+                      <span>1: {selectedLanguage === 'mr' ? 'पुष्टी ✓' : selectedLanguage === 'en' ? 'Confirm ✓' : 'पुष्टि ✓'}</span>
+                      <span>2: {selectedLanguage === 'mr' ? 'दुरुस्ती ↺' : selectedLanguage === 'en' ? 'Redo ↺' : 'सुधारें ↺'}</span>
                     </div>
                   </div>
                 )}

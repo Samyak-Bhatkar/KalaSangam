@@ -2,7 +2,12 @@ import os
 from pathlib import Path
 from pydantic_settings import BaseSettings
 
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Explicitly load .env from backend root so environment variables are always resolved
+load_dotenv(BASE_DIR / ".env")
+
 STATIC_DIR = BASE_DIR / "app" / "static"
 UPLOAD_DIR = STATIC_DIR / "uploads"
 AUDIO_DIR = STATIC_DIR / "audio"
