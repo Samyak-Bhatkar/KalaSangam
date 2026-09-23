@@ -956,10 +956,11 @@
         <div class="cylinder-tube">
           <span style="font-weight: 900;">1. Preprocessing &amp; EXIF Transpose</span>
           <div style="width: 90%; height: 1px; background: rgba(0,0,0,0.15); margin: 1px 0;"></div>
-          <!-- Skeleton Topology Handle Protection -->
-          <span style="color: #1E3A8A; font-size: 8.5px; line-height: 1.15;">
-            2. <strong>Skeleton-Topology Handle Protection</strong><br>
-            Distance-transform + attachment classifier (protects clay handles/loops from pruning)
+          <!-- Intricate Handle & Hollow Loop Protection -->
+          <span style="color: #1E3A8A; font-size: 8.5px; line-height: 1.2;">
+            2. <strong>Intricate Handle &amp; Loop Shield</strong><br>
+            Skeleton endpoint analysis + Bounded Geodesic Reconstruction<br>
+            <span style="color: #047857; font-weight: 800;">✓ Prevents jar handle amputation bug common in generic models</span>
           </span>
         </div>
       </div>
@@ -1004,6 +1005,7 @@
           <div class="model-pill primary-active">
             <span>birefnet-general (ONNX, ~972MB)</span>
             <small style="display: block; font-size: 7.5px; color: #15803D; font-weight: 900;">● PRIMARY NEURAL ENGINE</small>
+            <span style="display: block; font-size: 7px; color: #166534; font-weight: 800; line-height: 1.1;">Bilateral Boundary: Preserves thin jar handles &amp; hollow loops</span>
           </div>
           <div class="model-pill fallback-secondary">
             <span>u2netp / GrabCut Fallback (&le;640px)</span>
@@ -1036,7 +1038,8 @@
           <span style="font-weight: 900;">Perspective Tilt Guardrail (20°–60°)</span>
           <small style="color: #6D28D9;">Suppresses warped lifestyle on ambiguous tilt</small>
           <div style="border-top: 1px solid rgba(0,0,0,0.15); margin-top: 2px; padding-top: 1px;">
-            <small style="color: #1E293B; font-weight: 800;">Single-Tap Hole Removal (cv2.floodFill)</small>
+            <small style="color: #1E293B; font-weight: 800;">Trapped-Hole Clearing (cv2.floodFill)</small>
+            <span style="font-size: 7px; color: #4338CA; font-weight: 700; display: block;">Clears wall void inside handle without clipping rim</span>
           </div>
         </div>
       </div>
