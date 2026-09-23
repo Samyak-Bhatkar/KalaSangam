@@ -1,7 +1,8 @@
 """
 Renders the SIH 2026 Interconnected System Architecture Slide for ShilpSetu (Team INVINCIBLE).
-Redesigned to match the exact visual style, pastel color scheme, 3D cylinder pipes,
-scalloped clouds, sidebar capsules, and bottom tech-stack ribbon from the SIH reference presentation.
+Features 100% authentic ShilpSetu architecture and data flow, styled in the clean,
+light-mint academic presentation layout with 3D cylinder pipes, scalloped clouds,
+sidebar capsules, and bottom tech-stack ribbon.
 """
 
 import os
@@ -238,7 +239,7 @@ HTML_CONTENT = """<!DOCTYPE html>
       z-index: 10;
     }
 
-    /* INSIDE CENTRAL BOX: BENEFICIARY DATA BOX */
+    /* INSIDE CENTRAL BOX: ARTISAN CRAFT INGESTION BOX */
     .origin-data-box {
       position: absolute;
       left: 18px;
@@ -260,7 +261,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 
     .origin-title {
       font-family: 'Playfair Display', Georgia, serif;
-      font-size: 24px;
+      font-size: 23px;
       font-weight: 800;
       color: #000000;
       line-height: 1.15;
@@ -436,7 +437,7 @@ HTML_CONTENT = """<!DOCTYPE html>
     .report-bar-teal { background: #14B8A6; width: 65%; }
     .report-bar-orange { background: #F97316; width: 75%; }
 
-    /* ML ENSEMBLE VERTICAL COLUMN */
+    /* AI & VISION ORCHESTRATOR VERTICAL COLUMN */
     .ml-ensemble-box {
       position: absolute;
       right: 18px;
@@ -462,6 +463,7 @@ HTML_CONTENT = """<!DOCTYPE html>
       border-bottom: 2px solid #000000;
       padding-bottom: 2px;
       margin-bottom: 4px;
+      text-align: center;
     }
 
     .model-capsule-stack {
@@ -488,15 +490,16 @@ HTML_CONTENT = """<!DOCTYPE html>
       border: 2px solid #000000;
       border-radius: 12px;
       padding: 6px 10px;
-      width: 175px;
+      width: 180px;
       text-align: center;
       box-shadow: 0 2px 5px rgba(0,0,0,0.06);
     }
 
     .ml-inner-title {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 800;
       color: #000000;
+      line-height: 1.2;
     }
 
     .ml-inner-sub {
@@ -555,7 +558,7 @@ HTML_CONTENT = """<!DOCTYPE html>
     }
 
     .output-cyan-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
       color: #000000;
       line-height: 1.2;
@@ -587,7 +590,7 @@ HTML_CONTENT = """<!DOCTYPE html>
     }
 
     .composite-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
       color: #000000;
       line-height: 1.25;
@@ -730,7 +733,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             SHILPSETU AI!
             <span class="brand-tag">INVINCIBLE</span>
           </div>
-          <div class="brand-sub">End-to-End Artisan Multimodal Ingestion & Sovereign Commerce Engine</div>
+          <div class="brand-sub">End-to-End Artisan Multimodal Ingestion & Sovereign Commerce Platform</div>
         </div>
 
         <div class="top-right-header">
@@ -762,39 +765,39 @@ HTML_CONTENT = """<!DOCTYPE html>
           <line x1="195" y1="418" x2="242" y2="418" stroke="#000000" stroke-width="2.6" marker-end="url(#arrow-black)"/>
           <line x1="242" y1="432" x2="195" y2="432" stroke="#000000" stroke-width="2.6" marker-end="url(#arrow-black)"/>
 
-          <!-- 2. Inside Central Box: Beneficiary Data -> Top Cylinder -->
+          <!-- 2. Inside Central Box: Artisan Ingestion -> Top Vision Cylinder -->
           <path d="M 360,390 L 360,110 L 375,110" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)" fill="none"/>
 
-          <!-- 3. Inside Central Box: Beneficiary Data -> Bottom Cylinder -->
+          <!-- 3. Inside Central Box: Artisan Ingestion -> Bottom Speech Cylinder -->
           <path d="M 360,460 L 360,740 L 375,740" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)" fill="none"/>
 
-          <!-- 4. Top Cylinder -> ML Ensemble -->
+          <!-- 4. Top Cylinder -> AI Orchestrator -->
           <line x1="815" y1="110" x2="960" y2="110" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)"/>
 
           <!-- 5. Bottom Cylinder -> Multimodal LLM -->
           <line x1="815" y1="740" x2="960" y2="740" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)"/>
 
-          <!-- 6. Cloud 1 to SHAP/LIME -->
+          <!-- 6. Cloud 1 to AI Orchestrator -->
           <path d="M 700,240 C 735,240 755,275 790,275" stroke="#000000" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-black)" fill="none"/>
 
-          <!-- 7. Cloud 2 to Report -->
+          <!-- 7. Cloud 2 to Living Wage Report -->
           <path d="M 605,480 C 605,510 590,520 545,550" stroke="#000000" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-black)" fill="none"/>
 
-          <!-- 8. ML Ensemble -> Top Output Box -->
+          <!-- 8. AI Orchestrator -> Top Output Box -->
           <line x1="1205" y1="110" x2="1275" y2="110" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)"/>
 
-          <!-- 9. ML Ensemble -> Bottom Output Box -->
+          <!-- 9. AI Orchestrator -> Bottom Output Box -->
           <line x1="1205" y1="740" x2="1275" y2="740" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)"/>
 
-          <!-- 10. Converging lines into Composite Score -->
+          <!-- 10. Converging lines into Composite Karigar Score -->
           <path d="M 1450,110 L 1495,110 L 1495,405 L 1445,405" stroke="#000000" stroke-width="2.8" fill="none"/>
           <path d="M 1450,740 L 1495,740 L 1495,405 L 1445,405" stroke="#000000" stroke-width="2.8" fill="none"/>
           <line x1="1410" y1="405" x2="1445" y2="405" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)"/>
 
-          <!-- 11. Middle Cloud with dashed arrow to Fair Wage Bracket -->
+          <!-- 11. Middle Cloud with dashed arrow to Pricing Tiers -->
           <path d="M 1390,445 C 1425,530 1425,630 1380,660" stroke="#000000" stroke-width="2.4" stroke-dasharray="6 4" marker-end="url(#arrow-black)" fill="none"/>
 
-          <!-- 12. Composite Score -> 4 Outcome Pills -->
+          <!-- 12. Composite Score -> 4 Output Rails -->
           <line x1="1610" y1="405" x2="1645" y2="405" stroke="#000000" stroke-width="2.8"/>
           <path d="M 1645,405 L 1645,230 L 1655,230" stroke="#000000" stroke-width="2.4" marker-end="url(#arrow-black)" fill="none"/>
           <path d="M 1645,405 L 1645,320 L 1655,320" stroke="#000000" stroke-width="2.4" marker-end="url(#arrow-black)" fill="none"/>
@@ -818,8 +821,8 @@ HTML_CONTENT = """<!DOCTYPE html>
             </div>
 
             <div class="pill-capsule pill-api">
-              <div class="pill-title">Re-scoring Engine</div>
-              <div class="pill-sub">Vyapar-Niti Fair Wage</div>
+              <div class="pill-title">Vyapar-Niti Engine</div>
+              <div class="pill-sub">Statutory ₹120/hr Wage Floor</div>
             </div>
           </div>
 
@@ -845,49 +848,49 @@ HTML_CONTENT = """<!DOCTYPE html>
         <!-- ==================== CENTRAL WHITE BOUNDING BOX ==================== -->
         <div class="central-stage-box">
 
-          <!-- Left Inside: Beneficiary Data (Artisan Craft Data) -->
+          <!-- Left Inside: Artisan Craft Ingestion -->
           <div class="origin-data-box">
-            <div style="font-size: 26px;">📊 🧶</div>
+            <div style="font-size: 26px;">📸 🎙️</div>
             <div>
-              <div class="origin-title">Beneficiary<br>Data</div>
+              <div class="origin-title">Artisan Craft<br>Ingestion</div>
               <div class="origin-sub">Audio Dialect + Raw Photo</div>
             </div>
-            <div style="font-size: 22px;">⚛️ 📷</div>
+            <div style="font-size: 22px;">🧶 📱</div>
           </div>
 
           <!-- Top Branch: 3D Cylinder -->
           <div class="cylinder-pipeline-wrap" style="top: 15px;">
-            <div class="cylinder-title">Risk Assessment Pipeline</div>
+            <div class="cylinder-title">Photometric Studio Vision Pipeline</div>
             <div class="cylinder-3d-tube">
-              <div class="cylinder-main-text">Preprocessing and Feature Engineering</div>
-              <div class="cylinder-sub-text">rembg (BiRefNet), 6500K Studio Balance & Skeleton Pruning</div>
+              <div class="cylinder-main-text">Neural Matting, Color Science & Shadow Synthesis</div>
+              <div class="cylinder-sub-text">rembg (BiRefNet), OpenCV 6500K Studio Balance & Skeleton Pruning</div>
             </div>
           </div>
 
           <!-- Bottom Branch: 3D Cylinder -->
           <div class="cylinder-pipeline-wrap" style="top: 675px;">
             <div class="cylinder-3d-tube">
-              <div class="cylinder-main-text">Preprocessing and Principle component analysis</div>
+              <div class="cylinder-main-text">Indic Speech Recognition & Multimodal Entity Extraction</div>
               <div class="cylinder-sub-text">MeitY Bhashini ASR (22 Langs) & IndicTrans v2 Story Engine</div>
             </div>
-            <div class="cylinder-title" style="margin-top: 6px;">Income Classification Pipeline</div>
+            <div class="cylinder-title" style="margin-top: 6px;">Indic Multimodal Speech Pipeline</div>
           </div>
 
-          <!-- Cloud 1: Stabilize Explanation -->
+          <!-- Cloud 1: Contextual Storytelling -->
           <div class="cloud-shape" style="left: 375px; top: 195px; width: 175px;">
-            <div class="cloud-text">Stabilize<br>Explaination</div>
-            <div class="cloud-sub">Contextual Craft Normalization</div>
+            <div class="cloud-text">Contextual Craft<br>Extraction</div>
+            <div class="cloud-sub">Dialect & Story Normalization</div>
           </div>
 
-          <!-- Cloud 2: Mean Value Calculation -->
+          <!-- Cloud 2: Statutory Wage Floor Check -->
           <div class="cloud-shape" style="left: 375px; top: 410px; width: 175px;">
-            <div class="cloud-text">Mean Value<br>Calculation</div>
-            <div class="cloud-sub">Statutory Wage Floor Check</div>
+            <div class="cloud-text">Statutory Living<br>Wage Calc</div>
+            <div class="cloud-sub">MoSJE ₹120/hr Living Wage Check</div>
           </div>
 
-          <!-- Report with reasonability -->
+          <!-- Fair Price Report with reasonability -->
           <div class="report-wrap">
-            <div class="cylinder-title" style="font-size: 15px; margin-bottom: 8px;">Risk Report<br>with reasonability</div>
+            <div class="cylinder-title" style="font-size: 15px; margin-bottom: 8px;">Fair Price Report<br>with reasonability</div>
             <div class="report-card">
               <div style="font-size: 9px; font-weight:800; color:#10B981; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">FAIR WAGE</div>
               <div class="report-bar report-bar-green"></div>
@@ -897,51 +900,48 @@ HTML_CONTENT = """<!DOCTYPE html>
             </div>
           </div>
 
-          <!-- Right Inside: ML Ensemble Box -->
+          <!-- Right Inside: AI & Vision Orchestrator Box -->
           <div class="ml-ensemble-box">
-            <div class="ml-ensemble-header">ML Ensemble</div>
+            <div class="ml-ensemble-header">AI & Vision Orchestrator</div>
 
             <div class="model-capsule-stack">
-              <div class="model-capsule" style="background:#FEF08A;">Model 1: BiRefNet Matting</div>
+              <div class="model-capsule" style="background:#FEF08A;">Model 1: BiRefNet Matting (Sub-2s)</div>
               <div class="model-capsule" style="background:#BAE6FD;">Model 2: 6500K Studio Balance</div>
               <div class="model-capsule" style="background:#FED7AA;">Model n: GrabCut Fallback</div>
             </div>
 
-            <!-- Crisp Clean SVG Down Arrow -->
             <svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M 7 1 L 7 15 M 2 10 L 7 15 L 12 10" stroke="#000000" stroke-width="2.4" stroke-linecap="round"/></svg>
 
             <div class="ml-inner-box">
-              <div class="ml-inner-title">SHAP</div>
-              <div class="ml-inner-title">LIME</div>
-              <div class="ml-inner-sub">CLIP Visual Similarity</div>
+              <div class="ml-inner-title">CLIP Similarity</div>
+              <div class="ml-inner-sub">Visual Deduplication & Price Index</div>
             </div>
 
             <svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M 7 1 L 7 15 M 2 10 L 7 15 L 12 10" stroke="#000000" stroke-width="2.4" stroke-linecap="round"/></svg>
 
             <div class="ml-inner-box">
-              <div class="ml-inner-title">K Means</div>
-              <div class="ml-inner-sub">Artisan GI Clustering</div>
+              <div class="ml-inner-title">K-Means Cluster</div>
+              <div class="ml-inner-sub">Regional GI Craft Taxonomy</div>
             </div>
 
             <svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M 7 1 L 7 15 M 2 10 L 7 15 L 12 10" stroke="#000000" stroke-width="2.4" stroke-linecap="round"/></svg>
 
             <div class="ml-inner-box">
-              <div class="ml-inner-title">K Means</div>
-              <div class="ml-inner-sub">Statutory Wage Floor</div>
+              <div class="ml-inner-title">Wage Floor Engine</div>
+              <div class="ml-inner-sub">Statutory Minimum Wage Audit</div>
             </div>
 
             <svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M 7 1 L 7 15 M 2 10 L 7 15 L 12 10" stroke="#000000" stroke-width="2.4" stroke-linecap="round"/></svg>
 
             <div class="ml-inner-box">
-              <div class="ml-inner-title">SHAP</div>
-              <div class="ml-inner-title">LIME</div>
-              <div class="ml-inner-sub">Living Wage Audit</div>
+              <div class="ml-inner-title">IndicTrans v2</div>
+              <div class="ml-inner-sub">Buyer-Ready Story Formulation</div>
             </div>
 
             <svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M 7 1 L 7 15 M 2 10 L 7 15 L 12 10" stroke="#000000" stroke-width="2.4" stroke-linecap="round"/></svg>
 
             <div class="ml-multimodal-card">
-              <div style="font-size: 16px; font-weight: 900; color: #000;">ML Model</div>
+              <div style="font-size: 16px; font-weight: 900; color: #000;">Multimodal LLM</div>
               <div style="font-size: 11px; font-weight: 700; color: #1E1B4B; margin-top:2px;">Gemini 2.5 Flash + Llama 3.2</div>
             </div>
           </div>
@@ -951,55 +951,55 @@ HTML_CONTENT = """<!DOCTYPE html>
         <!-- ==================== RIGHT SECTION: OUTPUTS ==================== -->
         <div class="right-section">
 
-          <!-- Top Output: Most Routed Output -->
+          <!-- Top Output: Sovereign Catalog Listing -->
           <div class="output-box-wrap" style="position: absolute; left: 45px; top: 15px;">
             <div class="output-label">Output</div>
             <div class="output-cyan-box">
-              <div class="output-cyan-title">Most<br>Routed<br>Output</div>
+              <div class="output-cyan-title">Sovereign<br>Catalog<br>Listing</div>
               <div class="output-cyan-sub">ONDC & GeM Catalog Payload</div>
             </div>
           </div>
 
-          <!-- Middle Cloud: Group People With Similar Income -->
+          <!-- Middle Cloud: Artisan Cluster & GI Registry -->
           <div class="cloud-shape" style="left: 20px; top: 340px; width: 220px; border-radius: 40px;">
-            <div class="cloud-text">Group People<br>With Similar<br>Income</div>
-            <div class="cloud-sub">Artisan Cluster & GI Registry</div>
+            <div class="cloud-text">Artisan Cluster<br>&amp; GI Registry<br>Mapping</div>
+            <div class="cloud-sub">Authenticity & Traceability</div>
           </div>
 
-          <!-- Bottom Output: Income Bracket -->
+          <!-- Bottom Output: Vyapar-Niti Pricing Tiers -->
           <div class="output-box-wrap" style="position: absolute; left: 45px; top: 660px;">
             <div class="output-cyan-box">
-              <div class="output-cyan-title">Income<br>Bracket</div>
+              <div class="output-cyan-title">Vyapar-Niti<br>Pricing Tiers</div>
               <div class="output-cyan-sub">B2C 1.35x / B2B Wholesale MOQ</div>
             </div>
           </div>
 
-          <!-- Composite Credit Score Box -->
+          <!-- Composite Karigar Score Box -->
           <div class="composite-score-box">
-            <div class="composite-title">Composite<br>Credit<br>Score</div>
+            <div class="composite-title">Composite<br>Karigar<br>Score</div>
             <div class="composite-sub">Karigar Trust Score & 2D DCT Watermark</div>
           </div>
 
-          <!-- Rightmost 4 Outcome Pills -->
+          <!-- Rightmost 4 Outcome Rails -->
           <div class="outcome-pills-col">
             <div class="outcome-pill">
-              <div class="outcome-title">Low risk<br>Low Income</div>
-              <div class="outcome-sub">Direct B2C Buyer Marketplace</div>
+              <div class="outcome-title">Direct B2C<br>Storefront</div>
+              <div class="outcome-sub">Flutter Mobile & React Web Apps</div>
             </div>
 
             <div class="outcome-pill">
-              <div class="outcome-title">Low risk<br>High INCOME</div>
-              <div class="outcome-sub">ONDC Open Rails Discovery</div>
+              <div class="outcome-title">ONDC Open<br>Network</div>
+              <div class="outcome-sub">Beckn Protocol v1.2 Discovery</div>
             </div>
 
             <div class="outcome-pill">
-              <div class="outcome-title">High risk<br>Low INCOME</div>
-              <div class="outcome-sub">GeM Public Procurement (15% Pref)</div>
+              <div class="outcome-title">GeM Public<br>Procurement</div>
+              <div class="outcome-sub">15% Price Preference / Govt Orders</div>
             </div>
 
             <div class="outcome-pill">
-              <div class="outcome-title">High risk<br>High INCOME</div>
-              <div class="outcome-sub">GI Provenance & Export QR</div>
+              <div class="outcome-title">GI Registry &amp;<br>Provenance</div>
+              <div class="outcome-sub">Export Certificate & Tamper-proof QR</div>
             </div>
           </div>
 
@@ -1015,55 +1015,56 @@ HTML_CONTENT = """<!DOCTYPE html>
           <span class="tech-stack-title">Tech Stack</span>
         </div>
 
-        <!-- Segment 1: AI ML -->
+        <!-- Segment 1: AI & Vision -->
         <div class="tech-category-segment">
           <div class="tech-icons-row">
             <span class="tech-chip">🐍 Python</span>
             <span class="tech-chip">⚡ PyTorch</span>
             <span class="tech-chip">👁️ OpenCV</span>
             <span class="tech-chip">✂️ rembg</span>
-            <span class="tech-chip">🇮🇳 Bhashini</span>
-            <span class="tech-chip">🧠 Gemini Flash</span>
+            <span class="tech-chip">🖼️ Pillow</span>
+            <span class="tech-chip">🔍 CLIP</span>
           </div>
-          <div class="tech-category-label">AI ML</div>
+          <div class="tech-category-label">AI & Vision</div>
         </div>
 
         <div style="width: 2px; height: 42px; background: #000;"></div>
 
-        <!-- Segment 2: Backend -->
+        <!-- Segment 2: Speech & NLP -->
+        <div class="tech-category-segment">
+          <div class="tech-icons-row">
+            <span class="tech-chip">🇮🇳 Bhashini ASR</span>
+            <span class="tech-chip">🧠 Gemini Flash</span>
+            <span class="tech-chip">🦙 Llama 3.2</span>
+            <span class="tech-chip">🔄 IndicTrans v2</span>
+          </div>
+          <div class="tech-category-label">Speech & NLP</div>
+        </div>
+
+        <div style="width: 2px; height: 42px; background: #000;"></div>
+
+        <!-- Segment 3: Backend & Core -->
         <div class="tech-category-segment">
           <div class="tech-icons-row">
             <span class="tech-chip">⚡ FastAPI</span>
             <span class="tech-chip">🦄 Uvicorn</span>
             <span class="tech-chip">🛡️ Pydantic v2</span>
-            <span class="tech-chip">🐳 Docker</span>
+            <span class="tech-chip">🗄️ SQLite / Postgres</span>
           </div>
-          <div class="tech-category-label">Backend</div>
+          <div class="tech-category-label">Backend & Core</div>
         </div>
 
         <div style="width: 2px; height: 42px; background: #000;"></div>
 
-        <!-- Segment 3: Database -->
+        <!-- Segment 4: Frontend & Rails -->
         <div class="tech-category-segment">
           <div class="tech-icons-row">
-            <span class="tech-chip">🗄️ SQLite WAL</span>
-            <span class="tech-chip">🐘 PostgreSQL</span>
-            <span class="tech-chip">⚡ Redis</span>
-          </div>
-          <div class="tech-category-label">Database</div>
-        </div>
-
-        <div style="width: 2px; height: 42px; background: #000;"></div>
-
-        <!-- Segment 4: Frontend -->
-        <div class="tech-category-segment">
-          <div class="tech-icons-row">
-            <span class="tech-chip">📱 Flutter (Dart)</span>
+            <span class="tech-chip">📱 Flutter</span>
             <span class="tech-chip">⚛️ React 18</span>
-            <span class="tech-chip">⚡ Vite</span>
-            <span class="tech-chip">🎨 Tailwind M3</span>
+            <span class="tech-chip">🌐 ONDC Beckn</span>
+            <span class="tech-chip">🏛️ GeM</span>
           </div>
-          <div class="tech-category-label">Frontend</div>
+          <div class="tech-category-label">Frontend & Rails</div>
         </div>
 
       </div>
