@@ -1,10 +1,7 @@
 """
 Renders the SIH 2026 Interconnected System Architecture Slide for ShilpSetu (Team INVINCIBLE).
-Optimized for:
-1. Zero render-blocking assets (instant <10ms load time, no perpetual loading spinner)
-2. Dynamic auto-scaling to fit any user screen (1366x768, 1536x864, 1080p, 4K)
-3. Zero badge overlap with stacked pills
-4. Complete offline/local fallback support
+Redesigned to match the exact visual style, pastel color scheme, 3D cylinder pipes,
+scalloped clouds, sidebar capsules, and bottom tech-stack ribbon from the SIH reference presentation.
 """
 
 import os
@@ -15,12 +12,11 @@ HTML_CONTENT = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ShilpSetu AI — Interconnected System Architecture (Team INVINCIBLE)</title>
+  <title>ShilpSetu AI — System Architecture (Team INVINCIBLE - SIH 2026)</title>
   
-  <!-- Non-blocking asynchronous font loading with instant system-UI fallbacks -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800;900&family=JetBrains+Mono:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
   
   <style>
     * {
@@ -32,15 +28,14 @@ HTML_CONTENT = """<!DOCTYPE html>
     html, body {
       width: 100%;
       height: 100%;
-      background: #04070D;
-      color: #F8FAFC;
-      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #E8F7F5;
+      color: #0F172A;
+      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
       overflow: hidden;
       margin: 0;
       padding: 0;
     }
 
-    /* Outer centering container */
     .viewport-wrapper {
       width: 100vw;
       height: 100vh;
@@ -49,534 +44,677 @@ HTML_CONTENT = """<!DOCTYPE html>
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #04070D;
+      background: #E8F7F5;
     }
 
-    /* Fixed-aspect 1920x1080 Stage Canvas that auto-scales dynamically */
+    /* Fixed-aspect 1920x1080 Stage Canvas */
     #slide-stage {
       width: 1920px;
       height: 1080px;
       position: absolute;
       transform-origin: center center;
-      background: #060A12;
+      background: linear-gradient(135deg, #E6F7F4 0%, #EDFBF8 50%, #E2F5F2 100%);
       overflow: hidden;
-      padding: 20px 32px;
+      padding: 16px 24px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      box-shadow: 0 0 80px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.08);
     }
 
-    /* Ambient Circuit & Grid Background */
-    .bg-grid {
-      position: absolute;
-      inset: 0;
-      background-image: 
-        radial-gradient(circle at 50% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 55%),
-        radial-gradient(circle at 88% 70%, rgba(139, 92, 246, 0.07) 0%, transparent 45%),
-        radial-gradient(circle at 12% 70%, rgba(16, 185, 129, 0.07) 0%, transparent 45%),
-        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 100% 100%, 34px 34px, 34px 34px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Top Bar Header */
-    .header-bar {
+    /* TOP HEADER */
+    .top-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 10px 24px;
-      background: rgba(15, 23, 42, 0.88);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 16px;
-      backdrop-filter: blur(16px);
-      position: relative;
+      align-items: flex-start;
+      padding: 0 10px;
       z-index: 20;
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .team-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.22) 0%, rgba(220, 38, 38, 0.38) 100%);
-      border: 1.5px solid #EF4444;
-      border-radius: 999px;
-      color: #FCA5A5;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      box-shadow: 0 0 16px rgba(239, 68, 68, 0.28);
-    }
-
-    .team-badge::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      background: #EF4444;
-      border-radius: 50%;
-      box-shadow: 0 0 8px #EF4444;
-      animation: pulse-dot 2s infinite ease-in-out;
-    }
-
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-    }
-
-    .project-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 25px;
-      font-weight: 800;
-      color: #FFFFFF;
-      letter-spacing: -0.3px;
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-    }
-
-    .project-title span.hindi {
-      font-size: 19px;
-      color: #F59E0B;
-      font-weight: 700;
-    }
-
-    .project-subtitle {
-      font-size: 13px;
-      color: #94A3B8;
-      font-weight: 500;
-      margin-left: 6px;
-      padding-left: 12px;
-      border-left: 1.5px solid rgba(255,255,255,0.15);
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .sih-badge {
+    .top-left-title {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
+      gap: 2px;
     }
 
-    .sih-title {
+    .brand-title {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 15px;
-      font-weight: 800;
-      background: linear-gradient(90deg, #F59E0B 0%, #F97316 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: 0.6px;
-    }
-
-    .sih-sub {
-      font-size: 11.5px;
-      color: #94A3B8;
-      font-weight: 600;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .govt-tag {
-      padding: 6px 14px;
-      background: rgba(30, 41, 59, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      font-size: 11.5px;
-      font-weight: 700;
-      color: #E2E8F0;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* Diagram Stage Container */
-    .diagram-stage {
-      position: relative;
-      width: 1856px;
-      height: 875px;
-      margin-top: 8px;
-      z-index: 10;
-    }
-
-    /* SVG Overlay Layer for Exact Connectors */
-    .svg-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 1856px;
-      height: 875px;
-      z-index: 15;
-      pointer-events: none;
-    }
-
-    /* Category Cards Base Style */
-    .cat-card {
-      position: absolute;
-      border-radius: 18px;
-      background: rgba(15, 23, 42, 0.92);
-      border: 2px solid;
-      padding: 16px 18px;
-      display: flex;
-      flex-direction: column;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.55);
-      z-index: 25;
-    }
-
-    .cat-card-header {
+      font-size: 32px;
+      font-weight: 900;
+      color: #000000;
+      letter-spacing: -0.5px;
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .cat-icon-badge {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    .cat-title-wrap {
-      flex: 1;
-    }
-
-    .cat-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 9.5px;
+    .brand-tag {
+      font-size: 13px;
       font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 1.1px;
-      margin-bottom: 2px;
-      display: block;
-    }
-
-    .cat-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
+      background: #EF4444;
       color: #FFFFFF;
-      line-height: 1.25;
+      padding: 3px 10px;
+      border-radius: 999px;
+      letter-spacing: 1px;
     }
 
-    .cat-sub {
-      font-size: 10.5px;
-      color: #94A3B8;
-      font-weight: 500;
-      margin-top: 1px;
+    .brand-sub {
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
     }
 
-    /* Internal Tech Items List */
-    .tech-list {
+    .top-right-header {
       display: flex;
       flex-direction: column;
-      gap: 7px;
-      flex: 1;
+      align-items: flex-end;
+      gap: 2px;
     }
 
-    .tech-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      padding: 6px 8px;
-    }
-
-    .tech-item-icon {
-      font-size: 14px;
-      line-height: 1.2;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .tech-item-content {
-      flex: 1;
-      line-height: 1.35;
-    }
-
-    .tech-item-name {
-      font-size: 11.5px;
-      font-weight: 700;
-      color: #F1F5F9;
+    .sih-meta-row {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 12px;
     }
 
-    .tech-pill-mini {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 8.5px;
+    .sih-logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #0F172A;
+    }
+
+    .sih-brain-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: conic-gradient(from 180deg, #F97316 0%, #10B981 100%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFF;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .sih-title-large {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 40px;
       font-weight: 700;
-      padding: 1px 5px;
-      border-radius: 4px;
-      background: rgba(255,255,255,0.08);
-      color: #CBD5E1;
+      color: #000000;
+      letter-spacing: -0.5px;
+      line-height: 1;
+      margin-top: 4px;
     }
 
-    .tech-item-desc {
-      font-size: 9.5px;
-      color: #94A3B8;
-      font-weight: 400;
+    /* MAIN DIAGRAM CONTAINER */
+    .diagram-body {
+      position: relative;
+      width: 1872px;
+      height: 870px;
+      margin-top: 4px;
+    }
+
+    /* LEFT SIDEBAR: API & DATA LAYER CAPSULES */
+    .left-sidebar {
+      position: absolute;
+      left: 6px;
+      top: 10px;
+      width: 195px;
+      height: 820px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 15;
+    }
+
+    .sidebar-section-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 21px;
+      font-weight: 800;
+      color: #000000;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .pill-capsule {
+      width: 186px;
+      border-radius: 40px;
+      padding: 12px 10px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pill-api {
+      background: linear-gradient(180deg, #EEF4FF 0%, #DBEAFE 100%);
+      border: 2.8px solid #1D4ED8;
+    }
+
+    .pill-data {
+      background: linear-gradient(180deg, #E6FFFA 0%, #CCFBF1 100%);
+      border: 3px solid #0D9488;
+    }
+
+    .pill-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #000000;
+      line-height: 1.2;
+    }
+
+    .pill-sub {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #334155;
       margin-top: 2px;
     }
 
-    /* CARD 1: Frontend & UI (Blue) */
-    .card-frontend {
-      width: 250px;
-      height: 470px;
-      left: 18px;
-      top: 220px;
-      border-color: #3B82F6;
-      box-shadow: 0 12px 35px rgba(59, 130, 246, 0.22);
+    .v-arrow-double {
+      width: 20px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .card-frontend .cat-icon-badge {
-      background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
-      color: #FFFFFF;
-      border: 1.5px solid #60A5FA;
-    }
-    .card-frontend .cat-tag { color: #60A5FA; }
 
-    /* CARD 2: Backend & Core Architecture (Green) */
-    .card-backend {
-      width: 255px;
-      height: 470px;
-      left: 366px;
-      top: 220px;
-      border-color: #10B981;
-      box-shadow: 0 12px 35px rgba(16, 185, 129, 0.22);
-    }
-    .card-backend .cat-icon-badge {
-      background: linear-gradient(135deg, #065F46 0%, #10B981 100%);
-      color: #FFFFFF;
-      border: 1.5px solid #34D399;
-    }
-    .card-backend .cat-tag { color: #34D399; }
-
-    /* CARD 3: AI Computer Vision & Studio (Purple) - Branch 1 */
-    .card-vision {
-      width: 285px;
-      height: 340px;
-      left: 775px;
-      top: 60px;
-      border-color: #8B5CF6;
-      box-shadow: 0 12px 35px rgba(139, 92, 246, 0.22);
-    }
-    .card-vision .cat-icon-badge {
-      background: linear-gradient(135deg, #5B21B6 0%, #8B5CF6 100%);
-      color: #FFFFFF;
-      border: 1.5px solid #A78BFA;
-    }
-    .card-vision .cat-tag { color: #A78BFA; }
-
-    /* CARD 4: Speech & Multimodal Intelligence (Orange) - Branch 2 */
-    .card-speech {
-      width: 285px;
-      height: 340px;
-      left: 775px;
-      top: 450px;
-      border-color: #F97316;
-      box-shadow: 0 12px 35px rgba(249, 115, 22, 0.22);
-    }
-    .card-speech .cat-icon-badge {
-      background: linear-gradient(135deg, #9A3412 0%, #F97316 100%);
-      color: #FFFFFF;
-      border: 1.5px solid #FB923C;
-    }
-    .card-speech .cat-tag { color: #FB923C; }
-
-    /* CARD 5: Market Linkage & Pricing (Teal) */
-    .card-market {
-      width: 280px;
-      height: 470px;
-      left: 1205px;
-      top: 220px;
-      border-color: #0D9488;
-      box-shadow: 0 12px 35px rgba(13, 148, 136, 0.22);
-    }
-    .card-market .cat-icon-badge {
-      background: linear-gradient(135deg, #115E59 0%, #0D9488 100%);
-      color: #FFFFFF;
-      border: 1.5px solid #2DD4BF;
-    }
-    .card-market .cat-tag { color: #2DD4BF; }
-
-    /* CARD 6: Security, Trust & Provenance (Red) */
-    .card-security {
-      width: 260px;
-      height: 470px;
-      left: 1572px;
-      top: 220px;
-      border-color: #EF4444;
-      box-shadow: 0 12px 35px rgba(239, 68, 68, 0.22);
-    }
-    .card-security .cat-icon-badge {
-      background: linear-gradient(135deg, #991B1B 0%, #EF4444 100%);
-      color: #FFFFFF;
-      border: 1.5px solid #F87171;
-    }
-    .card-security .cat-tag { color: #F87171; }
-
-    /* Stacked Compact Flow Badges */
-    .arrow-badge-stack {
+    /* CENTRAL BOUNDING BOX */
+    .central-stage-box {
       position: absolute;
-      z-index: 30;
-      padding: 5px 9px;
-      border-radius: 12px;
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      left: 245px;
+      top: 5px;
+      width: 960px;
+      height: 835px;
+      background: #FFFFFF;
+      border: 1.8px solid #334155;
+      border-radius: 22px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      z-index: 10;
+    }
+
+    /* INSIDE CENTRAL BOX: BENEFICIARY DATA BOX */
+    .origin-data-box {
+      position: absolute;
+      left: 18px;
+      top: 305px;
+      width: 220px;
+      height: 240px;
+      background: linear-gradient(180deg, #99F6E4 0%, #5EEAD4 100%);
+      border: 2.8px solid #000000;
+      border-radius: 28px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 12px;
+      text-align: center;
+      z-index: 12;
+    }
+
+    .origin-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: #000000;
+      line-height: 1.15;
+    }
+
+    .origin-sub {
+      font-size: 11px;
+      font-weight: 700;
+      color: #064E3B;
+    }
+
+    /* 3D HORIZONTAL CYLINDERS */
+    .cylinder-pipeline-wrap {
+      position: absolute;
+      left: 135px;
+      width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .cylinder-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 19px;
+      font-weight: 800;
+      color: #000000;
+      margin-bottom: 6px;
+    }
+
+    .cylinder-3d-tube {
+      position: relative;
+      width: 430px;
+      height: 72px;
+      border: 2px solid #000000;
+      border-radius: 40px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #EEF2F6 40%, #CBD5E1 100%);
+      box-shadow: inset 0 3px 6px rgba(255,255,255,0.9), inset 0 -4px 8px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.08);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 0 24px;
+    }
+
+    .cylinder-3d-tube::before {
+      content: "";
+      position: absolute;
+      left: -2px;
+      top: -2px;
+      bottom: -2px;
+      width: 28px;
+      border-radius: 40px 0 0 40px;
+      border: 2px solid #000000;
+      border-right: 1.5px solid #64748B;
+      background: linear-gradient(90deg, #E2E8F0 0%, #F1F5F9 100%);
+    }
+
+    .cylinder-main-text {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0F172A;
       text-align: center;
-      gap: 2px;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.65);
-      transform: translate(-50%, -50%);
       line-height: 1.2;
     }
 
-    .arrow-badge-top-row {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 10px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .arrow-badge-sub-row {
-      font-size: 8.5px;
+    .cylinder-sub-text {
+      font-size: 10.5px;
       font-weight: 600;
-      font-family: 'JetBrains Mono', monospace;
-      opacity: 0.9;
-      white-space: nowrap;
+      color: #475569;
+      text-align: center;
+      margin-top: 2px;
     }
 
-    .arrow-badge-num {
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
+    /* SCALLOPED CLOUD CALLOUTS */
+    .cloud-shape {
+      position: absolute;
+      background: #EDE4F9;
+      border: 2.2px solid #000000;
+      border-radius: 36px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 8.5px;
-      font-weight: 900;
-      color: #FFFFFF;
-      flex-shrink: 0;
+      padding: 10px 14px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
-    /* Color variations for labels */
-    .badge-blue {
-      background: rgba(15, 35, 75, 0.96);
-      border: 1.5px solid #38BDF8;
-      color: #E0F2FE;
+    .cloud-shape::before, .cloud-shape::after {
+      content: "";
+      position: absolute;
+      background: #EDE4F9;
+      border: 2.2px solid #000000;
+      border-radius: 50%;
+      z-index: -1;
     }
-    .badge-blue .arrow-badge-num { background: #2563EB; }
 
-    .badge-purple {
-      background: rgba(45, 18, 85, 0.96);
-      border: 1.5px solid #A855F7;
-      color: #F3E8FF;
+    .cloud-shape::before {
+      width: 44px;
+      height: 44px;
+      top: -16px;
+      left: 28px;
     }
-    .badge-purple .arrow-badge-num { background: #7C3AED; }
 
-    .badge-orange {
-      background: rgba(65, 25, 10, 0.96);
-      border: 1.5px solid #FB923C;
-      color: #FFEDD5;
+    .cloud-shape::after {
+      width: 50px;
+      height: 50px;
+      top: -20px;
+      right: 28px;
     }
-    .badge-orange .arrow-badge-num { background: #EA580C; }
 
-    .badge-teal {
-      background: rgba(13, 45, 42, 0.96);
-      border: 1.5px solid #2DD4BF;
-      color: #CCFBF1;
+    .cloud-text {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #000000;
+      line-height: 1.2;
     }
-    .badge-teal .arrow-badge-num { background: #0F766E; }
 
-    .badge-red {
-      background: rgba(65, 15, 15, 0.96);
-      border: 1.5px solid #F87171;
-      color: #FEE2E2;
+    .cloud-sub {
+      font-size: 10px;
+      font-weight: 700;
+      color: #6B21A8;
+      margin-top: 2px;
     }
-    .badge-red .arrow-badge-num { background: #DC2626; }
 
-    .badge-green {
-      background: rgba(6, 45, 32, 0.96);
-      border: 1.5px solid #34D399;
-      color: #D1FAE5;
-    }
-    .badge-green .arrow-badge-num { background: #059669; }
-
-    /* Bottom Legend / Status Bar */
-    .footer-bar {
+    /* REASONABILITY REPORT GRAPHIC */
+    .report-wrap {
+      position: absolute;
+      left: 245px;
+      top: 500px;
+      width: 195px;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
-      padding: 10px 24px;
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      backdrop-filter: blur(12px);
+      text-align: center;
+    }
+
+    .report-card {
+      width: 82px;
+      height: 108px;
+      background: #FFFFFF;
+      border: 2.5px solid #10B981;
+      border-radius: 10px;
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.2);
+      padding: 8px 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       position: relative;
+    }
+
+    .report-card::after {
+      content: "✓ ₹120/hr";
+      position: absolute;
+      bottom: -10px;
+      right: -16px;
+      background: #10B981;
+      color: #FFF;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1.5px solid #FFF;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .report-bar {
+      height: 6px;
+      border-radius: 4px;
+      background: #E2E8F0;
+    }
+    .report-bar-green { background: #10B981; width: 85%; }
+    .report-bar-teal { background: #14B8A6; width: 65%; }
+    .report-bar-orange { background: #F97316; width: 75%; }
+
+    /* ML ENSEMBLE VERTICAL COLUMN */
+    .ml-ensemble-box {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      width: 240px;
+      height: 795px;
+      background: linear-gradient(180deg, #F8F1FF 0%, #EDE0FF 100%);
+      border: 2.6px solid #000000;
+      border-radius: 36px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 12;
+    }
+
+    .ml-ensemble-header {
+      font-size: 15px;
+      font-weight: 800;
+      color: #000000;
+      border-bottom: 2px solid #000000;
+      padding-bottom: 2px;
+      margin-bottom: 4px;
+    }
+
+    .model-capsule-stack {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .model-capsule {
+      background: #FFFFFF;
+      border: 1.8px solid #000000;
+      border-radius: 20px;
+      padding: 5px 8px;
+      text-align: center;
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #000000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    .ml-inner-box {
+      background: #FFFFFF;
+      border: 2px solid #000000;
+      border-radius: 12px;
+      padding: 6px 10px;
+      width: 175px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+    }
+
+    .ml-inner-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #000000;
+    }
+
+    .ml-inner-sub {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #475569;
+    }
+
+    .ml-multimodal-card {
+      width: 100%;
+      background: linear-gradient(180deg, #E0E7FF 0%, #C7D2FE 100%);
+      border: 2.5px solid #000000;
+      border-radius: 24px;
+      padding: 12px 8px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* RIGHT SECTION: OUTPUT & CLASSIFICATION */
+    .right-section {
+      position: absolute;
+      left: 1235px;
+      top: 5px;
+      width: 630px;
+      height: 835px;
+      z-index: 15;
+    }
+
+    .output-box-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .output-label {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #000000;
+      margin-bottom: 6px;
+    }
+
+    .output-cyan-box {
+      width: 170px;
+      height: 135px;
+      background: linear-gradient(180deg, #BAE6FD 0%, #7DD3FC 100%);
+      border: 3px solid #000000;
+      border-radius: 30px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .output-cyan-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #000000;
+      line-height: 1.2;
+    }
+
+    .output-cyan-sub {
+      font-size: 11px;
+      font-weight: 700;
+      color: #0369A1;
+      margin-top: 4px;
+    }
+
+    .composite-score-box {
+      position: absolute;
+      left: 210px;
+      top: 325px;
+      width: 165px;
+      height: 165px;
+      background: linear-gradient(180deg, #F1F5F9 0%, #E2E8F0 100%);
+      border: 3px solid #000000;
+      border-radius: 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .composite-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #000000;
+      line-height: 1.25;
+    }
+
+    .composite-sub {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1E293B;
+      margin-top: 6px;
+    }
+
+    .outcome-pills-col {
+      position: absolute;
+      left: 410px;
+      top: 195px;
+      width: 215px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .outcome-pill {
+      background: linear-gradient(180deg, #FFFFFF 0%, #F5F3FF 100%);
+      border: 2.6px solid #000000;
+      border-radius: 22px;
+      padding: 12px 14px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .outcome-title {
+      font-size: 15.5px;
+      font-weight: 800;
+      color: #000000;
+      line-height: 1.2;
+    }
+
+    .outcome-sub {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #475569;
+      margin-top: 2px;
+    }
+
+    /* BOTTOM RIBBON: TECH STACK ARCHES */
+    .tech-stack-ribbon {
+      width: 100%;
+      height: 80px;
+      background: linear-gradient(90deg, #F8FAFC 0%, #EEF2FF 50%, #ECFDF5 100%);
+      border: 2.6px solid #000000;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
       z-index: 20;
     }
 
-    .footer-legend {
+    .tech-stack-badge {
+      background: #FFFFFF;
+      border: 2.6px solid #000000;
+      border-radius: 999px;
+      padding: 8px 24px;
       display: flex;
       align-items: center;
-      gap: 18px;
-      font-size: 11px;
-      color: #94A3B8;
-      font-weight: 600;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    .legend-item {
+    .tech-stack-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: #000000;
+      text-decoration: underline;
+    }
+
+    .tech-category-segment {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 0 16px;
+      position: relative;
+    }
+
+    .tech-icons-row {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 10px;
     }
 
-    .legend-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-    }
-
-    .footer-stats {
-      font-family: 'JetBrains Mono', monospace;
+    .tech-chip {
+      background: #FFFFFF;
+      border: 1.5px solid #000000;
+      border-radius: 8px;
+      padding: 3px 8px;
       font-size: 11px;
-      color: #64748B;
-      display: flex;
-      gap: 16px;
+      font-weight: 800;
+      color: #0F172A;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
 
-    .stat-highlight {
-      color: #10B981;
-      font-weight: 700;
+    .tech-category-label {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #000000;
+    }
+
+    /* SVG CONNECTOR OVERLAY */
+    .connector-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 11;
     }
   </style>
 </head>
@@ -584,439 +722,356 @@ HTML_CONTENT = """<!DOCTYPE html>
 
   <div class="viewport-wrapper">
     <div id="slide-stage">
-      <div class="bg-grid"></div>
 
-      <!-- ==================== HEADER BAR ==================== -->
-      <div class="header-bar">
-        <div class="header-left">
-          <div class="team-badge">INVINCIBLE</div>
-          <div class="project-title">
-            ShilpSetu AI <span class="hindi">शिल्पसेतु AI</span>
-            <span class="project-subtitle">Interconnected End-to-End System Architecture & Data Flow</span>
+      <!-- ==================== TOP HEADER ==================== -->
+      <div class="top-header">
+        <div class="top-left-title">
+          <div class="brand-title">
+            SHILPSETU AI!
+            <span class="brand-tag">INVINCIBLE</span>
           </div>
+          <div class="brand-sub">End-to-End Artisan Multimodal Ingestion & Sovereign Commerce Engine</div>
         </div>
-        <div class="header-right">
-          <div class="sih-badge">
-            <span class="sih-title">SMART INDIA HACKATHON 2026</span>
-            <span class="sih-sub">Problem Statement ID: 26090</span>
+
+        <div class="top-right-header">
+          <div class="sih-meta-row">
+            <div class="sih-logo-badge">
+              <span class="sih-brain-icon">🧠</span>
+              <span>SMART INDIA HACKATHON 2026 • Problem ID: 26090</span>
+            </div>
+            <div style="font-size: 12px; font-weight: 700; color: #475569; padding-left: 8px; border-left: 2px solid #CBD5E1;">
+              🏛️ MoSJE • NBCFDC / NSFDC Sovereign Rails
+            </div>
           </div>
-          <div class="govt-tag">
-            🏛️ MoSJE • NBCFDC / NSFDC Sovereign Rails
-          </div>
+          <div class="sih-title-large">System Architecture</div>
         </div>
       </div>
 
       <!-- ==================== MAIN ARCHITECTURE STAGE ==================== -->
-      <div class="diagram-stage">
+      <div class="diagram-body">
 
-        <!-- SVG Layer for Interconnecting Connectors & Merge Nodes -->
-        <svg class="svg-layer" viewBox="0 0 1856 875" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- SVG CONNECTING ARROWS & PATHS -->
+        <svg class="connector-svg" viewBox="0 0 1872 870" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <!-- Arrowhead Markers -->
-            <marker id="arrow-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#38BDF8"/>
+            <marker id="arrow-black" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#000000"/>
             </marker>
-            <marker id="arrow-purple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#A855F7"/>
-            </marker>
-            <marker id="arrow-orange" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#FB923C"/>
-            </marker>
-            <marker id="arrow-teal" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2DD4BF"/>
-            </marker>
-            <marker id="arrow-red" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#F87171"/>
-            </marker>
-            <marker id="arrow-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#34D399"/>
-            </marker>
-
-            <!-- Drop shadow & glow filter -->
-            <filter id="glow-junction" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#2DD4BF" flood-opacity="0.9"/>
-            </filter>
           </defs>
 
-          <!-- 1. Frontend -> Backend (REST / WebSocket Ingestion) -->
-          <line x1="268" y1="455" x2="358" y2="455" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow-blue)" filter="drop-shadow(0 0 6px rgba(56, 189, 248, 0.6))"/>
+          <!-- 1. Left Sidebar Double Horizontal Connectors to Central Box -->
+          <line x1="195" y1="418" x2="242" y2="418" stroke="#000000" stroke-width="2.6" marker-end="url(#arrow-black)"/>
+          <line x1="242" y1="432" x2="195" y2="432" stroke="#000000" stroke-width="2.6" marker-end="url(#arrow-black)"/>
 
-          <!-- 2. Backend -> Vision Pipeline (Branch 1 - Upper) -->
-          <path d="M 621,310 C 690,310 710,230 767,230" fill="none" stroke="#A855F7" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow-purple)" filter="drop-shadow(0 0 5px rgba(168, 85, 247, 0.5))"/>
+          <!-- 2. Inside Central Box: Beneficiary Data -> Top Cylinder -->
+          <path d="M 360,390 L 360,110 L 375,110" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)" fill="none"/>
 
-          <!-- 3. Backend -> Speech Pipeline (Branch 2 - Lower) -->
-          <path d="M 621,600 C 690,600 710,620 767,620" fill="none" stroke="#FB923C" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow-orange)" filter="drop-shadow(0 0 5px rgba(251, 146, 60, 0.5))"/>
+          <!-- 3. Inside Central Box: Beneficiary Data -> Bottom Cylinder -->
+          <path d="M 360,460 L 360,740 L 375,740" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)" fill="none"/>
 
-          <!-- 4. Convergence / Merge: Vision (Card 3) + Speech (Card 4) -> Market Linkage (Card 5) -->
-          <path d="M 1060,230 C 1100,230 1120,400 1135,455" fill="none" stroke="#A855F7" stroke-width="2.8" stroke-linecap="round"/>
-          <path d="M 1060,620 C 1100,620 1120,510 1135,455" fill="none" stroke="#FB923C" stroke-width="2.8" stroke-linecap="round"/>
-          <line x1="1135" y1="455" x2="1197" y2="455" stroke="#2DD4BF" stroke-width="3.5" stroke-linecap="round" marker-end="url(#arrow-teal)" filter="drop-shadow(0 0 7px rgba(45, 212, 191, 0.7))"/>
-          <circle cx="1135" cy="455" r="5.5" fill="#2DD4BF" stroke="#FFFFFF" stroke-width="2" filter="url(#glow-junction)"/>
+          <!-- 4. Top Cylinder -> ML Ensemble -->
+          <line x1="815" y1="110" x2="960" y2="110" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)"/>
 
-          <!-- 5. Market Linkage -> Security, Trust & Provenance -->
-          <line x1="1485" y1="455" x2="1564" y2="455" stroke="#F87171" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow-red)" filter="drop-shadow(0 0 6px rgba(248, 113, 113, 0.6))"/>
+          <!-- 5. Bottom Cylinder -> Multimodal LLM -->
+          <line x1="815" y1="740" x2="960" y2="740" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)"/>
 
-          <!-- 6. Security -> Backend & Core Architecture (Persistence Return Loop) -->
-          <path d="M 1702,690 L 1702,835 C 1702,845 1680,845 1650,845 L 515,845 C 493,845 493,835 493,698" fill="none" stroke="#34D399" stroke-width="2.5" stroke-dasharray="7 4" stroke-linecap="round" marker-end="url(#arrow-green)" filter="drop-shadow(0 0 5px rgba(52, 211, 153, 0.45))"/>
+          <!-- 6. Cloud 1 to SHAP/LIME -->
+          <path d="M 700,240 C 735,240 755,275 790,275" stroke="#000000" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-black)" fill="none"/>
 
-          <!-- 7. Security -> Market Linkage (Broadcast Loop Back via ONDC/GeM) -->
-          <path d="M 1572,280 C 1540,250 1515,250 1493,275" fill="none" stroke="#2DD4BF" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow-teal)" filter="drop-shadow(0 0 4px rgba(45, 212, 191, 0.5))"/>
+          <!-- 7. Cloud 2 to Report -->
+          <path d="M 605,480 C 605,510 590,520 545,550" stroke="#000000" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-black)" fill="none"/>
 
-          <!-- 8. Market Linkage -> Frontend & UI (Live Listing Feed) -->
-          <path d="M 1345,220 L 1345,26 C 1345,14 1325,14 1290,14 L 165,14 C 143,14 143,26 143,212" fill="none" stroke="#38BDF8" stroke-width="2.5" stroke-dasharray="7 4" stroke-linecap="round" marker-end="url(#arrow-blue)" filter="drop-shadow(0 0 5px rgba(56, 189, 248, 0.45))"/>
+          <!-- 8. ML Ensemble -> Top Output Box -->
+          <line x1="1205" y1="110" x2="1275" y2="110" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)"/>
+
+          <!-- 9. ML Ensemble -> Bottom Output Box -->
+          <line x1="1205" y1="740" x2="1275" y2="740" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)"/>
+
+          <!-- 10. Converging lines into Composite Score -->
+          <path d="M 1450,110 L 1495,110 L 1495,405 L 1445,405" stroke="#000000" stroke-width="2.8" fill="none"/>
+          <path d="M 1450,740 L 1495,740 L 1495,405 L 1445,405" stroke="#000000" stroke-width="2.8" fill="none"/>
+          <line x1="1410" y1="405" x2="1445" y2="405" stroke="#000000" stroke-width="2.8" marker-end="url(#arrow-black)"/>
+
+          <!-- 11. Middle Cloud with dashed arrow to Fair Wage Bracket -->
+          <path d="M 1390,445 C 1425,530 1425,630 1380,660" stroke="#000000" stroke-width="2.4" stroke-dasharray="6 4" marker-end="url(#arrow-black)" fill="none"/>
+
+          <!-- 12. Composite Score -> 4 Outcome Pills -->
+          <line x1="1610" y1="405" x2="1645" y2="405" stroke="#000000" stroke-width="2.8"/>
+          <path d="M 1645,405 L 1645,230 L 1655,230" stroke="#000000" stroke-width="2.4" marker-end="url(#arrow-black)" fill="none"/>
+          <path d="M 1645,405 L 1645,320 L 1655,320" stroke="#000000" stroke-width="2.4" marker-end="url(#arrow-black)" fill="none"/>
+          <path d="M 1645,405 L 1645,475 L 1655,475" stroke="#000000" stroke-width="2.4" marker-end="url(#arrow-black)" fill="none"/>
+          <path d="M 1645,405 L 1645,565 L 1655,565" stroke="#000000" stroke-width="2.4" marker-end="url(#arrow-black)" fill="none"/>
         </svg>
 
-        <!-- ==================== 1. FRONTEND & UI (BLUE) ==================== -->
-        <div class="cat-card card-frontend">
-          <div class="cat-card-header">
-            <div class="cat-icon-badge">📱</div>
-            <div class="cat-title-wrap">
-              <span class="cat-tag">Layer 01 • Ingestion</span>
-              <h3 class="cat-title">Frontend & UI</h3>
-              <p class="cat-sub">Multi-Channel Artisan Access</p>
+        <!-- ==================== LEFT SIDEBAR CAPSULES ==================== -->
+        <div class="left-sidebar">
+          <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
+            <div class="sidebar-section-title">API Layer</div>
+            <div class="pill-capsule pill-api">
+              <div class="pill-title">FastAPI Backend</div>
+              <div class="pill-sub">Stateless Async Gateway</div>
+            </div>
+            
+            <div class="v-arrow-double">
+              <svg width="18" height="24" viewBox="0 0 18 24" fill="none">
+                <path d="M 9 2 L 4 7 M 9 2 L 14 7 M 9 2 L 9 22 M 9 22 L 4 17 M 9 22 L 14 17" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+
+            <div class="pill-capsule pill-api">
+              <div class="pill-title">Re-scoring Engine</div>
+              <div class="pill-sub">Vyapar-Niti Fair Wage</div>
             </div>
           </div>
-          <div class="tech-list">
-            <div class="tech-item">
-              <span class="tech-item-icon">📱</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">Flutter (Mobile) <span class="tech-pill-mini">Dart 3</span></div>
-                <div class="tech-item-desc">Cross-platform app, zero-bandwidth offline queue, 60px tactile touch targets</div>
-              </div>
+
+          <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
+            <div class="pill-capsule pill-data">
+              <div class="pill-title">Data Layer</div>
+              <div class="pill-sub">SQLite WAL & PostgreSQL</div>
             </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">⚛️</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">React 18 + Vite <span class="tech-pill-mini">Web</span></div>
-                <div class="tech-item-desc">Responsive buyer marketplace, coordinator audit desk & live analytics</div>
-              </div>
+
+            <div class="v-arrow-double">
+              <svg width="18" height="24" viewBox="0 0 18 24" fill="none">
+                <path d="M 9 2 L 4 7 M 9 2 L 14 7 M 9 2 L 9 22 M 9 22 L 4 17 M 9 22 L 14 17" stroke="#000000" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
             </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">📞</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">2G IVR Telephony <span class="tech-pill-mini">Hotline</span></div>
-                <div class="tech-item-desc">Keypad feature phone simulation, Web Audio DTMF tones & automated flow</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🎨</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">Tailwind + M3 <span class="tech-pill-mini">Design</span></div>
-                <div class="tech-item-desc">Zero-text icon navigation, warm terracotta aesthetic, accessible WCAG 2.1</div>
-              </div>
+
+            <div class="pill-capsule pill-data">
+              <div class="pill-title">Data Verification</div>
+              <div class="pill-sub">2D DCT Stego & SHA-256</div>
             </div>
           </div>
         </div>
 
-        <!-- Arrow 1 Stacked Label: Frontend -> Backend -->
-        <div class="arrow-badge-stack badge-blue" style="left: 317px; top: 455px;">
-          <div class="arrow-badge-top-row">
-            <span class="arrow-badge-num">1</span>
-            <span>Capture & Ingestion</span>
+        <!-- ==================== CENTRAL WHITE BOUNDING BOX ==================== -->
+        <div class="central-stage-box">
+
+          <!-- Left Inside: Beneficiary Data (Artisan Craft Data) -->
+          <div class="origin-data-box">
+            <div style="font-size: 26px;">📊 🧶</div>
+            <div>
+              <div class="origin-title">Beneficiary<br>Data</div>
+              <div class="origin-sub">Audio Dialect + Raw Photo</div>
+            </div>
+            <div style="font-size: 22px;">⚛️ 📷</div>
           </div>
-          <div class="arrow-badge-sub-row">REST / WebSocket</div>
+
+          <!-- Top Branch: 3D Cylinder -->
+          <div class="cylinder-pipeline-wrap" style="top: 15px;">
+            <div class="cylinder-title">Risk Assessment Pipeline</div>
+            <div class="cylinder-3d-tube">
+              <div class="cylinder-main-text">Preprocessing and Feature Engineering</div>
+              <div class="cylinder-sub-text">rembg (BiRefNet), 6500K Studio Balance & Skeleton Pruning</div>
+            </div>
+          </div>
+
+          <!-- Bottom Branch: 3D Cylinder -->
+          <div class="cylinder-pipeline-wrap" style="top: 675px;">
+            <div class="cylinder-3d-tube">
+              <div class="cylinder-main-text">Preprocessing and Principle component analysis</div>
+              <div class="cylinder-sub-text">MeitY Bhashini ASR (22 Langs) & IndicTrans v2 Story Engine</div>
+            </div>
+            <div class="cylinder-title" style="margin-top: 6px;">Income Classification Pipeline</div>
+          </div>
+
+          <!-- Cloud 1: Stabilize Explanation -->
+          <div class="cloud-shape" style="left: 375px; top: 195px; width: 175px;">
+            <div class="cloud-text">Stabilize<br>Explaination</div>
+            <div class="cloud-sub">Contextual Craft Normalization</div>
+          </div>
+
+          <!-- Cloud 2: Mean Value Calculation -->
+          <div class="cloud-shape" style="left: 375px; top: 410px; width: 175px;">
+            <div class="cloud-text">Mean Value<br>Calculation</div>
+            <div class="cloud-sub">Statutory Wage Floor Check</div>
+          </div>
+
+          <!-- Report with reasonability -->
+          <div class="report-wrap">
+            <div class="cylinder-title" style="font-size: 15px; margin-bottom: 8px;">Risk Report<br>with reasonability</div>
+            <div class="report-card">
+              <div style="font-size: 9px; font-weight:800; color:#10B981; border-bottom:1px solid #E2E8F0; padding-bottom:2px;">FAIR WAGE</div>
+              <div class="report-bar report-bar-green"></div>
+              <div class="report-bar report-bar-teal"></div>
+              <div class="report-bar report-bar-orange"></div>
+              <div style="font-size: 8px; color:#64748B; font-weight:700;">₹120/hr Guard</div>
+            </div>
+          </div>
+
+          <!-- Right Inside: ML Ensemble Box -->
+          <div class="ml-ensemble-box">
+            <div class="ml-ensemble-header">ML Ensemble</div>
+
+            <div class="model-capsule-stack">
+              <div class="model-capsule" style="background:#FEF08A;">Model 1: BiRefNet Matting</div>
+              <div class="model-capsule" style="background:#BAE6FD;">Model 2: 6500K Studio Balance</div>
+              <div class="model-capsule" style="background:#FED7AA;">Model n: GrabCut Fallback</div>
+            </div>
+
+            <!-- Crisp Clean SVG Down Arrow -->
+            <svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M 7 1 L 7 15 M 2 10 L 7 15 L 12 10" stroke="#000000" stroke-width="2.4" stroke-linecap="round"/></svg>
+
+            <div class="ml-inner-box">
+              <div class="ml-inner-title">SHAP</div>
+              <div class="ml-inner-title">LIME</div>
+              <div class="ml-inner-sub">CLIP Visual Similarity</div>
+            </div>
+
+            <svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M 7 1 L 7 15 M 2 10 L 7 15 L 12 10" stroke="#000000" stroke-width="2.4" stroke-linecap="round"/></svg>
+
+            <div class="ml-inner-box">
+              <div class="ml-inner-title">K Means</div>
+              <div class="ml-inner-sub">Artisan GI Clustering</div>
+            </div>
+
+            <svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M 7 1 L 7 15 M 2 10 L 7 15 L 12 10" stroke="#000000" stroke-width="2.4" stroke-linecap="round"/></svg>
+
+            <div class="ml-inner-box">
+              <div class="ml-inner-title">K Means</div>
+              <div class="ml-inner-sub">Statutory Wage Floor</div>
+            </div>
+
+            <svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M 7 1 L 7 15 M 2 10 L 7 15 L 12 10" stroke="#000000" stroke-width="2.4" stroke-linecap="round"/></svg>
+
+            <div class="ml-inner-box">
+              <div class="ml-inner-title">SHAP</div>
+              <div class="ml-inner-title">LIME</div>
+              <div class="ml-inner-sub">Living Wage Audit</div>
+            </div>
+
+            <svg width="14" height="18" viewBox="0 0 14 18" fill="none"><path d="M 7 1 L 7 15 M 2 10 L 7 15 L 12 10" stroke="#000000" stroke-width="2.4" stroke-linecap="round"/></svg>
+
+            <div class="ml-multimodal-card">
+              <div style="font-size: 16px; font-weight: 900; color: #000;">ML Model</div>
+              <div style="font-size: 11px; font-weight: 700; color: #1E1B4B; margin-top:2px;">Gemini 2.5 Flash + Llama 3.2</div>
+            </div>
+          </div>
+
         </div>
 
-        <!-- ==================== 2. BACKEND & CORE ARCHITECTURE (GREEN) ==================== -->
-        <div class="cat-card card-backend">
-          <div class="cat-card-header">
-            <div class="cat-icon-badge">⚙️</div>
-            <div class="cat-title-wrap">
-              <span class="cat-tag">Layer 02 • Core Gateway</span>
-              <h3 class="cat-title">Backend & Core</h3>
-              <p class="cat-sub">High-Concurrency Orchestrator</p>
-            </div>
-          </div>
-          <div class="tech-list">
-            <div class="tech-item">
-              <span class="tech-item-icon">⚡</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">FastAPI <span class="tech-pill-mini">Python 3.13</span></div>
-                <div class="tech-item-desc">Stateless async microservices gateway, parallel pipeline dispatch & routing</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🦄</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">Uvicorn ASGI <span class="tech-pill-mini">Async IO</span></div>
-                <div class="tech-item-desc">High-throughput event loop, handling multi-part audio/image streams</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🛡️</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">Pydantic v2 <span class="tech-pill-mini">Validation</span></div>
-                <div class="tech-item-desc">Strict schema contracts, craft entity sanitization & coordinator approval logs</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🗄️</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">SQLite WAL / Postgres <span class="tech-pill-mini">DB</span></div>
-                <div class="tech-item-desc">Zero-lock draft catalog persistence, artisan profiles & audit trail log</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- ==================== RIGHT SECTION: OUTPUTS ==================== -->
+        <div class="right-section">
 
-        <!-- Arrow 2 Stacked Label: Backend -> Vision (Branch 1) -->
-        <div class="arrow-badge-stack badge-purple" style="left: 698px; top: 230px;">
-          <div class="arrow-badge-top-row">
-            <span class="arrow-badge-num">2</span>
-            <span>Image Payload</span>
+          <!-- Top Output: Most Routed Output -->
+          <div class="output-box-wrap" style="position: absolute; left: 45px; top: 15px;">
+            <div class="output-label">Output</div>
+            <div class="output-cyan-box">
+              <div class="output-cyan-title">Most<br>Routed<br>Output</div>
+              <div class="output-cyan-sub">ONDC & GeM Catalog Payload</div>
+            </div>
           </div>
-          <div class="arrow-badge-sub-row">Vision Processing</div>
-        </div>
 
-        <!-- Arrow 3 Stacked Label: Backend -> Speech (Branch 2) -->
-        <div class="arrow-badge-stack badge-orange" style="left: 698px; top: 620px;">
-          <div class="arrow-badge-top-row">
-            <span class="arrow-badge-num">3</span>
-            <span>Audio Payload</span>
+          <!-- Middle Cloud: Group People With Similar Income -->
+          <div class="cloud-shape" style="left: 20px; top: 340px; width: 220px; border-radius: 40px;">
+            <div class="cloud-text">Group People<br>With Similar<br>Income</div>
+            <div class="cloud-sub">Artisan Cluster & GI Registry</div>
           </div>
-          <div class="arrow-badge-sub-row">Voice-to-Catalog</div>
-        </div>
 
-        <!-- ==================== 3. AI COMPUTER VISION & STUDIO (PURPLE) ==================== -->
-        <div class="cat-card card-vision">
-          <div class="cat-card-header">
-            <div class="cat-icon-badge">👁️</div>
-            <div class="cat-title-wrap">
-              <span class="cat-tag">Layer 03A • Visual AI</span>
-              <h3 class="cat-title">Computer Vision</h3>
-              <p class="cat-sub">Photometric Studio Pipeline</p>
+          <!-- Bottom Output: Income Bracket -->
+          <div class="output-box-wrap" style="position: absolute; left: 45px; top: 660px;">
+            <div class="output-cyan-box">
+              <div class="output-cyan-title">Income<br>Bracket</div>
+              <div class="output-cyan-sub">B2C 1.35x / B2B Wholesale MOQ</div>
             </div>
           </div>
-          <div class="tech-list">
-            <div class="tech-item">
-              <span class="tech-item-icon">✂️</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">rembg (BiRefNet/U2Net) <span class="tech-pill-mini">Matting</span></div>
-                <div class="tech-item-desc">Sub-2s neural background removal with high-res boundary preservation</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🖼️</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">OpenCV & Pillow <span class="tech-pill-mini">Color Science</span></div>
-                <div class="tech-item-desc">6500K studio color-cast balancing, Gaussian drop-shadow synthesis</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🦴</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">Skeleton Pruning <span class="tech-pill-mini">Topology</span></div>
-                <div class="tech-item-desc">Multi-component craft retention for intricate chanderi zari & pottery rims</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🛡️</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">GrabCut Fallback <span class="tech-pill-mini">Resilience</span></div>
-                <div class="tech-item-desc">Low-resource iterative graph-cut engine if neural VRAM constrained</div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- ==================== 4. SPEECH & MULTIMODAL INTELLIGENCE (ORANGE) ==================== -->
-        <div class="cat-card card-speech">
-          <div class="cat-card-header">
-            <div class="cat-icon-badge">🎙️</div>
-            <div class="cat-title-wrap">
-              <span class="cat-tag">Layer 03B • Multimodal</span>
-              <h3 class="cat-title">Speech & LLM Intel</h3>
-              <p class="cat-sub">Indic Dialect Extraction</p>
-            </div>
+          <!-- Composite Credit Score Box -->
+          <div class="composite-score-box">
+            <div class="composite-title">Composite<br>Credit<br>Score</div>
+            <div class="composite-sub">Karigar Trust Score & 2D DCT Watermark</div>
           </div>
-          <div class="tech-list">
-            <div class="tech-item">
-              <span class="tech-item-icon">🇮🇳</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">MeitY Bhashini ASR <span class="tech-pill-mini">Dhruva</span></div>
-                <div class="tech-item-desc">Conformer Indic ASR across 22 scheduled languages & colloquial dialects</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🧠</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">Gemini 2.5 Flash <span class="tech-pill-mini">Multimodal</span></div>
-                <div class="tech-item-desc">Combined audio transcript + image entity extraction for craft metadata</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🦙</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">Meta Llama 3.2 Vision <span class="tech-pill-mini">Edge Fallback</span></div>
-                <div class="tech-item-desc">Offline/on-prem multimodal fallback for zero-cloud sovereignty</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🔄</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">IndicTrans v2 <span class="tech-pill-mini">Translation</span></div>
-                <div class="tech-item-desc">Regional dialect to English product title, materials & craft story</div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Arrow 4 Stacked Label: Convergence Node -> Market Linkage -->
-        <div class="arrow-badge-stack badge-teal" style="left: 1135px; top: 405px;">
-          <div class="arrow-badge-top-row">
-            <span class="arrow-badge-num">4</span>
-            <span>Catalog + Image data</span>
-          </div>
-          <div class="arrow-badge-sub-row">→ Pricing Engine (Merge)</div>
-        </div>
+          <!-- Rightmost 4 Outcome Pills -->
+          <div class="outcome-pills-col">
+            <div class="outcome-pill">
+              <div class="outcome-title">Low risk<br>Low Income</div>
+              <div class="outcome-sub">Direct B2C Buyer Marketplace</div>
+            </div>
 
-        <!-- ==================== 5. MARKET LINKAGE & PRICING (TEAL) ==================== -->
-        <div class="cat-card card-market">
-          <div class="cat-card-header">
-            <div class="cat-icon-badge">⚖️</div>
-            <div class="cat-title-wrap">
-              <span class="cat-tag">Layer 04 • Sovereign Commerce</span>
-              <h3 class="cat-title">Market Linkage</h3>
-              <p class="cat-sub">Statutory Wage & Open Rails</p>
+            <div class="outcome-pill">
+              <div class="outcome-title">Low risk<br>High INCOME</div>
+              <div class="outcome-sub">ONDC Open Rails Discovery</div>
             </div>
-          </div>
-          <div class="tech-list">
-            <div class="tech-item">
-              <span class="tech-item-icon">📈</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">Vyapar-Niti Engine <span class="tech-pill-mini">Fair Wage</span></div>
-                <div class="tech-item-desc">MoSJE statutory ₹120/hr wage floor, B2C (1.35x), B2B wholesale MOQ tiers</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🔍</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">CLIP Similarity <span class="tech-pill-mini">Visual Index</span></div>
-                <div class="tech-item-desc">Image embeddings to cross-reference market pricing & prevent duplication</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🌐</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">ONDC Beckn v1.2 <span class="tech-pill-mini">Protocol</span></div>
-                <div class="tech-item-desc">BAP/BPP catalog serialization, open discovery across Buyer Apps</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🏛️</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">GeM Procurement <span class="tech-pill-mini">Gov Orders</span></div>
-                <div class="tech-item-desc">Direct 15% price preference listing for institutional public procurement</div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Arrow 5 Stacked Label: Market Linkage -> Security -->
-        <div class="arrow-badge-stack badge-red" style="left: 1528px; top: 455px;">
-          <div class="arrow-badge-top-row">
-            <span class="arrow-badge-num">5</span>
-            <span>Finalized Listing</span>
-          </div>
-          <div class="arrow-badge-sub-row">Watermark & Fingerprint</div>
-        </div>
+            <div class="outcome-pill">
+              <div class="outcome-title">High risk<br>Low INCOME</div>
+              <div class="outcome-sub">GeM Public Procurement (15% Pref)</div>
+            </div>
 
-        <!-- ==================== 6. SECURITY, TRUST & PROVENANCE (RED) ==================== -->
-        <div class="cat-card card-security">
-          <div class="cat-card-header">
-            <div class="cat-icon-badge">🔒</div>
-            <div class="cat-title-wrap">
-              <span class="cat-tag">Layer 05 • Trust & GI</span>
-              <h3 class="cat-title">Security & Trust</h3>
-              <p class="cat-sub">Cryptographic Provenance</p>
+            <div class="outcome-pill">
+              <div class="outcome-title">High risk<br>High INCOME</div>
+              <div class="outcome-sub">GI Provenance & Export QR</div>
             </div>
           </div>
-          <div class="tech-list">
-            <div class="tech-item">
-              <span class="tech-item-icon">🔏</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">2D DCT Steganography <span class="tech-pill-mini">SciPy</span></div>
-                <div class="tech-item-desc">Invisible frequency-domain luminance watermark with artisan GI & timestamp</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🏷️</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">SHA-256 Fingerprint <span class="tech-pill-mini">Integrity</span></div>
-                <div class="tech-item-desc">Cryptographic payload digest preventing catalog tampering & counterfeit claims</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">📱</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">Dynamic Authenticity QR <span class="tech-pill-mini">Verify</span></div>
-                <div class="tech-item-desc">Scannable buyer certificate linking directly to artisan cluster & GI registry</div>
-              </div>
-            </div>
-            <div class="tech-item">
-              <span class="tech-item-icon">🎖️</span>
-              <div class="tech-item-content">
-                <div class="tech-item-name">Karigar Trust Score <span class="tech-pill-mini">Ledger</span></div>
-                <div class="tech-item-desc">Fulfillment history, material authenticity & craft ratings credit scoring</div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Arrow 6 Stacked Label: Security -> Backend (Persistence Return Loop) -->
-        <div class="arrow-badge-stack badge-green" style="left: 1098px; top: 845px;">
-          <div class="arrow-badge-top-row">
-            <span class="arrow-badge-num">6</span>
-            <span>Persist Verified Listing</span>
-          </div>
-          <div class="arrow-badge-sub-row">DB State Sync (SQLite/PostgreSQL)</div>
-        </div>
-
-        <!-- Arrow 7 Stacked Label: Security -> Market Linkage (Broadcast Loop Back) -->
-        <div class="arrow-badge-stack badge-teal" style="left: 1528px; top: 245px;">
-          <div class="arrow-badge-top-row">
-            <span class="arrow-badge-num">7</span>
-            <span>Broadcast Listing</span>
-          </div>
-          <div class="arrow-badge-sub-row">ONDC / Beckn / GeM</div>
-        </div>
-
-        <!-- Arrow 8 Stacked Label: Market Linkage -> Frontend (Live Consumer/Artisan Feed) -->
-        <div class="arrow-badge-stack badge-blue" style="left: 744px; top: 14px;">
-          <div class="arrow-badge-top-row">
-            <span class="arrow-badge-num">8</span>
-            <span>Live Listing Feed</span>
-          </div>
-          <div class="arrow-badge-sub-row">Artisan Dashboard & Buyer Apps</div>
         </div>
 
       </div>
 
-      <!-- ==================== FOOTER STATUS BAR ==================== -->
-      <div class="footer-bar">
-        <div class="footer-legend">
-          <div class="legend-item"><span class="legend-dot" style="background:#3B82F6;"></span> 1. Ingestion</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#8B5CF6;"></span> 2. Vision AI</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#F97316;"></span> 3. Speech & LLM</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#0D9488;"></span> 4. Fair Wage Pricing</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#EF4444;"></span> 5. Provenance & GI</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#10B981;"></span> 6. Persistent Ledger</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#2DD4BF;"></span> 7. Open Rails</div>
-          <div class="legend-item"><span class="legend-dot" style="background:#38BDF8;"></span> 8. Live Sync</div>
+      <!-- ==================== BOTTOM RIBBON: TECH STACK ==================== -->
+      <div class="tech-stack-ribbon">
+        
+        <div class="tech-stack-badge">
+          <span style="font-size: 26px;">🧑‍💻</span>
+          <span class="tech-stack-title">Tech Stack</span>
         </div>
-        <div class="footer-stats">
-          <span>Pipeline Latency: <strong class="stat-highlight">&lt; 4.2s End-to-End</strong></span>
-          <span>•</span>
-          <span>Living Wage Guard: <strong class="stat-highlight">100% Protected (₹120/hr)</strong></span>
-          <span>•</span>
-          <span>Sovereignty: <strong class="stat-highlight">ONDC + GeM Ready</strong></span>
+
+        <!-- Segment 1: AI ML -->
+        <div class="tech-category-segment">
+          <div class="tech-icons-row">
+            <span class="tech-chip">🐍 Python</span>
+            <span class="tech-chip">⚡ PyTorch</span>
+            <span class="tech-chip">👁️ OpenCV</span>
+            <span class="tech-chip">✂️ rembg</span>
+            <span class="tech-chip">🇮🇳 Bhashini</span>
+            <span class="tech-chip">🧠 Gemini Flash</span>
+          </div>
+          <div class="tech-category-label">AI ML</div>
         </div>
+
+        <div style="width: 2px; height: 42px; background: #000;"></div>
+
+        <!-- Segment 2: Backend -->
+        <div class="tech-category-segment">
+          <div class="tech-icons-row">
+            <span class="tech-chip">⚡ FastAPI</span>
+            <span class="tech-chip">🦄 Uvicorn</span>
+            <span class="tech-chip">🛡️ Pydantic v2</span>
+            <span class="tech-chip">🐳 Docker</span>
+          </div>
+          <div class="tech-category-label">Backend</div>
+        </div>
+
+        <div style="width: 2px; height: 42px; background: #000;"></div>
+
+        <!-- Segment 3: Database -->
+        <div class="tech-category-segment">
+          <div class="tech-icons-row">
+            <span class="tech-chip">🗄️ SQLite WAL</span>
+            <span class="tech-chip">🐘 PostgreSQL</span>
+            <span class="tech-chip">⚡ Redis</span>
+          </div>
+          <div class="tech-category-label">Database</div>
+        </div>
+
+        <div style="width: 2px; height: 42px; background: #000;"></div>
+
+        <!-- Segment 4: Frontend -->
+        <div class="tech-category-segment">
+          <div class="tech-icons-row">
+            <span class="tech-chip">📱 Flutter (Dart)</span>
+            <span class="tech-chip">⚛️ React 18</span>
+            <span class="tech-chip">⚡ Vite</span>
+            <span class="tech-chip">🎨 Tailwind M3</span>
+          </div>
+          <div class="tech-category-label">Frontend</div>
+        </div>
+
       </div>
 
     </div>
   </div>
 
-  <!-- Dynamic Responsive Scaler (Instant Fit for 1366x768, 1080p, 4K, Mobile) -->
+  <!-- Dynamic Responsive Scaler -->
   <script>
     function fitSlide() {
       const stage = document.getElementById('slide-stage');
