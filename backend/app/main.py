@@ -176,6 +176,7 @@ def health_check():
             "bhashini_asr_pipeline": "ai4bharat/conformer-hi-gpu--t4",
             "bhashini_nmt_pipeline": "ai4bharat/indictrans2-gpu--t4",
             "gemini_configured": bool(settings.GEMINI_API_KEY),
+            "gemini_pool_keys": 11,
             "zero_fail_mode": True
         },
         "cloud_and_n8n": {

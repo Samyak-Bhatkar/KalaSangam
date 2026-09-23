@@ -346,7 +346,8 @@ async def call_gemini_fallback_pipeline(
         from google import genai
         from google.genai import types
 
-        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        from .gemini_pool import gemini_pool
+
         audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=clean_mime)
 
         lang_name_map = {
@@ -372,10 +373,11 @@ Output ONLY the raw JSON object, without backticks or markdown fences."""
 
         # Priority models: models/gemini-3-flash-preview is active, working, and sub-3s latency
         candidate_models = ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]
-        last_model_err = None
-        for model_name in candidate_models:
-            try:
-                def _invoke():
+
+        def _invoke_with_client(client):
+            last_err = None
+            for model_name in candidate_models:
+                try:
                     return client.models.generate_content(
                         model=model_name,
                         contents=[prompt, audio_part],
@@ -384,33 +386,37 @@ Output ONLY the raw JSON object, without backticks or markdown fences."""
                             response_mime_type="application/json"
                         )
                     )
-                response = await asyncio.wait_for(asyncio.to_thread(_invoke), timeout=12.0)
+                except Exception as model_err:
+                    last_err = model_err
+                    if gemini_pool.is_quota_error(model_err):
+                        raise model_err
+                    logger.warning(f"IVR Gemini model {model_name} failed: {model_err}")
+                    continue
+            if last_err:
+                raise last_err
+            raise ValueError("Empty response from candidate models")
 
-                import json
-                raw_text = (response.text or "").strip()
-                raw_text = re.sub(r"^```(?:json)?\s*", "", raw_text)
-                raw_text = re.sub(r"\s*```$", "", raw_text)
+        response = await asyncio.to_thread(gemini_pool.execute_with_failover, _invoke_with_client)
 
-                try:
-                    data = json.loads(raw_text)
-                    transcript = data.get("transcript", "").strip()
-                    translated_text = data.get("translatedText", transcript).strip()
-                except Exception:
-                    transcript = raw_text
-                    translated_text = raw_text
+        import json
+        raw_text = (response.text or "").strip()
+        raw_text = re.sub(r"^```(?:json)?\s*", "", raw_text)
+        raw_text = re.sub(r"\s*```$", "", raw_text)
 
-                if transcript and len(transcript) >= 2:
-                    latency = round((time.time() - t_start) * 1000, 1)
-                    logger.info(f"Gemini Indic ASR ({model_name}) transcribed successfully: '{transcript}' ({latency}ms)")
-                    return transcript, translated_text, latency
-            except Exception as model_err:
-                last_model_err = model_err
-                logger.warning(f"IVR Gemini model {model_name} failed: {model_err}")
-                continue
+        try:
+            data = json.loads(raw_text)
+            transcript = data.get("transcript", "").strip()
+            translated_text = data.get("translatedText", transcript).strip()
+        except Exception:
+            transcript = raw_text
+            translated_text = raw_text
 
-        if last_model_err:
-            raise last_model_err
-        raise ValueError("Empty transcription from all candidate models")
+        if transcript and len(transcript) >= 2:
+            latency = round((time.time() - t_start) * 1000, 1)
+            logger.info(f"Gemini Indic ASR transcribed successfully: '{transcript}' ({latency}ms)")
+            return transcript, translated_text, latency
+
+        raise ValueError("Empty transcription from Gemini pipeline")
 
     except Exception as err:
         log_gemini_error(

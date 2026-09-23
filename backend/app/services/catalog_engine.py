@@ -80,34 +80,37 @@ def call_gemini_multimodal(
             from google import genai
             from google.genai import types
 
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            from .gemini_pool import gemini_pool
+
             prompt = GEMINI_SYSTEM_DIRECTIVE.format(
                 transcript=transcript,
                 source_language=source_language
             )
 
-            response = None
-            for model_name in ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]:
-                try:
-                    response = client.models.generate_content(
-                        model=model_name,
-                        contents=[
-                            prompt,
-                            types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
-                        ],
-                        config=types.GenerateContentConfig(
-                            temperature=0.2,
-                            response_mime_type="application/json"
+            def _generate_catalog(client):
+                for model_name in ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]:
+                    try:
+                        resp = client.models.generate_content(
+                            model=model_name,
+                            contents=[
+                                prompt,
+                                types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+                            ],
+                            config=types.GenerateContentConfig(
+                                temperature=0.2,
+                                response_mime_type="application/json"
+                            )
                         )
-                    )
-                    if response and response.text:
-                        break
-                except Exception as m_err:
-                    logger.warning(f"Catalog model {model_name} error: {m_err}")
-                    continue
-
-            if not response or not response.text:
+                        if resp and resp.text:
+                            return resp
+                    except Exception as m_err:
+                        if gemini_pool.is_quota_error(m_err):
+                            raise m_err
+                        logger.warning(f"Catalog model {model_name} error: {m_err}")
+                        continue
                 raise ValueError("All Gemini catalog models returned empty response")
+
+            response = gemini_pool.execute_with_failover(_generate_catalog)
 
             raw_text = response.text.strip()
             # Clean possible markdown wrapping

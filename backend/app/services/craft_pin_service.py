@@ -236,35 +236,42 @@ def classify_and_format_pin_callout(
         from google import genai
         from google.genai import types
 
-        client = genai.Client(api_key=settings.GEMINI_API_KEY)
-        for model_name in ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]:
-            try:
-                resp = client.models.generate_content(
-                    model=model_name,
-                    contents=[prompt],
-                    config=types.GenerateContentConfig(
-                        temperature=0.1,
-                        response_mime_type="application/json"
+        from .gemini_pool import gemini_pool
+
+        def _generate_pin(client):
+            for model_name in ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]:
+                try:
+                    resp = client.models.generate_content(
+                        model=model_name,
+                        contents=[prompt],
+                        config=types.GenerateContentConfig(
+                            temperature=0.1,
+                            response_mime_type="application/json"
+                        )
                     )
-                )
-                if resp and resp.text:
-                    parsed = json.loads(resp.text)
-                    if "category" in parsed:
-                        cat = parsed.get("category", "craft_detail")
-                        bank = DEFECT_VARIATION_BANK if cat == "imperfection" else CRAFT_FEATURE_BANK
-                        term = parsed.get("bank_term") or parsed.get("short_label_en")
-                        if term not in bank:
-                            # Strict sanity match
-                            term = match_heuristic_bank_term(clean_transcript, cat)
-                        parsed["bank_term"] = term
-                        parsed["short_label_en"] = term
-                        parsed["short_label"] = parsed.get("short_label") or parsed.get("short_label_hi") or term
-                        parsed["one_line_summary"] = parsed.get("one_line_summary") or f"Authentic handcrafted {term.lower()} detail."
-                        parsed["full_description"] = parsed.get("full_description") or parsed.get("full_description_hi") or clean_transcript
-                        return parsed
-            except Exception as e_inner:
-                logger.debug(f"Gemini model {model_name} pin call failed: {e_inner}")
-                continue
+                    if resp and resp.text:
+                        parsed = json.loads(resp.text)
+                        if "category" in parsed:
+                            cat = parsed.get("category", "craft_detail")
+                            bank = DEFECT_VARIATION_BANK if cat == "imperfection" else CRAFT_FEATURE_BANK
+                            term = parsed.get("bank_term") or parsed.get("short_label_en")
+                            if term not in bank:
+                                # Strict sanity match
+                                term = match_heuristic_bank_term(clean_transcript, cat)
+                            parsed["bank_term"] = term
+                            parsed["short_label_en"] = term
+                            parsed["short_label"] = parsed.get("short_label") or parsed.get("short_label_hi") or term
+                            parsed["one_line_summary"] = parsed.get("one_line_summary") or f"Authentic handcrafted {term.lower()} detail."
+                            parsed["full_description"] = parsed.get("full_description") or parsed.get("full_description_hi") or clean_transcript
+                            return parsed
+                except Exception as e_inner:
+                    if gemini_pool.is_quota_error(e_inner):
+                        raise e_inner
+                    logger.debug(f"Gemini model {model_name} pin call failed: {e_inner}")
+                    continue
+            raise ValueError("All candidate pin models failed")
+
+        return gemini_pool.execute_with_failover(_generate_pin)
     except ImportError:
         try:
             import google.generativeai as legacy_genai

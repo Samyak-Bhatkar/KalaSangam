@@ -67,36 +67,44 @@ def transcribe_audio_bytes(
             from google import genai
             from google.genai import types
 
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            from .gemini_pool import gemini_pool
             audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=clean_mime)
-
             candidate_models = ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]
-            last_model_err = None
-            for model_name in candidate_models:
-                try:
-                    response = client.models.generate_content(
-                        model=model_name,
-                        contents=[
-                            GEMINI_TRANSCRIPTION_PROMPT,
-                            audio_part
-                        ],
-                    )
-                    text = (response.text or "").strip()
-                    # Clean any accidental wrapping
-                    text = re.sub(r"^[\"']|[\"']$", "", text).strip()
-                    if text and len(text) > 2:
-                        logger.info(f"Gemini Indic ASR ({model_name}) transcribed {len(audio_bytes)} bytes into {len(text)} chars.")
-                        return {
-                            "transcript": text,
-                            "source": "gemini_multimodal_asr",
-                            "engine": f"Google Gemini ASR ({model_name}) - MeitY Bhashini Indic Compatible",
-                            "gemini_error": None,
-                            "success": True,
-                        }
-                except Exception as model_err:
-                    last_model_err = model_err
-                    logger.warning(f"Gemini model {model_name} failed: {model_err}")
-                    continue
+
+            def _transcribe(client):
+                last_err = None
+                for model_name in candidate_models:
+                    try:
+                        resp = client.models.generate_content(
+                            model=model_name,
+                            contents=[
+                                GEMINI_TRANSCRIPTION_PROMPT,
+                                audio_part
+                            ],
+                        )
+                        text = (resp.text or "").strip()
+                        text = re.sub(r"^[\"']|[\"']$", "", text).strip()
+                        if text and len(text) > 2:
+                            return text, model_name
+                    except Exception as model_err:
+                        last_err = model_err
+                        if gemini_pool.is_quota_error(model_err):
+                            raise model_err
+                        logger.warning(f"Gemini model {model_name} failed: {model_err}")
+                        continue
+                if last_err:
+                    raise last_err
+                raise ValueError("All transcription models failed")
+
+            text, model_used = gemini_pool.execute_with_failover(_transcribe)
+            logger.info(f"Gemini Indic ASR ({model_used}) transcribed {len(audio_bytes)} bytes into {len(text)} chars.")
+            return {
+                "transcript": text,
+                "source": "gemini_multimodal_asr",
+                "engine": f"Google Gemini ASR ({model_used}) - MeitY Bhashini Indic Compatible",
+                "gemini_error": None,
+                "success": True,
+            }
 
             if last_model_err:
                 gemini_error_detail = log_gemini_error(
