@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShilpSetu AI — System Architecture (Zero-Smartphone Voice-IVR Module)</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #D9E8F5;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0F172A;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    /* Print / Presentation mode */
+    @page {
+      size: 16in 9in;
+      margin: 0;
+    }
+
+    @media print {
+      body {
+        background: #CBE0F1 !important;
+        padding: 0 !important;
+      }
+      .toolbar { display: none !important; }
+      .slide-canvas {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        border: none !important;
+      }
+    }
+
+    .toolbar {
+      width: 1240px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 8px 18px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .btn-export {
+      background: #1E293B;
+      color: #fff;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-export:hover { background: #0F172A; transform: translateY(-1px); }
+
+    /* Main 16:9 Presentation Canvas */
+    .slide-canvas {
+      width: 1240px;
+      height: 698px; /* 16:9 exact ratio */
+      background: #CBE0F1; /* Authentic light powdery blue background */
+      border: 2px solid #000;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 18px 8px 18px;
+    }
+
+    /* Top Header Bar */
+    .top-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .project-title-group {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .project-title {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #000;
+      line-height: 1;
+    }
+
+    .project-subtitle {
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #1E3A8A;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 3px 10px;
+      border-radius: 12px;
+      border: 1.5px solid #000;
+    }
+
+    .sih-header-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sih-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sih-text {
+      text-align: left;
+      font-weight: 900;
+      font-size: 9px;
+      line-height: 1.1;
+      color: #0F172A;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .system-arch-title {
+      font-size: 24px;
+      font-weight: 900;
+      font-family: serif;
+      color: #000;
+      letter-spacing: -0.5px;
+    }
+
+    /* MAIN DIAGRAM BODY */
+    .diagram-body {
+      flex: 1;
+      position: relative;
+      margin-top: 2px;
+      margin-bottom: 6px;
+    }
+
+    /* Column Headers */
+    .col-header {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0F172A;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    /* Reusable Pill Node */
+    .pill-node {
+      background: #D8ECF8;
+      border: 2px solid #000;
+      border-radius: 20px;
+      width: 122px;
+      padding: 4px 6px;
+      text-align: center;
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      line-height: 1.2;
+      position: relative;
+      z-index: 5;
+    }
+
+    .pill-node.cyan-light { background: #CEE9F9; }
+    .pill-node.amber-light { background: #FEF3C7; }
+    .pill-node.purple-light { background: #EDE9FE; }
+    .pill-node.emerald-light { background: #D1FAE5; }
+    .pill-node small { font-size: 8px; font-weight: 700; color: #334155; margin-top: 1px; }
+
+    /* 1. ZERO-SMARTPHONE INGRESS COLUMN (Leftmost) */
+    .caller-col {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      width: 124px;
+      z-index: 5;
+    }
+
+    .caller-step-pill {
+      background: #E0F2FE;
+      border: 2px solid #000;
+      border-radius: 18px;
+      width: 122px;
+      padding: 4.5px 6px;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.15;
+    }
+
+    .caller-step-pill small {
+      font-size: 7.5px;
+      font-weight: 700;
+      color: #0369A1;
+    }
+
+    .arrow-v-down {
+      font-size: 10px;
+      font-weight: 900;
+      color: #000;
+      line-height: 1;
+      margin: -3px 0;
+    }
+
+    /* 2. TELEPHONY GATEWAY & SESSION COLUMN */
+    .telephony-stack {
+      position: absolute;
+      top: 6px;
+      left: 142px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      width: 124px;
+      z-index: 5;
+    }
+
+    /* Central Input Node: Rural Caller Voice Stream */
+    .input-voice-card {
+      width: 124px;
+      height: 94px;
+      background: #8FE8F6; /* Bright cyan */
+      border: 2px solid #000;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6px;
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.15);
+      z-index: 5;
+    }
+
+    .input-voice-card h3 {
+      font-size: 12px;
+      font-weight: 900;
+      color: #000;
+      line-height: 1.15;
+    }
+
+    /* 8. AUTO-SCALING WORKER POOL CONTAINER */
+    .worker-pool-boundary {
+      position: absolute;
+      left: 278px;
+      top: 2px;
+      width: 486px;
+      height: 432px;
+      border: 2px solid #4F46E5;
+      border-radius: 26px;
+      background: rgba(238, 242, 255, 0.45);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .worker-pool-banner {
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      background: #4F46E5;
+      color: #FFF;
+      border: 1.5px solid #000;
+      border-radius: 12px;
+      padding: 2px 12px;
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      box-shadow: 1px 2px 0px rgba(0,0,0,0.2);
+    }
+
+    /* 3D Pipe Cylinders (Horizontal Tubes) */
+    .pipe-container {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 4;
+    }
+
+    .pipe-container.top-pipe {
+      left: 290px;
+      top: 16px;
+      width: 256px;
+    }
+
+    .pipe-container.bottom-pipe {
+      left: 290px;
+      top: 232px;
+      width: 256px;
+    }
+
+    .pipe-title {
+      font-size: 10px;
+      font-weight: 900;
+      color: #000;
+      margin-bottom: 2px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .cylinder-tube {
+      width: 100%;
+      background: linear-gradient(180deg, #FFFFFF 0%, #D8ECF8 45%, #B3D7EE 100%);
+      border: 2px solid #000;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 800;
+      color: #000;
+      text-align: center;
+      padding: 4px 8px;
+      position: relative;
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
+      gap: 1.5px;
+    }
+
+    .cylinder-tube::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 14px;
+      border-radius: 50% / 50%;
+      border-right: 2px solid #000;
+      background: #C4E2F6;
+    }
+
+    /* Big Vertical Engine Capsule (Center-Right Lavender Box) */
+    .central-engine-capsule {
+      position: absolute;
+      left: 566px;
+      top: 14px;
+      width: 188px;
+      height: 412px;
+      background: #F3E5F5; /* Soft pastel lilac */
+      border: 2px solid #000;
+      border-radius: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 7px 6px;
+      justify-content: space-between;
+      box-shadow: 3px 5px 0px rgba(0,0,0,0.15);
+      z-index: 5;
+    }
+
+    .ensemble-badge {
+      background: #FFF;
+      border: 2px solid #000;
+      border-radius: 14px;
+      padding: 2px 10px;
+      font-size: 9.5px;
+      font-weight: 900;
+      color: #000;
+      margin-bottom: 1px;
+    }
+
+    /* Nested Models Container */
+    .models-subbox {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1.5px solid #000;
+      border-radius: 12px;
+      padding: 3px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .model-pill {
+      border: 1.5px solid #000;
+      border-radius: 10px;
+      font-size: 8.5px;
+      font-weight: 800;
+      text-align: center;
+      padding: 2.5px 4px;
+      color: #000;
+      line-height: 1.15;
+    }
+
+    .model-pill.primary-active {
+      background: #DCFCE7;
+      border: 1.8px solid #166534;
+    }
+
+    .model-pill.fallback-secondary {
+      background: #F8FAFC;
+      border: 1.5px solid #64748B;
+      color: #334155;
+    }
+
+    .engine-section-box {
+      width: 100%;
+      background: #E1BEE7;
+      border: 1.5px solid #000;
+      border-radius: 10px;
+      padding: 3.5px 4px;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 800;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      line-height: 1.15;
+    }
+
+    .engine-section-box small {
+      font-size: 7.5px;
+      color: #4A148C;
+      font-weight: 700;
+    }
+
+    .engine-arrow-down {
+      font-size: 10px;
+      font-weight: 900;
+      color: #000;
+      margin: -2px 0;
+    }
+
+    /* Cloud Feedback Bubbles */
+    .cloud-callout {
+      position: absolute;
+      background: #E8D5F5;
+      border: 2px solid #000;
+      border-radius: 20px;
+      padding: 3.5px 8px;
+      font-size: 8.5px;
+      font-weight: 800;
+      text-align: center;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+      z-index: 6;
+      line-height: 1.15;
+    }
+
+    .cloud-left-top {
+      left: 298px;
+      top: 104px;
+      width: 240px;
+      height: 44px;
+      background: #FDF4FF;
+    }
+
+    .cloud-left-bottom {
+      left: 310px;
+      top: 366px;
+      width: 216px;
+      height: 40px;
+    }
+
+    .cloud-right {
+      left: 778px;
+      top: 106px;
+      width: 126px;
+      height: 46px;
+      z-index: 6;
+    }
+
+    /* SVG Connecting Curves */
+    .connections-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Top Output Box: DTMF Confirmation Review Gate */
+    .output-box-top {
+      position: absolute;
+      left: 776px;
+      top: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 6;
+    }
+
+    .output-header-tag {
+      font-size: 10.5px;
+      font-weight: 900;
+      color: #000;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    .output-pill-large {
+      background: #C6EBF8;
+      border: 2px solid #000;
+      border-radius: 16px;
+      padding: 6px 12px;
+      font-size: 10.5px;
+      font-weight: 900;
+      color: #000;
+      text-align: center;
+      line-height: 1.25;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+      width: 130px;
+    }
+
+    /* Unified Draft Listing Node */
+    .composite-box {
+      position: absolute;
+      left: 924px;
+      top: 100px;
+      width: 106px;
+      height: 82px;
+      background: #E0F2FE;
+      border: 2px solid #000;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 10.5px;
+      font-weight: 900;
+      color: #000;
+      line-height: 1.2;
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
+      z-index: 6;
+    }
+
+    /* Final Tier Cards (Far Right 4 Pills + In-Person Photo Link) */
+    .final-tiers-column {
+      position: absolute;
+      left: 1048px;
+      top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 174px;
+      z-index: 6;
+    }
+
+    .tier-card-pill {
+      background: #EDE9FE;
+      border: 2px solid #000;
+      border-radius: 15px;
+      padding: 4px 8px;
+      text-align: center;
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #000;
+      line-height: 1.15;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+    }
+
+    .tier-card-pill small {
+      display: block;
+      font-size: 8px;
+      font-weight: 700;
+      color: #4C1D95;
+    }
+
+    /* Physical Bridge: Coordinator SMS & Geo-Dispatch */
+    .bottom-meta-box {
+      position: absolute;
+      left: 776px;
+      top: 174px;
+      width: 130px;
+      height: 98px;
+      background: #8FE8F6;
+      border: 2px solid #000;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 9.5px;
+      font-weight: 900;
+      color: #000;
+      line-height: 1.15;
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
+      padding: 4px 6px;
+      z-index: 6;
+    }
+
+    /* Telemetry Report Graphic Box */
+    .report-graphic-box {
+      position: absolute;
+      left: 304px;
+      top: 185px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1.5px solid #000;
+      border-radius: 12px;
+      padding: 2.5px 8px;
+      z-index: 4;
+    }
+
+    .report-tag {
+      font-size: 9px;
+      font-weight: 800;
+      color: #000;
+      line-height: 1.15;
+    }
+
+    /* Cross-Cutting Telephony Scalability, Maintainability & Edge Governance */
+    .cross-cutting-bar {
+      position: absolute;
+      left: 776px;
+      top: 290px;
+      width: 446px;
+      height: 136px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid #000;
+      border-radius: 16px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
+      z-index: 6;
+    }
+
+    .gov-badge-title {
+      font-size: 10px;
+      font-weight: 900;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1.5px solid rgba(0,0,0,0.15);
+      padding-bottom: 4px;
+    }
+
+    .gov-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 12px;
+      font-size: 8.5px;
+      font-weight: 800;
+    }
+
+    .gov-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+      color: #1E293B;
+      line-height: 1.25;
+    }
+
+    /* =======================================================
+       BOTTOM TECH STACK RIBBON
+       ======================================================= */
+    .bottom-tech-ribbon {
+      width: 100%;
+      height: 48px;
+      background: #DDD4ED;
+      border: 2px solid #000;
+      border-radius: 26px;
+      display: flex;
+      align-items: center;
+      padding: 2px 10px;
+      gap: 8px;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .tech-stack-title-pill {
+      background: #FFFFFF;
+      border: 2px solid #000;
+      border-radius: 16px;
+      padding: 2.5px 10px;
+      font-size: 14px;
+      font-weight: 900;
+      color: #000;
+      letter-spacing: -0.5px;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tech-segment-group {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      justify-content: space-between;
+    }
+
+    .tech-segment {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tech-capsule {
+      background: #FFFFFF;
+      border: 2px solid #000;
+      border-radius: 16px;
+      padding: 2px 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 1.5px 2px 0px rgba(0,0,0,0.1);
+    }
+
+    .tech-capsule.blue-edge { border-left: 5px solid #1E40AF; }
+    .tech-capsule.green-edge { border-left: 5px solid #059669; }
+    .tech-capsule.cyan-edge { border-left: 5px solid #0284C7; }
+    .tech-capsule.purple-edge { border-left: 5px solid #7C3AED; }
+
+    .tech-badge-label {
+      font-size: 8.5px;
+      font-weight: 800;
+      color: #000;
+      margin-top: 1px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tech-icon-tag {
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Export Control Toolbar -->
+  <div class="toolbar">
+    <div>
+      <strong style="color: #0F172A; font-size: 13px;">🏛️ Smart India Hackathon 2026</strong>
+      <span style="margin-left: 10px; font-size: 12px; color: #475569;">System Architecture Slide (Problem ID: 26090 — कला-वाणी Zero-Smartphone Voice-IVR)</span>
+    </div>
+    <button class="btn-export" onclick="window.print()">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+      Export 16:9 PDF (Ctrl + P)
+    </button>
+  </div>
+
+  <!-- ==================== 16:9 PRESENTATION CANVAS ==================== -->
+  <div class="slide-canvas">
+
+    <!-- Top Header Bar -->
+    <div class="top-header-row">
+      <div class="project-title-group">
+        <div class="project-title">SHILPSETU!</div>
+        <div class="project-subtitle">Ministry of Social Justice &amp; Empowerment (MoSJE) • Problem Statement 26090</div>
+      </div>
+
+      <!-- Top Right SIH Logo & Slide Title -->
+      <div class="sih-header-group">
+        <div class="sih-badge">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="#F97316"/>
+            <path d="M12 6v6l4 2" stroke="#FFF" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="sih-text">
+            SMART INDIA<br>HACKATHON<br>2026
+          </div>
+        </div>
+        <div class="system-arch-title">Voice-IVR Architecture</div>
+      </div>
+    </div>
+
+    <!-- MAIN INTERACTIVE ARCHITECTURE CANVAS -->
+    <div class="diagram-body">
+
+      <!-- SVG BEZIER CURVES & DATAFLOW CONNECTIONS -->
+      <svg class="connections-svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#000"/>
+          </marker>
+          <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#1E40AF"/>
+          </marker>
+          <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#047857"/>
+          </marker>
+        </defs>
+
+        <!-- Flow 1: Caller Telephony Edge -> Voice Audio Ingress -->
+        <path d="M 128 190 L 140 190" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow 2: Voice Audio Ingress -> Fast SIP/REST Gateway -->
+        <path d="M 204 142 L 204 60" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow 3: Gateway pushes to Session Redis State Machine -->
+        <path d="M 204 56 L 204 78" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow 4: Session State Machine -> Dual Pipelines (Acoustics & Entity Parsing) -->
+        <path d="M 266 104 L 288 48" fill="none" stroke="#4F46E5" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <path d="M 266 114 L 288 268" fill="none" stroke="#4F46E5" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow 5: Top Acoustic Pipe -> Central ASR Engine -->
+        <path d="M 546 48 L 564 48" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow 6: Bottom Entity Parser Pipe -> Central ASR Engine -->
+        <path d="M 546 268 L 564 268" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Real-time Voice Prompt Audio Feedback Loop -->
+        <path d="M 310 386 C 240 386, 240 255, 210 245" fill="none" stroke="#991B1B" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+
+        <!-- Flow 7: Central Engine -> DTMF Confirmation Review Gate -->
+        <path d="M 754 52 L 774 52" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow 8: Review Gate -> Verified IVR Draft Listing -->
+        <path d="M 908 52 L 977 52 L 977 98" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow 9: Coordinator SMS & Geo-Dispatch -> Verified Draft Listing -->
+        <path d="M 908 220 L 977 220 L 977 184" fill="none" stroke="#047857" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+
+        <!-- Flow 10: Verified Draft Listing -> Final Marketplaces & Field Sync -->
+        <path d="M 1030 141 L 1046 141" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+      </svg>
+
+      <!-- 1. ZERO-SMARTPHONE CALLER EDGE COLUMN (LEFTMOST) -->
+      <div class="caller-col">
+        <span class="col-header" style="color: #0369A1;">Caller Ingress</span>
+        
+        <!-- Step 1: 2G Feature Phone Caller -->
+        <div class="caller-step-pill">
+          <span>☎️ Basic Keypad Phone</span>
+          <small>2G / GSM / JioBharat</small>
+        </div>
+
+        <div class="arrow-v-down">↓</div>
+
+        <!-- Step 2: Toll-Free 1800 Hotline -->
+        <div class="caller-step-pill">
+          <span>📞 1800-208-SHILP</span>
+          <small>Zero-Balance Toll-Free Call</small>
+        </div>
+
+        <div class="arrow-v-down">↓</div>
+
+        <!-- Step 3: SIP Trunk & Telephony Ingestion -->
+        <div class="caller-step-pill">
+          <span>📡 SIP / PSTN Trunk</span>
+          <small>8kHz AMR-NB / G.711 Ingress</small>
+        </div>
+
+        <div class="arrow-v-down">↓</div>
+
+        <!-- Step 4: WebRTC VAD Edge Filter -->
+        <div class="caller-step-pill" style="background: #D1FAE5; border-color: #047857;">
+          <span style="color: #065F46; font-weight: 900;">⚡ WebRTC VAD + Noise Gate</span>
+          <small style="color: #047857;">Sub-20ms Voice Detection</small>
+        </div>
+      </div>
+
+      <!-- 2. TELEPHONY GATEWAY & SESSION COLUMN -->
+      <div class="telephony-stack">
+        <span class="col-header">Telephony Ingress</span>
+
+        <!-- Fast SIP / Webhook Gateway -->
+        <div class="pill-node">
+          <span style="color: #1E40AF; font-size: 9.5px;">FastAPI Voice Webhook</span>
+          <small>Twilio / Exotel / SIP Gateway</small>
+          <span style="font-size: 7.5px; color: #15803D; font-weight: 800;">&lt;40ms audio chunk ACK</span>
+        </div>
+
+        <div class="arrow-v-down" style="color: #DC2626;">⇊</div>
+
+        <!-- Redis Multi-Turn State Machine -->
+        <div class="pill-node amber-light">
+          <span style="color: #92400E; font-size: 9.5px;">Redis Session FSM</span>
+          <small>State: Q1➔Q2➔Q3➔Verify</small>
+          <span style="font-size: 7.5px; color: #DC2626; font-weight: 800;">Dropout Resume State Cache</span>
+        </div>
+
+        <!-- Central Telephony Voice Stream Card -->
+        <div class="input-voice-card">
+          <div style="font-size: 16px; margin-bottom: 1px;">🎙️ 📟</div>
+          <h3>कला-वाणी Voice IVR</h3>
+          <small style="font-size: 7.5px; font-weight: 700; color: #0F172A; margin-top: 1px;">Spoken Vernacular Audio</small>
+          <div style="font-size: 11px; margin-top: 1px; color: #0369A1; font-weight: 800;">DTMF + Voice Dual-Path ⚡</div>
+        </div>
+
+        <!-- Call Audio Audit Logs -->
+        <div class="pill-node cyan-light">
+          <span>PostgreSQL / SQLite</span>
+          <small>Call Telemetry &amp; Audio Audit</small>
+          <span style="font-size: 7.5px; color: #0284C7; font-weight: 800;">(DPDP Redacted Audio Logs)</span>
+        </div>
+
+        <!-- Call Recording Audio Bucket -->
+        <div class="pill-node" style="background: #E0F2FE;">
+          <span>S3 / R2 Audio Vault</span>
+          <small>Raw 8kHz Call Streams</small>
+          <span style="font-size: 7.5px; color: #0369A1; font-weight: 800;">Encrypted AES-256 Storage</span>
+        </div>
+      </div>
+
+      <!-- 8. AUTO-SCALING WORKER POOL CONTAINER -->
+      <div class="worker-pool-boundary">
+        <div class="worker-pool-banner">
+          ⚙️ Auto-Scaling Voice Worker Pool (Celery + Redis, GPU T4 for Indic Conformer / CPU Fallback)
+        </div>
+      </div>
+
+      <!-- 3. TOP PIPE: ACOUSTIC NORMALIZATION & DIALECT HANDLING -->
+      <div class="pipe-container top-pipe">
+        <div class="pipe-title">Acoustic Conditioning Pipeline</div>
+        <div class="cylinder-tube">
+          <span style="font-weight: 900;">1. 8kHz ➔ 16kHz Sinc Resampling</span>
+          <div style="width: 90%; height: 1px; background: rgba(0,0,0,0.15); margin: 1px 0;"></div>
+          <!-- Workshop Noise Suppression -->
+          <span style="color: #1E3A8A; font-size: 8px; line-height: 1.15;">
+            2. <strong>Rural Workshop Denoising</strong> (Removes Loom &amp; Hammer Clatter)<br>
+            <span style="color: #047857; font-weight: 800;">✓ Filters village ambient noise before Indic Conformer inference</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Code-Mixed Dialect Normalization Callout -->
+      <div class="cloud-callout cloud-left-top">
+        <span style="font-weight: 900; color: #4338CA;">Code-Mixed Dialect Normalizer</span>
+        <small style="font-size: 7.5px; color: #374151;">Bhojpuri • Bundeli • Awadhi • Maithili • Marathi</small>
+        <small style="font-size: 7.5px; color: #B91C1C; font-weight: 800;">Preserves regional craft idioms ("साढ़े चार सौ", "दोनशे")</small>
+      </div>
+
+      <!-- 4. BOTTOM PIPE: SPOKEN NUMERIC & ENTITY EXTRACTION -->
+      <div class="pipe-container bottom-pipe">
+        <div class="pipe-title">Spoken Entity &amp; Value Extraction</div>
+        <div class="cylinder-tube" style="align-items: flex-start; text-align: left; padding-left: 18px;">
+          <!-- Explicit Heuristic Rules -->
+          <div style="display: flex; flex-direction: column; gap: 1.5px;">
+            <span>• <strong>Devanagari Digits</strong> ➔ ०-९ Transliteration to ISO 0-9</span>
+            <span>• <strong>Spoken Currency Idioms</strong> ➔ "डेढ़ सौ" ➔ ₹150, "ढाई सौ" ➔ ₹250</span>
+            <span>• <strong>Craft Taxonomy Mapping</strong> ➔ "चिकनी मिट्टी" ➔ Terracotta Category</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-Time Voice Telemetry & Exploitation Alert -->
+      <div class="report-graphic-box">
+        <div style="font-size: 16px;">🎙️</div>
+        <span class="report-tag">Real-Time Voice<br>Telemetry</span>
+      </div>
+
+      <div class="cloud-callout cloud-left-bottom">
+        <span style="color: #991B1B; font-weight: 900;">MoSJE Underpricing Alert</span>
+        <small style="font-size: 7.5px;">"चेतावनी: ₹50 मूल्य लागत से कम है। न्यूनतम ₹350 रखें।"</small>
+      </div>
+
+      <!-- 5. CENTRAL AI ASR & TRANSLATION ENGINE CAPSULE -->
+      <div class="central-engine-capsule">
+        <div class="ensemble-badge">MeitY Bhashini Indic ASR &amp; NMT</div>
+
+        <!-- Bhashini Conformer Primary + Multimodal Fallback -->
+        <div class="models-subbox">
+          <div class="model-pill primary-active">
+            <span>ai4bharat/conformer-hi-gpu (T4)</span>
+            <small style="display: block; font-size: 7.5px; color: #15803D; font-weight: 900;">● NATIONAL NLTM SPEECH ENGINE</small>
+            <span style="display: block; font-size: 7px; color: #166534; font-weight: 800; line-height: 1.1;">Fine-tuned on 12+ rural Indian accents &amp; dialects</span>
+          </div>
+          <div class="model-pill fallback-secondary">
+            <span>Gemini Multimodal Neural Bridge</span>
+            <small style="display: block; font-size: 7px; color: #475569;">Zero-Fail SLA during Govt API quota throttles</small>
+          </div>
+        </div>
+
+        <div class="engine-arrow-down">▼</div>
+
+        <!-- Machine Translation to English & Hindi -->
+        <div class="engine-section-box">
+          <span style="font-weight: 900;">ai4bharat/indictrans2 Engine</span>
+          <small>• Dialect ➔ Standard Hindi Devanagari</small>
+          <small>• Vernacular ➔ Standardized English Catalog Copy</small>
+        </div>
+
+        <div class="engine-arrow-down">▼</div>
+
+        <!-- MoSJE Fair Wage & Margin Rule -->
+        <div class="engine-section-box" style="background: #D1C4E9;">
+          <span style="font-weight: 900;">MoSJE Fair Wage Protector</span>
+          <small>Floor Price = Raw Cost + (Hours × Min Wage)</small>
+          <small style="color: #312E81;">Calculates B2C ₹450 / B2B ₹382.5 / GeM ₹405</small>
+        </div>
+
+        <div class="engine-arrow-down">▼</div>
+
+        <!-- DTMF Synthetic Audio Readback & Dial Confirmation -->
+        <div class="engine-section-box" style="background: #EDE9FE;">
+          <span style="font-weight: 900;">Indic TTS Audio Readback Loop</span>
+          <small style="color: #6D28D9;">"आपने कहा: टेराकोटा कलश, ₹450..."</small>
+          <div style="border-top: 1px solid rgba(0,0,0,0.15); margin-top: 2px; padding-top: 1px;">
+            <small style="color: #1E293B; font-weight: 800;">DTMF Tone Generator (rfc2833)</small>
+            <span style="font-size: 7px; color: #4338CA; font-weight: 700; display: block;">Keypad Press 1 = Confirm • Press 2 = Re-record</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. TOP OUTPUT BOX: ARTISAN DTMF CONFIRMATION REVIEW GATE -->
+      <div class="output-box-top">
+        <div class="output-header-tag">Review Gate</div>
+        <div class="output-pill-large">
+          <span>DTMF Audio<br>Readback Confirmation<br>(Keypad Press 1)</span>
+        </div>
+      </div>
+
+      <!-- Interactive Caller Decision Cloud -->
+      <div class="cloud-callout cloud-right">
+        <span style="font-weight: 900;">Keypad Choice</span>
+        <small style="font-size: 7.5px; color: #581C87;">Press 2 to Redo Price/Craft</small>
+      </div>
+
+      <!-- 7. PHYSICAL BRIDGE: COORDINATOR SMS & FIELD DISPATCH -->
+      <div class="bottom-meta-box">
+        <span style="color: #065F46; font-size: 10px;">📍 Physical Bridge Dispatch</span>
+        <small style="color: #047857; font-weight: 900;">Automated Coordinator SMS</small>
+        <span style="font-size: 7.5px; color: #1E293B; line-height: 1.15; margin: 2px 0;">
+          Geo-dispatches to Local MoSJE Field Worker:<br>
+          <strong style="color: #065F46;">[Artisan PIN: 273001 | Draft #ART-IVR]</strong>
+        </span>
+        <small style="color: #0369A1; font-weight: 800;">Missing-Photo Visit Task Queued</small>
+      </div>
+
+      <!-- 8. UNIFIED DRAFT LISTING OBJECT -->
+      <div class="composite-box">
+        <span>Verified<br>IVR Draft<br>Listing</span>
+        <small style="font-size: 7.5px; color: #0369A1; font-weight: 900;">Status: Draft</small>
+        <span style="font-size: 7px; color: #15803D; font-weight: 800; margin-top: 2px;">Zero Public QR Leak</span>
+      </div>
+
+      <!-- 9. FINAL MARKETPLACES & IN-PERSON PHOTO COMPLETION -->
+      <div class="final-tiers-column">
+        <!-- 4 Downstream Steps -->
+        <div class="tier-card-pill">
+          <span>Coordinator Mobile App</span>
+          <small>In-Person 3-Angle Studio Visit</small>
+        </div>
+        <div class="tier-card-pill">
+          <span>ONDC Auto-Promotion</span>
+          <small>Goes Live Instantly Post-Photo</small>
+        </div>
+        <div class="tier-card-pill">
+          <span>GeM B2G Procurement</span>
+          <small>Statutory MoSJE Artisan Quota</small>
+        </div>
+        <div class="tier-card-pill">
+          <span>NBCFDC / NSFDC Subsidy</span>
+          <small>Direct Bank Account DBTL Transfer</small>
+        </div>
+
+        <!-- Offline Sync & Audit Trail -->
+        <div class="tier-card-pill" style="background: #F0FDF4; border-color: #166534;">
+          <span style="color: #166534; font-weight: 900;">Field Coordinator Queue</span>
+          <small style="font-size: 7.5px; color: #15803D;">GPS Verified Workshop Visit Tag</small>
+        </div>
+      </div>
+
+      <!-- 10. CROSS-CUTTING TELEPHONY SCALABILITY, MAINTAINABILITY & EDGE GOVERNANCE -->
+      <div class="cross-cutting-bar">
+        <div class="gov-badge-title">
+          <span>🛡️ Scalability, Maintainability &amp; Telephony Edge Governance</span>
+          <span style="margin-left: auto; font-size: 8px; color: #4338CA; font-weight: 800;">TRAI &amp; MoSJE Compliance</span>
+        </div>
+        <div class="gov-grid">
+          <div class="gov-item">
+            <span>📶</span>
+            <span><strong>Telephony Dropout Recovery</strong> (Call drop auto-saves draft state; calling back resumes step)</span>
+          </div>
+          <div class="gov-item">
+            <span>🗣️</span>
+            <span><strong>12+ Indic Dialect Support</strong> (Bhashini NLTM GPU pipelines handle rural code-mixed dialects)</span>
+          </div>
+          <div class="gov-item">
+            <span>⚡</span>
+            <span><strong>High-Concurrency SIP Scaling</strong> (500+ concurrent calls load-balanced via Redis State Machine)</span>
+          </div>
+          <div class="gov-item">
+            <span>🔒</span>
+            <span><strong>Zero-Smartphone Inclusion Guarantee</strong> (100% accessible via ₹800 2G phone or feature phone)</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- =======================================================
+         BOTTOM TECH STACK RIBBON
+         ======================================================= -->
+    <div class="bottom-tech-ribbon">
+      <div class="tech-stack-title-pill">
+        <span>Tech Stack</span>
+        <span style="font-size: 13px;">⚡</span>
+      </div>
+
+      <div class="tech-segment-group">
+        <!-- Telephony & ASR -->
+        <div class="tech-segment">
+          <div class="tech-capsule blue-edge">
+            <span class="tech-icon-tag">📞</span>
+            <span>SIP / Asterisk</span>
+            <span style="font-size: 10px; color: #1E40AF;">•</span>
+            <span>MeitY Bhashini NLTM</span>
+            <span style="font-size: 10px; color: #1E40AF;">•</span>
+            <span>WebRTC VAD</span>
+          </div>
+          <span class="tech-badge-label">Telephony &amp; Indic Speech</span>
+        </div>
+
+        <!-- Conversational NLP & AI -->
+        <div class="tech-segment">
+          <div class="tech-capsule green-edge">
+            <span class="tech-icon-tag">🧠</span>
+            <span>IndicTrans2</span>
+            <span style="font-size: 10px; color: #047857;">•</span>
+            <span>Conformer-Hi (T4)</span>
+            <span style="font-size: 10px; color: #047857;">•</span>
+            <span>Gemini Audio Neural</span>
+          </div>
+          <span class="tech-badge-label">Conversational AI &amp; NMT</span>
+        </div>
+
+        <!-- Backend & Session FSM -->
+        <div class="tech-segment">
+          <div class="tech-capsule cyan-edge">
+            <span class="tech-icon-tag">⚙️</span>
+            <span>FastAPI</span>
+            <span style="font-size: 10px; color: #0284C7;">•</span>
+            <span>Redis State Machine</span>
+            <span style="font-size: 10px; color: #0284C7;">•</span>
+            <span>Celery Queue</span>
+          </div>
+          <span class="tech-badge-label">Backend &amp; Session FSM</span>
+        </div>
+
+        <!-- Physical Bridge & Storage -->
+        <div class="tech-segment">
+          <div class="tech-capsule purple-edge">
+            <span class="tech-icon-tag">📍</span>
+            <span>SQLite WAL</span>
+            <span style="font-size: 10px; color: #7C3AED;">•</span>
+            <span>Twilio / Gupshup SMS</span>
+            <span style="font-size: 10px; color: #7C3AED;">•</span>
+            <span>MoSJE Field Portal</span>
+          </div>
+          <span class="tech-badge-label">Physical Bridge &amp; Dispatch</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
