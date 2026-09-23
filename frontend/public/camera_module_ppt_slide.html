@@ -87,23 +87,62 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      padding: 14px 20px 10px 20px;
+      padding: 12px 18px 8px 18px;
     }
 
-    /* Top Left Project Name */
+    /* Top Left Project Name & Legend */
+    .project-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
     .project-title {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 900;
       letter-spacing: -0.5px;
       color: #000;
       line-height: 1;
     }
 
+    /* Requirement 9: Clean Status Legend */
+    .legend-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1.5px solid #000;
+      border-radius: 16px;
+      padding: 3px 10px;
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #0F172A;
+      box-shadow: 1px 2px 0px rgba(0,0,0,0.1);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-line-solid {
+      width: 18px;
+      height: 0;
+      border-top: 2.5px solid #000;
+    }
+
+    .legend-line-dashed {
+      width: 18px;
+      height: 0;
+      border-top: 2.5px dashed #000;
+    }
+
     /* Top Right SIH Logo & Architecture Header */
     .sih-header-group {
       position: absolute;
-      top: 14px;
-      right: 24px;
+      top: 10px;
+      right: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -114,19 +153,13 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 2px;
-    }
-
-    .sih-logo-img {
-      width: 44px;
-      height: 44px;
-      object-fit: contain;
+      margin-bottom: 1px;
     }
 
     .sih-text {
       text-align: left;
       font-weight: 900;
-      font-size: 11px;
+      font-size: 10px;
       line-height: 1.1;
       color: #0F172A;
       text-transform: uppercase;
@@ -134,104 +167,171 @@
     }
 
     .system-arch-title {
-      font-size: 32px;
+      font-size: 28px;
       font-weight: 900;
       font-family: serif;
       color: #000;
       letter-spacing: -0.5px;
-      margin-top: 2px;
+      margin-top: 1px;
     }
 
     /* MAIN DIAGRAM BODY */
     .diagram-body {
       flex: 1;
       position: relative;
-      margin-top: 6px;
-      margin-bottom: 8px;
+      margin-top: 4px;
+      margin-bottom: 6px;
     }
 
-    /* Left Stack: API Layer, Data Layer, Provenance Layer */
-    .left-stack {
-      position: absolute;
-      top: 22px;
-      left: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      width: 124px;
-    }
-
-    .stack-subheading {
-      font-size: 12px;
-      font-weight: 800;
-      color: #000;
-      margin-bottom: -5px;
-    }
-
+    /* Reusable Pill Node */
     .pill-node {
       background: #D8ECF8;
       border: 2px solid #000;
-      border-radius: 28px;
+      border-radius: 24px;
       width: 122px;
-      padding: 7px 6px;
+      padding: 5px 6px;
       text-align: center;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 800;
       color: #000;
-      box-shadow: 2px 3px 0px rgba(0,0,0,0.15);
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.12);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       line-height: 1.2;
+      position: relative;
+    }
+
+    .pill-node.dashed-node {
+      border: 2px dashed #000;
+      background: #EAF4FA;
     }
 
     .pill-node.cyan-light { background: #CEE9F9; }
-    .pill-node small { font-size: 8.5px; font-weight: 700; color: #334155; margin-top: 2px; }
+    .pill-node.amber-light { background: #FEF3C7; }
+    .pill-node.purple-light { background: #EDE9FE; }
+    .pill-node small { font-size: 8px; font-weight: 700; color: #334155; margin-top: 1px; }
 
-    .arrow-bidirectional-v {
-      font-size: 13px;
+    .stack-subheading {
+      font-size: 11px;
+      font-weight: 900;
+      color: #000;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    /* 1. CLIENT-SIDE PRE-PROCESSING (Column 1) */
+    .client-col {
+      position: absolute;
+      top: 10px;
+      left: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 124px;
+    }
+
+    .client-step-pill {
+      background: #CEE9F9;
+      border: 2px solid #000;
+      border-radius: 20px;
+      width: 122px;
+      padding: 5px 6px;
+      text-align: center;
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.2;
+    }
+
+    .client-step-pill.dashed-node {
+      border: 2px dashed #000;
+      background: #E0F2FE;
+    }
+
+    .client-step-pill small {
+      font-size: 8px;
+      font-weight: 700;
+      color: #0369A1;
+    }
+
+    .arrow-v-down {
+      font-size: 11px;
       font-weight: 900;
       color: #000;
       line-height: 1;
+      margin: -3px 0;
+    }
+
+    /* 2. MIDDLE-LEFT: API & STORAGE STACK + CRAFT CARD */
+    .ingress-stack {
+      position: absolute;
+      top: 10px;
+      left: 144px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 126px;
     }
 
     /* Central Input Node: Artisan Craft Image */
     .input-craft-card {
-      position: absolute;
-      left: 165px;
-      top: 120px;
-      width: 140px;
-      height: 130px;
-      background: #8FE8F6; /* Bright cyan from Udaan design */
+      width: 126px;
+      height: 98px;
+      background: #8FE8F6; /* Bright cyan */
       border: 2px solid #000;
-      border-radius: 24px;
+      border-radius: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 10px;
-      box-shadow: 3px 4px 0px rgba(0,0,0,0.15);
+      padding: 6px;
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.15);
       z-index: 5;
     }
 
-    .craft-icon-top {
-      font-size: 22px;
-      margin-bottom: 4px;
-    }
-
     .input-craft-card h3 {
-      font-size: 16px;
+      font-size: 12.5px;
       font-weight: 900;
       color: #000;
       line-height: 1.15;
     }
 
-    .craft-atom-icon {
-      font-size: 18px;
-      margin-top: 4px;
+    /* 8. AUTO-SCALING WORKER POOL CONTAINER */
+    .worker-pool-boundary {
+      position: absolute;
+      left: 284px;
+      top: 6px;
+      width: 486px;
+      height: 422px;
+      border: 2px dashed #4F46E5;
+      border-radius: 28px;
+      background: rgba(238, 242, 255, 0.4);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .worker-pool-banner {
+      position: absolute;
+      top: -11px;
+      left: 24px;
+      background: #4F46E5;
+      color: #FFF;
+      border: 1.5px solid #000;
+      border-radius: 12px;
+      padding: 2px 12px;
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      box-shadow: 1px 2px 0px rgba(0,0,0,0.2);
     }
 
     /* 3D Pipe Cylinders (Horizontal Tubes) */
@@ -244,41 +344,44 @@
     }
 
     .pipe-container.top-pipe {
-      left: 310px;
-      top: 50px;
-      width: 250px;
+      left: 296px;
+      top: 24px;
+      width: 260px;
     }
 
     .pipe-container.bottom-pipe {
-      left: 310px;
-      top: 250px;
-      width: 250px;
+      left: 296px;
+      top: 245px;
+      width: 260px;
     }
 
     .pipe-title {
-      font-size: 12.5px;
-      font-weight: 800;
+      font-size: 11px;
+      font-weight: 900;
       color: #000;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
       text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
     }
 
     .cylinder-tube {
       width: 100%;
-      height: 48px;
       background: linear-gradient(180deg, #FFFFFF 0%, #D8ECF8 45%, #B3D7EE 100%);
       border: 2px solid #000;
-      border-radius: 24px;
+      border-radius: 20px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 11.5px;
+      font-size: 10px;
       font-weight: 800;
       color: #000;
       text-align: center;
-      padding: 0 16px;
+      padding: 6px 12px;
       position: relative;
       box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
+      gap: 2px;
     }
 
     .cylinder-tube::before {
@@ -287,7 +390,7 @@
       left: 0;
       top: 0;
       bottom: 0;
-      width: 16px;
+      width: 14px;
       border-radius: 50% / 50%;
       border-right: 2px solid #000;
       background: #C4E2F6;
@@ -296,17 +399,17 @@
     /* Big Vertical Engine Capsule (Center-Right Lavender Box) */
     .central-engine-capsule {
       position: absolute;
-      left: 580px;
-      top: 15px;
-      width: 165px;
-      height: 385px;
+      left: 574px;
+      top: 18px;
+      width: 184px;
+      height: 398px;
       background: #F3E5F5; /* Soft pastel lilac */
       border: 2px solid #000;
-      border-radius: 36px;
+      border-radius: 30px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 10px 8px;
+      padding: 8px 7px;
       justify-content: space-between;
       box-shadow: 3px 5px 0px rgba(0,0,0,0.15);
       z-index: 5;
@@ -315,20 +418,20 @@
     .ensemble-badge {
       background: #FFF;
       border: 2px solid #000;
-      border-radius: 20px;
-      padding: 3px 12px;
-      font-size: 11px;
-      font-weight: 800;
+      border-radius: 16px;
+      padding: 2px 10px;
+      font-size: 10px;
+      font-weight: 900;
       color: #000;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     /* Nested Models Container */
     .models-subbox {
       width: 100%;
-      background: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.7);
       border: 1.5px solid #000;
-      border-radius: 14px;
+      border-radius: 12px;
       padding: 4px;
       display: flex;
       flex-direction: column;
@@ -336,14 +439,25 @@
     }
 
     .model-pill {
-      background: #F8BBD0; /* Soft pink pill */
       border: 1.5px solid #000;
-      border-radius: 12px;
-      font-size: 9.5px;
+      border-radius: 10px;
+      font-size: 9px;
       font-weight: 800;
       text-align: center;
-      padding: 2px 4px;
+      padding: 3px 4px;
       color: #000;
+      line-height: 1.2;
+    }
+
+    .model-pill.primary-active {
+      background: #DCFCE7;
+      border: 1.8px solid #166534;
+    }
+
+    .model-pill.fallback-dashed {
+      background: #F1F5F9;
+      border: 1.5px dashed #64748B;
+      color: #475569;
     }
 
     .engine-section-box {
@@ -351,37 +465,38 @@
       background: #E1BEE7;
       border: 1.5px solid #000;
       border-radius: 10px;
-      padding: 5px;
+      padding: 4px;
       text-align: center;
-      font-size: 10.5px;
+      font-size: 9.5px;
       font-weight: 800;
       color: #000;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
+      line-height: 1.2;
     }
 
     .engine-section-box small {
-      font-size: 8.5px;
+      font-size: 8px;
       color: #4A148C;
       font-weight: 700;
     }
 
     .engine-arrow-down {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 900;
       color: #000;
       margin: -2px 0;
     }
 
-    /* Cloud Feedback Bubbles (The Upward Loops) */
+    /* Cloud Feedback Bubbles (Upward Loops & Callouts) */
     .cloud-callout {
       position: absolute;
       background: #E8D5F5;
       border: 2px solid #000;
-      border-radius: 26px;
-      padding: 6px 12px;
-      font-size: 10px;
+      border-radius: 22px;
+      padding: 5px 10px;
+      font-size: 9.5px;
       font-weight: 800;
       text-align: center;
       color: #000;
@@ -391,32 +506,32 @@
       justify-content: center;
       box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
       z-index: 6;
+      line-height: 1.2;
     }
 
-    /* Left Cloud (Upward Loop #1: Voice Feedback) */
     .cloud-left-top {
-      left: 380px;
-      top: 110px;
-      width: 140px;
-      height: 48px;
+      left: 310px;
+      top: 118px;
+      width: 232px;
+      height: 52px;
+      background: #FDF4FF;
     }
 
     .cloud-left-bottom {
-      left: 390px;
-      top: 175px;
-      width: 130px;
-      height: 46px;
+      left: 350px;
+      top: 360px;
+      width: 154px;
+      height: 42px;
     }
 
-    /* Right Cloud (Interactive Human Review) */
     .cloud-right {
-      left: 765px;
-      top: 175px;
-      width: 140px;
-      height: 60px;
+      left: 785px;
+      top: 150px;
+      width: 125px;
+      height: 52px;
     }
 
-    /* SVG Connecting Curves (Upward Loops & Bridges) */
+    /* SVG Connecting Curves */
     .connections-svg {
       position: absolute;
       top: 0;
@@ -430,39 +545,41 @@
     /* Top Output Box: Quality Review Modal */
     .output-box-top {
       position: absolute;
-      left: 765px;
-      top: 35px;
+      left: 782px;
+      top: 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
     .output-header-tag {
-      font-size: 11.5px;
-      font-weight: 800;
+      font-size: 11px;
+      font-weight: 900;
       color: #000;
       margin-bottom: 2px;
+      text-transform: uppercase;
     }
 
     .output-pill-large {
       background: #C6EBF8;
       border: 2px solid #000;
-      border-radius: 20px;
-      padding: 8px 14px;
-      font-size: 11.5px;
+      border-radius: 18px;
+      padding: 7px 12px;
+      font-size: 11px;
       font-weight: 900;
       color: #000;
       text-align: center;
       line-height: 1.25;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
     }
 
     /* Unified Master Asset Box */
     .composite-box {
       position: absolute;
       left: 928px;
-      top: 165px;
-      width: 100px;
-      height: 78px;
+      top: 150px;
+      width: 102px;
+      height: 76px;
       background: #E0F2FE;
       border: 2px solid #000;
       border-radius: 14px;
@@ -478,33 +595,38 @@
       box-shadow: 2px 3px 0px rgba(0,0,0,0.1);
     }
 
-    /* Final Tier Cards (Far Right 4 Pills) */
+    /* Final Tier Cards (Far Right 4 Pills + Multi-Res Node) */
     .final-tiers-column {
       position: absolute;
-      left: 1055px;
-      top: 125px;
+      left: 1052px;
+      top: 50px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
-      width: 160px;
+      gap: 6px;
+      width: 170px;
     }
 
     .tier-card-pill {
       background: #EDE9FE;
       border: 2px solid #000;
-      border-radius: 18px;
-      padding: 6px 12px;
+      border-radius: 16px;
+      padding: 5px 10px;
       text-align: center;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 800;
       color: #000;
       line-height: 1.15;
       box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
     }
 
+    .tier-card-pill.dashed-node {
+      border: 2px dashed #6D28D9;
+      background: #FAF5FF;
+    }
+
     .tier-card-pill small {
       display: block;
-      font-size: 9px;
+      font-size: 8.5px;
       font-weight: 700;
       color: #4C1D95;
     }
@@ -512,10 +634,10 @@
     /* Bottom Secondary Cyan Box: Provenance & Metadata */
     .bottom-meta-box {
       position: absolute;
-      left: 770px;
-      top: 260px;
-      width: 120px;
-      height: 64px;
+      left: 785px;
+      top: 245px;
+      width: 125px;
+      height: 60px;
       background: #8FE8F6;
       border: 2px solid #000;
       border-radius: 16px;
@@ -524,7 +646,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 900;
       color: #000;
       line-height: 1.2;
@@ -534,39 +656,41 @@
     /* Quality Report Icon / Label in middle */
     .report-graphic-box {
       position: absolute;
-      left: 320px;
-      top: 140px;
+      left: 310px;
+      top: 185px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 2px;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1.5px solid #000;
+      border-radius: 12px;
+      padding: 3px 8px;
     }
 
     .report-tag {
-      font-size: 10.5px;
+      font-size: 9.5px;
       font-weight: 800;
       color: #000;
-      text-align: center;
       line-height: 1.15;
     }
 
     .report-icon {
-      font-size: 26px;
+      font-size: 18px;
     }
 
     /* =======================================================
-       BOTTOM TECH STACK RIBBON (EXACT UDAAN STYLE)
+       BOTTOM TECH STACK RIBBON
        ======================================================= */
     .bottom-tech-ribbon {
       width: 100%;
-      height: 52px;
-      background: #DDD4ED; /* Soft lavender track */
+      height: 50px;
+      background: #DDD4ED;
       border: 2px solid #000;
-      border-radius: 30px;
+      border-radius: 28px;
       display: flex;
       align-items: center;
-      padding: 4px 10px;
-      gap: 12px;
+      padding: 3px 10px;
+      gap: 10px;
       position: relative;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
@@ -574,16 +698,16 @@
     .tech-stack-title-pill {
       background: #FFFFFF;
       border: 2px solid #000;
-      border-radius: 20px;
-      padding: 4px 14px;
-      font-size: 17px;
+      border-radius: 18px;
+      padding: 3px 12px;
+      font-size: 15px;
       font-weight: 900;
       color: #000;
       letter-spacing: -0.5px;
       box-shadow: 2px 2px 0px rgba(0,0,0,0.15);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .tech-segment-group {
@@ -602,12 +726,12 @@
     .tech-capsule {
       background: #FFFFFF;
       border: 2px solid #000;
-      border-radius: 20px;
-      padding: 3px 12px;
+      border-radius: 18px;
+      padding: 2.5px 10px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 11px;
+      gap: 6px;
+      font-size: 10.5px;
       font-weight: 800;
       color: #000;
       box-shadow: 1.5px 2px 0px rgba(0,0,0,0.1);
@@ -619,16 +743,16 @@
     .tech-capsule.purple-edge { border-left: 6px solid #7C3AED; }
 
     .tech-badge-label {
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 800;
       color: #000;
-      margin-top: 2px;
+      margin-top: 1px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .tech-icon-tag {
-      font-size: 13px;
+      font-size: 12px;
     }
   </style>
 </head>
@@ -649,13 +773,27 @@
   <!-- ==================== 16:9 PRESENTATION CANVAS ==================== -->
   <div class="slide-canvas">
 
-    <!-- Top Left Project Title -->
-    <div class="project-title">SHILPSETU!</div>
+    <!-- Top Left Project Title & Status Legend -->
+    <div class="project-header-left">
+      <div class="project-title">SHILPSETU!</div>
+      <!-- Requirement 9: Status Legend -->
+      <div class="legend-badge">
+        <div class="legend-item">
+          <div class="legend-line-solid"></div>
+          <span>Active / Implemented</span>
+        </div>
+        <span style="color: #94A3B8;">|</span>
+        <div class="legend-item">
+          <div class="legend-line-dashed"></div>
+          <span>Planned Roadmap (Not Yet Built)</span>
+        </div>
+      </div>
+    </div>
 
     <!-- Top Right SIH Logo & Slide Title -->
     <div class="sih-header-group">
       <div class="sih-badge">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="10" stroke="#000" stroke-width="2" fill="#F97316"/>
           <path d="M12 6v6l4 2" stroke="#FFF" stroke-width="2" stroke-linecap="round"/>
         </svg>
@@ -669,112 +807,191 @@
     <!-- MAIN INTERACTIVE ARCHITECTURE CANVAS -->
     <div class="diagram-body">
 
-      <!-- SVG BEZIER CURVES & UPWARD FEEDBACK LOOPS -->
+      <!-- SVG BEZIER CURVES & DATAFLOW CONNECTIONS -->
       <svg class="connections-svg">
         <defs>
           <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M 0 1 L 8 5 L 0 9 z" fill="#000"/>
+          </marker>
+          <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#1E40AF"/>
           </marker>
           <marker id="arrow-dashed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
             <path d="M 0 1 L 8 5 L 0 9 z" fill="#000"/>
           </marker>
         </defs>
 
-        <!-- Arrow: Left Stack to Artisan Craft Data -->
-        <path d="M 134 185 L 163 185" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
-        <path d="M 163 185 L 134 185" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <!-- Flow 1: Client Pre-signed Upload -> FastAPI POST /studio/enqueue -->
+        <path d="M 128 360 L 140 360 L 140 45 L 142 45" fill="none" stroke="#000" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrow-dashed)"/>
 
-        <!-- Flow: Craft Image -> Top Pipe -->
-        <path d="M 235 120 L 235 74 L 308 74" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <!-- Flow 2: Client Pre-signed Upload -> S3/R2 Object Store -->
+        <path d="M 128 375 L 142 375" fill="none" stroke="#0284C7" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrow-blue)"/>
 
-        <!-- Flow: Craft Image -> Bottom Pipe -->
-        <path d="M 235 250 L 235 274 L 308 274" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <!-- Flow 3: Client Pre-Processing -> Artisan Craft Image Preview -->
+        <path d="M 128 200 L 142 200" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
 
-        <!-- Flow: Top Pipe -> Central Engine -->
-        <path d="M 560 74 L 578 74" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <!-- Flow 4: FastAPI pushes task_id + s3_key to Redis Queue and returns immediate (<80ms) -->
+        <path d="M 207 68 L 207 88" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
 
-        <!-- Flow: Bottom Pipe -> Central Engine -->
-        <path d="M 560 274 L 578 274" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <!-- Flow 5: Redis Queue -> Worker Pool Ingestion (Image Normalization & Quality Assessment) -->
+        <path d="M 270 115 L 294 65" fill="none" stroke="#4F46E5" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <path d="M 270 125 L 294 285" fill="none" stroke="#4F46E5" stroke-width="2.5" marker-end="url(#arrow)"/>
 
-        <!-- UPWARD LOOP #1 (Dashed curved arrow from Voice Alert to Input Craft Image) -->
-        <path d="M 390 195 C 330 195, 330 215, 307 205" fill="none" stroke="#000" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)"/>
+        <!-- Flow 6: Top Normalization Pipe -> Central Engine -->
+        <path d="M 556 65 L 572 65" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
 
-        <!-- Cloud feedback arrow: Middle Engine to Cloud -->
-        <path d="M 578 190 L 522 195" fill="none" stroke="#000" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrow-dashed)"/>
-        <path d="M 578 135 L 522 135" fill="none" stroke="#000" stroke-width="2" marker-end="url(#arrow)"/>
+        <!-- Flow 7: Bottom Quality Pipe -> Central Engine -->
+        <path d="M 556 285 L 572 285" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
 
-        <!-- Flow: Central Engine -> Top Output Review Modal -->
-        <path d="M 745 60 L 763 60" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <!-- UPWARD LOOP #1 (Voice Alert to Input Craft Card) -->
+        <path d="M 350 380 C 240 380, 240 260, 215 250" fill="none" stroke="#991B1B" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)"/>
 
-        <!-- Flow: Quality Review Modal -> Verified Master Box -->
-        <path d="M 875 60 L 975 60 L 975 163" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <!-- Flow 8: Central Engine -> Top Output Review Modal -->
+        <path d="M 758 60 L 780 60" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
 
-        <!-- UPWARD LOOP #2 (Dashed curved loop from Review Cloud back to Input Craft Data) -->
-        <path d="M 765 205 C 730 205, 730 350, 235 350 L 235 253" fill="none" stroke="#000" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)"/>
+        <!-- Flow 9: Quality Review Modal -> Verified Master Box -->
+        <path d="M 885 60 L 975 60 L 975 148" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
 
-        <!-- Flow: Metadata Box -> Verified Master Box -->
-        <path d="M 890 292 L 975 292 L 975 245" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <!-- UPWARD LOOP #2 (Interactive Human Review Discard/Retake back to Craft Card) -->
+        <path d="M 785 175 C 750 175, 750 330, 245 330 L 245 250" fill="none" stroke="#581C87" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow-dashed)"/>
 
-        <!-- Flow: Verified Master Box -> Final Tiers Column -->
-        <path d="M 1030 205 L 1053 205" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <!-- Flow 10: Metadata Box -> Verified Master Box -->
+        <path d="M 895 275 L 975 275 L 975 228" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+        <!-- Flow 11: Verified Master Box -> Final Tiers Column -->
+        <path d="M 1030 188 L 1050 188" fill="none" stroke="#000" stroke-width="2.5" marker-end="url(#arrow)"/>
       </svg>
 
-      <!-- 1. LEFT STACK (API, DATA, PROVENANCE) -->
-      <div class="left-stack">
-        <span class="stack-subheading">API Layer</span>
-        <div class="pill-node">
-          <span>FastAPI</span>
-          <small>Async Gateway</small>
-          <span style="font-size: 8px; color: #1E40AF; margin-top: 2px;">LRU Cache (5ms)</span>
+      <!-- 1. REQUIREMENT 1: CLIENT-SIDE PRE-PROCESSING (NEW LEFTMOST COLUMN) -->
+      <div class="client-col">
+        <span class="stack-subheading" style="color: #0369A1;">Client Canvas</span>
+        
+        <!-- Step 1: Camera Capture -->
+        <div class="client-step-pill">
+          <span>📸 Camera Capture</span>
+          <small>12MP Native Sensor</small>
         </div>
-        <div class="arrow-bidirectional-v">⇕</div>
+
+        <div class="arrow-v-down">↓</div>
+
+        <!-- Step 2: Canvas Resize -->
+        <div class="client-step-pill">
+          <span>🖼️ Canvas Resize</span>
+          <small>1080p WebP (~400KB)</small>
+        </div>
+
+        <div class="arrow-v-down">↓</div>
+
+        <!-- Step 3: Client-side Blur Check -->
+        <div class="client-step-pill">
+          <span>⚡ Blur Pre-Check</span>
+          <small>&lt;15ms Fast Reject</small>
+        </div>
+
+        <div class="arrow-v-down">↓</div>
+
+        <!-- Step 4: Direct Pre-signed Upload (Roadmap / Dashed) -->
+        <div class="client-step-pill dashed-node" title="Roadmap Planned: Pre-signed upload directly to bucket">
+          <span style="font-size: 8.5px;">☁️ Direct Upload</span>
+          <small>Pre-signed (S3/GCS)</small>
+          <span style="font-size: 7.5px; color: #6D28D9; font-weight: 800;">[ROADMAP]</span>
+        </div>
+      </div>
+
+      <!-- 2. INGRESS & STORAGE STACK (COLUMN 2) -->
+      <div class="ingress-stack">
+        <span class="stack-subheading">API &amp; State</span>
+
+        <!-- Requirement 2: Async FastAPI POST /studio/enqueue -->
+        <div class="pill-node">
+          <span style="color: #1E40AF; font-size: 10px;">FastAPI Ingress</span>
+          <small>POST /studio/enqueue</small>
+          <span style="font-size: 8px; color: #15803D; font-weight: 800;">&lt;80ms response</span>
+        </div>
+
+        <div class="arrow-v-down" style="color: #DC2626;">⇊</div>
+
+        <!-- Requirement 2: Redis Queue Node -->
+        <div class="pill-node amber-light">
+          <span style="color: #92400E; font-size: 10px;">Redis Queue</span>
+          <small>Celery / RQ Broker</small>
+          <span style="font-size: 7.5px; color: #DC2626; font-weight: 800;">task_id + s3_key</span>
+        </div>
+
+        <!-- Artisan Craft Image Preview Card -->
+        <div class="input-craft-card">
+          <div style="font-size: 18px; margin-bottom: 2px;">📷 🖼️</div>
+          <h3>Artisan Craft Image</h3>
+          <small style="font-size: 8px; font-weight: 700; color: #0F172A; margin-top: 2px;">On-Device Optimized</small>
+          <div style="font-size: 13px; margin-top: 2px;">⚛️</div>
+        </div>
+
+        <!-- Requirement 7: SQLite / Postgres metadata only -->
         <div class="pill-node cyan-light">
-          <span>Data Layer</span>
-          <small>SQLite 3 WAL</small>
-          <span style="font-size: 8px; color: #0284C7; margin-top: 2px;">Local State Store</span>
+          <span>SQLite / Postgres</span>
+          <small>Task State &amp; Metadata</small>
+          <span style="font-size: 7.5px; color: #0284C7; font-weight: 800;">(not image storage)</span>
         </div>
-        <div class="arrow-bidirectional-v">⇕</div>
+
+        <!-- Requirement 7: S3 / Cloudflare R2 Object Storage -->
+        <div class="pill-node" style="background: #E0F2FE;">
+          <span>S3 / Cloudflare R2</span>
+          <small>Object Storage</small>
+          <span style="font-size: 7.5px; color: #0369A1; font-weight: 800;">Master + Derived</span>
+        </div>
+
+        <!-- Provenance Layer (Kept Intact) -->
         <div class="pill-node">
-          <span>Provenance</span>
-          <span>Layer</span>
+          <span>Provenance Layer</span>
           <small>SHA-256 Crypto Hash</small>
-          <span style="font-size: 7.5px; color: #047857; margin-top: 2px;">GI Anti-Piracy QR</span>
+          <span style="font-size: 7.5px; color: #047857; font-weight: 800;">GI Anti-Piracy QR</span>
         </div>
       </div>
 
-      <!-- 2. CENTRAL INPUT ENTITY: ARTISAN CRAFT IMAGE -->
-      <div class="input-craft-card">
-        <div class="craft-icon-top">📷 🖼️</div>
-        <h3>Artisan Craft Image</h3>
-        <small style="font-size: 9.5px; font-weight: 700; color: #0F172A; margin-top: 4px;">Manual Shutter or Gallery Upload</small>
-        <div class="craft-atom-icon">⚛️</div>
+      <!-- 8. REQUIREMENT 8: AUTO-SCALING WORKER POOL CONTAINER -->
+      <div class="worker-pool-boundary">
+        <div class="worker-pool-banner">
+          ⚙️ Auto-Scaling Worker Pool (Celery workers, GPU for production / CPU for demo)
+        </div>
       </div>
 
-      <!-- 3. TOP PIPE CYLINDER: NORMALIZATION PIPELINE -->
+      <!-- 3. REQUIREMENT 4: TOP PIPE NORMALIZATION PIPELINE -->
       <div class="pipe-container top-pipe">
         <div class="pipe-title">Image Normalization Pipeline</div>
         <div class="cylinder-tube">
-          <span>Preprocessing<br>and EXIF Transpose</span>
+          <span style="font-weight: 900;">1. Preprocessing &amp; EXIF Transpose</span>
+          <div style="width: 90%; height: 1px; background: rgba(0,0,0,0.15); margin: 1px 0;"></div>
+          <!-- Requirement 4: Topology & Debris Filter -->
+          <span style="color: #1E3A8A; font-size: 9px; line-height: 1.15;">
+            2. <strong>Topology &amp; Debris Filter</strong> — distance transform + skeleton endpoint analysis (protects thin handles/loops)
+          </span>
         </div>
       </div>
 
-      <!-- 4. BOTTOM PIPE CYLINDER: QUALITY PIPELINE -->
+      <!-- Requirement 4: White Balance + CLAHE Cloud Callout -->
+      <div class="cloud-callout cloud-left-top">
+        <span style="font-weight: 900; color: #4338CA;">Segmentation-Aware White Balance</span>
+        <small style="font-size: 8px; color: #374151;">6500K gray-world (samples background where α ≤ 40)</small>
+        <small style="font-size: 8px; color: #6D28D9; font-weight: 800;">+ LAB CLAHE contrast normalization</small>
+      </div>
+
+      <!-- 4. REQUIREMENT 6: BOTTOM PIPE QUALITY ASSESSMENT PIPELINE -->
       <div class="pipe-container bottom-pipe">
         <div class="pipe-title">Quality Assessment Pipeline</div>
-        <div class="cylinder-tube">
-          <span>Laplacian Sharpness &<br>Luminance Exposure Analysis</span>
+        <div class="cylinder-tube" style="align-items: flex-start; text-align: left; padding-left: 20px;">
+          <!-- Requirement 6: Explicit Metrics -->
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span>• <strong>Laplacian Variance &lt; 65</strong> → Blur Reject</span>
+            <span>• <strong>Brightness Histogram Check</strong> (over/under)</span>
+            <span>• <strong>Border Clearance Check</strong> (padding guard)</span>
+          </div>
         </div>
       </div>
 
-      <!-- Quality Report Icon / Label in middle -->
+      <!-- Quality Metrics Badge & Voice Alert -->
       <div class="report-graphic-box">
-        <span class="report-tag">Quality Report<br>with Metrics</span>
         <div class="report-icon">📊</div>
-      </div>
-
-      <!-- 5. CLOUD CALLOUTS (UPWARD RECOVERY LOOPS) -->
-      <div class="cloud-callout cloud-left-top">
-        <span>Stabilize Framing & Exposure</span>
+        <span class="report-tag">CV Metric<br>Telemetry</span>
       </div>
 
       <div class="cloud-callout cloud-left-bottom">
@@ -782,49 +999,56 @@
         <small style="font-size: 8px;">"फोटो धुंधली है। दोबारा लें"</small>
       </div>
 
-      <div class="cloud-callout cloud-right">
-        <span>Interactive Before/After</span>
-        <small style="font-size: 8px; color: #581C87;">Artisan Discard / Retake</small>
-      </div>
-
-      <!-- 6. LARGE CENTRAL VERTICAL CAPSULE (AI STUDIO ENSEMBLE) -->
+      <!-- 5. REQUIREMENT 3 & 5: CENTRAL AI STUDIO CAPSULE -->
       <div class="central-engine-capsule">
-        <div class="ensemble-badge">Neural Ensemble</div>
+        <div class="ensemble-badge">Segmentation &amp; Synthesis</div>
 
-        <!-- Nested Model Pills -->
+        <!-- Requirement 3: BiRefNet Primary + u2netp Fallback -->
         <div class="models-subbox">
-          <div class="model-pill">BiRefNet-General</div>
-          <div class="model-pill" style="background: #E1BEE7;">bria-rmbg (Studio)</div>
-          <div class="model-pill" style="background: #C8E6C9;">u2net / u2netp</div>
+          <!-- Primary Active Node -->
+          <div class="model-pill primary-active">
+            <span>birefnet-general (ONNX, ~972MB)</span>
+            <small style="display: block; font-size: 7.5px; color: #15803D; font-weight: 900;">● PRIMARY / ACTIVE</small>
+          </div>
+          <!-- Fallback Secondary Node -->
+          <div class="model-pill fallback-dashed" title="Environment-aware fallback for Render 512MB RAM mode">
+            <span>u2netp — lightweight fallback</span>
+            <small style="display: block; font-size: 7px; color: #475569;">(Render 512MB RAM demo only)</small>
+          </div>
         </div>
 
         <div class="engine-arrow-down">▼</div>
 
-        <!-- 6500K Balance Stage -->
+        <!-- Requirement 5: Dual-Tier Ground Shadow Synthesis -->
         <div class="engine-section-box">
-          <span>OpenCV cv2</span>
-          <small>6500K Gray-World</small>
-          <small>Daylight Balancer</small>
+          <span style="font-weight: 900;">Dual-Tier Ground Shadow</span>
+          <small>• Tier 1: Ambient Occlusion Seam</small>
+          <small>• Tier 2: Floor Penumbra (feathered)</small>
         </div>
 
         <div class="engine-arrow-down">▼</div>
 
-        <!-- Shadow Stage -->
+        <!-- Requirement 5: Amazon/GeM 85% Canvas Centering -->
         <div class="engine-section-box" style="background: #D1C4E9;">
-          <span>Pillow (PIL)</span>
-          <small>Gaussian Blur (σ=15)</small>
-          <small>Contact Drop Shadow</small>
+          <span style="font-weight: 900;">Amazon / GeM 85% Rule</span>
+          <small>1080×1080 Square Centering</small>
+          <small style="color: #312E81;">Dominant Dimension = 86% Canvas</small>
         </div>
 
         <div class="engine-arrow-down">▼</div>
 
-        <!-- Bottom Model Box -->
-        <div class="ensemble-badge" style="background: #FFF; font-size: 9.5px; margin-bottom: 0;">
-          Composited Asset
+        <!-- Requirement 5: Enclosed Hole Removal + MobileSAM Hook -->
+        <div class="engine-section-box" style="background: #EDE9FE; border-style: solid;">
+          <span style="font-size: 8.5px; font-weight: 900;">Hole Removal (floodFill)</span>
+          <!-- MobileSAM point-prompt hook (Dashed / Roadmap) -->
+          <div style="border: 1px dashed #7C3AED; border-radius: 6px; padding: 2px; margin-top: 1px; background: rgba(255,255,255,0.7);">
+            <small style="color: #6D28D9; font-weight: 800; display: block; font-size: 7.5px;">MobileSAM Point-Prompt</small>
+            <span style="font-size: 7px; color: #475569; font-weight: 700;">[Hook, not yet active]</span>
+          </div>
         </div>
       </div>
 
-      <!-- 7. TOP OUTPUT BOX: INTERACTIVE QUALITY REVIEW MODAL -->
+      <!-- 6. TOP OUTPUT BOX: INTERACTIVE QUALITY REVIEW MODAL -->
       <div class="output-box-top">
         <div class="output-header-tag">Review Gate</div>
         <div class="output-pill-large">
@@ -832,21 +1056,28 @@
         </div>
       </div>
 
-      <!-- 8. BOTTOM ANGLE & FORMAT METADATA BOX -->
+      <!-- Interactive Human Review Cloud -->
+      <div class="cloud-callout cloud-right">
+        <span style="font-weight: 900;">Interactive Review</span>
+        <small style="font-size: 8px; color: #581C87;">Artisan Discard / Retake</small>
+      </div>
+
+      <!-- 7. BOTTOM ANGLE & FORMAT METADATA BOX -->
       <div class="bottom-meta-box">
-        <span>Metadata & Angle</span>
+        <span>Metadata &amp; Angle</span>
         <small style="font-size: 8px; font-weight: 700;">1:1 Cushion Margin</small>
         <small style="font-size: 7.5px; color: #0284C7; font-weight: 700;">2D DCT Watermark</small>
       </div>
 
-      <!-- 9. UNIFIED VERIFIED MASTER ASSET BOX -->
+      <!-- 8. UNIFIED VERIFIED MASTER ASSET BOX -->
       <div class="composite-box">
         <span>Verified<br>Studio<br>Master</span>
         <small style="font-size: 8px; color: #0369A1; font-weight: 800;">100% Quality Pass</small>
       </div>
 
-      <!-- 10. FINAL TIERS (FAR RIGHT 4 PILLS) -->
+      <!-- 9. FINAL TIERS & REQUIREMENT 7 MULTI-RESOLUTION OUTPUT -->
       <div class="final-tiers-column">
+        <!-- 4 Existing Channels (Kept Untouched as Requested) -->
         <div class="tier-card-pill">
           <span>ONDC Commerce</span>
           <small>Studio White (#F8F9FA)</small>
@@ -863,17 +1094,24 @@
           <span>GeM Procurement</span>
           <small>Statutory Tender Specs</small>
         </div>
+
+        <!-- Requirement 7: Multi-Resolution Output (Dashed / Roadmap) -->
+        <div class="tier-card-pill dashed-node" title="Planned Roadmap: Multi-resolution derived pipeline">
+          <span style="color: #6D28D9; font-weight: 900;">Multi-Resolution Output</span>
+          <small style="font-size: 7.5px; color: #4C1D95;">Master WebP • 256px • 720px • 4K</small>
+          <span style="font-size: 7px; color: #6D28D9; font-weight: 800;">[PLANNED ROADMAP]</span>
+        </div>
       </div>
 
     </div>
 
     <!-- =======================================================
-         BOTTOM TECH STACK RIBBON (EXACT UDAAN STYLE)
+         BOTTOM TECH STACK RIBBON (WITH REDIS & S3/R2 ADDED)
          ======================================================= -->
     <div class="bottom-tech-ribbon">
       <div class="tech-stack-title-pill">
         <span>Tech Stack</span>
-        <span style="font-size: 14px;">⚡</span>
+        <span style="font-size: 13px;">⚡</span>
       </div>
 
       <div class="tech-segment-group">
@@ -890,7 +1128,7 @@
           <span class="tech-badge-label">AI / Computer Vision</span>
         </div>
 
-        <!-- Backend -->
+        <!-- Backend (Added Celery / Redis as requested) -->
         <div class="tech-segment">
           <div class="tech-capsule green-edge">
             <span class="tech-icon-tag">⚙️</span>
@@ -898,20 +1136,24 @@
             <span style="font-size: 10px; color: #047857;">•</span>
             <span>Python 3.13</span>
             <span style="font-size: 10px; color: #047857;">•</span>
+            <span>Celery / Redis</span>
+            <span style="font-size: 10px; color: #047857;">•</span>
             <span>Uvicorn</span>
           </div>
           <span class="tech-badge-label">Backend</span>
         </div>
 
-        <!-- Database -->
+        <!-- Database (Added S3 / R2 as requested) -->
         <div class="tech-segment">
           <div class="tech-capsule cyan-edge">
             <span class="tech-icon-tag">💾</span>
             <span>SQLite 3 (WAL)</span>
             <span style="font-size: 10px; color: #0284C7;">•</span>
+            <span>S3 / R2 Storage</span>
+            <span style="font-size: 10px; color: #0284C7;">•</span>
             <span>LRU Hash Cache</span>
           </div>
-          <span class="tech-badge-label">Database & Cache</span>
+          <span class="tech-badge-label">Database &amp; Cache</span>
         </div>
 
         <!-- Frontend -->
