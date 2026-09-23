@@ -51,6 +51,8 @@ def save_media_file(
             logger.info(f"Uploaded {filename} to S3 bucket {settings.CLOUD_STORAGE_BUCKET}")
             return public_url, f"s3://{settings.CLOUD_STORAGE_BUCKET}/{filename}"
         except Exception as e:
+            from .gemini_logger import log_fallback_event
+            log_fallback_event("Cloud Media Storage", "AWS S3 / R2", e, "Routing to local disk storage (/static/uploads/)")
             logger.warning(f"S3 upload failed ({e}). Falling back to local storage.")
 
     # 2. Google Cloud Storage (GCS) upload
@@ -69,6 +71,8 @@ def save_media_file(
             logger.info(f"Uploaded {filename} to GCS bucket {settings.CLOUD_STORAGE_BUCKET}")
             return public_url, f"gs://{settings.CLOUD_STORAGE_BUCKET}/{filename}"
         except Exception as e:
+            from .gemini_logger import log_fallback_event
+            log_fallback_event("Cloud Media Storage", "Google Cloud Storage (GCS)", e, "Routing to local disk storage (/static/uploads/)")
             logger.warning(f"GCS upload failed ({e}). Falling back to local storage.")
 
     # 3. Supabase Storage upload
@@ -88,6 +92,8 @@ def save_media_file(
                     public_url = f"{supabase_url}/storage/v1/object/public/{settings.CLOUD_STORAGE_BUCKET}/{filename}"
                     return public_url, public_url
         except Exception as e:
+            from .gemini_logger import log_fallback_event
+            log_fallback_event("Cloud Media Storage", "Supabase Storage", e, "Routing to local disk storage (/static/uploads/)")
             logger.warning(f"Supabase storage upload failed ({e}). Falling back to local storage.")
 
     # 4. Zero-Fail Local Storage Fallback

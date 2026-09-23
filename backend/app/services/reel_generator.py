@@ -304,7 +304,16 @@ def render_vertical_reel(
     except Exception:
         has_ffmpeg = False
 
-    if has_ffmpeg:
+    if not has_ffmpeg:
+        from .gemini_logger import log_fallback_event
+        log_fallback_event(
+            service_name="AI Video Reel Generator",
+            component="FFmpeg Audio Muxer",
+            reason="FFmpeg executable not in system PATH",
+            fallback_action="Serving raw visual video with synchronized client-side Web Audio soundtrack player",
+            context=f"Product: {product_id}"
+        )
+    else:
         muxed_filename = f"reel_muxed_{product_id}_{timestamp}.mp4"
         muxed_path = settings.UPLOAD_DIR / muxed_filename
         try:
@@ -319,8 +328,15 @@ def render_vertical_reel(
             ]
             subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
             video_filename = muxed_filename
-        except Exception:
-            pass
+        except Exception as mux_err:
+            from .gemini_logger import log_fallback_event
+            log_fallback_event(
+                service_name="AI Video Reel Generator",
+                component="FFmpeg Command Execution",
+                reason=mux_err,
+                fallback_action="Falling back to pure video file with separate ambient soundtrack stream",
+                context=f"Product: {product_id}"
+            )
 
     reel_url = f"/static/uploads/{video_filename}"
     audio_soundtrack_url = "/static/audio/ambient_folk.wav"

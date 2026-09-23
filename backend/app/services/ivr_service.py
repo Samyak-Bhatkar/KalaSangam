@@ -23,7 +23,7 @@ import httpx
 from fastapi import HTTPException
 
 from ..config import settings
-from .gemini_logger import log_gemini_error
+from .gemini_logger import log_gemini_error, log_fallback_event
 from ..database import save_draft_product, get_product_by_id
 
 logger = logging.getLogger("ShilpSetu.IVRService")
@@ -398,6 +398,7 @@ async def process_ivr_step_audio(
     - Priority 3: Zero-Fail MoSJE Craft Heuristic
     """
     gemini_error_detail: Optional[str] = None
+    bhashini_error_detail: Optional[str] = None
 
     # Priority 1: Google Gemini Multimodal Neural Pipeline
     if settings.GEMINI_API_KEY:
@@ -427,7 +428,13 @@ async def process_ivr_step_audio(
                     )
                     engine_used = "MeitY Bhashini ULCA (ai4bharat/conformer-hi-gpu--t4)"
                 except Exception as bhashini_err:
-                    logger.warning(f"Bhashini fallback also failed ({bhashini_err}), using zero-fail heuristic.")
+                    bhashini_error_detail = log_fallback_event(
+                        service_name="IVR Speech Recognition Pipeline",
+                        component="MeitY Bhashini ULCA",
+                        reason=bhashini_err,
+                        fallback_action="MoSJE Zero-Fail Authenticity Craft Heuristics",
+                        context=f"Step: {step}, Language: {language}"
+                    )
                     transcript, translated_text, latency = ("पारंपरिक नक्काशीदार टेराकोटा कलश व हांडी", "Traditional handcrafted terracotta bell-clay pot", 180.0)
                     engine_used = "MoSJE Zero-Fail Craft Heuristic"
             else:
@@ -444,7 +451,13 @@ async def process_ivr_step_audio(
             )
             engine_used = "MeitY Bhashini ULCA (ai4bharat/conformer-hi-gpu--t4)"
         except Exception as bhashini_err:
-            logger.warning(f"Bhashini direct API error ({bhashini_err}), using zero-fail heuristic.")
+            bhashini_error_detail = log_fallback_event(
+                service_name="IVR Speech Recognition Pipeline (Direct Bhashini)",
+                component="MeitY Bhashini ULCA",
+                reason=bhashini_err,
+                fallback_action="MoSJE Zero-Fail Authenticity Craft Heuristics",
+                context=f"Step: {step}, Language: {language}"
+            )
             transcript, translated_text, latency = ("पारंपरिक नक्काशीदार टेराकोटा कलश व हांडी", "Traditional handcrafted terracotta bell-clay pot", 180.0)
             engine_used = "MoSJE Zero-Fail Craft Heuristic"
     else:
@@ -474,6 +487,8 @@ async def process_ivr_step_audio(
         "extractedValue": extracted_value,
         "engineUsed": engine_used,
         "gemini_error": gemini_error_detail,
+        "bhashini_error": bhashini_error_detail,
+        "fallback_active": bool(gemini_error_detail or bhashini_error_detail),
         "pipelineId": "ai4bharat/conformer-hi-gpu--t4",
         "translationModel": "ai4bharat/indictrans2-gpu--t4",
         "gateway": "MeitY Bhashini National Language Translation Mission (NLTM)",

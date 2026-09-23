@@ -5,13 +5,27 @@
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '') + '/api/v1';
 
+/**
+ * Standardized Developer Diagnostic Console Logger:
+ * When an API or subsystem encounters an issue and triggers a safe fallback,
+ * this function displays a high-visibility, styled notice in the browser console (F12)
+ * so developers can diagnose the issue immediately without breaking the user experience.
+ */
+export function logSystemFallbackNotice(component, reason, fallbackAction) {
+  console.warn(
+    `%c[ShilpSetu Fallback: ${component}]%c ${reason}\n↳ Action: ${fallbackAction} (UI continuing smoothly)`,
+    'background: #fff3cd; color: #856404; font-weight: bold; padding: 2px 6px; border-radius: 3px; border-left: 4px solid #ffc107;',
+    'color: #c62828; font-weight: 500; margin-left: 6px;'
+  );
+}
+
 export async function getCraftPresets() {
   try {
     const res = await fetch(`${API_BASE}/crafts/presets`);
-    if (!res.ok) throw new Error('Failed to fetch presets');
+    if (!res.ok) throw new Error(`HTTP ${res.status} on /crafts/presets`);
     return await res.json();
   } catch (err) {
-    console.warn('API presets error, using local fallback:', err);
+    logSystemFallbackNotice('Craft Presets API', err.message, 'Engaging static authentic craft fixtures');
     return {
       status: 'fallback',
       crafts: [
@@ -166,7 +180,7 @@ export async function checkPhotoQuality({ file, imageBase64, language = 'hi', ca
 
     return await res.json();
   } catch (err) {
-    console.warn('API checkPhotoQuality fallback to client heuristic pass:', err);
+    logSystemFallbackNotice('Photo Quality Inspection', err.message, 'Engaged client-side heuristic pass (UI unaffected)');
     return {
       status: 'success',
       passed: true,
@@ -235,7 +249,7 @@ export async function enhanceImage({ file, imageBase64, preserveOriginalTones = 
 
     return await res.json();
   } catch (err) {
-    console.warn('API enhanceImage fallback to uploaded craft render:', err);
+    logSystemFallbackNotice('Studio Image Enhancement', err.message, 'Serving raw uploaded craft render with local lighting cushion');
     return {
       status: 'fallback',
       studio_url: imageBase64 || null,
@@ -855,7 +869,7 @@ export async function fetchBackgroundOptions({
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch (err) {
-    console.warn('API fetchBackgroundOptions fallback to curated options:', err);
+    logSystemFallbackNotice('Stock Backgrounds API', err.message, 'Serving curated high-resolution Indian craft lifestyle options');
     const isFlatLay = shotAngle === 'flat_lay';
     return {
       status: 'fallback',

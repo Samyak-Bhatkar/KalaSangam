@@ -44,8 +44,15 @@ def dispatch_n8n_webhook(
             logger.warning(f"n8n webhook [{event_type}] returned status {res.status_code}")
             return False
     except requests.exceptions.RequestException as ex:
-        # Non-blocking graceful catch
-        logger.info(f"n8n webhook [{event_type}] deferred: n8n listener not active ({ex})")
+        # Non-blocking graceful catch with visible diagnostic notice
+        from .gemini_logger import log_fallback_event
+        log_fallback_event(
+            service_name="n8n Workflow Automation",
+            component=f"Webhook [{event_type}]",
+            reason=ex,
+            fallback_action="Local internal processing active (UI continues without interruption)",
+            context=f"Target: {webhook_url}"
+        )
         return False
 
 # ==============================================================================

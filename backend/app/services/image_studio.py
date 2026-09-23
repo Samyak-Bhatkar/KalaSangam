@@ -322,6 +322,14 @@ def segment_craft(pil_img: Image.Image, compute_tier: str = "high") -> Image.Ima
             logger.warning(f"Fast-tier fallback rembg execution error: {e}")
 
     # Ultimate fallback: Classical GrabCut
+    from .gemini_logger import log_fallback_event
+    log_fallback_event(
+        service_name="Vision Studio Segmentation",
+        component="Neural Rembg / MobileSAM Engine",
+        reason="Neural session unavailable, high server load, or memory threshold",
+        fallback_action="Sub-200ms Classical OpenCV GrabCut & Bounded Saliency Fallback",
+        context=f"Image Dimensions: {pil_img.size}"
+    )
     return segment_craft_fallback(pil_img)
 
 

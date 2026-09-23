@@ -22,6 +22,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from PIL import Image, ImageOps, ImageFilter
 from ..config import settings
 from ..models.schemas import BackgroundOption, BackgroundOptionsResponse
+from .gemini_logger import log_fallback_event
 
 logger = logging.getLogger("ShilpSetu.StockBackground")
 
@@ -257,7 +258,13 @@ def query_pexels(query: str, limit: int = 4) -> List[BackgroundOption]:
                     )
             return options
     except Exception as e:
-        logger.warning(f"Pexels query failed ({e}), attempting fallback.")
+        log_fallback_event(
+            service_name="Stock Photo Retrieval",
+            component="Pexels API",
+            reason=e,
+            fallback_action="Routing query to Pixabay API / Curated Indian Craft Backdrops",
+            context=f"Query: '{query}'"
+        )
         return []
 
 
@@ -295,7 +302,13 @@ def query_pixabay(query: str, limit: int = 4) -> List[BackgroundOption]:
                     )
             return options
     except Exception as e:
-        logger.warning(f"Pixabay query failed ({e}), engaging curated fallback.")
+        log_fallback_event(
+            service_name="Stock Photo Retrieval",
+            component="Pixabay API",
+            reason=e,
+            fallback_action="Routing to Curated Indian Handicraft High-Res Museum Backdrops",
+            context=f"Query: '{query}'"
+        )
         return []
 
 
