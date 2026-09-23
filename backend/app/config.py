@@ -21,6 +21,9 @@ class Settings(BaseSettings):
 
     # AI API Keys
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_KEY_NAME: str = os.getenv("GEMINI_KEY_NAME", "")
+    GEMINI_PROJECT_NAME: str = os.getenv("GEMINI_PROJECT_NAME", "")
+    GEMINI_PROJECT_NUMBER: str = os.getenv("GEMINI_PROJECT_NUMBER", "")
     BHASHINI_API_KEY: str = os.getenv("BHASHINI_API_KEY", "")
     BHASHINI_USER_ID: str = os.getenv("BHASHINI_USER_ID", "")
     BHASHINI_INFERENCE_KEY: str = os.getenv("BHASHINI_INFERENCE_KEY", "")

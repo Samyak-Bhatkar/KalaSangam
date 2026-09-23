@@ -13,6 +13,7 @@ from typing import Optional, Dict, Any
 from ..config import settings
 from ..models.schemas import CatalogItemResponse
 from ..models.mock_data import CRAFT_FIXTURES, DEFAULT_CRAFT_KEY
+from .gemini_logger import log_gemini_error
 
 logger = logging.getLogger("ShilpSetu.CatalogEngine")
 
@@ -86,7 +87,7 @@ def call_gemini_multimodal(
             )
 
             response = None
-            for model_name in ["gemini-3.5-flash-lite", "gemini-3.6-flash", "gemini-flash-latest"]:
+            for model_name in ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-3-flash-preview"]:
                 try:
                     response = client.models.generate_content(
                         model=model_name,
@@ -114,7 +115,7 @@ def call_gemini_multimodal(
             raw_text = re.sub(r"\s*```$", "", raw_text)
             return json.loads(raw_text)
         except Exception as e:
-            logger.warning(f"google-genai attempt failed ({e}), trying heuristic fallback")
+            logger.warning(f"google-genai attempt failed ({e}), trying legacy SDK fallback")
             import google.generativeai as gai
             gai.configure(api_key=settings.GEMINI_API_KEY)
             model = gai.GenerativeModel("gemini-2.5-flash")
@@ -132,6 +133,11 @@ def call_gemini_multimodal(
             return json.loads(raw_text)
 
     except Exception as ex:
+        log_gemini_error(
+            service_name="Catalog Engine Multimodal (call_gemini_multimodal)",
+            error=ex,
+            context=f"Language: {source_language}, Transcript preview: {(transcript or '')[:60]}"
+        )
         logger.error(f"Gemini API call failed: {ex}. Engaging zero-fail fallback.")
         return None
 

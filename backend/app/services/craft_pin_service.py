@@ -31,6 +31,7 @@ from PIL import Image, ImageDraw, ImageFont
 from ..config import settings
 from ..models.schemas import CraftPin
 from .stock_background_service import load_image_from_source
+from .gemini_logger import log_gemini_error
 
 logger = logging.getLogger("ShilpSetu.CraftPins")
 
@@ -236,7 +237,7 @@ def classify_and_format_pin_callout(
         from google.genai import types
 
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
-        for model_name in ["gemini-2.5-flash", "gemini-3.5-flash-lite", "gemini-flash-latest"]:
+        for model_name in ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-3-flash-preview"]:
             try:
                 resp = client.models.generate_content(
                     model=model_name,
@@ -268,7 +269,7 @@ def classify_and_format_pin_callout(
         try:
             import google.generativeai as legacy_genai
             legacy_genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = legacy_genai.GenerativeModel("gemini-1.5-flash")
+            model = legacy_genai.GenerativeModel("gemini-2.5-flash")
             resp = model.generate_content(
                 prompt,
                 generation_config={"temperature": 0.1, "response_mime_type": "application/json"}
@@ -288,9 +289,17 @@ def classify_and_format_pin_callout(
                     parsed["full_description"] = parsed.get("full_description") or parsed.get("full_description_hi") or clean_transcript
                     return parsed
         except Exception as e_leg:
-            logger.warning(f"Legacy Gemini pin call failed: {e_leg}")
+            log_gemini_error(
+                service_name="Legacy Gemini Pin Call (craft_pin_service.py)",
+                error=e_leg,
+                context=f"Transcript: {clean_transcript[:60]}"
+            )
     except Exception as e:
-        logger.warning(f"Gemini pin classification error: {e}")
+        log_gemini_error(
+            service_name="Gemini Pin Classification (craft_pin_service.py)",
+            error=e,
+            context=f"Transcript: {clean_transcript[:60]}"
+        )
 
     return heuristic_classify_pin(clean_transcript, language, category_hint)
 

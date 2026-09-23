@@ -9,6 +9,7 @@ import re
 from typing import Optional, Dict, Any
 from ..config import settings
 from ..models.mock_data import CRAFT_FIXTURES, DEFAULT_CRAFT_KEY
+from .gemini_logger import log_gemini_error
 
 logger = logging.getLogger("ShilpSetu.TranscriptionService")
 
@@ -60,7 +61,7 @@ def transcribe_audio_bytes(
     clean_mime = mime_type.split(";")[0].strip() if mime_type else "audio/webm"
     if not clean_mime or clean_mime == "application/octet-stream":
         clean_mime = "audio/webm"
-
+    gemini_error_detail = None
     if settings.GEMINI_API_KEY:
         try:
             from google import genai
@@ -69,8 +70,9 @@ def transcribe_audio_bytes(
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
             audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=clean_mime)
 
-            # Try modern production models in sequence
-            candidate_models = ["gemini-3.5-flash-lite", "gemini-3.6-flash", "gemini-flash-latest"]
+            # Try verified modern production models in sequence (Gemini on priority)
+            candidate_models = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-3-flash-preview"]
+            last_model_err = None
             for model_name in candidate_models:
                 try:
                     response = client.models.generate_content(
@@ -84,23 +86,37 @@ def transcribe_audio_bytes(
                     # Clean any accidental wrapping
                     text = re.sub(r"^[\"']|[\"']$", "", text).strip()
                     if text and len(text) > 2:
-                        logger.info(f"Bhashini Indic ASR ({model_name}) transcribed {len(audio_bytes)} bytes into {len(text)} chars.")
+                        logger.info(f"Gemini Indic ASR ({model_name}) transcribed {len(audio_bytes)} bytes into {len(text)} chars.")
                         return {
                             "transcript": text,
-                            "source": "bhashini_indic_asr",
-                            "engine": "MeitY Bhashini ULCA (ai4bharat/conformer-hi-gpu--t4)",
+                            "source": "gemini_multimodal_asr",
+                            "engine": f"Google Gemini ASR ({model_name}) - MeitY Bhashini Indic Compatible",
+                            "gemini_error": None,
                             "success": True,
                         }
                 except Exception as model_err:
+                    last_model_err = model_err
                     logger.warning(f"Gemini model {model_name} failed: {model_err}")
                     continue
+
+            if last_model_err:
+                gemini_error_detail = log_gemini_error(
+                    service_name="Artisan Voice Transcription (transcription_service.py)",
+                    error=last_model_err,
+                    context=f"Audio Size: {len(audio_bytes)} bytes, Mime: {clean_mime}, Language: {language}"
+                )
         except Exception as e:
-            logger.error(f"Gemini ASR pipeline error: {e}")
+            gemini_error_detail = log_gemini_error(
+                service_name="Gemini Client Initialization / Transcription Pipeline",
+                error=e,
+                context=f"Audio Size: {len(audio_bytes)} bytes, Mime: {clean_mime}, Language: {language}"
+            )
 
     # Fallback to zero-fail heuristic
     fallback_text = fallback_craft_transcript(category_hint)
     return {
         "transcript": fallback_text,
         "source": "zero_fail_heuristic",
+        "gemini_error": gemini_error_detail,
         "success": True,
     }

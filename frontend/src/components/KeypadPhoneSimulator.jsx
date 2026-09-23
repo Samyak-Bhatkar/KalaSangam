@@ -459,6 +459,15 @@ export default function KeypadPhoneSimulator({ onClose }) {
 
       logTelemetry('BHASHINI', `Bhashini Pipeline Response [${resp.engineUsed}] (${resp.latencyMs}ms)`, resp);
 
+      if (resp?.gemini_error) {
+        console.warn(
+          '%c[ShilpSetu IVR Notice]%c Gemini API Encountered: ' + resp.gemini_error + ' — Gracefully fallen back to backup engine (UI intact).',
+          'background: #fff3cd; color: #856404; font-weight: bold; padding: 2px 4px; border-radius: 3px;',
+          'color: #d32f2f; font-weight: normal;'
+        );
+        logTelemetry('AI_WARN', `Gemini Engine Notice: ${resp.gemini_error} (Backup engine active)`);
+      }
+
       // Update state with parsed values
       let isLowPrice = false;
       let detectedPriceVal = 450;

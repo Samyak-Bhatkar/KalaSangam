@@ -955,8 +955,9 @@ def assess_photo_quality(
                             issue_icon = icon_map.get(dominant_issue, "shake")
                 elif parsed.get("passed") is True and lap_var >= 50.0 and 50.0 <= mean_lum <= 225.0:
                     dominant_issue = None
-                    issue_icon = "check"
-        except Exception:
+        except Exception as e:
+            from .gemini_logger import log_gemini_error
+            log_gemini_error("Vision Studio Photography Validator (image_studio.py)", e, "Validating craft photo quality")
             pass  # Fail gracefully to OpenCV heuristics
 
     passed = dominant_issue is None

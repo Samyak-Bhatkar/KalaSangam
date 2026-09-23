@@ -582,6 +582,13 @@ export default function VoiceRecorder() {
 
       if (res.ok) {
         const data = await res.json();
+        if (data?.gemini_error) {
+          console.warn(
+            '%c[ShilpSetu AI Voice Notice]%c Gemini API Encountered: ' + data.gemini_error + ' — Gracefully fallen back to backup engine (UI intact).',
+            'background: #fff3cd; color: #856404; font-weight: bold; padding: 2px 4px; border-radius: 3px;',
+            'color: #d32f2f; font-weight: normal;'
+          );
+        }
         if (data?.transcript) {
           setTranscript(data.transcript);
           finalTranscriptRef.current = data.transcript;
