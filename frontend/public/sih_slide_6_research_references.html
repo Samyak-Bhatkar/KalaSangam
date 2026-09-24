@@ -232,9 +232,9 @@
     .pill-green { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
     .pill-amber { background: #FFFBEB; color: #B45309; border: 1px solid #FDE68A; }
 
-    /* ==================== SECTION 1: EXISTING SOLUTIONS LANDSCAPE (~18% Height) ==================== */
+    /* ==================== SECTION 1: EXISTING SOLUTIONS LANDSCAPE (~17% Height) ==================== */
     .sec-landscape {
-      height: 114px;
+      height: 112px;
       flex-shrink: 0;
     }
 
@@ -242,7 +242,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
-      padding: 6px 10px;
+      padding: 5.5px 10px;
       flex: 1;
       align-items: stretch;
     }
@@ -251,7 +251,7 @@
       background: #F8FAFC;
       border: 1px solid #E2E8F0;
       border-radius: 6px;
-      padding: 5px 8px;
+      padding: 4.5px 8px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -276,7 +276,6 @@
     .landscape-tag {
       font-size: 7.8px;
       font-weight: 700;
-      color: #64748B;
       background: #EDE9FE;
       color: #5B21B6;
       padding: 1px 5px;
@@ -287,7 +286,7 @@
       font-size: 8.2px;
       color: #475569;
       line-height: 1.25;
-      margin-bottom: 3px;
+      margin-bottom: 2.5px;
     }
     .landscape-prev strong {
       color: #1E293B;
@@ -310,7 +309,7 @@
 
     /* ==================== SECTION 2: 3-COLUMN REFERENCE DIRECTORY (~72% Height) ==================== */
     .sec-references {
-      height: 486px;
+      height: 484px;
       flex-shrink: 0;
     }
 
@@ -318,7 +317,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 10px;
-      padding: 8px 10px;
+      padding: 7px 10px;
       flex: 1;
       height: calc(100% - 28px);
     }
@@ -339,7 +338,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-bottom: 4px;
+      padding-bottom: 3.5px;
       border-bottom: 1.5px solid;
       margin-bottom: 2px;
     }
@@ -393,12 +392,31 @@
       gap: 4px;
     }
 
-    .ref-act-name {
+    /* Clickable Hyperlink on Citation Title */
+    .ref-act-link {
       font-size: 9.3px;
       font-weight: 800;
       color: #0F172A;
       line-height: 1.2;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: color 0.15s ease;
     }
+    .link-blue:hover { color: #1E40AF; text-decoration: underline; }
+    .link-amber:hover { color: #C2410C; text-decoration: underline; }
+    .link-green:hover { color: #047857; text-decoration: underline; }
+
+    .ext-icon {
+      font-size: 8px;
+      color: #64748B;
+      font-weight: 700;
+      transition: color 0.15s ease;
+    }
+    .link-blue:hover .ext-icon { color: #1E40AF; }
+    .link-amber:hover .ext-icon { color: #C2410C; }
+    .link-green:hover .ext-icon { color: #047857; }
 
     .ref-scope-tag {
       font-size: 7.2px;
@@ -420,6 +438,14 @@
       color: #64748B;
       line-height: 1.2;
     }
+    .ref-citation a {
+      color: #475569;
+      text-decoration: none;
+    }
+    .ref-citation a:hover {
+      text-decoration: underline;
+      color: #0F172A;
+    }
 
     .ref-role {
       font-size: 8.2px;
@@ -431,20 +457,28 @@
       font-weight: 700;
     }
 
-    /* ==================== BOTTOM ACRONYM LEGEND ==================== */
+    /* ==================== BOTTOM ACRONYM LEGEND WITH QR CODE ==================== */
     .acronym-legend-bar {
-      height: 22px;
+      height: 30px;
       background: #FFFFFF;
       border-top: 1.5px solid #CBD5E1;
       display: flex;
       align-items: center;
-      padding: 0 10px;
-      gap: 7px;
+      justify-content: space-between;
+      padding: 0 8px 0 10px;
       font-size: 7.6px;
       color: #475569;
+      flex-shrink: 0;
+      gap: 10px;
+    }
+
+    .legend-items-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       white-space: nowrap;
       overflow: hidden;
-      flex-shrink: 0;
+      flex: 1;
     }
 
     .legend-badge {
@@ -452,14 +486,61 @@
       font-size: 7px;
       background: #0F2E4A;
       color: #FFFFFF;
-      padding: 1px 5px;
+      padding: 1.5px 5px;
       border-radius: 3px;
       letter-spacing: 0.4px;
+      flex-shrink: 0;
     }
 
     .dot-sep {
       color: #94A3B8;
       font-weight: bold;
+    }
+
+    /* Right QR Code Block */
+    .qr-footer-block {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-radius: 4px;
+      padding: 2px 7px 2px 3px;
+      text-decoration: none;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+    .qr-footer-block:hover {
+      border-color: #0F2E4A;
+      background: #F1F5F9;
+    }
+
+    .qr-code-img {
+      width: 24px;
+      height: 24px;
+      border-radius: 2px;
+      display: block;
+    }
+
+    .qr-footer-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+    }
+
+    .qr-label {
+      font-size: 7.2px;
+      font-weight: 900;
+      color: #0F2E4A;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .qr-url {
+      font-size: 7px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: #1E40AF;
     }
   </style>
 </head>
@@ -506,7 +587,7 @@
       </div>
     </div>
 
-    <!-- ==================== SECTION 1: EXISTING SOLUTIONS LANDSCAPE (~18% Height) ==================== -->
+    <!-- ==================== SECTION 1: EXISTING SOLUTIONS LANDSCAPE (~17% Height) ==================== -->
     <div class="section-container sec-landscape">
       <div class="section-banner">
         <div class="section-title">
@@ -535,7 +616,7 @@
           </div>
         </div>
 
-        <!-- Col 2: Generic AI Photo Tools -->
+        <!-- Col 2: Generic AI Photo Editors -->
         <div class="landscape-card">
           <div class="landscape-header">
             <span class="landscape-category">
@@ -597,10 +678,15 @@
           <!-- Ref 1.1: Minimum Wages Act -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">Minimum Wages Act, 1948 &amp; Code on Wages, 2019</span>
+              <a href="https://www.indiacode.nic.in/handle/123456789/2260" target="_blank" rel="noopener noreferrer" class="ref-act-link link-blue" title="Open official Act text on India Code">
+                <span>Minimum Wages Act, 1948 &amp; Code on Wages</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-legal">Wage Floor</span>
             </div>
-            <div class="ref-citation">Ministry of Labour &amp; Employment, Govt. of India • Notified State Schedules</div>
+            <div class="ref-citation">
+              <a href="https://labour.gov.in/" target="_blank" rel="noopener noreferrer">Ministry of Labour &amp; Employment, Govt. of India</a> • Notified State Schedules
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Provides statutory legal basis for Module 3 (Fair Price Advisor). Hard-clamps artisan labor cost to official state minimum wage schedules (referenced UP semi-skilled baseline ₹43.75/hr up to ₹120/hr skilled craft benchmark), guaranteeing pricing algorithms can never underbid human subsistence.
             </div>
@@ -609,10 +695,15 @@
           <!-- Ref 1.2: DPDP Act 2023 -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">Digital Personal Data Protection (DPDP) Act, 2023</span>
+              <a href="https://www.indiacode.nic.in/handle/123456789/20847" target="_blank" rel="noopener noreferrer" class="ref-act-link link-blue" title="Open official Act text on India Code">
+                <span>Digital Personal Data Protection (DPDP) Act, 2023</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-legal">Data Privacy</span>
             </div>
-            <div class="ref-citation">Act No. 22 of 2023, Gazette of India • Ministry of Electronics &amp; IT (MeitY)</div>
+            <div class="ref-citation">
+              Act No. 22 of 2023, Gazette of India • <a href="https://www.meity.gov.in/content/digital-personal-data-protection-act-2023" target="_blank" rel="noopener noreferrer">Ministry of Electronics &amp; IT (MeitY)</a>
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Governs Slide 4 security architecture. Strictly adheres to Sections 4–6 lawful consent mandates through spoken vernacular audio prompts, zero third-party telemetry, ephemeral voice buffer purging, and AES-256 data-at-rest encryption for artisan phone numbers and bank records.
             </div>
@@ -621,10 +712,15 @@
           <!-- Ref 1.3: GI Act 1999 -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">Geographical Indications of Goods Act, 1999</span>
+              <a href="https://ipindia.gov.in/act-1999.htm" target="_blank" rel="noopener noreferrer" class="ref-act-link link-blue" title="Open official Act on IP India portal">
+                <span>Geographical Indications of Goods Act, 1999</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-legal">Authenticity</span>
             </div>
-            <div class="ref-citation">Act No. 48 of 1999 • Controller General of Patents, Designs &amp; Trade Marks (DPIIT)</div>
+            <div class="ref-citation">
+              Act No. 48 of 1999 • <a href="https://ipindia.gov.in/" target="_blank" rel="noopener noreferrer">Controller General of Patents, Designs &amp; Trade Marks (DPIIT)</a>
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Backs Slide 4's craft authenticity tags and digital provenance marking. Associates verified artisan listings with recognized GI clusters (e.g. Gorakhpur Terracotta, Bankura Pottery) and embeds tamper-evident metadata seals to protect traditional handcrafts against factory replicas.
             </div>
@@ -633,10 +729,15 @@
           <!-- Ref 1.4: SIH Problem Statement 26090 -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">SIH 2026 Problem Statement ID: 26090 Document</span>
+              <a href="https://www.sih.gov.in/" target="_blank" rel="noopener noreferrer" class="ref-act-link link-blue" title="Open official Smart India Hackathon portal">
+                <span>SIH 2026 Problem Statement ID: 26090</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-legal">Mandate</span>
             </div>
-            <div class="ref-citation">Ministry of Social Justice &amp; Empowerment (MoSJE) • Smart India Hackathon 2026</div>
+            <div class="ref-citation">
+              <a href="https://socialjustice.gov.in/" target="_blank" rel="noopener noreferrer">Ministry of Social Justice &amp; Empowerment (MoSJE)</a> • Smart India Hackathon
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Foundational mandate establishing target beneficiary criteria: marginalized SC, OBC, and de-notified artisan communities facing seasonal debt cycles, digital illiteracy, and middleman exploitation in physical trade fairs.
             </div>
@@ -657,10 +758,15 @@
           <!-- Ref 2.1: MeitY Bhashini -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">National Language Translation Mission (Bhashini)</span>
+              <a href="https://bhashini.gov.in/" target="_blank" rel="noopener noreferrer" class="ref-act-link link-amber" title="Open official Bhashini portal">
+                <span>National Language Translation Mission (Bhashini)</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-policy">Vernacular NLP</span>
             </div>
-            <div class="ref-citation">Ministry of Electronics and Information Technology (MeitY), Govt. of India</div>
+            <div class="ref-citation">
+              <a href="https://bhashini.gov.in/" target="_blank" rel="noopener noreferrer">Digital India Bhashini Division (DIBD)</a> • Ministry of Electronics &amp; IT (MeitY)
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Powers Module 2 (Story &amp; Catalog Writer) and Module 4 (Voice Line). Utilizes open-source Indic Whisper ASR, vernacular NMT, and Indic TTS speech synthesis models for regional dialects, enabling zero-typing phone interaction.
             </div>
@@ -669,10 +775,15 @@
           <!-- Ref 2.2: PM-Vishwakarma -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">Pradhan Mantri Vishwakarma Yojana (PM-Vishwakarma)</span>
+              <a href="https://pmvishwakarma.gov.in/" target="_blank" rel="noopener noreferrer" class="ref-act-link link-amber" title="Open official PM Vishwakarma portal">
+                <span>PM-Vishwakarma Yojana (Operational Guidelines)</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-policy">Artisan MSME</span>
             </div>
-            <div class="ref-citation">Ministry of MSME &amp; MoSJE • Central Sector Scheme Operational Guidelines (2023)</div>
+            <div class="ref-citation">
+              Ministry of MSME &amp; MoSJE • <a href="https://pmvishwakarma.gov.in/" target="_blank" rel="noopener noreferrer">pmvishwakarma.gov.in (Launched 2023)</a>
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Directly aligns with Slide 5 public mission outcomes. Provides digital marketing enablement for 18 traditional artisan trades (potters, sculptors, weavers), transforming toolkit beneficiaries into self-sustaining digital producers.
             </div>
@@ -681,10 +792,15 @@
           <!-- Ref 2.3: NBCFDC & NSFDC -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">NBCFDC &amp; NSFDC Apex Lending &amp; Cluster Guidelines</span>
+              <a href="https://nbcfdc.gov.in/" target="_blank" rel="noopener noreferrer" class="ref-act-link link-amber" title="Open official NBCFDC portal">
+                <span>NBCFDC &amp; NSFDC Apex Lending Guidelines</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-policy">MoSJE Finance</span>
             </div>
-            <div class="ref-citation">National Backward Classes / Scheduled Castes Finance &amp; Development Corporations</div>
+            <div class="ref-citation">
+              <a href="https://nbcfdc.gov.in/" target="_blank" rel="noopener noreferrer">NBCFDC</a> &amp; <a href="https://nsfdc.nic.in/" target="_blank" rel="noopener noreferrer">NSFDC</a> • CPSEs under Ministry of Social Justice &amp; Empowerment
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Guides socioeconomic targeting for marginalized artisans. Supports the transition from physical mela dependency to year-round national market linkages and contextualizes alternative credit profiling.
             </div>
@@ -693,10 +809,15 @@
           <!-- Ref 2.4: ONDC & GeM -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">ONDC Beckn Protocol v1.2.0 &amp; GeM Public Procurement</span>
+              <a href="https://ondc.org/" target="_blank" rel="noopener noreferrer" class="ref-act-link link-amber" title="Open ONDC & Beckn Protocol specifications">
+                <span>ONDC Beckn Protocol &amp; GeM Public Procurement</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-policy">Open Commerce</span>
             </div>
-            <div class="ref-citation">DPIIT, Min. of Commerce &amp; Industry • Public Procurement Policy for MSEs Order, 2012</div>
+            <div class="ref-citation">
+              <a href="https://becknprotocol.io/" target="_blank" rel="noopener noreferrer">Beckn Protocol v1.2.0</a> • <a href="https://gem.gov.in/" target="_blank" rel="noopener noreferrer">GeM Public Procurement Policy (MSEs)</a>
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Generates open Beckn-compliant catalog schemas for zero-commission multi-channel distribution across ONDC consumer apps, qualifying artisans for 4% statutory government procurement reservations on GeM.
             </div>
@@ -717,10 +838,15 @@
           <!-- Ref 3.1: BiRefNet -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">BiRefNet: Bilateral Reference Segmentation</span>
+              <a href="https://arxiv.org/abs/2401.03407" target="_blank" rel="noopener noreferrer" class="ref-act-link link-green" title="Open official BiRefNet paper on arXiv">
+                <span>BiRefNet: Bilateral Reference Segmentation</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-tech">Computer Vision</span>
             </div>
-            <div class="ref-citation">Zheng et al., CAAI AI Research 2024 / arXiv:2401.03407 • Apache 2.0 License</div>
+            <div class="ref-citation">
+              Zheng et al., CAAI AI Research 2024 • <a href="https://github.com/ZhengPeng7/BiRefNet" target="_blank" rel="noopener noreferrer">GitHub (Apache 2.0)</a>
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Powers Module 1 (Studio Assistant). High-resolution dichotomous segmentation network that uses bilateral guidance to extract fine handcrafted contours without server-side GPU costs or cloud API dependencies.
             </div>
@@ -729,10 +855,15 @@
           <!-- Ref 3.2: OpenCV -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">OpenCV (Open Source Computer Vision Library)</span>
+              <a href="https://opencv.org/" target="_blank" rel="noopener noreferrer" class="ref-act-link link-green" title="Open official OpenCV documentation">
+                <span>OpenCV (Computer Vision Library)</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-tech">Image Processing</span>
             </div>
-            <div class="ref-citation">Bradski, G. et al. • Open Source Computer Vision Foundation • Apache 2.0</div>
+            <div class="ref-citation">
+              Bradski, G. et al. • <a href="https://github.com/opencv/opencv" target="_blank" rel="noopener noreferrer">opencv/opencv (Apache 2.0 License)</a>
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Executes deterministic 6500K daylight color-cast normalization (Gray World calibration), contact shadow synthesis, and morphological hole-clearing for trapped voids inside clay handles.
             </div>
@@ -741,10 +872,15 @@
           <!-- Ref 3.3: CLIP -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">CLIP: Contrastive Language-Image Pre-Training</span>
+              <a href="https://arxiv.org/abs/2103.00020" target="_blank" rel="noopener noreferrer" class="ref-act-link link-green" title="Open official CLIP paper on arXiv">
+                <span>CLIP: Contrastive Language-Image Pre-Training</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-tech">Multimodal AI</span>
             </div>
-            <div class="ref-citation">Radford, A. et al., OpenAI, ICML 2021 / arXiv:2103.00020 • MIT License</div>
+            <div class="ref-citation">
+              Radford, A. et al., OpenAI (ICML 2021) • <a href="https://github.com/openai/CLIP" target="_blank" rel="noopener noreferrer">GitHub (MIT License)</a>
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Powers Module 3's semantic multi-channel price comp engine, mapping spoken artisan craft descriptions and image attributes against open marketplace product embeddings to establish fair baseline comps.
             </div>
@@ -753,10 +889,15 @@
           <!-- Ref 3.4: Asterisk & SIP -->
           <div class="ref-item">
             <div class="ref-item-top">
-              <span class="ref-act-name">SIP (RFC 3261) &amp; Asterisk Telephony Architecture</span>
+              <a href="https://datatracker.ietf.org/doc/html/rfc3261" target="_blank" rel="noopener noreferrer" class="ref-act-link link-green" title="Open official IETF RFC 3261 specification">
+                <span>SIP (RFC 3261) &amp; Asterisk Architecture</span>
+                <span class="ext-icon">↗</span>
+              </a>
               <span class="ref-scope-tag scope-tech">VoIP Ingress</span>
             </div>
-            <div class="ref-citation">IETF Standards Track RFC 3261 • Sangoma / Asterisk Open Source Telephony (GPLv2)</div>
+            <div class="ref-citation">
+              IETF Standards Track RFC 3261 • <a href="https://www.asterisk.org/" target="_blank" rel="noopener noreferrer">Asterisk Project (GPLv2)</a>
+            </div>
             <div class="ref-role">
               <strong>Role in ShilpSetu:</strong> Telephony gateway broker for Module 4 (Voice Line / कला-वाणी). Bridges rural 2G/GSM telephony voice calls to FastAPI backend pipelines without requiring client-side smartphone hardware.
             </div>
@@ -767,30 +908,39 @@
       </div>
     </div>
 
-    <!-- BOTTOM ACRONYM EXPANSION LEGEND BAR -->
+    <!-- BOTTOM ACRONYM EXPANSION LEGEND BAR WITH QR CODE -->
     <div class="acronym-legend-bar">
-      <span class="legend-badge">FULL EXPANSIONS</span>
-      <span><strong>MoSJE</strong>: Ministry of Social Justice &amp; Empowerment</span>
-      <span class="dot-sep">•</span>
-      <span><strong>MeitY</strong>: Ministry of Electronics and Information Technology</span>
-      <span class="dot-sep">•</span>
-      <span><strong>MSME</strong>: Micro, Small and Medium Enterprises</span>
-      <span class="dot-sep">•</span>
-      <span><strong>DPDP</strong>: Digital Personal Data Protection</span>
-      <span class="dot-sep">•</span>
-      <span><strong>GI</strong>: Geographical Indications</span>
-      <span class="dot-sep">•</span>
-      <span><strong>ONDC</strong>: Open Network for Digital Commerce</span>
-      <span class="dot-sep">•</span>
-      <span><strong>GeM</strong>: Government e-Marketplace</span>
-      <span class="dot-sep">•</span>
-      <span><strong>NBCFDC</strong>: National Backward Classes Finance &amp; Development Corporation</span>
-      <span class="dot-sep">•</span>
-      <span><strong>NSFDC</strong>: National Scheduled Castes Finance &amp; Development Corporation</span>
-      <span class="dot-sep">•</span>
-      <span><strong>ASR</strong>: Automated Speech Recognition</span>
-      <span class="dot-sep">•</span>
-      <span><strong>SIP</strong>: Session Initiation Protocol</span>
+      <div class="legend-items-left">
+        <span class="legend-badge">FULL EXPANSIONS</span>
+        <span><strong>MoSJE</strong>: Min. of Social Justice &amp; Empowerment</span>
+        <span class="dot-sep">•</span>
+        <span><strong>MeitY</strong>: Min. of Electronics &amp; IT</span>
+        <span class="dot-sep">•</span>
+        <span><strong>MSME</strong>: Micro, Small &amp; Medium Enterprises</span>
+        <span class="dot-sep">•</span>
+        <span><strong>DPDP</strong>: Digital Data Protection</span>
+        <span class="dot-sep">•</span>
+        <span><strong>GI</strong>: Geographical Indications</span>
+        <span class="dot-sep">•</span>
+        <span><strong>ONDC</strong>: Open Network for Digital Commerce</span>
+        <span class="dot-sep">•</span>
+        <span><strong>GeM</strong>: Govt e-Marketplace</span>
+        <span class="dot-sep">•</span>
+        <span><strong>NBCFDC/NSFDC</strong>: MoSJE Finance Corps</span>
+        <span class="dot-sep">•</span>
+        <span><strong>ASR</strong>: Speech Recognition</span>
+        <span class="dot-sep">•</span>
+        <span><strong>SIP</strong>: Session Initiation Protocol</span>
+      </div>
+
+      <!-- Compact QR Code Block for Printed Evaluation -->
+      <a href="https://github.com/Samyak-Bhatkar/KalaSangam" target="_blank" rel="noopener noreferrer" class="qr-footer-block" title="Scan or click to open repository and live verifiable citations">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGkAAABpCAIAAAC24JptAAAC/klEQVR4nO2dwY0bMQxFd4MtQJ2kkNSbQtKJOvDedBEskJ+fs0Lw3smwJc2Y4LckkvJ8vl6vD5D4pXUDbFfia70av/9UBpr//r77KDLy6r4a7+9EekVuzPVN0awOtnNoNqK+nfHe/3f1HXqlhHl4Zx/w0Kb4TfE7HWxn1ewiNXml2qRElxondRv7tVLd8TsdbNejWRcjoL7IfB1p/CT4nQ62u1KzI7M2Lm4/I78GqZVwBPxOB9v1aFZz8vF+WlwDpiJOkY+KaOPgdzrYzqpZ18pzvtdaJJpkj0rZvyl+p4PtdD4fyM8OKd57wL5+1sDvdLCdNT8bCeGOwApWS/FoM+ZO6luwNn4aNNscg3LtKKeU0CnucIth58Ml8DsdbOdYGxd3glPSdV/jQ68Dqd00fqeD7ZpjUJGqhgPF2sVI40Ob1B2m1s/4nQ62a65djCRrFq4Qbqr7ftG+6DfzrAE02zPPHqaqIUVvtITOA6Gn1I0t8DsdbNezn7UHf1yHgPZxXDJM/TrhdzrYzjHPHo69aOqbkqBcR/BSvcj1PA2a7cnPRhQxpG1jqjw4cphOCyKxNv4x0Kx1bbzzI5vWUYtuPVD6iN/pYLue2kXXCtZVxKgd3tGESX62FzT7eAzKhasGUgs0pcRLDMoJmm3O9RzaLFJJ2MPWcn+nmKiNNNba4Hc62M4aN9aCscWN5N5dU2ik6sN1qgi/08F2Pf+7eJhMp6m6eP+oGMvtO7i398LvdLCdNQZlL0ec/TO4NuBh5MiPEn6ng+2eOj+7M6SobF+p1aFNcYdLDMoJmr3pfypGfzZWK7MshtQ4I+AEzd70HIFZywcVS6RStVtFFeN3OtjupucIjJr2tYLJ4k458hHzrBM0e9NzBGatJMNe0bR3T12dmooW0OxN/0k+3LGjwyWKI2vaX+B3OtjuJs1O0wH5CNpU7gqF4Xc62O6m5wjsaPHe4gY5ldnRlI7f6WC7m54jMDJFxZGrF5O5kR8KLVWE3+lgu7ufI/C/gt/pYLsPmW9Hp/KX/o/cZgAAAABJRU5ErkJggg==" alt="QR Code" class="qr-code-img">
+        <div class="qr-footer-text">
+          <span class="qr-label">DIGITAL REPO &amp; CITATIONS</span>
+          <span class="qr-url">github.com/Samyak-Bhatkar/KalaSangam ↗</span>
+        </div>
+      </a>
     </div>
 
   </div>
