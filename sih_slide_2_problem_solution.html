@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIH 2026 — Slide 2: Problem Understanding & Proposed Solution (Problem Statement ID: 26090)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #D5E2EC;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0F172A;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 14px;
+    }
+
+    /* Print / PDF Export Setting: Exact 16:9 Landscape */
+    @page {
+      size: 16in 9in;
+      margin: 0;
+    }
+
+    @media print {
+      body {
+        background: #EDF3F8 !important;
+        padding: 0 !important;
+      }
+      .toolbar { display: none !important; }
+      .slide-canvas {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        border: none !important;
+      }
+    }
+
+    /* Control Toolbar */
+    .toolbar {
+      width: 1240px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 7px 18px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .btn-export {
+      background: #0F2E4A;
+      color: #FFFFFF;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-export:hover {
+      background: #1E3A8A;
+      transform: translateY(-1px);
+    }
+
+    /* ==================== 16:9 PRESENTATION CANVAS ==================== */
+    .slide-canvas {
+      width: 1240px;
+      height: 698px; /* 16:9 Exact Ratio */
+      background: #EDF3F8;
+      border: 2px solid #0F2E4A;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 16px 8px 16px;
+      justify-content: space-between;
+    }
+
+    /* ==================== MANDATED OFFICIAL HEADER ==================== */
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 38px;
+      border-bottom: 2px solid #0F2E4A;
+      padding-bottom: 4px;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .brand-title {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #0F2E4A;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .problem-tag {
+      font-size: 8.8px;
+      font-weight: 800;
+      color: #0F2E4A;
+      background: #FFFFFF;
+      padding: 2.5px 8px;
+      border-radius: 12px;
+      border: 1.5px solid #0F2E4A;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .sih-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #FFFFFF;
+      padding: 2px 7px;
+      border-radius: 14px;
+      border: 1.5px solid #0F2E4A;
+      flex-shrink: 0;
+    }
+
+    .sih-badge svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .sih-text {
+      text-align: left;
+      font-weight: 900;
+      font-size: 7.8px;
+      line-height: 1.05;
+      color: #0F172A;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .slide-title {
+      font-size: 18.5px;
+      font-weight: 900;
+      color: #0F2E4A;
+      letter-spacing: -0.5px;
+      white-space: nowrap;
+    }
+
+    .slide-number-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #FFFFFF;
+      background: #0F2E4A;
+      padding: 3px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Section Containers */
+    .section-container {
+      background: #FFFFFF;
+      border: 1.5px solid #0F2E4A;
+      border-radius: 9px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .section-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      line-height: 1;
+    }
+
+    .section-title {
+      font-size: 8.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #0F2E4A;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .section-pill {
+      font-size: 8px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+    }
+
+    .pill-blue { background: #EFF6FF; color: #1E40AF; border-color: #BFDBFE; }
+    .pill-green { background: #ECFDF5; color: #047857; border-color: #A7F3D0; }
+    .pill-amber { background: #FFF7ED; color: #C2410C; border-color: #FED7AA; }
+
+    /* ==================== SECTION 1: PROBLEM SNAPSHOT (~30%) ==================== */
+    .sec-problem {
+      height: 196px;
+      padding: 7px 14px 7px 14px;
+    }
+
+    .problem-content-grid {
+      display: grid;
+      grid-template-columns: 1.75fr 1fr;
+      gap: 12px;
+      height: 162px;
+      align-items: stretch;
+    }
+
+    /* Left: 4 Core Obstacles */
+    .obstacles-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .obstacle-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: #F8FAFC;
+      border: 1.2px solid #CBD5E1;
+      border-left: 4px solid #C2410C;
+      border-radius: 6px;
+      padding: 4.5px 9px;
+    }
+
+    .obstacle-icon {
+      font-size: 11px;
+      line-height: 1.2;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .obstacle-body {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .obstacle-title {
+      font-size: 9.2px;
+      font-weight: 800;
+      color: #0F2E4A;
+    }
+
+    .obstacle-desc {
+      font-size: 8px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* Right: Target User Profile */
+    .target-profile-card {
+      background: #F8FAFC;
+      border: 1.2px solid #CBD5E1;
+      border-left: 4px solid #1E40AF;
+      border-radius: 8px;
+      padding: 7px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .profile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed #CBD5E1;
+      padding-bottom: 3.5px;
+      margin-bottom: 3px;
+    }
+
+    .profile-title {
+      font-size: 8.8px;
+      font-weight: 800;
+      color: #0F2E4A;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .profile-items {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .profile-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      line-height: 1.2;
+    }
+
+    .profile-point-icon {
+      font-size: 10px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .profile-point-text {
+      font-size: 8px;
+      color: #334155;
+    }
+
+    .profile-point-text strong {
+      color: #0F2E4A;
+      font-weight: 800;
+    }
+
+    /* ==================== SECTION 2: OUR PROPOSED SOLUTION (~14%) ==================== */
+    .sec-solution {
+      height: 82px;
+      padding: 6px 14px 6px 14px;
+      border-left: 5px solid #047857;
+      background: #FFFFFF;
+    }
+
+    .solution-headline {
+      font-size: 10.6px;
+      font-weight: 800;
+      line-height: 1.35;
+      color: #0F172A;
+      padding: 2px 0;
+    }
+
+    .solution-headline mark {
+      background: transparent;
+      color: #047857;
+      font-weight: 900;
+    }
+
+    .solution-subtext {
+      font-size: 8.2px;
+      font-weight: 600;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-top: 1px dashed #E2E8F0;
+      padding-top: 3px;
+    }
+
+    .solution-subtext span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ==================== SECTION 3: KEY INNOVATIONS (~45%) ==================== */
+    .sec-innovations {
+      height: 258px;
+      padding: 7px 12px 6px 12px;
+    }
+
+    .innovations-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      height: 204px;
+      align-items: stretch;
+    }
+
+    .inno-card {
+      background: #FFFFFF;
+      border: 1.5px solid #0F2E4A;
+      border-radius: 8px;
+      padding: 7px 7px 7px 7px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(15, 23, 42, 0.03);
+    }
+
+    .inno-card.card-blue { border-top: 4px solid #1E40AF; }
+    .inno-card.card-green { border-top: 4px solid #047857; }
+    .inno-card.card-amber { border-top: 4px solid #C2410C; }
+
+    .inno-card-top {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .inno-tag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .inno-tag {
+      font-size: 7.2px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 1px 5px;
+      border-radius: 10px;
+    }
+
+    .tag-blue { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .tag-green { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
+    .tag-amber { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
+
+    .inno-name {
+      font-size: 11px;
+      font-weight: 900;
+      color: #0F2E4A;
+      line-height: 1.15;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .inno-solves-banner {
+      background: #F1F5F9;
+      border-radius: 4px;
+      padding: 2px 4px;
+      font-size: 7.2px;
+      font-weight: 800;
+      color: #334155;
+      line-height: 1.15;
+    }
+
+    /* Before vs After Contrast Strip */
+    .inno-contrast-box {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 5px;
+      padding: 4px 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5px;
+      font-size: 7.5px;
+      line-height: 1.2;
+    }
+
+    .contrast-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .contrast-badge-red {
+      color: #DC2626;
+      font-weight: 900;
+      font-size: 7px;
+      flex-shrink: 0;
+    }
+
+    .contrast-badge-green {
+      color: #047857;
+      font-weight: 900;
+      font-size: 7px;
+      flex-shrink: 0;
+    }
+
+    .contrast-text {
+      color: #475569;
+    }
+
+    .contrast-text strong {
+      color: #0F2E4A;
+    }
+
+    .inno-benefit-box {
+      border-radius: 6px;
+      padding: 5px 6px;
+      font-size: 8px;
+      font-weight: 600;
+      line-height: 1.3;
+      border-left: 3px solid;
+    }
+
+    .benefit-blue {
+      background: #EFF6FF;
+      color: #1E3A8A;
+      border-left-color: #1E40AF;
+    }
+
+    .benefit-green {
+      background: #ECFDF5;
+      color: #064E3B;
+      border-left-color: #047857;
+    }
+
+    .benefit-amber {
+      background: #FFF7ED;
+      color: #7C2D12;
+      border-left-color: #C2410C;
+    }
+
+    /* Bottom Acronym Legend */
+    .acronym-legend-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-size: 7.5px;
+      color: #334155;
+      font-weight: 600;
+      line-height: 1;
+      border-top: 1px dashed #CBD5E1;
+      padding-top: 4px;
+    }
+
+    .legend-badge {
+      background: #0F2E4A;
+      color: #FFFFFF;
+      font-size: 6.8px;
+      font-weight: 800;
+      padding: 1.5px 5px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .acronym-legend-bar strong {
+      color: #0F2E4A;
+      font-weight: 800;
+    }
+
+    .dot-sep {
+      color: #94A3B8;
+      font-size: 7px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Screen Controls -->
+  <div class="toolbar">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 13px;">🏛️</span>
+      <span style="font-weight: 800; font-size: 11.5px; color: #0F2E4A;">Smart India Hackathon 2026</span>
+      <span style="color: #64748B; font-size: 11.5px;">| Problem Statement ID: 26090 — ShilpSetu AI (MoSJE)</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 12px;">Screening Round Submission • PDF Only</span>
+      <button class="btn-export" onclick="window.print()">
+        <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+        Export 16:9 PDF (Ctrl + P)
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== 16:9 PRESENTATION CANVAS ==================== -->
+  <div class="slide-canvas">
+
+    <!-- MANDATED TEMPLATE HEADER -->
+    <div class="header-row">
+      <div class="header-left">
+        <div class="brand-title">SHILPSETU AI</div>
+        <div class="problem-tag">Problem Statement ID: 26090 • MoSJE (Min. of Social Justice &amp; Empowerment)</div>
+      </div>
+
+      <div class="header-right">
+        <div class="sih-badge">
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#0F2E4A" stroke-width="2" fill="#F97316"/>
+            <path d="M12 6v6l4 2" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="sih-text">
+            SMART INDIA<br>HACKATHON<br>2026
+          </div>
+        </div>
+        <h1 class="slide-title">Problem Understanding &amp; Proposed Solution</h1>
+        <div class="slide-number-pill">Slide 2 of 6</div>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 1: PROBLEM SNAPSHOT (~30%) ==================== -->
+    <div class="section-container sec-problem">
+      <div class="section-banner">
+        <div class="section-title">
+          <span>⚠️</span>
+          <span>Section 1: The Core Obstacles • Why Marginalized Artisans Cannot Access Digital Commerce</span>
+        </div>
+        <div class="section-pill pill-amber">Direct PS 26090 Grounding (MoSJE)</div>
+      </div>
+
+      <div class="problem-content-grid">
+        <!-- Left: 4 Core Obstacles -->
+        <div class="obstacles-col">
+
+          <div class="obstacle-item">
+            <span class="obstacle-icon">❌</span>
+            <div class="obstacle-body">
+              <span class="obstacle-title">Low Digital Literacy &amp; Regional Language Barriers</span>
+              <span class="obstacle-desc">Artisans cannot navigate complex, English-centric, text-dense seller registration portals or digital forms.</span>
+            </div>
+          </div>
+
+          <div class="obstacle-item">
+            <span class="obstacle-icon">❌</span>
+            <div class="obstacle-body">
+              <span class="obstacle-title">Dim Workshop Photography &amp; Lack of Cataloging Skills</span>
+              <span class="obstacle-desc">Rural workshops lack studio lighting and clean backgrounds, resulting in blurry photos rejected by modern buyers.</span>
+            </div>
+          </div>
+
+          <div class="obstacle-item">
+            <span class="obstacle-icon">❌</span>
+            <div class="obstacle-body">
+              <span class="obstacle-title">Information Asymmetry &amp; Predatory Middleman Exploitation</span>
+              <span class="obstacle-desc">Lacking fair pricing knowledge and market benchmarks, artisans fall into distress selling far below their labor cost.</span>
+            </div>
+          </div>
+
+          <div class="obstacle-item">
+            <span class="obstacle-icon">❌</span>
+            <div class="obstacle-body">
+              <span class="obstacle-title">Severe Dependency on Periodic Physical Exhibitions</span>
+              <span class="obstacle-desc">Sales spike briefly during annual fairs (Shilp Samagam, Surajkund Mela, Dilli Haat) but vanish once the exhibitions conclude.</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Target User Profile & Reality -->
+        <div class="target-profile-card">
+          <div class="profile-header">
+            <span class="profile-title">👥 Who Is Affected • Target Beneficiaries</span>
+            <span style="font-size: 7.5px; font-weight: 800; color: #1E40AF;">MoSJE Schemes</span>
+          </div>
+
+          <div class="profile-items">
+            <div class="profile-point">
+              <span class="profile-point-icon">🏛️</span>
+              <div class="profile-point-text">
+                <strong>Target Beneficiaries:</strong> Traditional craft micro-entrepreneurs, artisans, and weavers supported under <strong>NBCFDC</strong> &amp; <strong>NSFDC</strong> (MoSJE).
+              </div>
+            </div>
+
+            <div class="profile-point">
+              <span class="profile-point-icon">📱</span>
+              <div class="profile-point-text">
+                <strong>Smartphone Owners:</strong> Possess touchscreen devices but struggle with typing, complex English interfaces, and angle framing.
+              </div>
+            </div>
+
+            <div class="profile-point">
+              <span class="profile-point-icon">📞</span>
+              <div class="profile-point-text">
+                <strong>Feature Phone Owners:</strong> Elderly master craftsmen relying solely on basic ₹800 keypad mobiles without mobile internet.
+              </div>
+            </div>
+
+            <div class="profile-point" style="border-top: 1px dashed #CBD5E1; padding-top: 3px;">
+              <span class="profile-point-icon">🎯</span>
+              <div class="profile-point-text" style="font-size: 8px; color: #047857; font-weight: 700;">
+                <strong>Design Mandate:</strong> True inclusion requires zero text typing and end-to-end access across both device tiers.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 2: OUR PROPOSED SOLUTION (~14%) ==================== -->
+    <div class="section-container sec-solution">
+      <div class="section-banner">
+        <div class="section-title">
+          <span>💡</span>
+          <span>Section 2: Proposed Solution • Autonomous Virtual Business Manager</span>
+        </div>
+        <div class="section-pill pill-green">Elevator Pitch Line</div>
+      </div>
+
+      <div class="solution-headline">
+        <strong>ShilpSetu AI</strong> is an autonomous virtual business manager that bridges traditional craftsmanship to national digital commerce — enabling marginalized artisans to independently create professional catalogs, receive guaranteed living-wage pricing, and sell directly to open markets using only their natural spoken voice and phone.
+      </div>
+
+      <div class="solution-subtext">
+        <span>✓ <strong>Zero Text Typing:</strong> 100% voice and visual cues</span>
+        <span>✓ <strong>Dual-Tier Ingress:</strong> Works on touchscreens &amp; basic ₹800 keypad phones</span>
+        <span>✓ <strong>Middleman-Free:</strong> Direct broadcast to open buyer networks</span>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 3: KEY INNOVATIONS (~45%) ==================== -->
+    <div class="section-container sec-innovations">
+      <div class="section-banner">
+        <div class="section-title">
+          <span>⚡</span>
+          <span>Section 3: Key Innovations • Five Pillars Solving the Specific Artisan Barriers</span>
+        </div>
+        <div class="section-pill pill-blue">Human Benefit Framing (Engineering Proved in Slide 3)</div>
+      </div>
+
+      <div class="innovations-grid">
+
+        <!-- Innovation 1: AI Photo Studio -->
+        <div class="inno-card card-blue">
+          <div class="inno-card-top">
+            <div class="inno-tag-row">
+              <span class="inno-tag tag-blue">Vision Engine</span>
+              <span style="font-size: 8px; font-weight: 800; color: #1E40AF;">01</span>
+            </div>
+            <div class="inno-name">
+              <span>📷</span>
+              <span>AI Photo Studio</span>
+            </div>
+            <div class="inno-solves-banner">Solves: Cluttered Workshop Photos</div>
+          </div>
+
+          <!-- Human Contrast Strip -->
+          <div class="inno-contrast-box">
+            <div class="contrast-line">
+              <span class="contrast-badge-red">✕ Before:</span>
+              <span class="contrast-text">Photos rejected due to dim light &amp; clutter.</span>
+            </div>
+            <div class="contrast-line">
+              <span class="contrast-badge-green">✓ After:</span>
+              <span class="contrast-text">Clean white backdrop; true craft texture kept.</span>
+            </div>
+          </div>
+
+          <div class="inno-benefit-box benefit-blue">
+            Turns raw snapshots taken in dim rural rooms into marketplace-ready white-background showcases — without expensive cameras, lighting setups, or editing skills.
+          </div>
+        </div>
+
+        <!-- Innovation 2: Story & Catalog Writer -->
+        <div class="inno-card card-green">
+          <div class="inno-card-top">
+            <div class="inno-tag-row">
+              <span class="inno-tag tag-green">Speech &amp; NLP</span>
+              <span style="font-size: 8px; font-weight: 800; color: #047857;">02</span>
+            </div>
+            <div class="inno-name">
+              <span>🎙️</span>
+              <span>Story &amp; Catalog Writer</span>
+            </div>
+            <div class="inno-solves-banner">Solves: Text &amp; Language Barrier</div>
+          </div>
+
+          <!-- Human Contrast Strip -->
+          <div class="inno-contrast-box">
+            <div class="contrast-line">
+              <span class="contrast-badge-red">✕ Before:</span>
+              <span class="contrast-text">Can't type in English or fill seller forms.</span>
+            </div>
+            <div class="contrast-line">
+              <span class="contrast-badge-green">✓ After:</span>
+              <span class="contrast-text">Speak native dialect; AI writes story &amp; tags.</span>
+            </div>
+          </div>
+
+          <div class="inno-benefit-box benefit-green">
+            Enables illiterate artisans to simply speak in regional dialects about craft heritage — automatically generating rich storytelling and standardized bilingual listings.
+          </div>
+        </div>
+
+        <!-- Innovation 3: Fair Price Advisor -->
+        <div class="inno-card card-amber">
+          <div class="inno-card-top">
+            <div class="inno-tag-row">
+              <span class="inno-tag tag-amber">Living Wage</span>
+              <span style="font-size: 8px; font-weight: 800; color: #C2410C;">03</span>
+            </div>
+            <div class="inno-name">
+              <span>⚖️</span>
+              <span>Fair Price Advisor</span>
+            </div>
+            <div class="inno-solves-banner">Solves: Distress Exploitation</div>
+          </div>
+
+          <!-- Human Contrast Strip -->
+          <div class="inno-contrast-box">
+            <div class="contrast-line">
+              <span class="contrast-badge-red">✕ Before:</span>
+              <span class="contrast-text">Middlemen force distress sales below cost.</span>
+            </div>
+            <div class="contrast-line">
+              <span class="contrast-badge-green">✓ After:</span>
+              <span class="contrast-text">Hourly wage floor + material costs protected.</span>
+            </div>
+          </div>
+
+          <div class="inno-benefit-box benefit-amber">
+            Guarantees artisans are never underpaid by computing a protected living-wage price floor based on verified labor hours and raw materials, shielding from predatory haggling.
+          </div>
+        </div>
+
+        <!-- Innovation 4: Voice Line (कला-वाणी) -->
+        <div class="inno-card card-green">
+          <div class="inno-card-top">
+            <div class="inno-tag-row">
+              <span class="inno-tag tag-green">Telephony Ingress</span>
+              <span style="font-size: 8px; font-weight: 800; color: #047857;">04</span>
+            </div>
+            <div class="inno-name">
+              <span>📞</span>
+              <span>Voice Line (कला-वाणी)</span>
+            </div>
+            <div class="inno-solves-banner">Solves: Zero-Smartphone Divide</div>
+          </div>
+
+          <!-- Human Contrast Strip -->
+          <div class="inno-contrast-box">
+            <div class="contrast-line">
+              <span class="contrast-badge-red">✕ Before:</span>
+              <span class="contrast-text">Elderly weavers locked out with no phone.</span>
+            </div>
+            <div class="contrast-line">
+              <span class="contrast-badge-green">✓ After:</span>
+              <span class="contrast-text">Simple phone call from ₹800 keypad mobile.</span>
+            </div>
+          </div>
+
+          <div class="inno-benefit-box benefit-green">
+            Allows elderly master craftsmen without smartphones or internet to onboard, catalog items, and verify orders through a simple toll-free phone call from any basic keypad mobile.
+          </div>
+        </div>
+
+        <!-- Innovation 5: One-Tap Marketplace -->
+        <div class="inno-card card-amber">
+          <div class="inno-card-top">
+            <div class="inno-tag-row">
+              <span class="inno-tag tag-amber">Open Commerce</span>
+              <span style="font-size: 8px; font-weight: 800; color: #C2410C;">05</span>
+            </div>
+            <div class="inno-name">
+              <span>🌐</span>
+              <span>One-Tap Marketplace</span>
+            </div>
+            <div class="inno-solves-banner">Solves: Seasonal Fair Dependency</div>
+          </div>
+
+          <!-- Human Contrast Strip -->
+          <div class="inno-contrast-box">
+            <div class="contrast-line">
+              <span class="contrast-badge-red">✕ Before:</span>
+              <span class="contrast-text">Incomes dry up once annual fairs conclude.</span>
+            </div>
+            <div class="contrast-line">
+              <span class="contrast-badge-green">✓ After:</span>
+              <span class="contrast-text">365-day access to ONDC &amp; GeM tenders.</span>
+            </div>
+          </div>
+
+          <div class="inno-benefit-box benefit-amber">
+            Replaces dependency on intermittent annual fairs with continuous 365-day access to national buyers (ONDC) and government tenders (GeM) with zero middleman commissions.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- First-Use Acronym Spell-Outs for Cold Evaluator Context -->
+      <div class="acronym-legend-bar">
+        <span class="legend-badge">FULL EXPANSIONS</span>
+        <span><strong>MoSJE</strong>: Ministry of Social Justice &amp; Empowerment</span>
+        <span class="dot-sep">•</span>
+        <span><strong>NBCFDC</strong>: National Backward Classes Finance &amp; Development Corporation</span>
+        <span class="dot-sep">•</span>
+        <span><strong>NSFDC</strong>: National Scheduled Castes Finance &amp; Development Corporation</span>
+        <span class="dot-sep">•</span>
+        <span><strong>ONDC</strong>: Open Network for Digital Commerce</span>
+        <span class="dot-sep">•</span>
+        <span><strong>GeM</strong>: Government e-Marketplace</span>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
