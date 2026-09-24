@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIH 2026 — Slide 6: Research & References (Problem Statement ID: 26090)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #D5E2EC;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0F172A;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 14px;
+    }
+
+    /* Print / PDF Export Setting: Exact 16:9 Landscape */
+    @page {
+      size: 16in 9in;
+      margin: 0;
+    }
+
+    @media print {
+      body {
+        background: #EDF3F8 !important;
+        padding: 0 !important;
+      }
+      .toolbar { display: none !important; }
+      .slide-canvas {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        border: none !important;
+      }
+    }
+
+    /* Control Toolbar */
+    .toolbar {
+      width: 1240px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 7px 18px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .btn-export {
+      background: #0F2E4A;
+      color: #FFFFFF;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-export:hover {
+      background: #1E3A8A;
+      transform: translateY(-1px);
+    }
+
+    /* ==================== 16:9 PRESENTATION CANVAS ==================== */
+    .slide-canvas {
+      width: 1240px;
+      height: 698px; /* 16:9 Exact Ratio */
+      background: #EDF3F8;
+      border: 2px solid #0F2E4A;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 16px 8px 16px;
+      justify-content: space-between;
+    }
+
+    /* ==================== MANDATED OFFICIAL HEADER ==================== */
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 38px;
+      border-bottom: 2px solid #0F2E4A;
+      padding-bottom: 4px;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .brand-title {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #0F2E4A;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .problem-tag {
+      font-size: 8.8px;
+      font-weight: 800;
+      color: #0F2E4A;
+      background: #FFFFFF;
+      padding: 2.5px 8px;
+      border-radius: 12px;
+      border: 1.5px solid #0F2E4A;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .sih-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #FFFFFF;
+      padding: 2px 7px;
+      border-radius: 14px;
+      border: 1.5px solid #0F2E4A;
+      flex-shrink: 0;
+    }
+
+    .sih-badge svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .sih-text {
+      text-align: left;
+      font-weight: 900;
+      font-size: 7.8px;
+      line-height: 1.05;
+      color: #0F172A;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .slide-title {
+      font-size: 19px;
+      font-weight: 900;
+      color: #0F2E4A;
+      letter-spacing: -0.5px;
+      white-space: nowrap;
+    }
+
+    .slide-pill {
+      font-size: 9px;
+      font-weight: 800;
+      color: #FFFFFF;
+      background: #0F2E4A;
+      padding: 3px 9px;
+      border-radius: 10px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    /* ==================== COMMON SECTION CONTAINERS ==================== */
+    .section-container {
+      background: #FFFFFF;
+      border-radius: 8px;
+      border: 1.5px solid #CBD5E1;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .section-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3.5px 10px;
+      border-bottom: 1.5px solid #E2E8F0;
+      background: #F8FAFC;
+    }
+
+    .section-title {
+      font-size: 10.5px;
+      font-weight: 900;
+      color: #0F2E4A;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-pill {
+      font-size: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      padding: 1.5px 7px;
+      border-radius: 10px;
+    }
+    .pill-navy { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-green { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
+    .pill-amber { background: #FFFBEB; color: #B45309; border: 1px solid #FDE68A; }
+
+    /* ==================== SECTION 1: EXISTING SOLUTIONS LANDSCAPE (~18% Height) ==================== */
+    .sec-landscape {
+      height: 114px;
+      flex-shrink: 0;
+    }
+
+    .landscape-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 6px 10px;
+      flex: 1;
+      align-items: stretch;
+    }
+
+    .landscape-card {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      padding: 5px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .landscape-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 2px;
+    }
+
+    .landscape-category {
+      font-size: 9.8px;
+      font-weight: 800;
+      color: #0F2E4A;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .landscape-tag {
+      font-size: 7.8px;
+      font-weight: 700;
+      color: #64748B;
+      background: #EDE9FE;
+      color: #5B21B6;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .landscape-prev {
+      font-size: 8.2px;
+      color: #475569;
+      line-height: 1.25;
+      margin-bottom: 3px;
+    }
+    .landscape-prev strong {
+      color: #1E293B;
+    }
+
+    .landscape-diff {
+      font-size: 8.2px;
+      font-weight: 700;
+      color: #047857;
+      background: #ECFDF5;
+      border: 1px solid #A7F3D0;
+      border-radius: 4px;
+      padding: 2.5px 6px;
+      line-height: 1.22;
+    }
+    .landscape-diff span {
+      font-weight: 800;
+      color: #065F46;
+    }
+
+    /* ==================== SECTION 2: 3-COLUMN REFERENCE DIRECTORY (~72% Height) ==================== */
+    .sec-references {
+      height: 486px;
+      flex-shrink: 0;
+    }
+
+    .ref-columns-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      padding: 8px 10px;
+      flex: 1;
+      height: calc(100% - 28px);
+    }
+
+    .ref-column {
+      display: flex;
+      flex-direction: column;
+      background: #F8FAFC;
+      border-radius: 6px;
+      border: 1px solid #E2E8F0;
+      padding: 6px 8px;
+      gap: 5.5px;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .col-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 4px;
+      border-bottom: 1.5px solid;
+      margin-bottom: 2px;
+    }
+    .col-header-blue { border-color: #1E40AF; }
+    .col-header-amber { border-color: #C2410C; }
+    .col-header-green { border-color: #047857; }
+
+    .col-title {
+      font-size: 10.2px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .title-blue { color: #1E40AF; }
+    .title-amber { color: #C2410C; }
+    .title-green { color: #047857; }
+
+    .col-count-badge {
+      font-size: 7.5px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    .badge-blue { background: #DBEAFE; color: #1E40AF; }
+    .badge-amber { background: #FFEDD5; color: #C2410C; }
+    .badge-green { background: #D1FAE5; color: #047857; }
+
+    /* Reference Item Card */
+    .ref-item {
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 5px;
+      padding: 5px 7px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: all 0.15s ease;
+    }
+    .ref-item:hover {
+      border-color: #94A3B8;
+      box-shadow: 0 2px 5px rgba(15, 23, 42, 0.05);
+    }
+
+    .ref-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .ref-act-name {
+      font-size: 9.3px;
+      font-weight: 800;
+      color: #0F172A;
+      line-height: 1.2;
+    }
+
+    .ref-scope-tag {
+      font-size: 7.2px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 1px 4.5px;
+      border-radius: 3px;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+    .scope-legal { background: #EFF6FF; color: #1E40AF; border: 0.5px solid #BFDBFE; }
+    .scope-policy { background: #FFF7ED; color: #C2410C; border: 0.5px solid #FFEDD5; }
+    .scope-tech { background: #ECFDF5; color: #047857; border: 0.5px solid #A7F3D0; }
+
+    .ref-citation {
+      font-size: 8px;
+      font-weight: 600;
+      font-style: italic;
+      color: #64748B;
+      line-height: 1.2;
+    }
+
+    .ref-role {
+      font-size: 8.2px;
+      color: #334155;
+      line-height: 1.25;
+    }
+    .ref-role strong {
+      color: #0F172A;
+      font-weight: 700;
+    }
+
+    /* ==================== BOTTOM ACRONYM LEGEND ==================== */
+    .acronym-legend-bar {
+      height: 22px;
+      background: #FFFFFF;
+      border-top: 1.5px solid #CBD5E1;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 7px;
+      font-size: 7.6px;
+      color: #475569;
+      white-space: nowrap;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .legend-badge {
+      font-weight: 900;
+      font-size: 7px;
+      background: #0F2E4A;
+      color: #FFFFFF;
+      padding: 1px 5px;
+      border-radius: 3px;
+      letter-spacing: 0.4px;
+    }
+
+    .dot-sep {
+      color: #94A3B8;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- In-Browser Control Toolbar -->
+  <div class="toolbar">
+    <div style="font-size: 11px; font-weight: 700; color: #0F2E4A; display: flex; align-items: center; gap: 8px;">
+      <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #047857;"></span>
+      <span>SIH 2026 Presentation Deck • Slide 6 of 6 • Screening Round Evaluation</span>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-export" onclick="window.print()">
+        <span>🖨️</span>
+        <span>Export 16:9 PDF (Ctrl + P)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 16:9 Presentation Canvas Container -->
+  <div class="slide-canvas">
+
+    <!-- MANDATED OFFICIAL HEADER BAR -->
+    <div class="header-row">
+      <div class="header-left">
+        <span class="brand-title">SHILPSETU AI</span>
+        <span class="problem-tag">Problem Statement ID: 26090 • MoSJE (Min. of Social Justice &amp; Empowerment)</span>
+      </div>
+      <div class="header-right">
+        <div class="sih-badge">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#C2410C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="#047857" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="sih-text">
+            <span>SMART INDIA</span><br>
+            <span style="color: #C2410C;">HACKATHON</span><br>
+            <span style="color: #047857;">2026</span>
+          </div>
+        </div>
+        <span class="slide-title">Research &amp; References</span>
+        <span class="slide-pill">Slide 6 of 6</span>
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 1: EXISTING SOLUTIONS LANDSCAPE (~18% Height) ==================== -->
+    <div class="section-container sec-landscape">
+      <div class="section-banner">
+        <div class="section-title">
+          <span>🔍</span>
+          <span>Existing Solutions Landscape • Grounded Comparison &amp; Purpose-Built Scope</span>
+        </div>
+        <div class="section-pill pill-navy">Comparative Assessment (PS 26090 Context)</div>
+      </div>
+
+      <div class="landscape-grid">
+
+        <!-- Col 1: Generic Seller Marketplaces -->
+        <div class="landscape-card">
+          <div class="landscape-header">
+            <span class="landscape-category">
+              <span>🛒</span>
+              <span>Generic E-Commerce Marketplaces</span>
+            </span>
+            <span class="landscape-tag">Amazon / Flipkart Seller</span>
+          </div>
+          <div class="landscape-prev">
+            <strong>Standard Model:</strong> Requires desktop/smartphone app, written English/Hindi typing, GSTIN documentation, and complex catalog taxonomy.
+          </div>
+          <div class="landscape-diff">
+            <span>ShilpSetu Distinction:</span> 100% voice-driven onboarding via ₹800 basic keypad phones (IVR) or single-button vernacular camera app; zero typing required.
+          </div>
+        </div>
+
+        <!-- Col 2: Generic AI Photo Tools -->
+        <div class="landscape-card">
+          <div class="landscape-header">
+            <span class="landscape-category">
+              <span>📸</span>
+              <span>Generic AI Photo Editors</span>
+            </span>
+            <span class="landscape-tag">remove.bg / Canva / PhotoRoom</span>
+          </div>
+          <div class="landscape-prev">
+            <strong>Standard Model:</strong> Cloud generative AI replaces backgrounds but often alters clay geometry, bleaches terracotta dyes, or misses inner handle voids.
+          </div>
+          <div class="landscape-diff">
+            <span>ShilpSetu Distinction:</span> Deterministic BiRefNet matting + D65 daylight balancing preserves true craft texture and color with zero generative hallucination.
+          </div>
+        </div>
+
+        <!-- Col 3: Pricing & Intermediary Systems -->
+        <div class="landscape-card">
+          <div class="landscape-header">
+            <span class="landscape-category">
+              <span>⚖️</span>
+              <span>Commercial Pricing &amp; Settlement</span>
+            </span>
+            <span class="landscape-tag">Aggregator Platforms</span>
+          </div>
+          <div class="landscape-prev">
+            <strong>Standard Model:</strong> Demand algorithms push distress discounts below labor cost; take 15%–35% platform commission fees from artisan payout.
+          </div>
+          <div class="landscape-diff">
+            <span>ShilpSetu Distinction:</span> Hard-clamps statutory fair wage floor (UP gazetted baseline); dispatches 100% payment directly to bank account via DBT.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== SECTION 2: 3-COLUMN REFERENCE DIRECTORY (~72% Height) ==================== -->
+    <div class="section-container sec-references">
+      <div class="section-banner">
+        <div class="section-title">
+          <span>📚</span>
+          <span>Consolidated Statutory, Policy, and Technical Reference Directory</span>
+        </div>
+        <div class="section-pill pill-amber">Substantive Backing for Slides 2–5</div>
+      </div>
+
+      <div class="ref-columns-grid">
+
+        <!-- COLUMN 1: LEGAL & STATUTORY FRAMEWORK (Navy #1E40AF) -->
+        <div class="ref-column">
+          <div class="col-header col-header-blue">
+            <span class="col-title title-blue">
+              <span>⚖️</span>
+              <span>Legal &amp; Statutory Framework</span>
+            </span>
+            <span class="col-count-badge badge-blue">4 References</span>
+          </div>
+
+          <!-- Ref 1.1: Minimum Wages Act -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">Minimum Wages Act, 1948 &amp; Code on Wages, 2019</span>
+              <span class="ref-scope-tag scope-legal">Wage Floor</span>
+            </div>
+            <div class="ref-citation">Ministry of Labour &amp; Employment, Govt. of India • Notified State Schedules</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Provides statutory legal basis for Module 3 (Fair Price Advisor). Hard-clamps artisan labor cost to official state minimum wage schedules (referenced UP semi-skilled baseline ₹43.75/hr up to ₹120/hr skilled craft benchmark), guaranteeing pricing algorithms can never underbid human subsistence.
+            </div>
+          </div>
+
+          <!-- Ref 1.2: DPDP Act 2023 -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">Digital Personal Data Protection (DPDP) Act, 2023</span>
+              <span class="ref-scope-tag scope-legal">Data Privacy</span>
+            </div>
+            <div class="ref-citation">Act No. 22 of 2023, Gazette of India • Ministry of Electronics &amp; IT (MeitY)</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Governs Slide 4 security architecture. Strictly adheres to Sections 4–6 lawful consent mandates through spoken vernacular audio prompts, zero third-party telemetry, ephemeral voice buffer purging, and AES-256 data-at-rest encryption for artisan phone numbers and bank records.
+            </div>
+          </div>
+
+          <!-- Ref 1.3: GI Act 1999 -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">Geographical Indications of Goods Act, 1999</span>
+              <span class="ref-scope-tag scope-legal">Authenticity</span>
+            </div>
+            <div class="ref-citation">Act No. 48 of 1999 • Controller General of Patents, Designs &amp; Trade Marks (DPIIT)</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Backs Slide 4's craft authenticity tags and digital provenance marking. Associates verified artisan listings with recognized GI clusters (e.g. Gorakhpur Terracotta, Bankura Pottery) and embeds tamper-evident metadata seals to protect traditional handcrafts against factory replicas.
+            </div>
+          </div>
+
+          <!-- Ref 1.4: SIH Problem Statement 26090 -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">SIH 2026 Problem Statement ID: 26090 Document</span>
+              <span class="ref-scope-tag scope-legal">Mandate</span>
+            </div>
+            <div class="ref-citation">Ministry of Social Justice &amp; Empowerment (MoSJE) • Smart India Hackathon 2026</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Foundational mandate establishing target beneficiary criteria: marginalized SC, OBC, and de-notified artisan communities facing seasonal debt cycles, digital illiteracy, and middleman exploitation in physical trade fairs.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COLUMN 2: GOVERNMENT SCHEMES & PUBLIC DIGITAL RAILS (Terracotta #C2410C) -->
+        <div class="ref-column">
+          <div class="col-header col-header-amber">
+            <span class="col-title title-amber">
+              <span>🏛️</span>
+              <span>Govt. Schemes &amp; Public Rails</span>
+            </span>
+            <span class="col-count-badge badge-amber">4 References</span>
+          </div>
+
+          <!-- Ref 2.1: MeitY Bhashini -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">National Language Translation Mission (Bhashini)</span>
+              <span class="ref-scope-tag scope-policy">Vernacular NLP</span>
+            </div>
+            <div class="ref-citation">Ministry of Electronics and Information Technology (MeitY), Govt. of India</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Powers Module 2 (Story &amp; Catalog Writer) and Module 4 (Voice Line). Utilizes open-source Indic Whisper ASR, vernacular NMT, and Indic TTS speech synthesis models for regional dialects, enabling zero-typing phone interaction.
+            </div>
+          </div>
+
+          <!-- Ref 2.2: PM-Vishwakarma -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">Pradhan Mantri Vishwakarma Yojana (PM-Vishwakarma)</span>
+              <span class="ref-scope-tag scope-policy">Artisan MSME</span>
+            </div>
+            <div class="ref-citation">Ministry of MSME &amp; MoSJE • Central Sector Scheme Operational Guidelines (2023)</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Directly aligns with Slide 5 public mission outcomes. Provides digital marketing enablement for 18 traditional artisan trades (potters, sculptors, weavers), transforming toolkit beneficiaries into self-sustaining digital producers.
+            </div>
+          </div>
+
+          <!-- Ref 2.3: NBCFDC & NSFDC -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">NBCFDC &amp; NSFDC Apex Lending &amp; Cluster Guidelines</span>
+              <span class="ref-scope-tag scope-policy">MoSJE Finance</span>
+            </div>
+            <div class="ref-citation">National Backward Classes / Scheduled Castes Finance &amp; Development Corporations</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Guides socioeconomic targeting for marginalized artisans. Supports the transition from physical mela dependency to year-round national market linkages and contextualizes alternative credit profiling.
+            </div>
+          </div>
+
+          <!-- Ref 2.4: ONDC & GeM -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">ONDC Beckn Protocol v1.2.0 &amp; GeM Public Procurement</span>
+              <span class="ref-scope-tag scope-policy">Open Commerce</span>
+            </div>
+            <div class="ref-citation">DPIIT, Min. of Commerce &amp; Industry • Public Procurement Policy for MSEs Order, 2012</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Generates open Beckn-compliant catalog schemas for zero-commission multi-channel distribution across ONDC consumer apps, qualifying artisans for 4% statutory government procurement reservations on GeM.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COLUMN 3: TECHNICAL & OPEN-SOURCE FOUNDATIONS (Green #047857) -->
+        <div class="ref-column">
+          <div class="col-header col-header-green">
+            <span class="col-title title-green">
+              <span>🔬</span>
+              <span>Open-Source &amp; Technical AI</span>
+            </span>
+            <span class="col-count-badge badge-green">4 References</span>
+          </div>
+
+          <!-- Ref 3.1: BiRefNet -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">BiRefNet: Bilateral Reference Segmentation</span>
+              <span class="ref-scope-tag scope-tech">Computer Vision</span>
+            </div>
+            <div class="ref-citation">Zheng et al., CAAI AI Research 2024 / arXiv:2401.03407 • Apache 2.0 License</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Powers Module 1 (Studio Assistant). High-resolution dichotomous segmentation network that uses bilateral guidance to extract fine handcrafted contours without server-side GPU costs or cloud API dependencies.
+            </div>
+          </div>
+
+          <!-- Ref 3.2: OpenCV -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">OpenCV (Open Source Computer Vision Library)</span>
+              <span class="ref-scope-tag scope-tech">Image Processing</span>
+            </div>
+            <div class="ref-citation">Bradski, G. et al. • Open Source Computer Vision Foundation • Apache 2.0</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Executes deterministic 6500K daylight color-cast normalization (Gray World calibration), contact shadow synthesis, and morphological hole-clearing for trapped voids inside clay handles.
+            </div>
+          </div>
+
+          <!-- Ref 3.3: CLIP -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">CLIP: Contrastive Language-Image Pre-Training</span>
+              <span class="ref-scope-tag scope-tech">Multimodal AI</span>
+            </div>
+            <div class="ref-citation">Radford, A. et al., OpenAI, ICML 2021 / arXiv:2103.00020 • MIT License</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Powers Module 3's semantic multi-channel price comp engine, mapping spoken artisan craft descriptions and image attributes against open marketplace product embeddings to establish fair baseline comps.
+            </div>
+          </div>
+
+          <!-- Ref 3.4: Asterisk & SIP -->
+          <div class="ref-item">
+            <div class="ref-item-top">
+              <span class="ref-act-name">SIP (RFC 3261) &amp; Asterisk Telephony Architecture</span>
+              <span class="ref-scope-tag scope-tech">VoIP Ingress</span>
+            </div>
+            <div class="ref-citation">IETF Standards Track RFC 3261 • Sangoma / Asterisk Open Source Telephony (GPLv2)</div>
+            <div class="ref-role">
+              <strong>Role in ShilpSetu:</strong> Telephony gateway broker for Module 4 (Voice Line / कला-वाणी). Bridges rural 2G/GSM telephony voice calls to FastAPI backend pipelines without requiring client-side smartphone hardware.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- BOTTOM ACRONYM EXPANSION LEGEND BAR -->
+    <div class="acronym-legend-bar">
+      <span class="legend-badge">FULL EXPANSIONS</span>
+      <span><strong>MoSJE</strong>: Ministry of Social Justice &amp; Empowerment</span>
+      <span class="dot-sep">•</span>
+      <span><strong>MeitY</strong>: Ministry of Electronics and Information Technology</span>
+      <span class="dot-sep">•</span>
+      <span><strong>MSME</strong>: Micro, Small and Medium Enterprises</span>
+      <span class="dot-sep">•</span>
+      <span><strong>DPDP</strong>: Digital Personal Data Protection</span>
+      <span class="dot-sep">•</span>
+      <span><strong>GI</strong>: Geographical Indications</span>
+      <span class="dot-sep">•</span>
+      <span><strong>ONDC</strong>: Open Network for Digital Commerce</span>
+      <span class="dot-sep">•</span>
+      <span><strong>GeM</strong>: Government e-Marketplace</span>
+      <span class="dot-sep">•</span>
+      <span><strong>NBCFDC</strong>: National Backward Classes Finance &amp; Development Corporation</span>
+      <span class="dot-sep">•</span>
+      <span><strong>NSFDC</strong>: National Scheduled Castes Finance &amp; Development Corporation</span>
+      <span class="dot-sep">•</span>
+      <span><strong>ASR</strong>: Automated Speech Recognition</span>
+      <span class="dot-sep">•</span>
+      <span><strong>SIP</strong>: Session Initiation Protocol</span>
+    </div>
+
+  </div>
+
+</body>
+</html>
