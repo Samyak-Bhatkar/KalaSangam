@@ -391,7 +391,7 @@
       line-height: 1.15;
     }
 
-    /* ==================== SECTION 3: FUTURE SCALABILITY PATHWAYS (~36%) ==================== */
+    /* ==================== SECTION 3: FUTURE SCALABILITY PATHWAYS & INNOVATION (~36%) ==================== */
     .sec-future-vision {
       height: 226px;
       padding: 6px 12px 5px 12px;
@@ -400,24 +400,128 @@
 
     .future-grid {
       display: grid;
-      grid-template-columns: 1.35fr 1fr;
-      gap: 10px;
+      grid-template-columns: 1.18fr 0.98fr 1fr;
+      gap: 8px;
       height: 182px;
       margin-top: 4px;
       align-items: stretch;
     }
 
-    /* Left: Alternative Credit Scoring Exploration Card */
+    /* Col 1: AI Reel Storyteller (Built & Working) */
+    .reel-card {
+      background: #F8FAFC;
+      border: 1.2px solid #CBD5E1;
+      border-top: 3.5px solid #047857;
+      border-radius: 6px;
+      padding: 5px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 3px;
+    }
+
+    .reel-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px dashed #CBD5E1;
+      padding-bottom: 3px;
+    }
+
+    .reel-card-title {
+      font-size: 8.8px;
+      font-weight: 900;
+      color: #0F2E4A;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .reel-badge {
+      background: #ECFDF5;
+      color: #047857;
+      border: 1px solid #A7F3D0;
+      font-size: 6.8px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 3px;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .reel-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      line-height: 1.2;
+    }
+
+    .reel-point-icon {
+      font-size: 9px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .reel-point-text {
+      font-size: 7.3px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .reel-point-text strong {
+      color: #0F2E4A;
+      font-weight: 800;
+    }
+
+    .reel-features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5px 5px;
+      background: #F1F5F9;
+      border-radius: 4px;
+      padding: 3px 5px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .reel-feature-pill {
+      font-size: 6.9px;
+      font-weight: 700;
+      color: #1E293B;
+      display: flex;
+      align-items: center;
+      gap: 3.5px;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+
+    .reel-feature-icon {
+      font-size: 8px;
+      flex-shrink: 0;
+    }
+
+    .reel-card-footer {
+      background: #ECFDF5;
+      border-left: 3px solid #047857;
+      padding: 2.5px 6px;
+      border-radius: 0 4px 4px 0;
+      font-size: 6.9px;
+      font-weight: 700;
+      color: #047857;
+      line-height: 1.2;
+    }
+
+    /* Col 2: Alternative Credit Scoring Exploration Card */
     .credit-pathway-card {
       background: #F8FAFC;
       border: 1.2px solid #CBD5E1;
       border-top: 3.5px solid #1E40AF;
       border-radius: 6px;
-      padding: 6px 9px;
+      padding: 5px 8px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 4px;
+      gap: 3px;
     }
 
     .credit-pathway-header {
@@ -429,12 +533,13 @@
     }
 
     .credit-pathway-title {
-      font-size: 9px;
+      font-size: 8.8px;
       font-weight: 900;
       color: #0F2E4A;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
+      white-space: nowrap;
     }
 
     .future-badge {
@@ -446,23 +551,24 @@
       padding: 1px 5px;
       border-radius: 3px;
       letter-spacing: 0.3px;
+      white-space: nowrap;
     }
 
     .credit-point {
       display: flex;
       align-items: flex-start;
-      gap: 5px;
+      gap: 4px;
       line-height: 1.2;
     }
 
     .credit-point-icon {
-      font-size: 9.5px;
+      font-size: 9px;
       flex-shrink: 0;
       margin-top: 1px;
     }
 
     .credit-point-text {
-      font-size: 7.6px;
+      font-size: 7.3px;
       font-weight: 600;
       color: #334155;
     }
@@ -475,20 +581,20 @@
     .credit-pathway-disclaimer {
       background: #EFF6FF;
       border-left: 3px solid #1E40AF;
-      padding: 3px 6px;
+      padding: 2.5px 6px;
       border-radius: 0 4px 4px 0;
-      font-size: 7px;
+      font-size: 6.8px;
       font-weight: 700;
       color: #1E3A8A;
       line-height: 1.2;
     }
 
-    /* Right: 3 Scalability Vectors */
+    /* Col 3: 3 Scalability Vectors */
     .scalability-vectors-col {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 4px;
+      gap: 3.5px;
     }
 
     .vector-card {
@@ -496,15 +602,15 @@
       border: 1.2px solid #CBD5E1;
       border-left: 3px solid #1E40AF;
       border-radius: 6px;
-      padding: 4.5px 7px;
+      padding: 4px 6px;
       display: flex;
       flex-direction: column;
       gap: 1.5px;
-      line-height: 1.2;
+      line-height: 1.18;
     }
 
     .vector-title {
-      font-size: 8.5px;
+      font-size: 8.3px;
       font-weight: 800;
       color: #0F2E4A;
       display: flex;
@@ -513,7 +619,7 @@
     }
 
     .vector-desc {
-      font-size: 7.4px;
+      font-size: 7.2px;
       font-weight: 600;
       color: #475569;
     }
@@ -620,7 +726,7 @@
             <span class="outcome-title">Continuous 365-Day Access</span>
           </div>
           <div class="outcome-desc">
-            Replaces complete dependence on 2–3 seasonal exhibitions with continuous national buyer discovery through open commerce rails.
+            Structures catalogs for open commerce rails, positioning artisans for continuous discovery beyond 2–3 seasonal exhibitions.
           </div>
           <div class="outcome-highlight-tag">
             ✓ Year-round income stability
@@ -722,10 +828,10 @@
             <span class="align-scheme-tag">ONDC &amp; GeM Portal</span>
           </div>
           <div class="align-body">
-            Conforms natively to open Beckn protocol schemas, enabling <strong>zero-commission discovery</strong> on popular consumer buyer apps and eligibility for government procurement tenders.
+            Generates Beckn-protocol-compliant catalog schemas, designed for future ONDC network integration once seller registration is completed; structured to align with GeM's MSE procurement reservation policy, pending formal seller registration and compliance certification.
           </div>
           <div class="align-footer-intent">
-            Broadens institutional buyer access without platform monopolies
+            Positions artisans for institutional buyer access without platform monopolies
           </div>
         </div>
 
@@ -739,17 +845,68 @@
           <span>🚀</span>
           <span>Section 3: Future Scalability Pathways &amp; Long-Term Horizon</span>
         </div>
-        <div class="section-pill pill-blue">Post-Hackathon Expansion Vision</div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <span class="section-pill pill-green">Beyond-Mandate Innovation Built</span>
+          <span class="section-pill pill-blue">Post-Hackathon Expansion Vision</span>
+        </div>
       </div>
 
       <div class="future-grid">
 
-        <!-- Left: Future Pathway - Alternative Credit Scoring Exploration -->
+        <!-- Col 1: Beyond-Mandate Innovation - AI Reel Storyteller (Built & Working) -->
+        <div class="reel-card">
+          <div class="reel-card-header">
+            <span class="reel-card-title">
+              <span>🎬</span>
+              <span>AI Reel Storyteller</span>
+            </span>
+            <span class="reel-badge">✓ Built &amp; Working</span>
+          </div>
+
+          <div class="reel-point">
+            <span class="reel-point-icon">⚠️</span>
+            <div class="reel-point-text">
+              <strong>The Social Commerce Gap:</strong> Rural artisans lack video editing skills and equipment, while modern buyers discover crafts primarily through short-form social video (Reels, Shorts, WhatsApp Status).
+            </div>
+          </div>
+
+          <div class="reel-point">
+            <span class="reel-point-icon">✨</span>
+            <div class="reel-point-text">
+              <strong>Automated 15s Story Video:</strong> Automatically converts a single studio photo and spoken voice story into a shareable 15-second vertical video — zero editing skill or cost required from the artisan.
+            </div>
+          </div>
+
+          <div class="reel-features-grid">
+            <div class="reel-feature-pill">
+              <span class="reel-feature-icon">🎞️</span>
+              <span>Ken Burns pan-zoom motion</span>
+            </div>
+            <div class="reel-feature-pill">
+              <span class="reel-feature-icon">🎵</span>
+              <span>Royalty-free in-app audio</span>
+            </div>
+            <div class="reel-feature-pill">
+              <span class="reel-feature-icon">📲</span>
+              <span>Scannable listing QR code</span>
+            </div>
+            <div class="reel-feature-pill">
+              <span class="reel-feature-icon">💬</span>
+              <span>1-tap WhatsApp Status share</span>
+            </div>
+          </div>
+
+          <div class="reel-card-footer">
+            ✓ Demonstrated working capability: converts studio photo &amp; voice story into social-commerce video
+          </div>
+        </div>
+
+        <!-- Col 2: Future Pathway - Alternative Credit Scoring Exploration -->
         <div class="credit-pathway-card">
           <div class="credit-pathway-header">
             <span class="credit-pathway-title">
               <span>💳</span>
-              <span>Future Pathway: Alternative Credit Scoring Exploration</span>
+              <span>Credit Scoring Exploration</span>
             </span>
             <span class="future-badge">Proposed Future Integration</span>
           </div>
@@ -773,7 +930,7 @@
           </div>
         </div>
 
-        <!-- Right: 3 Scalability Expansion Pillars -->
+        <!-- Col 3: 3 Scalability Expansion Pillars -->
         <div class="scalability-vectors-col">
 
           <div class="vector-card">
