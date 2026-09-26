@@ -955,7 +955,7 @@ export default function CameraViewfinder() {
       {/* ==================================================================== */}
       {/* BOTTOM CONTROL DECK: Tactile Shutter, Lens Switch, Gallery Upload    */}
       {/* ==================================================================== */}
-      <div className="z-30 pb-6 pt-3 px-8 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-around shrink-0">
+      <div className="z-30 pb-20 pt-3 px-8 bg-black/90 backdrop-blur-md border-t border-white/10 flex items-center justify-around shrink-0">
 
         {/* 1. Camera Flip / Re-open Lens */}
         <button

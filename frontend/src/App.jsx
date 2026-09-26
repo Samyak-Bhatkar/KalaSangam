@@ -316,7 +316,7 @@ export default function App() {
         {/* ==================================================================== */}
         {/* MAIN WORKFLOW SCREENS                                                */}
         {/* ==================================================================== */}
-        <main className="flex-1 relative overflow-y-auto pb-24">
+        <main className={`flex-1 relative ${currentStep === 1 ? 'overflow-hidden' : 'overflow-y-auto'}`}>
           {currentStep === 0 && (
             <HomeCommandCenter onNavigateToVyaparNiti={() => setCurrentStep('vyapar-niti')} />
           )}
@@ -491,7 +491,7 @@ export default function App() {
         {currentStep !== 'vyapar-niti' && (
           <nav
             aria-label="Workflow Navigation"
-            className="absolute bottom-3 left-3 right-3 z-30 bg-white/95 backdrop-blur-xl rounded-full border border-stone-200/90 shadow-[0_8px_30px_rgba(0,0,0,0.12)] px-2 py-1.5 flex items-center justify-around"
+            className="absolute bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-xl border-t border-stone-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] px-3 pt-2 pb-2.5 flex items-center justify-around"
           >
             {[
               { step: 0, label: language === 'hi' ? 'होम' : 'Home', icon: Home },

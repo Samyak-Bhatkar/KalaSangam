@@ -1156,7 +1156,7 @@ export default function VoiceRecorder() {
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col justify-between bg-[#FDFBF7] text-slate-900 p-5 select-none overflow-y-auto font-sans">
+    <div className="relative w-full h-full flex flex-col justify-between bg-[#FDFBF7] text-slate-900 p-5 pb-24 select-none overflow-y-auto font-sans">
 
       {/* ── Top Header ────────────────────────────────────────────────────── */}
       <div>
