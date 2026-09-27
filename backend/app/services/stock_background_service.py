@@ -312,6 +312,56 @@ def query_pixabay(query: str, limit: int = 4) -> List[BackgroundOption]:
         return []
 
 
+HINDI_TO_EN_SETTING_MAP = {
+    "दीवाली": "diwali festive lights",
+    "दिवाली": "diwali oil lamps festive",
+    "दीया": "diwali diyas lamps",
+    "पूजा": "pooja altar brass festive",
+    "त्योहार": "festive celebration background",
+    "उत्सव": "indian festival celebration",
+    "लकड़ी": "rustic wooden table surface",
+    "मेज़": "wooden table display",
+    "टेबल": "table surface display",
+    "संगमरमर": "white marble surface",
+    "मार्बल": "marble stone surface",
+    "मिट्टी": "terracotta courtyard rustic ground",
+    "आंगन": "traditional indian courtyard",
+    "बाज़ार": "handicraft market bazaar display",
+    "दुकान": "artisan store shop display",
+    "बगीचा": "green garden nature botanical",
+    "फूल": "floral flowers background",
+    "पत्थर": "natural stone textured surface",
+    "मंदिर": "temple brass traditional altar",
+    "दीवार": "textured heritage wall background",
+    "कालीन": "traditional carpet rug textile",
+    "कपड़ा": "silk fabric aesthetic drape",
+    "हस्तशिल्प": "indian handicraft aesthetic",
+    "रसोई": "indian kitchen dining table",
+    "कमरा": "ambient living room decor",
+    "लिविंग": "living room table decor",
+}
+
+def translate_hindi_query_if_needed(query: str) -> str:
+    """Translates Devanagari Hindi craft setting descriptions into English search terms."""
+    if not query:
+        return query
+    has_devanagari = any('\u0900' <= char <= '\u097F' for char in query)
+    if not has_devanagari:
+        return query
+
+    translated_tokens = []
+    q_lower = query.strip()
+    matched = False
+    for hi_term, en_term in HINDI_TO_EN_SETTING_MAP.items():
+        if hi_term in q_lower:
+            translated_tokens.append(en_term)
+            matched = True
+
+    if matched:
+        return " ".join(translated_tokens) + " surface"
+    return "traditional indian aesthetic background surface"
+
+
 def get_background_options(
     query: Optional[str] = None,
     limit: int = 4,
@@ -329,9 +379,8 @@ def get_background_options(
     6. Marks single top result as recommended: true.
     7. Identifies if lifestyle option is eligible (guardrail against ambiguous angles).
     """
-    base_query = (query or "").strip()
-    if not base_query:
-        base_query = "neutral wooden surface"
+    raw_query = (query or "").strip()
+    base_query = translate_hindi_query_if_needed(raw_query) if raw_query else "neutral wooden surface"
 
     clean_angle = (shot_angle or "").lower().strip() or None
     lifestyle_eligible = clean_angle != "angled"

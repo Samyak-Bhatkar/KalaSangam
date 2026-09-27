@@ -3,7 +3,7 @@ import {
   Sparkles, Award, Check, ImagePlus, RefreshCw, X, Eye, EyeOff, Edit3,
   MapPin, Play, Pause, Trash2, ShieldCheck, Plus, Sliders, Download,
   Share2, Move, CheckCircle2, ArrowRight, ExternalLink, Tag,
-  ZoomIn, ChevronLeft, ChevronRight, Loader2
+  ZoomIn, ChevronLeft, ChevronRight, Loader2, Mic
 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 import { fetchBackgroundOptions, compositeLifestyleImage, exportAnnotatedImage } from '../services/api';
@@ -332,11 +332,110 @@ export default function StudioReviewCard({ activeSubStep = null }) {
   const [compositeCache, setCompositeCache] = useState({}); // { [bgId]: { url, base64 } }
   const [hasSkipped, setHasSkipped] = useState(false);
 
+  // Custom Voice & Text Prompt Staging State
+  const [activeSearchedQuery, setActiveSearchedQuery] = useState(null);
+  const [customPromptText, setCustomPromptText] = useState('');
+  const [isVoiceListening, setIsVoiceListening] = useState(false);
+  const recognitionRef = useRef(null);
+
+  // Initialize SpeechRecognition for Voice Staging Prompts
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognizer = new SpeechRecognition();
+      recognizer.continuous = false;
+      recognizer.interimResults = true;
+      recognizer.lang = language === 'en' ? 'en-IN' : 'hi-IN';
+
+      recognizer.onresult = (event) => {
+        let transcript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        setCustomPromptText(transcript);
+      };
+
+      recognizer.onend = () => {
+        setIsVoiceListening(false);
+      };
+
+      recognizer.onerror = (err) => {
+        console.warn('Voice recognition error:', err);
+        setIsVoiceListening(false);
+      };
+
+      recognitionRef.current = recognizer;
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch (e) {}
+      }
+    };
+  }, [language]);
+
+  const toggleVoiceListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition && !recognitionRef.current) {
+      alert(language === 'hi' ? 'माइक्रोफ़ोन इस ब्राउज़र में समर्थित नहीं है। कृपया टाइप करें।' : 'Speech recognition not supported in this browser. Please type.');
+      return;
+    }
+
+    if (isVoiceListening) {
+      try { recognitionRef.current?.stop(); } catch (e) {}
+      setIsVoiceListening(false);
+      if (customPromptText.trim()) {
+        handleTriggerCustomBackgroundSearch(customPromptText.trim());
+      }
+    } else {
+      try {
+        setCustomPromptText('');
+        recognitionRef.current?.start();
+        setIsVoiceListening(true);
+      } catch (err) {
+        console.warn('Error starting speech recognition:', err);
+        setIsVoiceListening(false);
+      }
+    }
+  };
+
+  const handleTriggerCustomBackgroundSearch = async (queryText) => {
+    const q = (queryText || customPromptText || '').trim();
+    if (!q) return;
+
+    setActiveSearchedQuery(q);
+    setIsLoadingOptions(true);
+    try {
+      const res = await fetchBackgroundOptions({
+        suggestedBackgroundQuery: q,
+        limit: 4,
+        shotAngle: activeShotInfo.shotAngle,
+        tiltDegrees: activeShotInfo.tiltDegrees,
+        cutoutBase64: effectiveCutout,
+        rawImageBase64: rawImageBase64 || rawSrc,
+      });
+
+      if (res && res.options && res.options.length > 0) {
+        setBackgroundCandidates(res.options);
+        const top = res.options[0];
+        setSelectedBgId(top.id);
+        if (effectiveCutout) {
+          triggerCompositesForOptions(res.options, effectiveCutout, top);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch custom background options:', err);
+    } finally {
+      setIsLoadingOptions(false);
+    }
+  };
+
   const rawSrc = rawImageBase64 || rawImageUrl || selectedPreset?.raw_image_url || selectedPreset?.sample_image_url || '/terracotta_pot_raw.png';
   const studioSrc = studioImageBase64 || studioImageUrl || selectedPreset?.clean_image_url || '/terracotta_pot_clean.png';
   const effectiveCutout = cutoutBase64 || studioImageBase64 || rawImageBase64 || studioSrc || rawSrc;
 
-  const effectiveQuery = suggestedBackgroundQuery ||
+  const effectiveQuery = activeSearchedQuery ||
+    suggestedBackgroundQuery ||
     catalogData?.suggested_background_query ||
     (selectedPreset?.craft_category?.toLowerCase().includes('textile') ? 'silk fabric aesthetic surface' :
       selectedPreset?.craft_category?.toLowerCase().includes('metal') ? 'temple brass courtyard surface' :
@@ -541,7 +640,7 @@ export default function StudioReviewCard({ activeSubStep = null }) {
       },
     ];
 
-    const candidates = (backgroundCandidates || []).slice(0, 3);
+    const candidates = (backgroundCandidates || []).slice(0, 4);
     candidates.forEach((opt, idx) => {
       const comp = compositeCache[opt.id];
       const src = comp?.base64 || comp?.url || opt.thumbnail_url || opt.url;
@@ -550,15 +649,15 @@ export default function StudioReviewCard({ activeSubStep = null }) {
         type: 'lifestyle',
         title: opt.title,
         badge: opt.title || (language === 'hi' ? `परिवेश ${idx + 1}` : `SETTING ${idx + 1}`),
-        tabLabel: opt.title || (language === 'hi' ? `परिवेश ${idx + 1}` : `Option ${idx + 1}`),
+        tabLabel: opt.title ? (opt.title.length > 10 ? opt.title.slice(0, 10) + '..' : opt.title) : (language === 'hi' ? `परिवेश ${idx + 1}` : `Option ${idx + 1}`),
         src: src,
         candidate: opt,
         isCompositing: isCompositing && !comp,
       });
     });
 
-    if (list.length < 4 && isLoadingOptions) {
-      for (let i = list.length; i < 4; i++) {
+    if (list.length < 5 && isLoadingOptions) {
+      for (let i = list.length; i < 5; i++) {
         list.push({
           id: `placeholder_${i}`,
           type: 'placeholder',
@@ -579,7 +678,7 @@ export default function StudioReviewCard({ activeSubStep = null }) {
   useEffect(() => {
     if (activeSubStep === 2) {
       if (selectedBgId) {
-        const found = backgroundCandidates.slice(0, 3).findIndex(o => o.id === selectedBgId);
+        const found = backgroundCandidates.slice(0, 4).findIndex(o => o.id === selectedBgId);
         if (found !== -1) {
           setSelectedCarouselIndex(found + 1);
         }
@@ -1489,15 +1588,117 @@ export default function StudioReviewCard({ activeSubStep = null }) {
       {/* ==================================================================== */}
       {(activeSubStep === 2 || activeSubStep === null) && isLifestyleAllowed && (
         <div className="p-4 bg-slate-950/90 border-t border-slate-800 space-y-3">
+          {/* Custom Voice & Text Prompt Box (4 Backgrounds Simultaneously) */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-amber-500/30 shadow-lg space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-white flex items-center gap-1.5">
+                    <span>{language === 'hi' ? 'अपनी पसंद का परिवेश बताएं' : 'Custom Background Staging'}</span>
+                    <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-300 font-bold border border-amber-500/30">
+                      Voice / AI
+                    </span>
+                  </h4>
+                  <p className="text-[10px] text-slate-400">
+                    {language === 'hi'
+                      ? 'माइक दबाकर बोलें या लिखें — AI एक साथ 4 नए विकल्प तैयार करेगा'
+                      : 'Speak or type — AI generates 4 matching scenes simultaneously'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Input Bar with Mic & Action Button */}
+            <div className="relative flex items-center gap-1.5 bg-slate-950 border border-slate-700/80 rounded-2xl p-1.5 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/20 transition-all">
+              {/* Voice Mic Button */}
+              <button
+                type="button"
+                onClick={toggleVoiceListening}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer ${
+                  isVoiceListening
+                    ? 'bg-rose-500 text-white animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.6)]'
+                    : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-400/40'
+                }`}
+                title={isVoiceListening ? 'सुन रहे हैं... बोलें' : 'माइक दबाकर बोलें'}
+              >
+                <Mic className={`w-4 h-4 ${isVoiceListening ? 'animate-bounce' : ''}`} />
+              </button>
+
+              {/* Text Input */}
+              <input
+                type="text"
+                value={customPromptText}
+                onChange={(e) => setCustomPromptText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleTriggerCustomBackgroundSearch(customPromptText);
+                  }
+                }}
+                placeholder={
+                  isVoiceListening
+                    ? (language === 'hi' ? '🎙️ सुन रहे हैं... अपना परिवेश बोलें...' : '🎙️ Listening... Speak now...')
+                    : (language === 'hi' ? 'उदा. दीवाली की रोशनी, सफेद मार्बल, लकड़ी की टेबल...' : 'e.g. Diwali lights, white marble, rustic wood...')
+                }
+                className="flex-1 bg-transparent px-2 text-xs text-white placeholder-slate-400 outline-none"
+              />
+
+              {/* Generate / Search Action Button */}
+              <button
+                type="button"
+                disabled={isLoadingOptions || !customPromptText.trim()}
+                onClick={() => handleTriggerCustomBackgroundSearch(customPromptText)}
+                className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-40 text-slate-950 font-black text-xs transition-all flex items-center gap-1 cursor-pointer shrink-0 shadow-sm active:scale-95"
+              >
+                {isLoadingOptions ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5" />
+                )}
+                <span>{language === 'hi' ? '4 परिवेश बनाएं' : 'Generate 4'}</span>
+              </button>
+            </div>
+
+            {/* Quick Suggestion Chips */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none text-[10.5px]">
+              <span className="text-slate-400 font-bold shrink-0">{language === 'hi' ? 'त्वरित सुझाव:' : 'Quick:'}</span>
+              {[
+                { label: '🪔 दीवाली उत्सव', q: 'diwali festive lights pooja' },
+                { label: '🪵 लकड़ी की मेज़', q: 'rustic natural wooden table' },
+                { label: '🏛️ पारंपरिक आंगन', q: 'traditional indian courtyard ground' },
+                { label: '☕ लिविंग रूम', q: 'living room ambient table decor' },
+                { label: '🌿 बगीचा व प्रकृति', q: 'lush green garden botanical surface' },
+              ].map((chip) => (
+                <button
+                  key={chip.label}
+                  type="button"
+                  onClick={() => {
+                    setCustomPromptText(chip.label.split(' ')[1] || chip.label);
+                    handleTriggerCustomBackgroundSearch(chip.q);
+                  }}
+                  className="px-2.5 py-1 rounded-full bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-amber-400/50 text-slate-300 hover:text-amber-300 font-medium whitespace-nowrap transition cursor-pointer shrink-0 active:scale-95"
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Suggested Query, Perspective Pill & Color Harmony Pill */}
           <div className="flex items-center justify-between text-[10px] text-slate-400 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800/80 flex-wrap gap-2">
             <div className="flex items-center gap-1.5 truncate">
               <span className="text-amber-400 font-extrabold uppercase text-[9px] tracking-wider">
-                {language === 'hi' ? 'सुझाया गया परिवेश:' : 'Detected Setting:'}
+                {language === 'hi' ? 'सक्रिय परिवेश:' : 'Active Setting:'}
               </span>
-              <span className="text-slate-200 font-medium italic truncate">"{effectiveQuery}"</span>
+              <span className="text-slate-200 font-medium italic truncate">"{activeSearchedQuery || effectiveQuery}"</span>
             </div>
             <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                {language === 'hi' ? '4 परिवेश उपलब्ध' : '4 Scenes Ready'}
+              </span>
               {dominantColorInfo?.hex && (
                 <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1.5">
                   <span
@@ -1527,6 +1728,53 @@ export default function StudioReviewCard({ activeSubStep = null }) {
               )}
             </div>
           </div>
+
+          {/* 4 Background Options Card Grid (Instant Visual Switcher for all 4) */}
+          {backgroundCandidates && backgroundCandidates.length > 0 && (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                <span className="font-bold text-slate-300">
+                  {language === 'hi' ? 'सभी 4 परिवेश विकल्प (टैप करके चुनें):' : 'All 4 Background Scenes (Tap to View):'}
+                </span>
+                <span className="text-[10px] text-amber-400">
+                  {language === 'hi' ? 'ऊपर तुलना करें ↔' : 'Compare above ↔'}
+                </span>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {backgroundCandidates.slice(0, 4).map((opt, idx) => {
+                  const isSelected = selectedBgId === opt.id;
+                  const previewSrc = compositeCache[opt.id]?.base64 || compositeCache[opt.id]?.url || opt.thumbnail_url || opt.url;
+                  return (
+                    <div
+                      key={opt.id}
+                      onClick={() => handleSelectBackground(opt)}
+                      className={`relative aspect-square rounded-2xl overflow-hidden cursor-pointer border-2 transition-all duration-200 active:scale-95 group ${
+                        isSelected
+                          ? 'border-emerald-400 ring-2 ring-emerald-400/30 shadow-lg scale-[1.02]'
+                          : 'border-slate-800 hover:border-slate-700 bg-slate-900/60'
+                      }`}
+                    >
+                      <img
+                        src={previewSrc}
+                        alt={opt.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      {isSelected && (
+                        <div className="absolute top-1 right-1 z-10 w-4.5 h-4.5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </div>
+                      )}
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent p-1 text-center">
+                        <span className="text-[9px] font-bold text-slate-200 block truncate">
+                          {opt.title || `परिवेश ${idx + 1}`}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Active Selection Feedback Banner */}
           <div className="px-3.5 py-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-2">
