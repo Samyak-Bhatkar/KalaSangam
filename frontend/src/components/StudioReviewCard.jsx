@@ -9,7 +9,7 @@ import { fetchBackgroundOptions, compositeLifestyleImage, exportAnnotatedImage }
 import FineTuneStudioModal from './FineTuneStudioModal';
 import CraftPinVoiceModal from './CraftPinVoiceModal';
 
-export default function StudioReviewCard() {
+export default function StudioReviewCard({ activeSubStep = null }) {
   const {
     rawImageUrl,
     rawImageBase64,
@@ -355,6 +355,19 @@ export default function StudioReviewCard() {
   // Dominant craft color & palette harmony metadata
   const [dominantColorInfo, setDominantColorInfo] = useState(null);
 
+  // Synchronize view tab with activeSubStep pagination
+  useEffect(() => {
+    if (activeSubStep === 2) {
+      setActiveViewTab('lifestyle');
+      if (backgroundCandidates.length > 0 && !selectedBgId) {
+        const rec = backgroundCandidates.find(o => o.recommended) || backgroundCandidates[0];
+        if (rec) handleSelectBackground(rec);
+      }
+    } else if (activeSubStep === 1) {
+      setActiveViewTab('studio');
+    }
+  }, [activeSubStep, backgroundCandidates.length, selectedBgId]);
+
   // Fetch candidate backgrounds (only if angle is eligible)
   useEffect(() => {
     let isCancelled = false;
@@ -513,7 +526,11 @@ export default function StudioReviewCard() {
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
-            {language === 'hi' ? 'एआई स्टूडियो रूपांतरण' : 'Autonomous AI Studio'}
+            {activeSubStep === 2
+              ? (language === 'hi' ? 'चरण 2: पृष्ठभूमि चयन (Staging)' : 'Step 2: Lifestyle Staging')
+              : activeSubStep === 1
+              ? (language === 'hi' ? 'चरण 1: शिल्प प्रामाणिकता (The Voice Canvas)' : 'Step 1: The Voice Canvas')
+              : (language === 'hi' ? 'एआई स्टूडियो रूपांतरण' : 'Autonomous AI Studio')}
           </span>
         </div>
 
@@ -1046,8 +1063,10 @@ export default function StudioReviewCard() {
         </div>
       </div>
 
-      {/* Enhancement summary chips */}
-      <div className="p-3 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-around text-[11px] text-slate-400">
+      {/* Enhancement summary chips & Craft Pins (Step 1: The Voice Canvas) */}
+      {(activeSubStep === 1 || activeSubStep === null) && (
+        <>
+          <div className="p-3 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-around text-[11px] text-slate-400">
         <span className="flex items-center gap-1 text-slate-300">
           <Check className="w-3.5 h-3.5 text-emerald-400" />
           {language === 'hi' ? 'डीब्लर व शार्पनिंग' : 'AI Deblur & Clarity'}
@@ -1239,12 +1258,14 @@ export default function StudioReviewCard() {
           )}
         </div>
       )}
+    </>
+  )}
 
       {/* ==================================================================== */}
-      {/* OPTIONAL STEP: CHOOSE A BACKGROUND SETTING (STOCK PHOTOS COMPOSITE)  */}
+      {/* STEP 2: CHOOSE A BACKGROUND SETTING (STOCK PHOTOS COMPOSITE)          */}
       {/* Guardrail: Only surfaced if camera angle is eligible (eye_level or flat_lay) */}
       {/* ==================================================================== */}
-      {isLifestyleAllowed && (
+      {(activeSubStep === 2 || activeSubStep === null) && isLifestyleAllowed && (
         <div className="p-4 bg-slate-950/90 border-t border-slate-800 space-y-3">
           {/* Section Header */}
           <div className="flex items-center justify-between">
