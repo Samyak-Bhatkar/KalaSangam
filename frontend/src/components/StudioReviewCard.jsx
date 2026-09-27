@@ -1186,88 +1186,100 @@ export default function StudioReviewCard({ activeSubStep = null }) {
 
       {/* Secondary Action Bar (Fine-Tune, Add Details, View Craft Details, Export for ONDC) - Only in Step 1 */}
       {activeSubStep !== 2 && (
-        <div className="px-4 py-2.5 bg-slate-950/90 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] font-medium text-slate-300">
-              {language === 'hi' ? 'स्वच्छ 4K स्टूडियो परिणाम' : 'Clean 4K Studio Result'}
+        <div className="px-3.5 py-2.5 bg-slate-950/95 border-t border-slate-800 space-y-2">
+          {/* Status Row (Apple/Material 3 clean metadata bar) */}
+          <div className="flex items-center justify-between text-[11px] px-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+              <span className="font-semibold text-slate-300">
+                {language === 'hi' ? 'स्वच्छ 4K स्टूडियो परिणाम' : 'Clean 4K Studio Result'}
+              </span>
+            </div>
+            <span className="text-[10px] text-slate-400 font-medium px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800">
+              {language === 'hi' ? 'ONDC ई-कॉमर्स मानक' : 'ONDC Ready'}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {/* Export for ONDC Syndication Button */}
+          {/* Unified 4-Action Toolstrip in EXACTLY ONE Row (Apple / Airbnb / Material 3) */}
+          <div className="grid grid-cols-4 gap-1.5 w-full">
+            {/* 1. Fine-Tune Studio */}
             <button
               type="button"
-              onClick={handleExportOndcImage}
-              disabled={isExportingOndc}
-              className="min-h-[42px] px-3 py-1.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border border-emerald-400/50 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 disabled:opacity-60"
-              title="Export flattened JPEG with technical callouts burned in for ONDC Beckn v1.2"
+              onClick={() => setIsFineTuneOpen(true)}
+              className="h-10 px-1.5 rounded-xl bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-400/50 text-slate-200 hover:text-amber-300 transition-all flex items-center justify-center gap-1 cursor-pointer shadow-xs active:scale-95 group"
+              title={language === 'hi' ? 'एआई स्टूडियो फोटो सुधारें' : 'Fine-Tune Photo'}
             >
-              {isExportingOndc ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Share2 className="w-3.5 h-3.5" />
-              )}
-              <span>
-                {language === 'hi' ? 'ONDC एक्सपोर्ट' : 'Export for ONDC'}
+              <Edit3 className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform shrink-0" />
+              <span className="text-[11px] font-bold truncate">
+                {language === 'hi' ? 'सुधारें' : 'Fine-Tune'}
               </span>
             </button>
 
-            {/* View Craft Details Toggle Button */}
-            <button
-              type="button"
-              onClick={() => {
-                setIsCraftPinsVisible(!isCraftPinsVisible);
-                if (!isCraftPinsVisible) {
-                  setActiveViewTab('studio');
-                }
-              }}
-              className={`min-h-[42px] px-3 py-1.5 rounded-2xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 ${
-                isCraftPinsVisible
-                  ? 'bg-amber-500/20 border-amber-400/80 text-amber-300'
-                  : 'bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
-              }`}
-            >
-              {isCraftPinsVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              <span>
-                {language === 'hi'
-                  ? (isCraftPinsVisible ? 'विवरण छुपाएं' : 'शिल्प विवरण देखें')
-                  : (isCraftPinsVisible ? 'Hide Details' : 'View Craft Details')}
-                {craftPins.length > 0 && ` (${craftPins.length})`}
-              </span>
-            </button>
-
-            {/* Add Details (Tap-to-Annotate) Secondary Button */}
+            {/* 2. Add Detail Pin (Tap-to-Annotate) */}
             <button
               type="button"
               onClick={() => {
                 setIsAnnotating(!isAnnotating);
                 setIsCraftPinsVisible(true);
                 setActiveViewTab('studio');
-                if (!isAnnotating) setSliderPosition(100); // Switch to Artisan view so pin dropping is visible
+                if (!isAnnotating) setSliderPosition(100);
               }}
-              className={`min-h-[42px] px-3 py-1.5 rounded-2xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 ${
+              className={`h-10 px-1.5 rounded-xl border transition-all flex items-center justify-center gap-1 cursor-pointer shadow-xs active:scale-95 ${
                 isAnnotating
-                  ? 'bg-emerald-600 border-emerald-400 text-white'
-                  : 'bg-slate-900 hover:bg-slate-800 border-slate-700 hover:border-amber-400/60 text-amber-300 hover:text-amber-200'
+                  ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 ring-1 ring-emerald-400/30'
+                  : 'bg-slate-900 hover:bg-slate-800/90 border-slate-800 hover:border-amber-400/50 text-slate-200 hover:text-amber-300'
               }`}
+              title={language === 'hi' ? 'शिल्प पर नया प्रामाणिकता बिंदु जोड़ें' : 'Add Craft Pin'}
             >
-              <MapPin className="w-3.5 h-3.5" />
-              <span>
+              <MapPin className={`w-3.5 h-3.5 shrink-0 ${isAnnotating ? 'text-emerald-400 animate-bounce' : 'text-amber-400'}`} />
+              <span className="text-[11px] font-bold truncate">
                 {isAnnotating
-                  ? (language === 'hi' ? '✓ पूरा हुआ' : '✓ Done')
-                  : (language === 'hi' ? 'विवरण जोड़ें' : 'Add Details')}
+                  ? (language === 'hi' ? '✓ संपन्न' : '✓ Done')
+                  : (language === 'hi' ? 'पिन जोड़ें' : 'Add Pin')}
               </span>
             </button>
 
-            {/* Fine-Tune Button */}
+            {/* 3. View / Hide Craft Details Toggle */}
             <button
               type="button"
-              onClick={() => setIsFineTuneOpen(true)}
-              className="min-h-[42px] px-3 py-1.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-amber-400/60 text-amber-300 hover:text-amber-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+              onClick={() => {
+                setIsCraftPinsVisible(!isCraftPinsVisible);
+                if (!isCraftPinsVisible) setActiveViewTab('studio');
+              }}
+              className={`h-10 px-1.5 rounded-xl border transition-all flex items-center justify-center gap-1 cursor-pointer shadow-xs active:scale-95 ${
+                isCraftPinsVisible
+                  ? 'bg-amber-500/15 border-amber-400/60 text-amber-300'
+                  : 'bg-slate-900 hover:bg-slate-800/90 border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200'
+              }`}
+              title={language === 'hi' ? 'शिल्प विवरण छुपाएं या दिखाएं' : 'Toggle Pin Visibility'}
             >
-              <Edit3 className="w-3.5 h-3.5 text-amber-400" />
-              <span>{language === 'hi' ? 'सुधारें' : 'Fine-Tune'}</span>
+              {isCraftPinsVisible ? (
+                <EyeOff className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              ) : (
+                <Eye className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              )}
+              <span className="text-[11px] font-bold truncate">
+                {language === 'hi' ? 'विवरण' : 'Details'}
+                {craftPins.length > 0 && ` (${craftPins.length})`}
+              </span>
+            </button>
+
+            {/* 4. Export for ONDC */}
+            <button
+              type="button"
+              onClick={handleExportOndcImage}
+              disabled={isExportingOndc}
+              className="h-10 px-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border border-emerald-400/40 text-white transition-all flex items-center justify-center gap-1 cursor-pointer shadow-sm shadow-emerald-950 active:scale-95 disabled:opacity-60"
+              title="Export flattened JPEG with technical callouts burned in for ONDC Beckn v1.2"
+            >
+              {isExportingOndc ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
+              ) : (
+                <Share2 className="w-3.5 h-3.5 shrink-0" />
+              )}
+              <span className="text-[11px] font-bold truncate">
+                {language === 'hi' ? 'एक्सपोर्ट' : 'Export'}
+              </span>
             </button>
           </div>
         </div>
