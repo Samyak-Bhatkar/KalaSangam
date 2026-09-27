@@ -577,24 +577,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Reassurance Status Banner */}
-                  <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 text-center">
-                    <span className="text-[11px] text-slate-400 font-medium">
-                      {productStatus === 'draft' ? (
-                        <span className="text-amber-400 font-bold inline-flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                          ड्राफ्ट सुरक्षित है • 24 घंटे बाद स्वतः साफ़ होगा
-                        </span>
-                      ) : productStatus === 'published' ? (
-                        <span className="text-emerald-400 font-bold inline-flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                          ONDC व GeM पर लाइव प्रसारित • सत्यापन QR सक्रिय
-                        </span>
-                      ) : (
-                        'परीक्षण सुरक्षित: प्रकाशित करने तक कोई भी सार्वजनिक QR नहीं बनता।'
-                      )}
-                    </span>
-                  </div>
+
                 </div>
               )}
 
