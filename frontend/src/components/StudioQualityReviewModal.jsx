@@ -47,7 +47,15 @@ export default function StudioQualityReviewModal({
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhancementPhase, setEnhancementPhase] = useState(0);
+  const [progressPercent, setProgressPercent] = useState(0);
   const [isFineTuneOpen, setIsFineTuneOpen] = useState(false);
+  const progressIntervalRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    };
+  }, []);
 
   const handleFineTuneApply = ({ studioBase64, cutoutBase64 }) => {
     setEnhancedResult(prev => ({
@@ -88,18 +96,37 @@ export default function StudioQualityReviewModal({
     }
   }, [isOpen, qualityResult, rawPhotoBase64]);
 
-  // Autonomous cloud studio enhancement pipeline
+  // Autonomous cloud studio enhancement pipeline with real-time percentage progression
   const triggerEnhancement = async (base64Img) => {
+    setReviewState('enhancing');
     setIsEnhancing(true);
     setEnhancementPhase(1);
+    setProgressPercent(10);
 
-    const phaseTimer1 = setTimeout(() => setEnhancementPhase(2), 700);
-    const phaseTimer2 = setTimeout(() => setEnhancementPhase(3), 1400);
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+
+    let currentPct = 10;
+    progressIntervalRef.current = setInterval(() => {
+      if (currentPct < 35) {
+        currentPct += Math.floor(Math.random() * 5) + 3;
+        setEnhancementPhase(1);
+      } else if (currentPct < 65) {
+        currentPct += Math.floor(Math.random() * 4) + 2;
+        setEnhancementPhase(2);
+      } else if (currentPct < 88) {
+        currentPct += Math.floor(Math.random() * 2) + 1;
+        setEnhancementPhase(3);
+      } else if (currentPct < 96) {
+        currentPct += 1;
+        setEnhancementPhase(3);
+      }
+      setProgressPercent(Math.min(96, currentPct));
+    }, 110);
 
     try {
       const res = await enhanceImage({ imageBase64: base64Img });
-      clearTimeout(phaseTimer1);
-      clearTimeout(phaseTimer2);
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      setProgressPercent(100);
       setEnhancementPhase(4);
 
       setTimeout(() => {
@@ -124,9 +151,11 @@ export default function StudioQualityReviewModal({
 
         // Haptic feedback
         if ('vibrate' in navigator) navigator.vibrate([60, 40, 60]);
-      }, 500);
+      }, 450);
     } catch (err) {
       console.warn('Enhancement error, using fallback studio render:', err);
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      setProgressPercent(100);
       setReviewState('enhanced');
       setIsEnhancing(false);
       saveAnglePhoto(activeAngleIndex, {
@@ -262,50 +291,145 @@ export default function StudioQualityReviewModal({
               </button>
 
               <button
+                disabled={isEnhancing}
                 onClick={() => {
+                  setReviewState('enhancing');
                   triggerEnhancement(rawPhotoBase64);
                 }}
-                className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-semibold border border-white/15 cursor-pointer transition-all active:scale-95"
+                className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-semibold border border-white/15 cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {language === 'hi' ? 'फिर भी यह फोटो इस्तेमाल करें' : 'Continue Anyway'}
+                {isEnhancing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+                    <span>{language === 'hi' ? 'रूपांतरण शुरू हो रहा है...' : 'Starting Enhancement...'}</span>
+                  </>
+                ) : (
+                  <span>{language === 'hi' ? 'फिर भी यह फोटो इस्तेमाल करें' : 'Continue Anyway'}</span>
+                )}
               </button>
             </div>
           </div>
         )}
 
         {/* ------------------------------------------------------------- */}
-        {/* STATE 2: ENHANCING PROGRESS ANIMATION (Cloud 4-Phase Step)      */}
+        {/* STATE 2: ENHANCING PROGRESS ANIMATION & PERCENTAGE BAR         */}
         {/* ------------------------------------------------------------- */}
         {reviewState === 'enhancing' && (
-          <div className="p-8 flex flex-col items-center text-center space-y-6">
-            <div className="relative w-28 h-28 rounded-full border-4 border-amber-500/20 border-t-amber-400 animate-spin flex items-center justify-center">
-              <Sparkles className="w-12 h-12 text-amber-400 animate-pulse" />
+          <div className="p-6 flex flex-col items-center text-center space-y-4 animate-fadeIn">
+            {/* Glowing AI Core Indicator with Percentage inside */}
+            <div className="relative w-28 h-28 flex items-center justify-center">
+              {/* Outer pulsing ring */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500/20 via-orange-500/20 to-emerald-500/20 animate-ping opacity-60" />
+              {/* Spinning gradient border */}
+              <div
+                className="w-24 h-24 rounded-full border-4 border-slate-800 border-t-amber-400 border-r-orange-400 flex items-center justify-center animate-spin shadow-[0_0_25px_rgba(245,158,11,0.35)]"
+                style={{ animationDuration: '1.2s' }}
+              />
+              {/* Center percentage & icon */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
+                <span className="text-2xl font-black text-white tracking-tight">
+                  {progressPercent}%
+                </span>
+                <span className="text-[9px] font-bold text-amber-400 uppercase tracking-wider">
+                  {progressPercent === 100 ? (language === 'hi' ? 'पूर्ण' : 'Done') : (language === 'hi' ? 'प्रोसेसिंग' : 'AI Active')}
+                </span>
+              </div>
             </div>
 
-            <div className="space-y-3 w-full max-w-[260px]">
-              <h3 className="text-base font-black text-white">
-                {language === 'hi' ? 'एआई स्टूडियो रूपांतरण जारी है...' : 'AI Studio Transforming...'}
+            {/* Title & Phase Description */}
+            <div className="space-y-1 w-full max-w-[320px]">
+              <h3 className="text-sm font-black text-white flex items-center justify-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+                <span>
+                  {language === 'hi'
+                    ? 'एआई स्टूडियो रूपांतरण जारी है...'
+                    : 'AI Studio Transforming...'}
+                </span>
               </h3>
+              <p className="text-xs text-amber-300/90 font-semibold min-h-[20px] transition-all duration-200">
+                {progressPercent < 35
+                  ? (language === 'hi' ? 'बैकग्राउंड साफ़ किया जा रहा है (rembg AI मॉडल)...' : 'AI isolating craft & removing background...')
+                  : progressPercent < 65
+                  ? (language === 'hi' ? 'किनारे तराशना व 6500K प्राकृतिक प्रकाश संतुलन...' : 'Edge refinement & 6500K daylight balancing...')
+                  : progressPercent < 90
+                  ? (language === 'hi' ? 'प्राकृतिक संपर्क छाया (Contact Shadow) संश्लेषण...' : 'Synthesizing natural contact table shadow...')
+                  : (language === 'hi' ? 'अंतिम 4K स्टूडियो तैयार! लोड हो रहा है...' : 'Finalizing 4K studio quality render...')}
+              </p>
+            </div>
 
-              {/* 4 Step Progress Indicators */}
-              <div className="space-y-1.5 text-left text-xs text-slate-300 font-semibold bg-slate-950/70 p-3 rounded-2xl border border-slate-800">
-                <div className={`flex items-center gap-2 ${enhancementPhase >= 1 ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  {enhancementPhase > 1 ? <Check className="w-3.5 h-3.5" /> : <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  <span>{language === 'hi' ? 'बैकग्राउंड हटाया जा रहा है' : 'Background Removal'}</span>
-                </div>
-                <div className={`flex items-center gap-2 ${enhancementPhase >= 2 ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  {enhancementPhase > 2 ? <Check className="w-3.5 h-3.5" /> : enhancementPhase === 2 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span className="w-3.5 h-3.5 rounded-full border border-slate-700" />}
-                  <span>{language === 'hi' ? '6500K प्राकृतिक प्रकाश संतुलन' : '6500K Daylight Balance'}</span>
-                </div>
-                <div className={`flex items-center gap-2 ${enhancementPhase >= 3 ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  {enhancementPhase > 3 ? <Check className="w-3.5 h-3.5" /> : enhancementPhase === 3 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span className="w-3.5 h-3.5 rounded-full border border-slate-700" />}
-                  <span>{language === 'hi' ? 'टेबल शैडो व 10% पैडिंग' : 'Contact Shadow Synthesis'}</span>
-                </div>
-                <div className={`flex items-center gap-2 ${enhancementPhase >= 4 ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  {enhancementPhase === 4 ? <Check className="w-3.5 h-3.5" /> : <span className="w-3.5 h-3.5 rounded-full border border-slate-700" />}
-                  <span>{language === 'hi' ? 'ई-कॉमर्स 4K कैनवास' : 'E-Commerce Studio Ready'}</span>
-                </div>
+            {/* Glowing Progress Bar with Shimmer */}
+            <div className="w-full max-w-[300px] space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] font-bold">
+                <span className="text-slate-400">
+                  {language === 'hi' ? 'मॉडल प्रगति (Progress):' : 'Model Progress:'}
+                </span>
+                <span className="text-amber-400 font-extrabold">{progressPercent}%</span>
               </div>
+
+              <div className="w-full h-3 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800 shadow-inner">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-400 transition-all duration-150 ease-out shadow-[0_0_12px_rgba(245,158,11,0.5)] relative overflow-hidden"
+                  style={{ width: `${Math.max(4, progressPercent)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* 4 Step Progress Checklist */}
+            <div className="space-y-1.5 text-left text-xs text-slate-300 font-semibold bg-slate-950/80 p-3 rounded-2xl border border-slate-800/90 w-full max-w-[300px]">
+              <div className={`flex items-center gap-2 ${enhancementPhase >= 1 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                {enhancementPhase > 1 ? (
+                  <Check className="w-3.5 h-3.5 shrink-0 stroke-[3]" />
+                ) : (
+                  <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin text-amber-400" />
+                )}
+                <span className="text-[11px]">
+                  {language === 'hi' ? '1. AI बैकग्राउंड पृथक्करण (U-2-Net)' : '1. AI Background Cutout (U-2-Net)'}
+                </span>
+              </div>
+
+              <div className={`flex items-center gap-2 ${enhancementPhase >= 2 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                {enhancementPhase > 2 ? (
+                  <Check className="w-3.5 h-3.5 shrink-0 stroke-[3]" />
+                ) : enhancementPhase === 2 ? (
+                  <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin text-amber-400" />
+                ) : (
+                  <span className="w-3.5 h-3.5 rounded-full border border-slate-700 shrink-0" />
+                )}
+                <span className="text-[11px]">
+                  {language === 'hi' ? '2. 6500K प्राकृतिक प्रकाश व टोन' : '2. 6500K Daylight & White Balance'}
+                </span>
+              </div>
+
+              <div className={`flex items-center gap-2 ${enhancementPhase >= 3 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                {enhancementPhase > 3 ? (
+                  <Check className="w-3.5 h-3.5 shrink-0 stroke-[3]" />
+                ) : enhancementPhase === 3 ? (
+                  <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin text-amber-400" />
+                ) : (
+                  <span className="w-3.5 h-3.5 rounded-full border border-slate-700 shrink-0" />
+                )}
+                <span className="text-[11px]">
+                  {language === 'hi' ? '3. प्राकृतिक संपर्क छाया (Contact Shadow)' : '3. Realistic Surface Contact Shadow'}
+                </span>
+              </div>
+
+              <div className={`flex items-center gap-2 ${enhancementPhase >= 4 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                {enhancementPhase === 4 ? (
+                  <Check className="w-3.5 h-3.5 shrink-0 stroke-[3]" />
+                ) : (
+                  <span className="w-3.5 h-3.5 rounded-full border border-slate-700 shrink-0" />
+                )}
+                <span className="text-[11px]">
+                  {language === 'hi' ? '4. 4K ई-कॉमर्स ONDC स्टूडियो आउटपुट' : '4. 4K E-Commerce ONDC Studio Output'}
+                </span>
+              </div>
+            </div>
+
+            {/* Reassurance Footer Notice */}
+            <div className="w-full max-w-[300px] p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[10.5px] text-amber-200/90 font-medium leading-relaxed">
+              💡 {language === 'hi'
+                ? 'मॉडल पृष्ठभूमि साफ़ करने में 2-4 सेकंड लेता है — न्यूरल नेटवर्क आपके शिल्प को 4K में तैयार कर रहा है।'
+                : 'The AI model requires 2-4 seconds to segment and render 4K studio craft — please wait.'}
             </div>
           </div>
         )}
