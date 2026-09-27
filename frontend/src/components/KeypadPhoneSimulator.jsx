@@ -925,360 +925,409 @@ export default function KeypadPhoneSimulator({ onClose }) {
             </div>
           </div>
 
-          {/* Realistic Hardware Phone Chassis */}
-          <div className="w-[300px] sm:w-[320px] bg-[#1E242B] rounded-[44px] p-4 border-4 border-[#333E4A] shadow-[0_25px_60px_rgba(0,0,0,0.8),inset_0_2px_4px_rgba(255,255,255,0.15)] flex flex-col items-center relative">
+          {/* Realistic Hardware Phone Chassis with Authentic Depth & Ambient Ground Shadow */}
+          <div className="relative flex flex-col items-center">
+            {/* Ambient Ground Contact Shadow */}
+            <div className="absolute -bottom-5 inset-x-4 h-10 bg-black/80 blur-2xl rounded-full pointer-events-none -z-10" />
+            <div className="absolute -bottom-2 inset-x-8 h-4 bg-black/90 blur-md rounded-full pointer-events-none -z-10" />
 
-            {/* Top Earpiece Speaker Slit */}
-            <div className="w-14 h-1.5 rounded-full bg-[#0D1117] mb-3 shadow-inner" />
+            {/* Handheld Feature Phone Unibody Polycarbonate Chassis */}
+            <div className="w-[310px] sm:w-[330px] bg-gradient-to-b from-[#252c36] via-[#1c222a] to-[#13171e] rounded-[52px] p-4 sm:p-4.5 border-[3px] border-[#364250] shadow-[0_35px_80px_rgba(0,0,0,0.9),0_12px_28px_rgba(0,0,0,0.7),inset_0_2px_1.5px_rgba(255,255,255,0.22),inset_0_-4px_8px_rgba(0,0,0,0.85),inset_2px_0_3px_rgba(255,255,255,0.06),inset_-2px_0_3px_rgba(0,0,0,0.45)] flex flex-col items-center relative select-none">
 
-            {/* Brand Logo on Phone Bezel */}
-            <div className="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-2 font-mono flex items-center gap-1">
-              <span>SHILPSETU</span>
-              <span className="text-[8px] px-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                ZERO-SMARTPHONE
-              </span>
-            </div>
+              {/* Subtle Outer Bezel Matte Texture / Highlight Lip */}
+              <div className="absolute inset-[3px] rounded-[49px] border border-white/5 pointer-events-none" />
 
-            {/* ================================================================ */}
-            {/* RETRO BACKLIT MONOCHROME LCD DISPLAY (Greenish Dot Matrix Glow)  */}
-            {/* ================================================================ */}
-            <div className="w-full h-[180px] bg-[#6E8B62] rounded-2xl p-2.5 border-4 border-[#2A3525] shadow-inner text-[#142310] font-mono flex flex-col justify-between overflow-hidden relative select-none">
-
-              {/* LCD Top Status Bar */}
-              <div className="flex items-center justify-between text-[9px] font-black pb-1 border-b border-[#557049]/40 shrink-0">
-                <div className="flex items-center gap-1">
-                  {/* Signal Bars */}
-                  <div className="flex items-end gap-0.5 h-2.5">
-                    <span className="w-0.5 h-1 bg-[#142310]" />
-                    <span className="w-0.5 h-1.5 bg-[#142310]" />
-                    <span className="w-0.5 h-2 bg-[#142310]" />
-                    <span className="w-0.5 h-2.5 bg-[#142310]" />
-                  </div>
-                  <span>BSNL 2G</span>
-                </div>
-
-                {/* Call Timer or Network Status */}
-                <div className="text-[10px] font-black">
-                  {callState !== 'IDLE' && callState !== 'DIALING' ? (
-                    <span className="flex items-center gap-1">
-                      <Radio className="w-2.5 h-2.5 animate-pulse" />
-                      {formatTime(callDuration)}
-                    </span>
-                  ) : (
-                    <span>1800-208-SHILP</span>
-                  )}
-                </div>
-
-                {/* Battery Icon */}
-                <div className="flex items-center gap-0.5">
-                  <div className="w-4 h-2 border border-[#142310] rounded-xs p-0.5 flex gap-0.5">
-                    <span className="w-1 h-full bg-[#142310]" />
-                    <span className="w-1 h-full bg-[#142310]" />
-                  </div>
-                  <span className="w-0.5 h-1 bg-[#142310]" />
+              {/* Top Earpiece Speaker Slit with Acoustic Micro-Mesh */}
+              <div className="w-16 h-2 rounded-full bg-[#0a0e13] mb-3 p-[1px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.95),0_1px_1px_rgba(255,255,255,0.12)] border border-[#2b3542]/70 flex items-center justify-center">
+                <div className="w-full h-full rounded-full bg-[#12171e] flex items-center justify-center gap-1 opacity-80">
+                  <span className="w-1.5 h-0.5 rounded-full bg-[#1c242e]" />
+                  <span className="w-2.5 h-0.5 rounded-full bg-[#242d38]" />
+                  <span className="w-1.5 h-0.5 rounded-full bg-[#1c242e]" />
                 </div>
               </div>
 
-              {/* LCD Screen Dynamic Content by State */}
-              <div className="flex-1 flex flex-col justify-center items-center text-center px-1 py-1 overflow-hidden">
-                {/* STATE 1: IDLE */}
-                {callState === 'IDLE' && (
-                  <div className="space-y-1 animate-in fade-in">
-                    <div className="text-xs font-black uppercase tracking-tight">
-                      कला-वाणी IVR
-                    </div>
-                    <div className="text-[11px] font-extrabold bg-[#557049]/30 px-2 py-0.5 rounded">
-                      1800-208-7445
-                    </div>
-                    <p className="text-[9px] leading-tight opacity-90">
-                      सामान जोड़ने हेतु हरा बटन दबाएं
-                    </p>
-                    <div className="text-[8px] font-bold text-[#1F3318] pt-1">
-                      (Press Green Call Button)
-                    </div>
-                  </div>
-                )}
-
-                {/* STATE 2: DIALING */}
-                {callState === 'DIALING' && (
-                  <div className="space-y-1.5 animate-in fade-in">
-                    <PhoneCall className="w-6 h-6 mx-auto animate-bounce" />
-                    <div className="text-xs font-black">कॉल लग रहा है...</div>
-                    <div className="text-[10px] tracking-wider font-bold">1800-208-SHILP</div>
-                    <div className="text-[8px] opacity-80">Connecting to MoSJE Gateway...</div>
-                  </div>
-                )}
-
-                {/* STATE 3: WELCOME & LANGUAGE SELECTION */}
-                {callState === 'WELCOME_LANG' && (
-                  <div className="w-full space-y-0.5 text-left text-[9px] font-bold animate-in fade-in">
-                    <div className="text-center font-black text-[10px] pb-0.5 border-b border-[#557049]/30">
-                      भाषा चुनें / Select Lang
-                    </div>
-                    <div className="flex justify-between px-1">
-                      <button type="button" onClick={() => handleKeyPress('1')} className="hover:underline cursor-pointer font-bold">1: हिन्दी</button>
-                      <button type="button" onClick={() => handleKeyPress('2')} className="opacity-80 hover:underline cursor-pointer font-bold">2: मराठी</button>
-                      <button type="button" onClick={() => handleKeyPress('3')} className="opacity-80 hover:underline cursor-pointer font-bold">3: EN</button>
-                    </div>
-                    <div className="text-center text-[8px] pt-1 text-[#223B1A]">
-                      कीपैड पर 1, 2 या 3 दबाएं
-                    </div>
-                  </div>
-                )}
-
-                {/* STATE 4: PLAYING PROMPT */}
-                {callState === 'PLAYING_PROMPT' && (
-                  <div className="space-y-1 animate-in fade-in">
-                    <div className="text-[9px] font-black uppercase bg-[#557049]/30 px-2 py-0.5 rounded">
-                      सवाल {activeStepIndex + 1}/3
-                    </div>
-                    <div className="flex items-center justify-center gap-1.5 py-1">
-                      <Volume2 className="w-4 h-4 animate-pulse" />
-                      <span className="text-[10px] font-bold">
-                        {activeStepIndex === 0 ? (selectedLanguage === 'mr' ? 'वस्तूचे नाव' : selectedLanguage === 'en' ? 'Product Name' : 'उत्पाद का नाम') :
-                         activeStepIndex === 1 ? (selectedLanguage === 'mr' ? 'वापरलेले साहित्य' : selectedLanguage === 'en' ? 'Craft Material' : 'निर्माण सामग्री') :
-                         (selectedLanguage === 'mr' ? 'विक्री किंमत' : selectedLanguage === 'en' ? 'Selling Price' : 'बिक्री मूल्य')}
-                      </span>
-                    </div>
-                    <div className="text-[8px] opacity-80">
-                      {selectedLanguage === 'mr' ? 'कृपया काळजीपूर्वक ऐका...' : selectedLanguage === 'en' ? 'Please listen carefully...' : 'कृपया ध्यान से सुनें...'}
-                    </div>
-                  </div>
-                )}
-
-                {/* STATE 5: RECORDING (Mic Active + Waveform + Silence Timer) */}
-                {callState === 'RECORDING' && (
-                  <div className="w-full space-y-1 animate-in fade-in">
-                    <div className="flex items-center justify-between text-[9px] font-black">
-                      <span className="flex items-center gap-1 text-red-950 font-black">
-                        <span className="w-2 h-2 rounded-full bg-red-800 animate-ping" />
-                        रिकॉर्डिंग
-                      </span>
-                      <span>{recordingSeconds}s / 15s</span>
-                    </div>
-
-                    {/* LCD Live Audio Decibel Waveform */}
-                    <div className="flex items-end justify-center gap-1 h-7 bg-[#557049]/30 rounded p-1">
-                      {audioLevels.map((lvl, i) => (
-                        <span
-                          key={i}
-                          className="w-1.5 bg-[#142310] rounded-xs"
-                          style={{ height: `${lvl}px` }}
-                        />
-                      ))}
-                    </div>
-
-                    <div className="text-[8px] leading-tight">
-                      बोलें • पूरा होने पर <span className="font-black">#</span> दबाएं
-                    </div>
-                  </div>
-                )}
-
-                {/* STATE 6: PROCESSING VIA BHASHINI */}
-                {callState === 'PROCESSING' && (
-                  <div className="space-y-1.5 animate-in fade-in">
-                    <RefreshCw className="w-5 h-5 mx-auto animate-spin" />
-                    <div className="text-[10px] font-black">Bhashini ASR...</div>
-                    <div className="text-[8px] opacity-80">आवाज का पाठ में रूपांतरण जारी</div>
-                  </div>
-                )}
-
-                {/* STATE 7: CONFIRMATION READ-BACK */}
-                {callState === 'CONFIRMATION' && (
-                  <div className="w-full space-y-0.5 text-left text-[8px] leading-tight animate-in fade-in">
-                    <div className="text-center font-black text-[9px] pb-0.5 border-b border-[#557049]/30">
-                      {selectedLanguage === 'mr' ? 'पुष्टी करा (Confirm)' : selectedLanguage === 'en' ? 'Confirm Details' : 'पुष्टि करें (Confirm)'}
-                    </div>
-                    <div className="truncate font-bold">{selectedLanguage === 'mr' ? 'वस्तू' : selectedLanguage === 'en' ? 'Item' : 'वस्तू'}: {formData.product_name || (selectedLanguage === 'mr' ? 'कलश' : 'कलश')}</div>
-                    <div className="truncate font-bold">{selectedLanguage === 'en' ? 'Material' : 'सामग्री'}: {formData.material || (selectedLanguage === 'mr' ? 'माती' : 'मिट्टी')}</div>
-                    <div className="font-black">{selectedLanguage === 'mr' ? 'किंमत' : selectedLanguage === 'en' ? 'Price' : 'मूल्य'}: ₹{formData.price || 450}</div>
-                    <div className="flex justify-between pt-0.5 font-black text-[9px] text-[#1F3617]">
-                      <span>1: {selectedLanguage === 'mr' ? 'पुष्टी ✓' : selectedLanguage === 'en' ? 'Confirm ✓' : 'पुष्टि ✓'}</span>
-                      <span>2: {selectedLanguage === 'mr' ? 'दुरुस्ती ↺' : selectedLanguage === 'en' ? 'Redo ↺' : 'सुधारें ↺'}</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* STATE: PRICE_WARNING (FAIR PRICE DISCLAIMER) */}
-                {callState === 'PRICE_WARNING' && (
-                  <div className="w-full space-y-0.5 text-left text-[8px] leading-tight animate-in fade-in">
-                    <div className="text-center font-black text-[9px] pb-0.5 border-b border-[#557049]/40 text-[#251010] flex items-center justify-center gap-1">
-                      <span>⚠️ कम मूल्य चेतावनी (Low Price)</span>
-                    </div>
-                    <div className="flex justify-between font-bold pt-0.5">
-                      <span>बोली गई कीमत:</span>
-                      <span className="line-through text-[#3a1d1d]">₹{lowPriceWarning?.spoken || 200}</span>
-                    </div>
-                    <div className="flex justify-between font-black text-[#13280e]">
-                      <span>उचित मूल्य (MSP):</span>
-                      <span className="bg-[#557049]/30 px-1 rounded text-[8.5px]">₹{lowPriceWarning?.recommended || 450}</span>
-                    </div>
-                    <div className="text-[7px] text-[#241313] font-bold leading-tight pt-0.5">
-                      यह शिल्प के न्यूनतम बाज़ार मूल्य से कम है।
-                    </div>
-                    <div className="flex justify-between pt-1 font-black text-[8.5px] text-[#1F3617] border-t border-[#557049]/30">
-                      <span>1: ₹450 चुनें ✓</span>
-                      <span>2: फिर बोलें ↺</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* STATE 8: REDO SELECTION */}
-                {callState === 'REDO_SELECT' && (
-                  <div className="w-full space-y-0.5 text-left text-[8px] font-bold animate-in fade-in">
-                    <div className="text-center font-black text-[9px] pb-0.5 border-b border-[#557049]/30">
-                      सुधारें (Redo Question)
-                    </div>
-                    <div>1: उत्पाद का नाम बदलें</div>
-                    <div>2: सामग्री बदलें</div>
-                    <div>3: मूल्य बदलें</div>
-                  </div>
-                )}
-
-                {/* STATE 9: SUBMITTING DRAFT */}
-                {callState === 'SUBMITTING' && (
-                  <div className="space-y-1.5 animate-in fade-in">
-                    <Send className="w-5 h-5 mx-auto animate-bounce" />
-                    <div className="text-[10px] font-black">ड्राफ्ट सेव हो रहा है...</div>
-                    <div className="text-[8px] opacity-80">SMS ग्राम समन्वयक को प्रेषित</div>
-                  </div>
-                )}
-
-                {/* STATE 10: RECEIPT & COORDINATOR SMS SUMMARY */}
-                {callState === 'RECEIPT' && (
-                  <div className="w-full space-y-0.5 text-left text-[8px] leading-tight animate-in fade-in">
-                    <div className="text-center font-black text-[9px] text-emerald-950 pb-0.5 border-b border-[#557049]/40">
-                      ✓ ड्राफ्ट रसीद जारी
-                    </div>
-                    <div className="font-mono text-[7.5px] truncate font-bold">ID: {draftResult?.draft_id}</div>
-                    <div className="truncate">वस्तू: {formData.product_name}</div>
-                    <div className="font-black">मूल्य: ₹{formData.price} • ड्राफ्ट</div>
-                    <div className="text-[7px] text-[#1A2E14] font-bold pt-0.5 leading-tight">
-                      SMS प्रेषित: समन्वयक फोटो खींचने आएंगे
-                    </div>
-                  </div>
-                )}
-
-                {/* STATE 11: ERROR */}
-                {callState === 'ERROR' && (
-                  <div className="space-y-1 text-red-950 animate-in fade-in">
-                    <AlertCircle className="w-5 h-5 mx-auto" />
-                    <div className="text-[10px] font-black">त्रुटि / Error</div>
-                    <div className="text-[8px] leading-tight line-clamp-2">
-                      {lastError?.message || 'कॉल प्रक्रिया विफल रही'}
-                    </div>
-                    <div className="text-[7.5px] font-bold pt-0.5">लाल बटन दबाएं (Press End Call)</div>
-                  </div>
-                )}
+              {/* Brand Logo & Model Badge Debossed on Phone Bezel */}
+              <div className="flex items-center gap-1.5 mb-2.5">
+                <span className="text-[10px] font-black tracking-[0.25em] text-slate-300 uppercase font-mono drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                  SHILPSETU
+                </span>
+                <span className="text-[8px] font-black px-1.5 py-0.5 rounded-[4px] bg-amber-400/15 text-amber-300 border border-amber-400/35 tracking-wider font-mono shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+                  ZERO-SMARTPHONE
+                </span>
               </div>
 
-              {/* LCD Bottom Bar */}
-              <div className="flex items-center justify-between text-[8px] font-black pt-1 border-t border-[#557049]/40 shrink-0">
-                <span>{callState === 'IDLE' ? 'MENU' : callState === 'PRICE_WARNING' ? '₹450 (1)' : 'INFO'}</span>
-                <span>{callState === 'IDLE' ? 'DIAL' : callState === 'PRICE_WARNING' ? 'WARN' : 'HOLD'}</span>
-                <span>{callState === 'IDLE' ? 'NAMES' : callState === 'PRICE_WARNING' ? 'REDO (2)' : 'BACK'}</span>
+              {/* ================================================================ */}
+              {/* RETRO BACKLIT MONOCHROME LCD DISPLAY (Recessed Window & Glass)   */}
+              {/* ================================================================ */}
+              <div className="w-full bg-[#0b0f14] rounded-[22px] p-[7px] border-2 border-[#2b3644] shadow-[inset_0_4px_10px_rgba(0,0,0,0.95),0_1px_2px_rgba(255,255,255,0.1)] mb-3 relative">
+                
+                {/* Real LCD Acrylic Glass Housing */}
+                <div 
+                  className="w-full h-[184px] bg-[#708c60] rounded-[16px] p-2.5 border-2 border-[#374930] shadow-[inset_0_3px_8px_rgba(18,32,14,0.65),inset_0_-2px_4px_rgba(18,32,14,0.45)] text-[#10220c] font-mono flex flex-col justify-between overflow-hidden relative"
+                  style={{
+                    backgroundImage: 'radial-gradient(#4d693f 0.75px, transparent 0.75px)',
+                    backgroundSize: '3.5px 3.5px'
+                  }}
+                >
+                  {/* Diagonal Glass Sheen Reflection (Realistic Acrylic Glare) */}
+                  <div className="absolute inset-0 pointer-events-none rounded-[15px] bg-gradient-to-br from-white/25 via-white/5 to-transparent h-2/3 w-full -skew-y-12 -translate-y-3 opacity-70 z-20" />
+
+                  {/* LCD Top Status Bar */}
+                  <div className="flex items-center justify-between text-[9px] font-black pb-1.5 border-b border-[#4d6640]/50 shrink-0 relative z-10">
+                    <div className="flex items-center gap-1.5">
+                      {/* Signal Bars (Step-Ladder 2G) */}
+                      <div className="flex items-end gap-[1.5px] h-3">
+                        <span className="w-[2px] h-1.5 bg-[#10220c]" />
+                        <span className="w-[2px] h-2 bg-[#10220c]" />
+                        <span className="w-[2px] h-2.5 bg-[#10220c]" />
+                        <span className="w-[2px] h-3 bg-[#10220c]" />
+                      </div>
+                      <span className="tracking-tighter">BSNL 2G</span>
+                    </div>
+
+                    {/* Toll-Free ID or Active Call Timer */}
+                    <div className="text-[10px] font-black tracking-tight">
+                      {callState !== 'IDLE' && callState !== 'DIALING' ? (
+                        <span className="flex items-center gap-1 text-[#0b1708]">
+                          <Radio className="w-2.5 h-2.5 animate-pulse" />
+                          {formatTime(callDuration)}
+                        </span>
+                      ) : (
+                        <span className="tracking-wider">1800-208-SHILP</span>
+                      )}
+                    </div>
+
+                    {/* Battery Indicator with Segmented Power Bars */}
+                    <div className="flex items-center gap-0.5">
+                      <div className="w-[18px] h-2.5 border-[1.5px] border-[#10220c] rounded-[2px] p-[1px] flex gap-[1.5px]">
+                        <span className="w-1 h-full bg-[#10220c]" />
+                        <span className="w-1 h-full bg-[#10220c]" />
+                        <span className="w-1 h-full bg-[#10220c]" />
+                      </div>
+                      <span className="w-[1.5px] h-1 bg-[#10220c] rounded-r-[1px]" />
+                    </div>
+                  </div>
+
+                  {/* LCD Screen Dynamic Content by State (High-Contrast Ink) */}
+                  <div className="flex-1 flex flex-col justify-center items-center text-center px-1 py-1 overflow-hidden relative z-10">
+                    {/* STATE 1: IDLE */}
+                    {callState === 'IDLE' && (
+                      <div className="space-y-1 animate-in fade-in">
+                        <div className="text-xs font-black uppercase tracking-wider drop-shadow-[0_0.5px_0_rgba(180,215,160,0.4)]">
+                          कला-वाणी IVR
+                        </div>
+                        <div className="text-[11px] font-extrabold bg-[#4d6640]/30 px-2 py-0.5 rounded shadow-[inset_0_1px_1px_rgba(0,0,0,0.15)]">
+                          1800-208-7445
+                        </div>
+                        <p className="text-[9px] leading-tight font-extrabold opacity-95">
+                          सामान जोड़ने हेतु हरा बटन दबाएं
+                        </p>
+                        <div className="text-[8px] font-bold text-[#1a3314] pt-0.5">
+                          (Press Green Call Button)
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STATE 2: DIALING */}
+                    {callState === 'DIALING' && (
+                      <div className="space-y-1.5 animate-in fade-in">
+                        <PhoneCall className="w-6 h-6 mx-auto animate-bounce text-[#10220c]" />
+                        <div className="text-xs font-black tracking-tight">कॉल लग रहा है...</div>
+                        <div className="text-[10px] tracking-wider font-extrabold bg-[#4d6640]/30 px-2 py-0.5 rounded">1800-208-SHILP</div>
+                        <div className="text-[8px] font-bold opacity-85">Connecting to MoSJE Gateway...</div>
+                      </div>
+                    )}
+
+                    {/* STATE 3: WELCOME & LANGUAGE SELECTION */}
+                    {callState === 'WELCOME_LANG' && (
+                      <div className="w-full space-y-0.5 text-left text-[9px] font-bold animate-in fade-in">
+                        <div className="text-center font-black text-[10px] pb-0.5 border-b border-[#4d6640]/40">
+                          भाषा चुनें / Select Lang
+                        </div>
+                        <div className="flex justify-between px-1 pt-1 font-extrabold">
+                          <button type="button" onClick={() => handleKeyPress('1')} className="hover:underline cursor-pointer">1: हिन्दी</button>
+                          <button type="button" onClick={() => handleKeyPress('2')} className="opacity-90 hover:underline cursor-pointer">2: मराठी</button>
+                          <button type="button" onClick={() => handleKeyPress('3')} className="opacity-90 hover:underline cursor-pointer">3: EN</button>
+                        </div>
+                        <div className="text-center text-[8px] pt-1.5 font-black text-[#1c3614]">
+                          कीपैड पर 1, 2 या 3 दबाएं
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STATE 4: PLAYING PROMPT */}
+                    {callState === 'PLAYING_PROMPT' && (
+                      <div className="space-y-1 animate-in fade-in">
+                        <div className="text-[9px] font-black uppercase bg-[#4d6640]/35 px-2 py-0.5 rounded">
+                          सवाल {activeStepIndex + 1}/3
+                        </div>
+                        <div className="flex items-center justify-center gap-1.5 py-1">
+                          <Volume2 className="w-4 h-4 animate-pulse text-[#10220c]" />
+                          <span className="text-[10px] font-extrabold">
+                            {activeStepIndex === 0 ? (selectedLanguage === 'mr' ? 'वस्तूचे नाव' : selectedLanguage === 'en' ? 'Product Name' : 'उत्पाद का नाम') :
+                             activeStepIndex === 1 ? (selectedLanguage === 'mr' ? 'वापरलेले साहित्य' : selectedLanguage === 'en' ? 'Craft Material' : 'निर्माण सामग्री') :
+                             (selectedLanguage === 'mr' ? 'विक्री किंमत' : selectedLanguage === 'en' ? 'Selling Price' : 'बिक्री मूल्य')}
+                          </span>
+                        </div>
+                        <div className="text-[8px] font-bold opacity-85">
+                          {selectedLanguage === 'mr' ? 'कृपया काळजीपूर्वक ऐका...' : selectedLanguage === 'en' ? 'Please listen carefully...' : 'कृपया ध्यान से सुनें...'}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STATE 5: RECORDING (Mic Active + Waveform + Silence Timer) */}
+                    {callState === 'RECORDING' && (
+                      <div className="w-full space-y-1 animate-in fade-in">
+                        <div className="flex items-center justify-between text-[9px] font-black">
+                          <span className="flex items-center gap-1 text-[#2d0909] font-black">
+                            <span className="w-2 h-2 rounded-full bg-[#3b0d0d] animate-ping" />
+                            रिकॉर्डिंग
+                          </span>
+                          <span className="font-mono">{recordingSeconds}s / 15s</span>
+                        </div>
+
+                        {/* LCD Live Audio Decibel Waveform */}
+                        <div className="flex items-end justify-center gap-1 h-7 bg-[#4d6640]/35 rounded p-1 shadow-inner">
+                          {audioLevels.map((lvl, i) => (
+                            <span
+                              key={i}
+                              className="w-1.5 bg-[#10220c] rounded-xs"
+                              style={{ height: `${lvl}px` }}
+                            />
+                          ))}
+                        </div>
+
+                        <div className="text-[8px] font-bold leading-tight">
+                          बोलें • पूरा होने पर <span className="font-black underline">#</span> दबाएं
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STATE 6: PROCESSING VIA BHASHINI */}
+                    {callState === 'PROCESSING' && (
+                      <div className="space-y-1.5 animate-in fade-in">
+                        <RefreshCw className="w-5 h-5 mx-auto animate-spin text-[#10220c]" />
+                        <div className="text-[10px] font-black">Bhashini ASR...</div>
+                        <div className="text-[8px] font-bold opacity-85">आवाज का पाठ में रूपांतरण जारी</div>
+                      </div>
+                    )}
+
+                    {/* STATE 7: CONFIRMATION READ-BACK */}
+                    {callState === 'CONFIRMATION' && (
+                      <div className="w-full space-y-0.5 text-left text-[8px] leading-tight animate-in fade-in">
+                        <div className="text-center font-black text-[9px] pb-0.5 border-b border-[#4d6640]/40">
+                          {selectedLanguage === 'mr' ? 'पुष्टी करा (Confirm)' : selectedLanguage === 'en' ? 'Confirm Details' : 'पुष्टि करें (Confirm)'}
+                        </div>
+                        <div className="truncate font-extrabold">{selectedLanguage === 'mr' ? 'वस्तू' : selectedLanguage === 'en' ? 'Item' : 'वस्तू'}: {formData.product_name || (selectedLanguage === 'mr' ? 'कलश' : 'कलश')}</div>
+                        <div className="truncate font-extrabold">{selectedLanguage === 'en' ? 'Material' : 'सामग्री'}: {formData.material || (selectedLanguage === 'mr' ? 'माती' : 'मिट्टी')}</div>
+                        <div className="font-black">{selectedLanguage === 'mr' ? 'किंमत' : selectedLanguage === 'en' ? 'Price' : 'मूल्य'}: ₹{formData.price || 450}</div>
+                        <div className="flex justify-between pt-0.5 font-black text-[9px] text-[#1c3614]">
+                          <span>1: {selectedLanguage === 'mr' ? 'पुष्टी ✓' : selectedLanguage === 'en' ? 'Confirm ✓' : 'पुष्टि ✓'}</span>
+                          <span>2: {selectedLanguage === 'mr' ? 'दुरुस्ती ↺' : selectedLanguage === 'en' ? 'Redo ↺' : 'सुधारें ↺'}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STATE: PRICE_WARNING (FAIR PRICE DISCLAIMER) */}
+                    {callState === 'PRICE_WARNING' && (
+                      <div className="w-full space-y-0.5 text-left text-[8px] leading-tight animate-in fade-in">
+                        <div className="text-center font-black text-[9px] pb-0.5 border-b border-[#4d6640]/50 text-[#250d0d] flex items-center justify-center gap-1">
+                          <span>⚠️ कम मूल्य चेतावनी (Low Price)</span>
+                        </div>
+                        <div className="flex justify-between font-bold pt-0.5">
+                          <span>बोली गई कीमत:</span>
+                          <span className="line-through text-[#3a1d1d]">₹{lowPriceWarning?.spoken || 200}</span>
+                        </div>
+                        <div className="flex justify-between font-black text-[#10220c]">
+                          <span>उचित मूल्य (MSP):</span>
+                          <span className="bg-[#4d6640]/35 px-1 rounded text-[8.5px]">₹{lowPriceWarning?.recommended || 450}</span>
+                        </div>
+                        <div className="text-[7px] text-[#241313] font-bold leading-tight pt-0.5">
+                          यह शिल्प के न्यूनतम बाज़ार मूल्य से कम है।
+                        </div>
+                        <div className="flex justify-between pt-1 font-black text-[8.5px] text-[#1c3614] border-t border-[#4d6640]/40">
+                          <span>1: ₹450 चुनें ✓</span>
+                          <span>2: फिर बोलें ↺</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STATE 8: REDO SELECTION */}
+                    {callState === 'REDO_SELECT' && (
+                      <div className="w-full space-y-0.5 text-left text-[8px] font-extrabold animate-in fade-in">
+                        <div className="text-center font-black text-[9px] pb-0.5 border-b border-[#4d6640]/40">
+                          सुधारें (Redo Question)
+                        </div>
+                        <div>1: उत्पाद का नाम बदलें</div>
+                        <div>2: सामग्री बदलें</div>
+                        <div>3: मूल्य बदलें</div>
+                      </div>
+                    )}
+
+                    {/* STATE 9: SUBMITTING DRAFT */}
+                    {callState === 'SUBMITTING' && (
+                      <div className="space-y-1.5 animate-in fade-in">
+                        <Send className="w-5 h-5 mx-auto animate-bounce text-[#10220c]" />
+                        <div className="text-[10px] font-black">ड्राफ्ट सेव हो रहा है...</div>
+                        <div className="text-[8px] font-bold opacity-85">SMS ग्राम समन्वयक को प्रेषित</div>
+                      </div>
+                    )}
+
+                    {/* STATE 10: RECEIPT & COORDINATOR SMS SUMMARY */}
+                    {callState === 'RECEIPT' && (
+                      <div className="w-full space-y-0.5 text-left text-[8px] leading-tight animate-in fade-in">
+                        <div className="text-center font-black text-[9px] text-[#0d260c] pb-0.5 border-b border-[#4d6640]/50">
+                          ✓ ड्राफ्ट रसीद जारी
+                        </div>
+                        <div className="font-mono text-[7.5px] truncate font-extrabold">ID: {draftResult?.draft_id}</div>
+                        <div className="truncate font-bold">वस्तू: {formData.product_name}</div>
+                        <div className="font-black">मूल्य: ₹{formData.price} • ड्राफ्ट</div>
+                        <div className="text-[7px] text-[#142810] font-bold pt-0.5 leading-tight">
+                          SMS प्रेषित: समन्वयक फोटो खींचने आएंगे
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STATE 11: ERROR */}
+                    {callState === 'ERROR' && (
+                      <div className="space-y-1 text-[#2d0909] animate-in fade-in">
+                        <AlertCircle className="w-5 h-5 mx-auto text-[#2d0909]" />
+                        <div className="text-[10px] font-black">त्रुटि / Error</div>
+                        <div className="text-[8px] leading-tight line-clamp-2 font-bold">
+                          {lastError?.message || 'कॉल प्रक्रिया विफल रही'}
+                        </div>
+                        <div className="text-[7.5px] font-black pt-0.5">लाल बटन दबाएं (Press End Call)</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* LCD Bottom Soft Key Labels Bar */}
+                  <div className="flex items-center justify-between text-[8px] font-black pt-1 border-t border-[#4d6640]/50 shrink-0 relative z-10 tracking-wider">
+                    <span>{callState === 'IDLE' ? 'MENU' : callState === 'PRICE_WARNING' ? '₹450 (1)' : 'INFO'}</span>
+                    <span>{callState === 'IDLE' ? 'DIAL' : callState === 'PRICE_WARNING' ? 'WARN' : 'HOLD'}</span>
+                    <span>{callState === 'IDLE' ? 'NAMES' : callState === 'PRICE_WARNING' ? 'REDO (2)' : 'BACK'}</span>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Soft Keys & Directional Navigation Pad */}
-            <div className="w-full mt-3 px-2 flex items-center justify-between">
-              {/* Left Soft Key */}
-              <button
-                onClick={() => {
-                  if (callState === 'IDLE') handleStartCall();
-                  else if (callState === 'PRICE_WARNING') handleKeyPress('1');
-                  else handleKeyPress('1');
-                }}
-                className="w-12 h-6 bg-[#2B3540] hover:bg-[#394654] active:translate-y-0.5 rounded-lg border border-[#445363] text-[9px] font-black text-slate-300 shadow-md cursor-pointer flex items-center justify-center"
-              >
-                ──
-              </button>
-
-              {/* Center D-Pad Navigation Pill */}
-              <div className="w-16 h-12 bg-[#262F38] rounded-2xl border-2 border-[#3D4C5C] shadow-md flex items-center justify-center p-1">
+              {/* ================================================================ */}
+              {/* TACTILE NAVIGATION CONTROLS: SOFT KEYS & 4-WAY D-PAD ROCKER      */}
+              {/* ================================================================ */}
+              <div className="w-full mt-1 px-1 flex items-center justify-between gap-2">
+                {/* Left Soft Key */}
                 <button
                   onClick={() => {
                     if (callState === 'IDLE') handleStartCall();
-                    else if (callState === 'RECORDING') handleKeyPress('#');
                     else if (callState === 'PRICE_WARNING') handleKeyPress('1');
+                    else handleKeyPress('1');
                   }}
-                  className="w-8 h-8 rounded-full bg-[#181F26] hover:bg-[#202933] active:scale-95 border border-[#4A5D70] flex items-center justify-center text-[10px] font-black text-amber-400 cursor-pointer shadow-inner"
-                  title="OK / Select"
+                  className="w-13 h-7 bg-gradient-to-b from-[#34404e] via-[#26303b] to-[#1c232a] hover:from-[#3c4a5b] hover:to-[#222b34] active:translate-y-0.5 rounded-[10px] border-t border-[#4e5f73] border-b-2 border-[#12171c] border-x border-[#2d3744] shadow-[0_4px_8px_rgba(0,0,0,0.6),inset_0_1.5px_0.5px_rgba(255,255,255,0.22),inset_0_-2px_3px_rgba(0,0,0,0.4)] cursor-pointer flex items-center justify-center transition-all group"
+                  title="Left Soft Key"
                 >
-                  OK
+                  <span className="w-4 h-[2px] rounded-full bg-slate-300 group-active:scale-95 shadow-[inset_0_1px_1px_rgba(0,0,0,0.8),0_1px_0_rgba(255,255,255,0.25)]" />
+                </button>
+
+                {/* Center 4-Way D-Pad Navigation Rocker with Concave OK Dish */}
+                <div className="w-18 h-13 bg-gradient-to-b from-[#2e3946] via-[#212a33] to-[#171e25] rounded-[22px] p-1 border-2 border-[#425264] shadow-[0_6px_14px_rgba(0,0,0,0.75),inset_0_1.5px_1px_rgba(255,255,255,0.25),inset_0_-2px_4px_rgba(0,0,0,0.8)] relative flex items-center justify-center">
+                  {/* Directional Guide Marks */}
+                  <span className="absolute top-0.5 text-[6.5px] text-slate-400/60 font-black leading-none pointer-events-none">▲</span>
+                  <span className="absolute bottom-0.5 text-[6.5px] text-slate-400/60 font-black leading-none pointer-events-none">▼</span>
+                  <span className="absolute left-1 text-[6.5px] text-slate-400/60 font-black leading-none pointer-events-none">◀</span>
+                  <span className="absolute right-1 text-[6.5px] text-slate-400/60 font-black leading-none pointer-events-none">▶</span>
+
+                  {/* Center Tactile OK Key */}
+                  <button
+                    onClick={() => {
+                      if (callState === 'IDLE') handleStartCall();
+                      else if (callState === 'RECORDING') handleKeyPress('#');
+                      else if (callState === 'PRICE_WARNING') handleKeyPress('1');
+                    }}
+                    className="w-9 h-9 rounded-full bg-gradient-to-b from-[#222b35] via-[#171e25] to-[#10141a] hover:from-[#2a3542] hover:to-[#141920] active:scale-90 border border-[#48596c] shadow-[0_2px_5px_rgba(0,0,0,0.85),inset_0_2px_4px_rgba(0,0,0,0.95),inset_0_-1px_1.5px_rgba(255,255,255,0.18)] flex items-center justify-center text-[10.5px] font-black text-amber-400 cursor-pointer transition-all"
+                    title="OK / Select"
+                  >
+                    <span className="tracking-tight drop-shadow-[0_0_6px_rgba(245,158,11,0.6)]">OK</span>
+                  </button>
+                </div>
+
+                {/* Right Soft Key */}
+                <button
+                  onClick={() => {
+                    if (callState === 'PRICE_WARNING') handleKeyPress('2');
+                    else if (callState !== 'IDLE') handleEndCall();
+                  }}
+                  className="w-13 h-7 bg-gradient-to-b from-[#34404e] via-[#26303b] to-[#1c232a] hover:from-[#3c4a5b] hover:to-[#222b34] active:translate-y-0.5 rounded-[10px] border-t border-[#4e5f73] border-b-2 border-[#12171c] border-x border-[#2d3744] shadow-[0_4px_8px_rgba(0,0,0,0.6),inset_0_1.5px_0.5px_rgba(255,255,255,0.22),inset_0_-2px_3px_rgba(0,0,0,0.4)] cursor-pointer flex items-center justify-center transition-all group"
+                  title="Right Soft Key"
+                >
+                  <span className="w-4 h-[2px] rounded-full bg-slate-300 group-active:scale-95 shadow-[inset_0_1px_1px_rgba(0,0,0,0.8),0_1px_0_rgba(255,255,255,0.25)]" />
                 </button>
               </div>
 
-              {/* Right Soft Key */}
-              <button
-                onClick={() => {
-                  if (callState === 'PRICE_WARNING') handleKeyPress('2');
-                  else if (callState !== 'IDLE') handleEndCall();
-                }}
-                className="w-12 h-6 bg-[#2B3540] hover:bg-[#394654] active:translate-y-0.5 rounded-lg border border-[#445363] text-[9px] font-black text-slate-300 shadow-md cursor-pointer flex items-center justify-center"
-              >
-                ──
-              </button>
-            </div>
-
-            {/* Dedicated Call / End Call Buttons */}
-            <div className="w-full mt-2.5 px-2 flex items-center justify-between">
-              {/* Green Call Button */}
-              <button
-                onClick={handleStartCall}
-                disabled={callState !== 'IDLE'}
-                className="w-14 h-9 bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 active:translate-y-0.5 disabled:opacity-40 rounded-xl border border-emerald-400/50 shadow-[0_4px_10px_rgba(16,185,129,0.3)] flex items-center justify-center text-white cursor-pointer transition-all"
-                title="Dial / Call (Green)"
-              >
-                <Phone className="w-4 h-4" />
-              </button>
-
-              {/* Red End-Call Button */}
-              <button
-                onClick={handleEndCall}
-                disabled={callState === 'IDLE'}
-                className="w-14 h-9 bg-gradient-to-b from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 active:translate-y-0.5 disabled:opacity-40 rounded-xl border border-rose-400/50 shadow-[0_4px_10px_rgba(244,63,94,0.3)] flex items-center justify-center text-white cursor-pointer transition-all"
-                title="Hang Up / End Call (Red)"
-              >
-                <PhoneOff className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* ================================================================ */}
-            {/* 3x4 PHYSICAL NUMERIC KEYPAD WITH DUAL-TONE DTMF SYNTHESIS        */}
-            {/* ================================================================ */}
-            <div className="w-full grid grid-cols-3 gap-2 mt-3 px-1">
-              {[
-                { key: '1', sub: '. , ?' },
-                { key: '2', sub: 'ABC' },
-                { key: '3', sub: 'DEF' },
-                { key: '4', sub: 'GHI' },
-                { key: '5', sub: 'JKL' },
-                { key: '6', sub: 'MNO' },
-                { key: '7', sub: 'PQRS' },
-                { key: '8', sub: 'TUV' },
-                { key: '9', sub: 'WXYZ' },
-                { key: '*', sub: '+' },
-                { key: '0', sub: '_' },
-                { key: '#', sub: '✓' },
-              ].map(({ key, sub }) => (
+              {/* ================================================================ */}
+              {/* DEDICATED CALL & END-CALL ILLUMINATED KEYS                       */}
+              {/* ================================================================ */}
+              <div className="w-full mt-2 px-1 flex items-center justify-between gap-3">
+                {/* Green Call Button with Translucent Backlit Glow */}
                 <button
-                  key={key}
-                  onClick={() => handleKeyPress(key)}
-                  className="h-11 bg-gradient-to-b from-[#2B3540] to-[#202830] hover:from-[#35414E] hover:to-[#27323C] active:translate-y-0.5 rounded-xl border border-[#404E5C] text-slate-100 shadow-[0_3px_6px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] flex flex-col items-center justify-center cursor-pointer transition-all group select-none"
+                  onClick={handleStartCall}
+                  disabled={callState !== 'IDLE'}
+                  className="w-15 h-9.5 bg-gradient-to-b from-[#10b981] via-[#059669] to-[#047857] hover:from-[#34d399] hover:to-[#059669] active:translate-y-0.5 disabled:opacity-40 rounded-[14px] border-t border-emerald-300/70 border-b-2 border-emerald-950 border-x border-emerald-600 shadow-[0_5px_14px_rgba(16,185,129,0.45),0_2px_4px_rgba(0,0,0,0.6),inset_0_2px_1px_rgba(255,255,255,0.45),inset_0_-2px_4px_rgba(0,0,0,0.4)] flex items-center justify-center text-white cursor-pointer transition-all"
+                  title="Dial / Call (Green)"
                 >
-                  <span className="text-sm font-black tracking-tight leading-none group-active:scale-95">
-                    {key}
-                  </span>
-                  <span className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider leading-none mt-0.5 font-mono">
-                    {sub}
-                  </span>
+                  <Phone className="w-4.5 h-4.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
                 </button>
-              ))}
-            </div>
 
-            {/* Bottom Microphone Hole */}
-            <div className="w-1.5 h-1.5 rounded-full bg-[#0D1117] mt-3 shadow-inner" />
+                {/* Red End-Call Button with Translucent Backlit Glow */}
+                <button
+                  onClick={handleEndCall}
+                  disabled={callState === 'IDLE'}
+                  className="w-15 h-9.5 bg-gradient-to-b from-[#f43f5e] via-[#e11d48] to-[#be123c] hover:from-[#fb7185] hover:to-[#e11d48] active:translate-y-0.5 disabled:opacity-40 rounded-[14px] border-t border-rose-300/70 border-b-2 border-rose-950 border-x border-rose-700 shadow-[0_5px_14px_rgba(244,63,94,0.45),0_2px_4px_rgba(0,0,0,0.6),inset_0_2px_1px_rgba(255,255,255,0.4),inset_0_-2px_4px_rgba(0,0,0,0.4)] flex items-center justify-center text-white cursor-pointer transition-all"
+                  title="Hang Up / End Call (Red)"
+                >
+                  <PhoneOff className="w-4.5 h-4.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+                </button>
+              </div>
+
+              {/* ================================================================ */}
+              {/* 3x4 PHYSICAL NUMERIC KEYPAD WITH 3D TACTILE BEVELS & SHADOWS     */}
+              {/* ================================================================ */}
+              <div className="w-full grid grid-cols-3 gap-2 mt-3 px-0.5">
+                {[
+                  { key: '1', sub: '. , ?' },
+                  { key: '2', sub: 'ABC' },
+                  { key: '3', sub: 'DEF' },
+                  { key: '4', sub: 'GHI' },
+                  { key: '5', sub: 'JKL' },
+                  { key: '6', sub: 'MNO' },
+                  { key: '7', sub: 'PQRS' },
+                  { key: '8', sub: 'TUV' },
+                  { key: '9', sub: 'WXYZ' },
+                  { key: '*', sub: '+' },
+                  { key: '0', sub: '_' },
+                  { key: '#', sub: '✓' },
+                ].map(({ key, sub }) => (
+                  <button
+                    key={key}
+                    onClick={() => handleKeyPress(key)}
+                    className="h-11.5 bg-gradient-to-b from-[#2e3744] via-[#232b36] to-[#192028] hover:from-[#374251] hover:to-[#1e2630] active:translate-y-0.5 rounded-[13px] border-t border-[#4b5a6d]/80 border-b-2 border-[#0f1419] border-x border-[#2d3744] text-slate-100 shadow-[0_5px_9px_-1px_rgba(0,0,0,0.7),0_2px_4px_-1px_rgba(0,0,0,0.5),inset_0_1.5px_0.5px_rgba(255,255,255,0.22),inset_0_-2px_4px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center cursor-pointer transition-all group select-none relative"
+                  >
+                    {/* Tactile 5-Key Blind Dialing Homing Nub */}
+                    {key === '5' && (
+                      <span className="absolute right-1.5 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-slate-300/40 shadow-[0_0.5px_0_rgba(255,255,255,0.3),inset_0_0.5px_0.5px_rgba(0,0,0,0.9)]" />
+                    )}
+
+                    <span className="text-[15.5px] font-black tracking-tight leading-none text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] group-active:scale-95">
+                      {key}
+                    </span>
+                    <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest leading-none mt-1 font-mono group-active:scale-95">
+                      {sub}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Bottom Microphone Pinhole with Recessed Countersink */}
+              <div className="w-2 h-2 rounded-full bg-[#080b0f] mt-3 shadow-[inset_0_1.5px_2px_rgba(0,0,0,0.95),0_1px_0.5px_rgba(255,255,255,0.12)] border border-[#1b232b]" />
+            </div>
           </div>
 
           {/* Quick Helpful Hint below Phone */}
