@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Sparkles, Award, Check, ImagePlus, RefreshCw, X, Eye, EyeOff, Edit3,
   MapPin, Play, Pause, Trash2, ShieldCheck, Plus, Sliders, Download,
-  Share2, Move, CheckCircle2, ArrowRight, ExternalLink, Tag
+  Share2, Move, CheckCircle2, ArrowRight, ExternalLink, Tag,
+  ZoomIn, ChevronLeft, ChevronRight, Loader2
 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 import { fetchBackgroundOptions, compositeLifestyleImage, exportAnnotatedImage } from '../services/api';
@@ -519,6 +520,103 @@ export default function StudioReviewCard({ activeSubStep = null }) {
     lifestyleImageBase64 ||
     lifestyleImageUrl;
 
+  // Carousel State for Step 2 (Lifestyle Staging comparison - 1 Clean Studio + 3 Suggested Backgrounds)
+  const [selectedCarouselIndex, setSelectedCarouselIndex] = useState(1);
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+
+  const cleanStudioImg = studioImageUrl || studioImageBase64 || cutoutBase64 || cutoutUrl || rawImageUrl;
+
+  // Assemble the 4 comparison images: 1 clean studio + up to 3 suggested backgrounds
+  const carouselImages = React.useMemo(() => {
+    const list = [
+      {
+        id: 'clean_studio',
+        type: 'studio',
+        title: language === 'hi' ? 'स्वच्छ 4K स्टूडियो' : 'Clean 4K Studio',
+        badge: language === 'hi' ? 'स्वच्छ स्टूडियो' : 'CLEAN STUDIO',
+        tabLabel: language === 'hi' ? 'स्वच्छ स्टूडियो' : 'Clean Studio',
+        src: cleanStudioImg,
+        candidate: null,
+        isCompositing: false,
+      },
+    ];
+
+    const candidates = (backgroundCandidates || []).slice(0, 3);
+    candidates.forEach((opt, idx) => {
+      const comp = compositeCache[opt.id];
+      const src = comp?.base64 || comp?.url || opt.thumbnail_url || opt.url;
+      list.push({
+        id: opt.id,
+        type: 'lifestyle',
+        title: opt.title,
+        badge: opt.title || (language === 'hi' ? `परिवेश ${idx + 1}` : `SETTING ${idx + 1}`),
+        tabLabel: opt.title || (language === 'hi' ? `परिवेश ${idx + 1}` : `Option ${idx + 1}`),
+        src: src,
+        candidate: opt,
+        isCompositing: isCompositing && !comp,
+      });
+    });
+
+    if (list.length < 4 && isLoadingOptions) {
+      for (let i = list.length; i < 4; i++) {
+        list.push({
+          id: `placeholder_${i}`,
+          type: 'placeholder',
+          title: language === 'hi' ? `परिवेश ${i}` : `Setting ${i}`,
+          badge: language === 'hi' ? 'लोड हो रहा है...' : 'LOADING...',
+          tabLabel: language === 'hi' ? `परिवेश ${i}` : `Option ${i}`,
+          src: null,
+          candidate: null,
+          isCompositing: true,
+        });
+      }
+    }
+
+    return list;
+  }, [cleanStudioImg, backgroundCandidates, compositeCache, isCompositing, isLoadingOptions, language]);
+
+  // Synchronize carousel selection with current background choice
+  useEffect(() => {
+    if (activeSubStep === 2) {
+      if (selectedBgId) {
+        const found = backgroundCandidates.slice(0, 3).findIndex(o => o.id === selectedBgId);
+        if (found !== -1) {
+          setSelectedCarouselIndex(found + 1);
+        }
+      } else if (activeViewTab === 'studio') {
+        setSelectedCarouselIndex(0);
+      }
+    }
+  }, [activeSubStep, selectedBgId, backgroundCandidates, activeViewTab]);
+
+  const handleSelectCarouselIndex = (index) => {
+    if (index < 0 || index >= carouselImages.length) return;
+    setSelectedCarouselIndex(index);
+    const item = carouselImages[index];
+    if (!item) return;
+
+    if (item.type === 'studio') {
+      setSelectedBgId(null);
+      setLifestyleImageUrl(null);
+      setLifestyleImageBase64(null);
+      setActiveViewTab('studio');
+    } else if (item.candidate) {
+      handleSelectBackground(item.candidate);
+    }
+  };
+
+  const handlePrevCarouselImage = () => {
+    if (carouselImages.length === 0) return;
+    const prev = (selectedCarouselIndex - 1 + carouselImages.length) % carouselImages.length;
+    handleSelectCarouselIndex(prev);
+  };
+
+  const handleNextCarouselImage = () => {
+    if (carouselImages.length === 0) return;
+    const next = (selectedCarouselIndex + 1) % carouselImages.length;
+    handleSelectCarouselIndex(next);
+  };
+
   return (
     <div className="w-full rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-2xl">
       {/* Top Banner with Badges & Tab Toggle */}
@@ -527,71 +625,181 @@ export default function StudioReviewCard({ activeSubStep = null }) {
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
             {activeSubStep === 2
-              ? (language === 'hi' ? 'चरण 2: पृष्ठभूमि चयन (Staging)' : 'Step 2: Lifestyle Staging')
+              ? (language === 'hi' ? 'चरण 2: पृष्ठभूमि चयन (Lifestyle Staging)' : 'Step 2: Lifestyle Staging')
               : activeSubStep === 1
               ? (language === 'hi' ? 'चरण 1: शिल्प प्रामाणिकता (The Voice Canvas)' : 'Step 1: The Voice Canvas')
               : (language === 'hi' ? 'एआई स्टूडियो रूपांतरण' : 'Autonomous AI Studio')}
           </span>
         </div>
 
-        {/* View Switcher Tabs (Primary Studio vs Optional Lifestyle) */}
-        {isLifestyleAllowed ? (
-          <div className="flex items-center gap-1 p-0.5 bg-slate-900 rounded-full border border-slate-800 text-[11px]">
-            <button
-              onClick={() => setActiveViewTab('studio')}
-              className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
-                activeViewTab === 'studio'
-                  ? 'bg-emerald-500 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              {language === 'hi' ? 'प्राथमिक स्टूडियो' : 'Primary Studio'}
-            </button>
-            <button
-              onClick={() => {
-                setActiveViewTab('lifestyle');
-                const rec = backgroundCandidates.find(o => o.recommended) || backgroundCandidates[0];
-                if (!selectedBgId && rec) {
-                  handleSelectBackground(rec);
-                } else if (selectedBgId) {
-                  const current = backgroundCandidates.find(o => o.id === selectedBgId);
-                  if (current && !compositeCache[selectedBgId] && !isCompositing) {
-                    handleSelectBackground(current);
-                  }
-                }
-              }}
-              disabled={backgroundCandidates.length === 0 && !isLoadingOptions}
-              className={`px-3 py-1 rounded-full font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeViewTab === 'lifestyle'
-                  ? 'bg-emerald-500 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Sparkles className={`w-3 h-3 ${activeViewTab === 'lifestyle' ? 'text-white' : 'text-amber-400'}`} />
-              <span>{language === 'hi' ? 'लाइफस्टाइल (2nd)' : 'Lifestyle (2nd)'}</span>
-              {activeLifestyleDisplay && (
-                <span className={`w-1.5 h-1.5 rounded-full ${activeViewTab === 'lifestyle' ? 'bg-white' : 'bg-emerald-400'}`} />
-              )}
-            </button>
-          </div>
+        {/* Right Controls: In Step 2, DO NOT show Image 3 tab bar; only show GI Tag if eligible */}
+        {activeSubStep === 2 ? (
+          catalogData?.gi_tag_eligible && (
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 text-[10.5px] font-bold text-amber-300 shrink-0 whitespace-nowrap">
+              <Award className="w-3.5 h-3.5" />
+              <span>GI Certified</span>
+            </div>
+          )
         ) : (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] text-slate-300 font-bold">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span>{language === 'hi' ? 'शुद्ध ई-कॉमर्स स्टूडियो (Amazon 85%)' : 'Pure E-Commerce Studio (Amazon 85%)'}</span>
-          </div>
-        )}
+          <div className="flex items-center gap-1.5 shrink-0 flex-nowrap">
+            {/* View Switcher Tabs (Primary Studio vs Optional Lifestyle) */}
+            {isLifestyleAllowed ? (
+              <div className="flex items-center gap-1 p-0.5 bg-slate-900 rounded-full border border-slate-800 text-[11px]">
+                <button
+                  onClick={() => setActiveViewTab('studio')}
+                  className={`px-2.5 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                    activeViewTab === 'studio'
+                      ? 'bg-emerald-500 text-white shadow-xs'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {language === 'hi' ? 'प्राथमिक स्टूडियो' : 'Primary Studio'}
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveViewTab('lifestyle');
+                    const rec = backgroundCandidates.find(o => o.recommended) || backgroundCandidates[0];
+                    if (!selectedBgId && rec) {
+                      handleSelectBackground(rec);
+                    } else if (selectedBgId) {
+                      const current = backgroundCandidates.find(o => o.id === selectedBgId);
+                      if (current && !compositeCache[selectedBgId] && !isCompositing) {
+                        handleSelectBackground(current);
+                      }
+                    }
+                  }}
+                  disabled={backgroundCandidates.length === 0 && !isLoadingOptions}
+                  className={`px-2.5 py-1 rounded-full font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                    activeViewTab === 'lifestyle'
+                      ? 'bg-emerald-500 text-white shadow-xs'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Sparkles className={`w-3 h-3 ${activeViewTab === 'lifestyle' ? 'text-white' : 'text-amber-400'}`} />
+                  <span>{language === 'hi' ? 'लाइफस्टाइल (2nd)' : 'Lifestyle (2nd)'}</span>
+                  {activeLifestyleDisplay && (
+                    <span className={`w-1.5 h-1.5 rounded-full ${activeViewTab === 'lifestyle' ? 'bg-white' : 'bg-emerald-400'}`} />
+                  )}
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] text-slate-300 font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span>{language === 'hi' ? 'शुद्ध ई-कॉमर्स स्टूडियो (Amazon 85%)' : 'Pure E-Commerce Studio (Amazon 85%)'}</span>
+              </div>
+            )}
 
-        {/* GI Tag / MoSJE Badge */}
-        {catalogData?.gi_tag_eligible && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 text-[11px] font-bold text-amber-300">
-            <Award className="w-3.5 h-3.5" />
-            <span>GI Certified</span>
+            {/* GI Tag / MoSJE Badge */}
+            {catalogData?.gi_tag_eligible && (
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 text-[10.5px] font-bold text-amber-300 shrink-0 whitespace-nowrap">
+                <Award className="w-3.5 h-3.5" />
+                <span>GI Certified</span>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Main Visual Display: Primary Clean Studio (Split Slider Dual View) or Secondary Lifestyle Preview */}
-      {activeViewTab === 'studio' ? (
+      {/* Main Visual Display: Step 2 4-Image Comparison Carousel vs Step 1 Split Slider */}
+      {activeSubStep === 2 ? (
+        /* ==================================================================== */
+        /* STEP 2: 4-IMAGE COMPARISON VIEWER (EXACT IMAGE 2 INTERFACE)          */
+        /* 1 Clean Studio Image + 3 Suggested Background Lifestyle Composites   */
+        /* Clean images (no pins, no tags, no callout lines), < and > buttons,  */
+        /* top-right "3/4 • ORIGINAL" badge, bottom-right zoom, and bottom tabs */
+        /* ==================================================================== */
+        <div className="flex flex-col bg-slate-950">
+          <div className="relative w-full aspect-square max-h-[380px] bg-stone-100 dark:bg-slate-950 overflow-hidden select-none flex items-center justify-center">
+            {/* Active Image Display */}
+            {carouselImages[selectedCarouselIndex]?.src ? (
+              <img
+                src={carouselImages[selectedCarouselIndex].src}
+                alt={carouselImages[selectedCarouselIndex].title}
+                className="w-full h-full object-contain transition-all duration-300"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-2 p-6 text-center text-slate-400">
+                <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+                <span className="text-xs font-semibold">
+                  {language === 'hi' ? 'छवि लोड हो रही है...' : 'Loading staging option...'}
+                </span>
+              </div>
+            )}
+
+            {/* Compositing Overlay Spinner if in progress */}
+            {carouselImages[selectedCarouselIndex]?.isCompositing && (
+              <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs flex flex-col items-center justify-center gap-2 z-10 text-white">
+                <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+                <span className="text-xs font-bold text-amber-300">
+                  {language === 'hi' ? 'पृष्ठभूमि कंपोज़िटिंग...' : 'Compositing Staging Scene...'}
+                </span>
+              </div>
+            )}
+
+            {/* Top-Right Badge: Image 2 style "3/4 • ORIGINAL" / "1/4 • CLEAN STUDIO" */}
+            <div className="absolute top-3 right-3 z-20 px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-white text-[11px] font-black tracking-wider uppercase border border-white/10 shadow-lg flex items-center gap-1.5 pointer-events-none">
+              <span className="text-amber-400 font-extrabold">
+                {selectedCarouselIndex + 1}/{carouselImages.length}
+              </span>
+              <span className="text-white/40">•</span>
+              <span className="truncate max-w-[130px]">
+                {carouselImages[selectedCarouselIndex]?.badge}
+              </span>
+            </div>
+
+            {/* Left Circular Arrow Button (Vertically centered at far left) */}
+            <button
+              type="button"
+              onClick={handlePrevCarouselImage}
+              aria-label="Previous Staging Image"
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/95 hover:bg-white text-slate-900 shadow-[0_4px_16px_rgba(0,0,0,0.35)] flex items-center justify-center cursor-pointer transition-all active:scale-90 border border-slate-200/90"
+            >
+              <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
+            </button>
+
+            {/* Right Circular Arrow Button (Vertically centered at far right) */}
+            <button
+              type="button"
+              onClick={handleNextCarouselImage}
+              aria-label="Next Staging Image"
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/95 hover:bg-white text-slate-900 shadow-[0_4px_16px_rgba(0,0,0,0.35)] flex items-center justify-center cursor-pointer transition-all active:scale-90 border border-slate-200/90"
+            >
+              <ChevronRight className="w-5 h-5 stroke-[2.5]" />
+            </button>
+
+            {/* Bottom-Right Zoom Button */}
+            <button
+              type="button"
+              onClick={() => setIsZoomOpen(true)}
+              aria-label="Zoom Image"
+              className="absolute bottom-3 right-3 z-20 w-8 h-8 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white flex items-center justify-center cursor-pointer backdrop-blur-md border border-white/20 shadow-md transition-all active:scale-90"
+            >
+              <ZoomIn className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Bottom Segmented Tab Bar (Matching Image 2: "बाज़ार | प्रोफेशनल स्टूडियो | मूल | विशेषताएं") */}
+          <div className="bg-[#F8F5EE] dark:bg-slate-950 px-2 py-2.5 border-t border-stone-200 dark:border-slate-800 flex items-center justify-around gap-1.5">
+            {carouselImages.map((img, idx) => {
+              const isActive = selectedCarouselIndex === idx;
+              return (
+                <button
+                  key={img.id || idx}
+                  type="button"
+                  onClick={() => handleSelectCarouselIndex(idx)}
+                  className={`flex-1 py-2 px-1 rounded-xl text-center text-[11px] font-bold transition-all cursor-pointer truncate ${
+                    isActive
+                      ? 'bg-white dark:bg-slate-800 text-stone-900 dark:text-amber-300 shadow-sm border border-stone-300/80 dark:border-slate-700 ring-1 ring-black/5'
+                      : 'text-stone-500 hover:text-stone-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5'
+                  }`}
+                >
+                  <span className="truncate block max-w-full">{img.tabLabel}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : activeViewTab === 'studio' ? (
         <div className="flex flex-col">
           {/* Dual-View Mode Split Slider Toggle Bar */}
           <div className="px-4 py-2 bg-slate-950 border-b border-slate-800/80 flex items-center justify-between flex-wrap gap-2 text-xs">
@@ -976,92 +1184,94 @@ export default function StudioReviewCard({ activeSubStep = null }) {
         </div>
       )}
 
-      {/* Secondary Action Bar (Fine-Tune, Add Details, View Craft Details, Export for ONDC) */}
-      <div className="px-4 py-2.5 bg-slate-950/90 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[11px] font-medium text-slate-300">
-            {language === 'hi' ? 'स्वच्छ 4K स्टूडियो परिणाम' : 'Clean 4K Studio Result'}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {/* Export for ONDC Syndication Button */}
-          <button
-            type="button"
-            onClick={handleExportOndcImage}
-            disabled={isExportingOndc}
-            className="min-h-[42px] px-3 py-1.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border border-emerald-400/50 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 disabled:opacity-60"
-            title="Export flattened JPEG with technical callouts burned in for ONDC Beckn v1.2"
-          >
-            {isExportingOndc ? (
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Share2 className="w-3.5 h-3.5" />
-            )}
-            <span>
-              {language === 'hi' ? 'ONDC एक्सपोर्ट' : 'Export for ONDC'}
+      {/* Secondary Action Bar (Fine-Tune, Add Details, View Craft Details, Export for ONDC) - Only in Step 1 */}
+      {activeSubStep !== 2 && (
+        <div className="px-4 py-2.5 bg-slate-950/90 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[11px] font-medium text-slate-300">
+              {language === 'hi' ? 'स्वच्छ 4K स्टूडियो परिणाम' : 'Clean 4K Studio Result'}
             </span>
-          </button>
+          </div>
 
-          {/* View Craft Details Toggle Button */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsCraftPinsVisible(!isCraftPinsVisible);
-              if (!isCraftPinsVisible) {
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Export for ONDC Syndication Button */}
+            <button
+              type="button"
+              onClick={handleExportOndcImage}
+              disabled={isExportingOndc}
+              className="min-h-[42px] px-3 py-1.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border border-emerald-400/50 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 disabled:opacity-60"
+              title="Export flattened JPEG with technical callouts burned in for ONDC Beckn v1.2"
+            >
+              {isExportingOndc ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Share2 className="w-3.5 h-3.5" />
+              )}
+              <span>
+                {language === 'hi' ? 'ONDC एक्सपोर्ट' : 'Export for ONDC'}
+              </span>
+            </button>
+
+            {/* View Craft Details Toggle Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsCraftPinsVisible(!isCraftPinsVisible);
+                if (!isCraftPinsVisible) {
+                  setActiveViewTab('studio');
+                }
+              }}
+              className={`min-h-[42px] px-3 py-1.5 rounded-2xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 ${
+                isCraftPinsVisible
+                  ? 'bg-amber-500/20 border-amber-400/80 text-amber-300'
+                  : 'bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+              }`}
+            >
+              {isCraftPinsVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              <span>
+                {language === 'hi'
+                  ? (isCraftPinsVisible ? 'विवरण छुपाएं' : 'शिल्प विवरण देखें')
+                  : (isCraftPinsVisible ? 'Hide Details' : 'View Craft Details')}
+                {craftPins.length > 0 && ` (${craftPins.length})`}
+              </span>
+            </button>
+
+            {/* Add Details (Tap-to-Annotate) Secondary Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsAnnotating(!isAnnotating);
+                setIsCraftPinsVisible(true);
                 setActiveViewTab('studio');
-              }
-            }}
-            className={`min-h-[42px] px-3 py-1.5 rounded-2xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 ${
-              isCraftPinsVisible
-                ? 'bg-amber-500/20 border-amber-400/80 text-amber-300'
-                : 'bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
-            }`}
-          >
-            {isCraftPinsVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-            <span>
-              {language === 'hi'
-                ? (isCraftPinsVisible ? 'विवरण छुपाएं' : 'शिल्प विवरण देखें')
-                : (isCraftPinsVisible ? 'Hide Details' : 'View Craft Details')}
-              {craftPins.length > 0 && ` (${craftPins.length})`}
-            </span>
-          </button>
+                if (!isAnnotating) setSliderPosition(100); // Switch to Artisan view so pin dropping is visible
+              }}
+              className={`min-h-[42px] px-3 py-1.5 rounded-2xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 ${
+                isAnnotating
+                  ? 'bg-emerald-600 border-emerald-400 text-white'
+                  : 'bg-slate-900 hover:bg-slate-800 border-slate-700 hover:border-amber-400/60 text-amber-300 hover:text-amber-200'
+              }`}
+            >
+              <MapPin className="w-3.5 h-3.5" />
+              <span>
+                {isAnnotating
+                  ? (language === 'hi' ? '✓ पूरा हुआ' : '✓ Done')
+                  : (language === 'hi' ? 'विवरण जोड़ें' : 'Add Details')}
+              </span>
+            </button>
 
-          {/* Add Details (Tap-to-Annotate) Secondary Button */}
-          <button
-            type="button"
-            onClick={() => {
-              setIsAnnotating(!isAnnotating);
-              setIsCraftPinsVisible(true);
-              setActiveViewTab('studio');
-              if (!isAnnotating) setSliderPosition(100); // Switch to Artisan view so pin dropping is visible
-            }}
-            className={`min-h-[42px] px-3 py-1.5 rounded-2xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 ${
-              isAnnotating
-                ? 'bg-emerald-600 border-emerald-400 text-white'
-                : 'bg-slate-900 hover:bg-slate-800 border-slate-700 hover:border-amber-400/60 text-amber-300 hover:text-amber-200'
-            }`}
-          >
-            <MapPin className="w-3.5 h-3.5" />
-            <span>
-              {isAnnotating
-                ? (language === 'hi' ? '✓ पूरा हुआ' : '✓ Done')
-                : (language === 'hi' ? 'विवरण जोड़ें' : 'Add Details')}
-            </span>
-          </button>
-
-          {/* Fine-Tune Button */}
-          <button
-            type="button"
-            onClick={() => setIsFineTuneOpen(true)}
-            className="min-h-[42px] px-3 py-1.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-amber-400/60 text-amber-300 hover:text-amber-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-          >
-            <Edit3 className="w-3.5 h-3.5 text-amber-400" />
-            <span>{language === 'hi' ? 'सुधारें' : 'Fine-Tune'}</span>
-          </button>
+            {/* Fine-Tune Button */}
+            <button
+              type="button"
+              onClick={() => setIsFineTuneOpen(true)}
+              className="min-h-[42px] px-3 py-1.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-amber-400/60 text-amber-300 hover:text-amber-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+            >
+              <Edit3 className="w-3.5 h-3.5 text-amber-400" />
+              <span>{language === 'hi' ? 'सुधारें' : 'Fine-Tune'}</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Enhancement summary chips & Craft Pins (Step 1: The Voice Canvas) */}
       {(activeSubStep === 1 || activeSubStep === null) && (
@@ -1262,53 +1472,13 @@ export default function StudioReviewCard({ activeSubStep = null }) {
   )}
 
       {/* ==================================================================== */}
-      {/* STEP 2: CHOOSE A BACKGROUND SETTING (STOCK PHOTOS COMPOSITE)          */}
-      {/* Guardrail: Only surfaced if camera angle is eligible (eye_level or flat_lay) */}
+      {/* STEP 2: LIFESTYLE STAGING CONTEXT & SELECTION SUMMARY                */}
+      {/* Guardrail: Only surfaced if camera angle is eligible                 */}
       {/* ==================================================================== */}
       {(activeSubStep === 2 || activeSubStep === null) && isLifestyleAllowed && (
         <div className="p-4 bg-slate-950/90 border-t border-slate-800 space-y-3">
-          {/* Section Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400">
-                <ImagePlus className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black text-slate-200 flex items-center gap-1.5">
-                  <span>{language === 'hi' ? 'एक पृष्ठभूमि सेटिंग चुनें (वैकल्पिक)' : 'Choose a Background Setting (Optional)'}</span>
-                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                    ₹0 Free Stock
-                  </span>
-                </h4>
-                <p className="text-[10px] text-slate-400">
-                  {language === 'hi'
-                    ? 'आपकी आवाज़ के विवरण से मेल खाती वास्तविक लाइफस्टाइल तस्वीर'
-                    : 'Realistic contextual shot matching your spoken craft description'}
-                </p>
-              </div>
-            </div>
-
-            {/* Skip / Remove Option */}
-            {(selectedBgId || activeLifestyleDisplay) ? (
-              <button
-                onClick={handleSkipOrRemove}
-                className="px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-bold border border-slate-700 flex items-center gap-1 transition-all cursor-pointer"
-              >
-                <X className="w-3 h-3 text-rose-400" />
-                <span>{language === 'hi' ? 'हटाएं' : 'Remove'}</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleSkipOrRemove}
-                className="px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-[11px] font-bold border border-slate-700/60 transition-all cursor-pointer"
-              >
-                {language === 'hi' ? 'छोड़ें (Skip)' : 'Skip'}
-              </button>
-            )}
-          </div>
-
           {/* Suggested Query, Perspective Pill & Color Harmony Pill */}
-          <div className="flex items-center justify-between text-[10px] text-slate-400 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800/80 flex-wrap gap-1">
+          <div className="flex items-center justify-between text-[10px] text-slate-400 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800/80 flex-wrap gap-2">
             <div className="flex items-center gap-1.5 truncate">
               <span className="text-amber-400 font-extrabold uppercase text-[9px] tracking-wider">
                 {language === 'hi' ? 'सुझाया गया परिवेश:' : 'Detected Setting:'}
@@ -1340,106 +1510,40 @@ export default function StudioReviewCard({ activeSubStep = null }) {
               {isCompositing && (
                 <span className="flex items-center gap-1 text-amber-400 text-[9px]">
                   <RefreshCw className="w-2.5 h-2.5 animate-spin" />
-                  <span>कंपोज़िटिंग...</span>
+                  <span>{language === 'hi' ? 'कंपोज़िटिंग...' : 'Compositing...'}</span>
                 </span>
               )}
             </div>
           </div>
 
-          {/* Background Candidate Cards Grid */}
-          {isLoadingOptions && backgroundCandidates.length === 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 py-4">
-              {[1, 2, 3, 4].map(idx => (
-                <div
-                  key={idx}
-                  className="aspect-square rounded-2xl bg-slate-900/80 border border-slate-800 animate-pulse flex items-center justify-center"
-                >
-                  <div className="w-5 h-5 border-2 border-slate-700 border-t-amber-400 rounded-full animate-spin" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {backgroundCandidates.map((opt) => {
-                const isSelected = selectedBgId === opt.id || (!selectedBgId && opt.recommended);
-                const previewSrc = compositeCache[opt.id]?.base64 || compositeCache[opt.id]?.url || opt.thumbnail_url;
-
-                return (
-                  <div
-                    key={opt.id}
-                    onClick={() => handleSelectBackground(opt)}
-                    className={`group relative aspect-square rounded-2xl overflow-hidden cursor-pointer border-2 transition-all duration-200 active:scale-95 ${
-                      isSelected
-                        ? 'border-emerald-400 ring-3 ring-emerald-400/30 shadow-xl shadow-emerald-500/20 scale-[1.02]'
-                        : 'border-slate-800 hover:border-slate-600 bg-slate-900/60'
-                    }`}
-                  >
-                    {/* Background Image / Live Composited Preview */}
-                    <img
-                      src={previewSrc}
-                      alt={opt.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-
-                    {/* Recommended Badge */}
-                    {opt.recommended && (
-                      <div className="absolute top-1.5 left-1.5 z-10 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 text-slate-950 font-black text-[9px] shadow-lg flex items-center gap-1 tracking-tight">
-                        <Sparkles className="w-2.5 h-2.5 stroke-[3]" />
-                        <span>{language === 'hi' ? 'अनुशंसित' : 'Recommended'}</span>
-                      </div>
-                    )}
-
-                    {/* Selected Active Checkmark */}
-                    {isSelected && (
-                      <div className="absolute top-1.5 right-1.5 z-10 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg border border-white/20">
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      </div>
-                    )}
-
-                    {/* Loading spinner overlay while generating this specific composite */}
-                    {isCompositing && !compositeCache[opt.id] && (
-                      <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center">
-                        <RefreshCw className="w-4 h-4 text-amber-400 animate-spin" />
-                      </div>
-                    )}
-
-                    {/* Card Title Label */}
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent p-1.5 text-center">
-                      <span className="text-[10px] font-bold text-slate-200 block truncate">
-                        {opt.title}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Selection Status Note */}
-          {activeLifestyleDisplay && !hasSkipped ? (
-            <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between text-[11px] text-emerald-300">
-              <span className="flex items-center gap-1.5">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>
-                  {language === 'hi'
-                    ? 'लाइफस्टाइल फोटो कैटलॉग में द्वितीयक छवि के रूप में संलग्न है।'
-                    : 'Lifestyle photo attached as optional 2nd catalog image.'}
-                </span>
+          {/* Active Selection Feedback Banner */}
+          <div className="px-3.5 py-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 shrink-0">
+                <Check className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-xs font-bold text-slate-200">
+                {selectedCarouselIndex === 0
+                  ? (language === 'hi'
+                    ? 'स्वच्छ 4K स्टूडियो फोटो चुनी गई है (Amazon 85% मानक)'
+                    : 'Clean 4K Studio photo selected (Amazon 85% Standard)')
+                  : (language === 'hi'
+                    ? `चयनित: ${carouselImages[selectedCarouselIndex]?.title || 'लाइफस्टाइल परिवेश'} (द्वितीयक फोटो)`
+                    : `Selected: ${carouselImages[selectedCarouselIndex]?.title || 'Lifestyle Staging'} (2nd Photo)`)}
               </span>
+            </div>
+
+            {selectedCarouselIndex > 0 && (
               <button
-                onClick={() => setActiveViewTab('lifestyle')}
-                className="text-amber-300 hover:text-amber-200 font-bold underline cursor-pointer shrink-0 ml-2"
+                type="button"
+                onClick={() => handleSelectCarouselIndex(0)}
+                className="px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-rose-300 text-[10px] font-bold border border-slate-700 flex items-center gap-1 transition-all cursor-pointer shrink-0"
               >
-                {language === 'hi' ? 'बड़ा देखें' : 'View Full'}
+                <X className="w-3 h-3 text-rose-400" />
+                <span>{language === 'hi' ? 'हटाएं (केवल स्टूडियो)' : 'Remove (Studio only)'}</span>
               </button>
-            </div>
-          ) : hasSkipped ? (
-            <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-[10px] text-slate-400 text-center">
-              {language === 'hi'
-                ? 'लाइफस्टाइल फोटो छोड़ दी गई है। केवल स्वच्छ प्राथमिक स्टूडियो फोटो का उपयोग किया जाएगा।'
-                : 'Lifestyle shot skipped. Only the primary clean studio shot will be used.'}
-            </div>
-          ) : null}
+            )}
+          </div>
         </div>
       )}
 
@@ -1563,6 +1667,33 @@ export default function StudioReviewCard({ activeSubStep = null }) {
                 {language === 'hi' ? 'संपन्न (Done)' : 'Done'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox / Zoom Modal */}
+      {isZoomOpen && (
+        <div
+          onClick={() => setIsZoomOpen(false)}
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 cursor-zoom-out animate-fadeIn"
+        >
+          <button
+            type="button"
+            onClick={() => setIsZoomOpen(false)}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center cursor-pointer transition-all"
+            aria-label="Close Preview"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <div className="max-w-2xl max-h-[80vh] w-full flex flex-col items-center justify-center">
+            <img
+              src={carouselImages[selectedCarouselIndex]?.src || cleanStudioImg}
+              alt={carouselImages[selectedCarouselIndex]?.title || 'Zoom Preview'}
+              className="max-w-full max-h-[75vh] object-contain rounded-2xl shadow-2xl"
+            />
+            <p className="mt-3 text-white text-xs font-bold text-center">
+              {carouselImages[selectedCarouselIndex]?.title}
+            </p>
           </div>
         </div>
       )}

@@ -431,21 +431,21 @@ export default function App() {
 
               {/* STEP 1: The Voice Canvas (Annotation & Detail) */}
               {activePrasaranStep === 1 && (
-                <div className="space-y-4 animate-fadeIn">
+                <div className="space-y-4 animate-fadeIn pb-24">
                   <StudioReviewCard activeSubStep={1} />
                 </div>
               )}
 
               {/* STEP 2: Staging (Background Selection) */}
               {activePrasaranStep === 2 && (
-                <div className="space-y-4 animate-fadeIn">
+                <div className="space-y-4 animate-fadeIn pb-24">
                   <StudioReviewCard activeSubStep={2} />
                 </div>
               )}
 
               {/* STEP 3: Economics (Pricing & Tiers) */}
               {activePrasaranStep === 3 && (
-                <div className="space-y-4 animate-fadeIn">
+                <div className="space-y-4 animate-fadeIn pb-24">
                   <PricingCard />
                 </div>
               )}
