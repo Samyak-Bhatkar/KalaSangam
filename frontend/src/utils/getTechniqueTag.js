@@ -28,6 +28,38 @@ export function getTechniqueTag(product) {
     }
   }
 
+  // Alias lookups for common terms
+  if ((craftType.includes('mirror') || craftType.includes('rabari') || craftType.includes('shisha') || craftType.includes('abhla')) && craftTechniques.kutch_embroidery) {
+    return craftTechniques.kutch_embroidery;
+  }
+  if ((craftType.includes('copper') || craftType.includes('tambat') || craftType.includes('thathera')) && craftTechniques.copper_craft) {
+    return craftTechniques.copper_craft;
+  }
+  if ((craftType.includes('brass') || craftType.includes('moradabad')) && craftTechniques.moradabad_brass) {
+    return craftTechniques.moradabad_brass;
+  }
+  if ((craftType.includes('block print') || craftType.includes('sanganer') || craftType.includes('bagru')) && craftTechniques.sanganeri) {
+    return craftTechniques.sanganeri;
+  }
+  if ((craftType.includes('channapatna') || craftType.includes('lac-turn') || craftType.includes('lacquer')) && craftTechniques.channapatna) {
+    return craftTechniques.channapatna;
+  }
+  if (craftType.includes('pichwai') && craftTechniques.pichwai) {
+    return craftTechniques.pichwai;
+  }
+  if ((craftType.includes('zardozi') || craftType.includes('zari embroidery')) && craftTechniques.zardozi) {
+    return craftTechniques.zardozi;
+  }
+  if (craftType.includes('kantha') && craftTechniques.kantha) {
+    return craftTechniques.kantha;
+  }
+  if ((craftType.includes('tanjore') || craftType.includes('thanjavur')) && craftTechniques.tanjore) {
+    return craftTechniques.tanjore;
+  }
+  if ((craftType.includes('cane') || craftType.includes('bamboo')) && craftTechniques.cane_bamboo) {
+    return craftTechniques.cane_bamboo;
+  }
+
   // Also check if category mentions 'wood' -> wooden_craft
   if (craftType.includes('wood') && craftTechniques.wooden_craft) {
     return craftTechniques.wooden_craft;

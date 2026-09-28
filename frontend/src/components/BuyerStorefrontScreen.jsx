@@ -254,7 +254,7 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
                       <div className="text-right">
                         <span className="text-[9px] text-slate-400 font-semibold block">सीधी कीमत</span>
                         <span className="text-base font-black text-[#C85A32]">
-                          ₹{p.price || p.suggested_price || '—'}
+                          ₹{p.price || p.suggested_price || p.b2c_price || p.fair_price_b2c_inr || '—'}
                         </span>
                       </div>
                     </div>
@@ -446,7 +446,7 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-600">सीधा लाभ दर:</span>
-                    <span className="font-black text-[#C85A32]">₹{selectedProduct.price || selectedProduct.suggested_price}</span>
+                    <span className="font-black text-[#C85A32]">₹{selectedProduct.price || selectedProduct.suggested_price || selectedProduct.b2c_price || selectedProduct.fair_price_b2c_inr || '—'}</span>
                   </div>
                 </div>
 

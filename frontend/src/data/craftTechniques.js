@@ -64,5 +64,65 @@ export const craftTechniques = {
     name_hi: "बनारसी कड़वा ज़री बुनाई",
     lineage: "Varanasi Silk Brocade Tradition (Uttar Pradesh)",
     description: "An intricate pit-loom jacquard weaving tradition where gold and silver zari threads are individually engraved into mulberry silk warp to produce regal brocades."
+  },
+  pichwai: {
+    name: "Nathdwara Pichwai Devotional Painting",
+    name_hi: "नाथद्वारा पिछवाई चित्रकला",
+    lineage: "Nathdwara Temple Art Tradition (400+ years old)",
+    description: "An ancient devotional cloth-painting technique from Rajasthan depicting Shrinathji and pastoral motifs using natural stone pigments, gold leaf, and squirrel-hair brushes."
+  },
+  kutch_embroidery: {
+    name: "Kutch Shisha / Mirror-Work Embroidery",
+    name_hi: "कच्छ आभला / शीशा कशीदाकारी",
+    lineage: "Kutch Desert Nomadic Needlework Tradition",
+    description: "A vibrant folk embroidery tradition from Gujarat incorporating small reflective mirrors (shisha/abhla) bound with intricate herringbone and chain stitches into cotton or silk fabrics."
+  },
+  channapatna: {
+    name: "Channapatna Lac-Turned Woodcraft",
+    name_hi: "चन्नपटना लाक-पॉलिश काष्ठकला",
+    lineage: "Channapatna Toy Tradition (Tipu Sultan Royal Guilds)",
+    description: "A specialized lathe-turning craft from Karnataka using Wrightia tinctoria (ivory wood) coated with organic vegetable-dyed non-toxic natural shellac."
+  },
+  sanganeri: {
+    name: "Jaipur Hand Block Printing",
+    name_hi: "जयपुर सांगानेरी ब्लॉक छपाई",
+    lineage: "Chhipa Community Block-Printing Tradition",
+    description: "A centuries-old textile printing method using hand-carved teak wood blocks stamped repetitively with mineral and vegetable dyes on fine cotton textiles."
+  },
+  moradabad_brass: {
+    name: "Moradabad Engraved Brassware",
+    name_hi: "मुरादाबाद नक्काशीदार पीतल शिल्प",
+    lineage: "Peetal Nagri Metalware Guilds (Uttar Pradesh)",
+    description: "A master metal-engraving tradition where virgin brass is hand-turned, etched with fine stylus tools, and lacquered for heritage tableware and decor."
+  },
+  copper_craft: {
+    name: "Hand-Beaten Thathera / Tambat Copperware",
+    name_hi: "हस्त-निर्मित तांबट तांबा शिल्प",
+    lineage: "Traditional Thathera & Tambat Coppersmith Guilds",
+    description: "A heritage cold-hammering and engraving tradition where sheets of pure copper are manually beaten, embossed, and chiseled with floral wellness motifs."
+  },
+  zardozi: {
+    name: "Lucknow Zardozi Metallic Hand Embroidery",
+    name_hi: "लखनऊ जरदोजी धातु तार कढ़ाई",
+    lineage: "Mughal Imperial Gold Embroidery Guilds",
+    description: "A royal embroidery craft using gilded gold and silver wires (kalabattu), sequins, and seed pearls sewn onto velvet and silk with curved aari needle hooks."
+  },
+  kantha: {
+    name: "Bengal Nakshi Kantha Embroidery",
+    name_hi: "बंगाल नक्षी कांथा सुई-शिल्प",
+    lineage: "Indigenous Bengal Running Stitch Tradition",
+    description: "A heritage recycling needlecraft where layers of soft cotton and silk fabric are quilted together using intricate wavy running stitches to create folk narratives."
+  },
+  tanjore: {
+    name: "Tanjore Gold Foil Relief Painting",
+    name_hi: "तंजौर स्वर्ण पत्र भित्ति चित्रकला",
+    lineage: "Chola & Maratha Royal Court Tradition",
+    description: "A classical South Indian painting style characterized by rich vivid colors, iconic compositions, and glittering 22-carat gold foils overlaid on delicate gesso relief."
+  },
+  cane_bamboo: {
+    name: "Assam Split-Cane & Bamboo Weaving",
+    name_hi: "असम बेंत व बांस बुनाई शिल्प",
+    lineage: "Northeastern Indigenous Bamboo Guilds",
+    description: "An eco-friendly tribal weaving tradition utilizing indigenous golden cane and split bamboo reeds to weave durable baskets, furniture, and utility vessels."
   }
 };

@@ -418,7 +418,7 @@ export default function IndiaCraftMap({
                           </p>
                           <div className="flex items-center justify-between mt-0.5">
                             <span className="text-xs font-black text-amber-400">
-                              ₹{p.fair_price_b2c_inr || p.expected_price_inr || '480'}
+                              ₹{p.fair_price_b2c_inr || p.b2c_price || p.price || p.suggested_price || p.expected_price_inr || '480'}
                             </span>
                             <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
                               ONDC Live
