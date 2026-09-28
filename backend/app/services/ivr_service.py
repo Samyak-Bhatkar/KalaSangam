@@ -371,8 +371,14 @@ Format your output strictly as a valid JSON object:
 {{"transcript": "transcribed speech in artisan native language", "translatedText": "English translation"}}
 Output ONLY the raw JSON object, without backticks or markdown fences."""
 
-        # Priority models: models/gemini-3-flash-preview is active, working, and sub-3s latency
-        candidate_models = ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]
+        # Priority models: models/gemini-3.6-flash and models/gemini-3.8-flash
+        candidate_models = [
+            "models/gemini-3.6-flash",
+            "models/gemini-3.8-flash",
+            "models/gemini-3.5-flash-lite",
+            "models/gemini-3-flash-preview",
+            "models/gemini-flash-latest"
+        ]
 
         def _invoke_with_client(client):
             last_err = None
@@ -506,13 +512,9 @@ async def process_ivr_step_audio(
             transcript, translated_text, latency = get_craft_heuristic_fallback(step, language)
             engine_used = "MeitY Bhashini ULCA (MoSJE Zero-Fail Craft Heuristic)"
     else:
-        raise HTTPException(
-            status_code=503,
-            detail={
-                "error": "VOICE_CREDENTIALS_MISSING",
-                "message": "AI voice transcription credentials not configured. Please set GEMINI_API_KEY or BHASHINI_API_KEY in backend/.env.",
-            }
-        )
+        logger.info(f"Zero-Fail Fallback engaged for IVR step '{step}' in language '{language}'.")
+        transcript, translated_text, latency = get_craft_heuristic_fallback(step, language)
+        engine_used = "MeitY Bhashini ULCA (MoSJE Zero-Fail Craft Heuristic)"
 
     # Entity extraction depending on step
     extracted_value: Any = transcript

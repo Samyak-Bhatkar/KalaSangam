@@ -239,7 +239,13 @@ def classify_and_format_pin_callout(
         from .gemini_pool import gemini_pool
 
         def _generate_pin(client):
-            for model_name in ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]:
+            for model_name in [
+                "models/gemini-3.6-flash",
+                "models/gemini-3.8-flash",
+                "models/gemini-3.5-flash-lite",
+                "models/gemini-3-flash-preview",
+                "models/gemini-flash-latest"
+            ]:
                 try:
                     resp = client.models.generate_content(
                         model=model_name,
@@ -276,7 +282,7 @@ def classify_and_format_pin_callout(
         try:
             import google.generativeai as legacy_genai
             legacy_genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = legacy_genai.GenerativeModel("models/gemini-3-flash-preview")
+            model = legacy_genai.GenerativeModel("models/gemini-3.6-flash")
             resp = model.generate_content(
                 prompt,
                 generation_config={"temperature": 0.1, "response_mime_type": "application/json"}

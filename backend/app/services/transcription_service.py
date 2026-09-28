@@ -69,7 +69,13 @@ def transcribe_audio_bytes(
 
             from .gemini_pool import gemini_pool
             audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=clean_mime)
-            candidate_models = ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]
+            candidate_models = [
+                "models/gemini-3.6-flash",
+                "models/gemini-3.8-flash",
+                "models/gemini-3.5-flash-lite",
+                "models/gemini-3-flash-preview",
+                "models/gemini-flash-latest"
+            ]
 
             def _transcribe(client):
                 last_err = None

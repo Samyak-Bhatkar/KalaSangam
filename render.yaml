@@ -13,6 +13,18 @@ services:
         value: production
       - key: ZERO_FAIL_MODE
         value: "true"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEYS
+        sync: false
+      - key: BHASHINI_API_KEY
+        sync: false
+      - key: BHASHINI_USER_ID
+        sync: false
+      - key: BHASHINI_INFERENCE_KEY
+        sync: false
+      - key: BHASHINI_PIPELINE_ID
+        sync: false
 
   # KalaSangam Frontend Web Client
   - type: web

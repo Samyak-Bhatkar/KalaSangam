@@ -88,7 +88,13 @@ def call_gemini_multimodal(
             )
 
             def _generate_catalog(client):
-                for model_name in ["models/gemini-3-flash-preview", "models/gemini-flash-latest"]:
+                for model_name in [
+                    "models/gemini-3.6-flash",
+                    "models/gemini-3.8-flash",
+                    "models/gemini-3.5-flash-lite",
+                    "models/gemini-3-flash-preview",
+                    "models/gemini-flash-latest"
+                ]:
                     try:
                         resp = client.models.generate_content(
                             model=model_name,
@@ -118,22 +124,26 @@ def call_gemini_multimodal(
             raw_text = re.sub(r"\s*```$", "", raw_text)
             return json.loads(raw_text)
         except Exception as e:
-            logger.warning(f"google-genai attempt failed ({e}), trying legacy SDK fallback")
-            import google.generativeai as gai
-            gai.configure(api_key=settings.GEMINI_API_KEY)
-            model = gai.GenerativeModel("models/gemini-3-flash-preview")
-            prompt = GEMINI_SYSTEM_DIRECTIVE.format(
-                transcript=transcript,
-                source_language=source_language
-            )
-            resp = model.generate_content([
-                prompt,
-                {"mime_type": "image/jpeg", "data": image_bytes}
-            ])
-            raw_text = resp.text.strip()
-            raw_text = re.sub(r"^```json\s*", "", raw_text)
-            raw_text = re.sub(r"\s*```$", "", raw_text)
-            return json.loads(raw_text)
+            logger.warning(f"google-genai attempt failed ({e}), checking legacy SDK fallback")
+            try:
+                import google.generativeai as gai
+                gai.configure(api_key=settings.GEMINI_API_KEY)
+                model = gai.GenerativeModel("models/gemini-3.6-flash")
+                prompt = GEMINI_SYSTEM_DIRECTIVE.format(
+                    transcript=transcript,
+                    source_language=source_language
+                )
+                resp = model.generate_content([
+                    prompt,
+                    {"mime_type": "image/jpeg", "data": image_bytes}
+                ])
+                raw_text = resp.text.strip()
+                raw_text = re.sub(r"^```json\s*", "", raw_text)
+                raw_text = re.sub(r"\s*```$", "", raw_text)
+                return json.loads(raw_text)
+            except (ImportError, Exception) as leg_err:
+                logger.debug(f"Legacy SDK fallback not available or failed: {leg_err}")
+                return None
 
     except Exception as ex:
         log_gemini_error(

@@ -81,11 +81,13 @@ def get_studio_session():
     If high-tier models cannot be loaded or would block with huge downloads,
     silently fails over so requests never crash or hang.
     """
-    global session_studio, _STUDIO_SESSION_ATTEMPTED
+    global REMBG_AVAILABLE, session_studio, _STUDIO_SESSION_ATTEMPTED
     if session_studio is not None:
+        REMBG_AVAILABLE = True
         return session_studio
     with _SESSION_LOCK:
         if session_studio is not None:
+            REMBG_AVAILABLE = True
             return session_studio
         if _STUDIO_SESSION_ATTEMPTED:
             return None
@@ -122,6 +124,7 @@ def get_studio_session():
                     sess = new_session(model_name)
                     if sess is not None:
                         session_studio = sess
+                        REMBG_AVAILABLE = True
                         logger.info(f"Successfully initialized high-tier rembg studio session: {model_name}")
                         return session_studio
                 except Exception as ex:
@@ -539,6 +542,9 @@ def process_studio_image(
     from PIL import ImageOps
     raw_img = Image.open(io.BytesIO(raw_bytes))
     raw_img = ImageOps.exif_transpose(raw_img).convert("RGB")
+    # Clamp input dimensions to max 1600px to prevent 512MB RAM exhaustion from mobile uploads
+    if max(raw_img.size) > 1600:
+        raw_img.thumbnail((1600, 1600), Image.Resampling.LANCZOS)
     
     # 1. Preliminary segmentation pass to isolate craft vs background reference
     # Reuse cached cutout from quality gate if available, otherwise compute and cache
@@ -633,6 +639,9 @@ def process_studio_image(
             "height": new_h
         }
     }
+
+    import gc
+    gc.collect()
 
     return raw_img, studio_canvas, metadata
 
@@ -936,14 +945,21 @@ def assess_photo_quality(
                 "Respond ONLY with a JSON object: "
                 "{\"passed\": true/false, \"dominant_issue\": null | \"blurry\" | \"cut_off\" | \"too_dark\" | \"too_bright\" | \"cluttered\"}"
             )
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=[
-                    types.Part.from_bytes(data=raw_bytes, mime_type="image/jpeg"),
-                    prompt,
-                ],
-                config=types.GenerateContentConfig(temperature=0.1, response_mime_type="application/json")
-            )
+            response = None
+            for model_name in ["models/gemini-3.6-flash", "models/gemini-3.8-flash", "models/gemini-3.5-flash-lite"]:
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=[
+                            types.Part.from_bytes(data=raw_bytes, mime_type="image/jpeg"),
+                            prompt,
+                        ],
+                        config=types.GenerateContentConfig(temperature=0.1, response_mime_type="application/json")
+                    )
+                    if response and response.text:
+                        break
+                except Exception as m_e:
+                    continue
             if response and response.text:
                 parsed = json.loads(response.text)
                 if parsed.get("passed") is False and parsed.get("dominant_issue"):
