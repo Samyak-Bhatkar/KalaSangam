@@ -10,6 +10,8 @@ import logging
 import base64
 import io
 import re
+import uuid
+import time
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 from PIL import Image
@@ -24,6 +26,9 @@ MOTIF_KB_PATH = Path(__file__).resolve().parent.parent / "data" / "motif_kb.json
 
 # In-memory store for artisan confirmed motif testimonies
 ARTISAN_MOTIF_CONFIRMATIONS: Dict[str, Dict[str, Any]] = {}
+
+# In-memory queue for public community suggestions (shown in Coordinator Review Desk)
+PENDING_MOTIF_SUGGESTIONS: List[Dict[str, Any]] = []
 
 def load_motif_kb() -> List[Dict[str, Any]]:
     """Loads seeded motif knowledge base from disk."""
@@ -51,8 +56,6 @@ def get_candidates(craft_hint: Optional[str] = None, cluster_hint: Optional[str]
         score = 0
         cat = m.get("craft_category", "").lower()
         cluster = m.get("cluster_hint", "").lower()
-        name_en = m.get("name_en", "").lower()
-        name_hi = m.get("name_hi", "").lower()
 
         if any(w in hint_str for w in ["terracotta", "pottery", "clay", "pot", "mitti", "kalash", "gorakhpur"]):
             if "terracotta" in cat:
@@ -78,6 +81,7 @@ def call_gemini_motif_vision(image_bytes: bytes, candidates: List[Dict[str, Any]
     """
     Invokes Gemini Vision with candidate-constrained prompt.
     Strict rule: rejects any response whose motif_id is not in candidates.
+    If image is not a craft, returns {"unrecognized": True}.
     """
     if not settings.GEMINI_API_KEY:
         logger.info("GEMINI_API_KEY not configured, will engage fallback")
@@ -104,85 +108,90 @@ CANDIDATES:
 {json.dumps(candidate_summary, ensure_ascii=False, indent=2)}
 
 STRICT RULES:
-1. You MUST select ONLY a motif_id from the candidate list above ({candidate_ids}).
-2. Do NOT invent new motif IDs. If unsure, select the closest candidate.
+1. If the image is completely unrelated to Indian handicraft (e.g. laptop, car, food, generic office item), return:
+{{"is_craft": false, "motif_id": null, "confidence": 0.0, "reason": "Non-craft object"}}
+2. If it is a handicraft, you MUST select ONLY a motif_id from the candidate list above ({candidate_ids}).
 3. Return ONLY a valid JSON object matching this schema:
 {{
+  "is_craft": true,
   "motif_id": "<one of the candidate motif_ids>",
-  "confidence": <float between 0.75 and 0.98>,
+  "confidence": <float between 0.70 and 0.98>,
   "detected_visual_features": ["list of 2-3 visual details observed in the image"],
   "artisan_observation_hi": "संक्षिप्त 1 वाक्य विवरण हिंदी में",
   "artisan_observation_en": "Brief 1-sentence visual observation in English"
 }}"""
 
     try:
-        # 1. Attempt google.genai
-        try:
-            from google import genai
-            from google.genai import types
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            
-            # Use stable verified models
-            model_candidates = ["models/gemini-2.5-flash", "models/gemini-flash-latest", "models/gemini-2.5-flash-lite", "models/gemini-3.6-flash"]
-            response = None
-            for m in model_candidates:
-                try:
-                    response = client.models.generate_content(
-                        model=m,
-                        contents=[
-                            system_prompt,
-                            types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
-                        ]
-                    )
-                    if response and response.text:
-                        break
-                except Exception as m_err:
-                    logger.debug(f"Motif decode with model {m} failed: {m_err}")
-            
-            if response and response.text:
-                raw_text = response.text.strip()
-                raw_text = re.sub(r"^```json\s*", "", raw_text)
-                raw_text = re.sub(r"\s*```$", "", raw_text)
-                parsed = json.loads(raw_text)
-                if parsed.get("motif_id") in candidate_ids:
-                    return parsed
-                else:
-                    logger.warning(f"Gemini returned invalid motif_id {parsed.get('motif_id')}, rejected.")
-                    return None
-        except Exception as e:
-            logger.warning(f"google-genai client attempt failed: {e}")
+        from google import genai
+        from google.genai import types
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        
+        model_candidates = ["models/gemini-2.5-flash", "models/gemini-flash-latest", "models/gemini-2.5-flash-lite", "models/gemini-3.6-flash"]
+        response = None
+        for m in model_candidates:
+            try:
+                response = client.models.generate_content(
+                    model=m,
+                    contents=[
+                        system_prompt,
+                        types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+                    ]
+                )
+                if response and response.text:
+                    break
+            except Exception as m_err:
+                logger.debug(f"Motif decode with model {m} failed: {m_err}")
+        
+        if response and response.text:
+            raw_text = response.text.strip()
+            raw_text = re.sub(r"^```json\s*", "", raw_text)
+            raw_text = re.sub(r"\s*```$", "", raw_text)
+            parsed = json.loads(raw_text)
 
-        # 2. Legacy google.generativeai fallback
-        try:
-            import google.generativeai as gai
-            gai.configure(api_key=settings.GEMINI_API_KEY)
-            model = gai.GenerativeModel("models/gemini-3.6-flash")
-            resp = model.generate_content([
-                system_prompt,
-                {"mime_type": "image/jpeg", "data": image_bytes}
-            ])
-            if resp and resp.text:
-                raw_text = resp.text.strip()
-                raw_text = re.sub(r"^```json\s*", "", raw_text)
-                raw_text = re.sub(r"\s*```$", "", raw_text)
-                parsed = json.loads(raw_text)
-                if parsed.get("motif_id") in candidate_ids:
-                    return parsed
-                else:
-                    logger.warning(f"Gemini returned invalid motif_id {parsed.get('motif_id')}, rejected.")
-                    return None
-        except Exception as leg_err:
-            logger.debug(f"Legacy SDK fallback failed: {leg_err}")
+            if parsed.get("is_craft") is False:
+                return {"unrecognized": True, "reason": parsed.get("reason", "Non-craft object")}
 
-    except Exception as ex:
-        log_gemini_error("Motif Engine (call_gemini_motif_vision)", ex)
-    
+            if parsed.get("motif_id") in candidate_ids:
+                return parsed
+            else:
+                logger.warning(f"Gemini returned invalid motif_id {parsed.get('motif_id')}, rejected.")
+                return None
+    except Exception as e:
+        logger.warning(f"google-genai client attempt failed: {e}")
+
+    # Legacy SDK fallback
+    try:
+        import google.generativeai as gai
+        gai.configure(api_key=settings.GEMINI_API_KEY)
+        model = gai.GenerativeModel("models/gemini-3.6-flash")
+        resp = model.generate_content([
+            system_prompt,
+            {"mime_type": "image/jpeg", "data": image_bytes}
+        ])
+        if resp and resp.text:
+            raw_text = resp.text.strip()
+            raw_text = re.sub(r"^```json\s*", "", raw_text)
+            raw_text = re.sub(r"\s*```$", "", raw_text)
+            parsed = json.loads(raw_text)
+
+            if parsed.get("is_craft") is False:
+                return {"unrecognized": True, "reason": parsed.get("reason", "Non-craft object")}
+
+            if parsed.get("motif_id") in candidate_ids:
+                return parsed
+            else:
+                logger.warning(f"Gemini returned invalid motif_id {parsed.get('motif_id')}, rejected.")
+                return None
+    except Exception as leg_err:
+        logger.debug(f"Legacy SDK fallback failed: {leg_err}")
+
     return None
 
-def build_category_fallback_record(craft_hint: Optional[str] = None, language: str = "hi") -> Dict[str, Any]:
+def build_category_fallback_record(craft_hint: Optional[str] = None, language: str = "hi", status: str = "partial") -> Dict[str, Any]:
     """
     Offline/error fallback: returns the category-level craft record from CRAFT_FIXTURES
     labelled 'Craft record' (never a specific motif match).
+    Part B Rule: status='partial' -> match_chip_label='Craft-level match'.
     """
     hint = (craft_hint or "").lower()
     fixture = CRAFT_FIXTURES[DEFAULT_CRAFT_KEY]
@@ -194,36 +203,64 @@ def build_category_fallback_record(craft_hint: Optional[str] = None, language: s
     cat_name = fixture.get("craft_category", "Traditional Indian Craft")
     title_hi = fixture.get("title_hi", "पारंपरिक भारतीय शिल्प")
     title_en = fixture.get("title_en", "Traditional Indian Craft")
+    technique_hi = fixture.get("technique", "पारंपरिक हस्तकला तकनीक")
+    technique_en = fixture.get("technique", "Handcrafted traditional technique")
+
+    # Match chip labels according to Rule B1
+    if status == "unrecognized":
+        chip_label = "कोई सटीक रूपांकन नहीं मिला" if language == "hi" else "No exact motif match"
+        show_pct = False
+        confidence_pct = None
+    else:
+        chip_label = "शिल्प-स्तरीय मेल" if language == "hi" else "Craft-level match"
+        show_pct = False
+        confidence_pct = None
 
     return {
-        "status": "fallback",
+        "status": status,
         "is_category_fallback": True,
         "motif_id": f"CRAFT-RECORD-{fixture.get('id', 'GEN-01')}",
         "record_type": "Craft record",
+        "match_chip_label": chip_label,
+        "show_pct_chip": show_pct,
         "name_en": f"Craft Record: {cat_name}",
         "name_hi": f"शिल्प अभिलेख: {title_hi}",
-        "name_local": fixture.get("technique", "पारंपरिक हस्तकला"),
+        "name_local": technique_hi if language == "hi" else technique_en,
+        "name_local_hi": technique_hi,
+        "name_local_en": technique_en,
         "craft_category": cat_name,
         "cluster_hint": fixture.get("cluster_pin", "India"),
         "meaning_en": f"Category-level craft record for {cat_name}. Specific motif could not be confirmed with high optical confidence.",
         "meaning_hi": f"{title_hi} का श्रेणी-स्तरीय शिल्प अभिलेख। विशिष्ट रूपांकन का निश्चित मिलान नहीं हो सका।",
         "meaning": f"{title_hi} का श्रेणी-स्तरीय शिल्प अभिलेख।" if language == "hi" else f"Category-level craft record for {cat_name}.",
-        "technique_note_en": fixture.get("technique", "Handcrafted traditional technique"),
-        "technique_note_hi": fixture.get("technique", "पारंपरिक हस्तकला तकनीक"),
-        "technique_note": fixture.get("technique", "पारंपरिक हस्तकला तकनीक"),
-        "sources": {
-            "name": "🟢 Curated (MoSJE Craft Register)",
-            "meaning": "🟢 Curated (Ministry Benchmark)",
-            "technique": "🟢 Curated (GI Documentation)",
-            "verification_status": "TODO_VERIFY_SOURCE"
-        },
-        "source_badges": [
-            {"field": "name", "label": "🟢 Curated", "detail": "National Handicraft Register"},
-            {"field": "meaning", "label": "🟢 Curated", "detail": "Ministry Benchmark"},
-            {"field": "technique", "label": "🟢 Curated", "detail": "GI Documentation"}
+        "technique_note_en": technique_en,
+        "technique_note_hi": technique_hi,
+        "technique_note": technique_hi if language == "hi" else technique_en,
+        "sources": [
+            {
+                "title": f"Official Fixture: {cat_name}",
+                "publisher": "National Handicrafts Board / Cluster Documentation",
+                "url_or_doc_id": fixture.get("id", "GEN-01"),
+                "page_or_section": "Cluster Baseline"
+            }
         ],
-        "confidence": 0.85,
-        "confidence_pct": "85%",
+        "source_badges": [
+            {
+                "field": "name",
+                "label": "⚪ Draft (सत्यापन शेष)" if language == "hi" else "⚪ Draft (Unverified)",
+                "type": "draft",
+                "detail": "Cluster baseline fixture pending field audit"
+            },
+            {
+                "field": "technique",
+                "label": "🟡 AI-observed" if language == "hi" else "🟡 AI-observed",
+                "type": "ai_observed",
+                "detail": "Category geometry match"
+            }
+        ],
+        "verification_status": "needs_verification",
+        "confidence": 0.70,
+        "confidence_pct": None,
         "narration_text": f"यह {title_hi} का श्रेणी-स्तरीय अभिलेख है।" if language == "hi" else f"This is a verified category record for {cat_name}.",
         "narration_audio_url": None,
         "detected_visual_features": ["Category geometry matched", "Organic material textures"]
@@ -237,11 +274,15 @@ def decode_craft_motif(
 ) -> Dict[str, Any]:
     """
     Decodes motif from base64 image using candidate matching & Gemini Vision.
-    Falls back safely to category-level craft record on offline/error.
+    Enforces honest status and strict 3-tier provenance rules:
+    - status='matched' -> Motif match NN%
+    - status='partial' -> Craft-level match (hide %)
+    - status='unrecognized' -> No exact motif match (hide %)
+    - Green 'Curated' badge ONLY when verification_status == 'verified' and non-empty sources.
     """
     candidates = get_candidates(craft_hint, cluster_hint, limit=5)
     if not candidates:
-        return build_category_fallback_record(craft_hint, language)
+        return build_category_fallback_record(craft_hint, language, status="partial")
 
     image_bytes = None
     if image_base64:
@@ -258,58 +299,85 @@ def decode_craft_motif(
     if image_bytes and settings.GEMINI_API_KEY:
         ai_result = call_gemini_motif_vision(image_bytes, candidates, language)
 
-    # If Gemini succeeded with a valid candidate
+    # If Gemini explicitly flagged image as non-craft
+    if ai_result and ai_result.get("unrecognized"):
+        return build_category_fallback_record(craft_hint, language, status="unrecognized")
+
+    # If Gemini succeeded with a valid candidate from the candidate list
     if ai_result and ai_result.get("motif_id"):
         matched_id = ai_result["motif_id"]
         matched = next((c for c in candidates if c["motif_id"] == matched_id), candidates[0])
         
         conf = float(ai_result.get("confidence", 0.94))
+        conf_pct_val = int(conf * 100)
         ai_obs_hi = ai_result.get("artisan_observation_hi", "")
         ai_obs_en = ai_result.get("artisan_observation_en", "")
 
-        meaning_text = matched["meaning_hi"] if language == "hi" else matched["meaning_en"]
-        tech_text = matched["technique_note_hi"] if language == "hi" else matched["technique_note_en"]
-        narration = matched["narration_hi"] if language == "hi" else matched["narration_en"]
+        meaning_text = matched.get("meaning_hi") if language == "hi" else matched.get("meaning_en")
+        tech_text = matched.get("technique_note_hi") if language == "hi" else matched.get("technique_note_en")
+        name_local_text = matched.get("name_local_hi") if language == "hi" else matched.get("name_local_en")
+        narration = matched.get("narration_hi") if language == "hi" else matched.get("narration_en")
+
+        # Provenance badge rule B2:
+        # Green curated ONLY if verification_status == "verified" AND non-empty sources
+        is_verified = (matched.get("verification_status") == "verified") and len(matched.get("sources", [])) > 0
+        if is_verified:
+            source_badge_label = "🟢 Curated" if language != "hi" else "🟢 प्रमाणित (Curated)"
+            source_badge_type = "curated"
+        else:
+            source_badge_label = "⚪ Draft (सत्यापन शेष)" if language == "hi" else "⚪ Draft (Verification Pending)"
+            source_badge_type = "draft"
+
+        chip_label = f"रूपांकन मेल {conf_pct_val}%" if language == "hi" else f"Motif match {conf_pct_val}%"
 
         return {
-            "status": "success",
+            "status": "matched",
             "is_category_fallback": False,
             "motif_id": matched["motif_id"],
             "record_type": "Motif record",
+            "match_chip_label": chip_label,
+            "show_pct_chip": True,
             "name_en": matched["name_en"],
             "name_hi": matched["name_hi"],
-            "name_local": matched["name_local"],
+            "name_local": name_local_text or matched.get("name_local_hi"),
+            "name_local_hi": matched.get("name_local_hi"),
+            "name_local_en": matched.get("name_local_en"),
             "craft_category": matched["craft_category"],
             "cluster_hint": matched["cluster_hint"],
-            "gi_tag_ref": matched.get("gi_tag_ref", ""),
+            "gi_tag_ref": matched.get("gi_tag_ref"),
             "meaning_en": matched["meaning_en"],
             "meaning_hi": matched["meaning_hi"],
             "meaning": meaning_text,
             "technique_note_en": matched["technique_note_en"],
             "technique_note_hi": matched["technique_note_hi"],
             "technique_note": tech_text,
-            "sources": {
-                "name": "🟢 Curated",
-                "meaning": "🟢 Curated",
-                "technique": "🟡 AI-observed",
-                "verification_status": "TODO_VERIFY_SOURCE"
-            },
+            "verification_status": matched.get("verification_status", "needs_verification"),
+            "sources": matched.get("sources", []),
             "source_badges": [
-                {"field": "name", "label": "🟢 Curated", "detail": matched.get("sources", {}).get("citation", "Curated Archive")},
-                {"field": "meaning", "label": "🟢 Curated", "detail": "Oral Folklore Archive"},
-                {"field": "technique", "label": "🟡 AI-observed", "detail": "Gemini 2.5 Vision analysis"}
+                {
+                    "field": "name",
+                    "label": source_badge_label,
+                    "type": source_badge_type,
+                    "detail": matched.get("sources", [{}])[0].get("title", "Archival Reference")
+                },
+                {
+                    "field": "technique",
+                    "label": "🟡 AI-observed" if language != "hi" else "🟡 AI-अवलोकन",
+                    "type": "ai_observed",
+                    "detail": "Gemini 2.5 Vision contour extraction"
+                }
             ],
             "confidence": conf,
-            "confidence_pct": f"{int(conf * 100)}%",
+            "confidence_pct": f"{conf_pct_val}%",
             "narration_text": narration,
             "narration_audio_url": None,
-            "detected_visual_features": ai_result.get("detected_visual_features", ["Incised motif contour", "Handmade relief structure"]),
+            "detected_visual_features": ai_result.get("detected_visual_features", ["Pattern contour matched", "Handcrafted texture"]),
             "ai_observation": ai_obs_hi if language == "hi" else ai_obs_en
         }
 
-    # If offline or Gemini unconfigured:
-    # Rule: "Offline / error fallback: return the category-level craft record from CRAFT_FIXTURES labelled 'Craft record' (never a specific motif match)."
-    return build_category_fallback_record(craft_hint, language)
+    # If offline, rate-limited, or no candidate matched:
+    # Rule B1: status='partial' -> "Craft-level match" and hide % chip
+    return build_category_fallback_record(craft_hint, language, status="partial")
 
 def confirm_or_correct_motif(
     motif_id: str,
@@ -321,6 +389,7 @@ def confirm_or_correct_motif(
 ) -> Dict[str, Any]:
     """
     Appends an ARTISAN entry (🔵 Artisan-told) to the motif record for this product.
+    Only authenticated artisans/coordinators can append directly.
     """
     key = product_id or motif_id
     confirmation_entry = {
@@ -344,6 +413,60 @@ def confirm_or_correct_motif(
         "source_badge": "🔵 Artisan-told",
         "message": "Artisan cultural testimony successfully appended to Craft Knowledge Vault"
     }
+
+def submit_public_suggestion(
+    motif_id: str,
+    suggestion_text: str,
+    cluster_hint: Optional[str] = None,
+    language: str = "hi",
+    suggested_by: Optional[str] = "Public Contributor"
+) -> Dict[str, Any]:
+    """
+    Saves a public/visitor suggestion into the coordinator pending review queue.
+    CRITICAL RULE: A suggestion must NEVER appear as 'artisan-told' until approved.
+    """
+    suggestion_id = f"SUGG-{uuid.uuid4().hex[:8].upper()}"
+    entry = {
+        "id": suggestion_id,
+        "motif_id": motif_id,
+        "suggestion_text": suggestion_text.strip(),
+        "cluster_hint": cluster_hint or "General",
+        "language": language,
+        "suggested_by": suggested_by,
+        "status": "pending_coordinator_review",
+        "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    }
+    PENDING_MOTIF_SUGGESTIONS.append(entry)
+    logger.info(f"Saved public motif suggestion {suggestion_id} for motif {motif_id}")
+    return {
+        "status": "submitted",
+        "suggestion_id": suggestion_id,
+        "message": "आपकी टिप्पणी समीक्षा हेतु समन्वयक समीक्षा पटल (Review Desk) पर भेज दी गई है।" if language == "hi" else "Your suggestion has been submitted to the Coordinator Review Desk for verification."
+    }
+
+def get_pending_suggestions() -> List[Dict[str, Any]]:
+    """Returns all pending suggestions for Coordinator Review Panel."""
+    return [s for s in PENDING_MOTIF_SUGGESTIONS if s.get("status") == "pending_coordinator_review"]
+
+def approve_suggestion(suggestion_id: str, coordinator_name: str = "Cluster Coordinator") -> Optional[Dict[str, Any]]:
+    """Approves a public suggestion, converting it into a verified testimony."""
+    for s in PENDING_MOTIF_SUGGESTIONS:
+        if s.get("id") == suggestion_id:
+            s["status"] = "approved"
+            s["approved_by"] = coordinator_name
+            s["approved_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            
+            # Now register it as an approved oral record
+            ARTISAN_MOTIF_CONFIRMATIONS[s["motif_id"]] = {
+                "motif_id": s["motif_id"],
+                "artisan_name": f"{s['suggested_by']} (Approved by {coordinator_name})",
+                "testimony": s["suggestion_text"],
+                "language": s["language"],
+                "confirmed_at": s["approved_at"],
+                "badge": "🔵 Verified Testimony"
+            }
+            return s
+    return None
 
 def get_confirmed_motif_for_product(product_id: str) -> Optional[Dict[str, Any]]:
     """Retrieves any artisan-confirmed motif testimony for a product."""

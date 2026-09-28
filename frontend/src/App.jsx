@@ -51,6 +51,7 @@ import CoordinatorReviewPanel from './components/CoordinatorReviewPanel';
 import AuthLoginScreen from './components/AuthLoginScreen';
 import BuyerStorefrontScreen from './components/BuyerStorefrontScreen';
 import VyaparNitiScreen from './components/VyaparNitiScreen';
+import MotifDecoder from './components/MotifDecoder';
 
 export default function App() {
   const {
@@ -82,6 +83,14 @@ export default function App() {
 
   // Slide-over Profile Drawer State
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
+
+  // Support public motif scanner route with NO login (?view=scan or ?scan=true)
+  const [publicScanOpen, setPublicScanOpen] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('view') === 'scan' || params.get('scan') === 'true';
+  });
+  const [storefrontSearchQuery, setStorefrontSearchQuery] = useState('');
 
   // Support public buyer storefront route with NO login (?view=storefront or ?storefront=true)
   const [publicStorefront, setPublicStorefront] = useState(() => {
@@ -116,6 +125,30 @@ export default function App() {
     }
   }, [setActiveModal, setCurrentStep]);
 
+  // 0. PUBLIC MOTIF SCANNER (Zero login required - Rule A1)
+  if (publicScanOpen) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-0 md:p-6 select-none font-sans">
+        <div className="relative w-full md:max-w-[430px] h-screen md:h-[900px] md:max-h-[95vh] bg-slate-950 md:rounded-[40px] md:border md:border-amber-400/40 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden">
+          <MotifDecoder
+            isOpen={true}
+            mode="public"
+            onClose={() => {
+              window.history.pushState({}, '', '/');
+              setPublicScanOpen(false);
+            }}
+            onExploreCraft={(cluster) => {
+              window.history.pushState({}, '', '?view=storefront');
+              setStorefrontSearchQuery(cluster || '');
+              setPublicScanOpen(false);
+              setPublicStorefront(true);
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // 1. PUBLIC BUYER STOREFRONT (Zero login required)
   if (publicStorefront) {
     return (
@@ -124,6 +157,11 @@ export default function App() {
           window.history.pushState({}, '', '/');
           setPublicStorefront(false);
         }}
+        onScanMotifPublic={() => {
+          window.history.pushState({}, '', '?view=scan');
+          setPublicScanOpen(true);
+        }}
+        initialSearchQuery={storefrontSearchQuery}
       />
     );
   }
@@ -155,6 +193,10 @@ export default function App() {
             onBrowseStorefront={() => {
               window.history.pushState({}, '', '?view=storefront');
               setPublicStorefront(true);
+            }}
+            onScanMotifPublic={() => {
+              window.history.pushState({}, '', '?view=scan');
+              setPublicScanOpen(true);
             }}
           />
         </div>

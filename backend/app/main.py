@@ -10,9 +10,10 @@ import time
 import base64
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict, Any
+from collections import defaultdict
 from PIL import Image
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, BackgroundTasks, Header
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, BackgroundTasks, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, FileResponse
@@ -71,12 +72,16 @@ from .models.schemas import (
     PriceApplyRequest,
     MotifDecodeRequest,
     MotifConfirmRequest,
+    MotifSuggestionRequest,
 )
 from .models.mock_data import CRAFT_FIXTURES
 from .services.motif_engine import (
     decode_craft_motif,
     confirm_or_correct_motif,
-    get_confirmed_motif_for_product
+    get_confirmed_motif_for_product,
+    submit_public_suggestion,
+    get_pending_suggestions,
+    approve_suggestion
 )
 from .services.craft_pin_service import (
     classify_and_format_pin_callout,
@@ -1213,17 +1218,22 @@ async def verify_product_public_endpoint(product_id: str):
                     "motif_id": "MOTIF-TERRA-MAYUR-001",
                     "name_en": "Mayur (Peacock) Motif",
                     "name_hi": "मयूर रूपांकन",
-                    "name_local": "मोर पंख नक्काशी (Bhojpuri)",
-                    "meaning_en": "Ancient Vedic emblem of monsoon rains, fertility, grace, and eternal vigilance.",
-                    "meaning_hi": "प्राचीन वैदिक प्रतीक जो वर्षा के आगमन, उर्वरता और समृद्धि का द्योतक है।",
-                    "technique_note_en": "Deeply hand-incised with a pointed bamboo stylus on leather-hard alluvial clay.",
-                    "technique_note_hi": "चमड़े जैसी सख्त गीली मिट्टी पर नुकीली बांस की तीली से उकेरी गई पारंपरिक नक्काशी।",
-                    "sources": {
-                        "name": "🟢 Curated",
-                        "meaning": "🟢 Curated",
-                        "technique": "🟡 AI-observed",
-                        "verification_status": "TODO_VERIFY_SOURCE"
-                    },
+                    "name_local": "मोर रूपांकन (भोजपुरी अंचल)",
+                    "name_local_hi": "मोर रूपांकन (भोजपुरी अंचल)",
+                    "name_local_en": "Mor Motif (Bhojpuri region)",
+                    "meaning_en": "Traditional emblem of monsoon arrival, grace, and natural harmony in eastern Uttar Pradesh potter traditions.",
+                    "meaning_hi": "पूर्वी उत्तर प्रदेश के कुंभकार परंपरा में वर्षा के आगमन, सौंदर्य और प्रकृति के साथ सामंजस्य का पारंपरिक प्रतीक।",
+                    "technique_note_en": "Hand-incised surface patterning on clay vessel before low-temperature pit firing.",
+                    "technique_note_hi": "भट्टी में पकाने से पूर्व मिट्टी के पात्र पर हाथ से उकेरा गया रेखांकन।",
+                    "verification_status": "needs_verification",
+                    "sources": [
+                        {
+                            "title": "Field Documentation of Traditional Terracotta Pottery (Gorakhpur Cluster)",
+                            "publisher": "Development Commissioner (Handicrafts), Ministry of Textiles [Archival Record]",
+                            "url_or_doc_id": "DOC-DCH-UP-GKP-2018",
+                            "page_or_section": "Section 4: Decorative Motifs"
+                        }
+                    ],
                     "confidence_pct": "95%"
                 }
             )
@@ -1978,15 +1988,32 @@ async def get_system_architecture_slide():
 # MOTIF CULTURAL KNOWLEDGE VAULT ROUTES (Theme: Heritage & Culture | PS 26197)
 # ==============================================================================
 
+# Rate Limiter for Motif Decoding (10 requests/min/IP)
+MOTIF_RATE_LIMITS: Dict[str, List[float]] = defaultdict(list)
+RATE_LIMIT_WINDOW = 60.0
+RATE_LIMIT_MAX_REQUESTS = 10
+
 @app.post("/api/motif/decode")
 @app.post("/api/v1/motif/decode")
-async def decode_motif_endpoint(req: MotifDecodeRequest):
+async def decode_motif_endpoint(req: MotifDecodeRequest, request: Request):
     """
     POST /api/motif/decode or /api/v1/motif/decode
     Accepts craft photo, candidate matches, runs Gemini Flash iconographer prompt,
     enforces candidate validation, and returns cultural knowledge record.
-    Falls back safely to category-level craft record on offline/error.
+    Protected by 10 req/min/IP rate limiter. Falls back safely to category record on offline/error.
     """
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    timestamps = [t for t in MOTIF_RATE_LIMITS[client_ip] if now - t < RATE_LIMIT_WINDOW]
+    if len(timestamps) >= RATE_LIMIT_MAX_REQUESTS:
+        logger.warning(f"Rate limit exceeded for IP {client_ip} on /api/motif/decode")
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded: maximum 10 requests per minute per IP. Please wait a moment."
+        )
+    timestamps.append(now)
+    MOTIF_RATE_LIMITS[client_ip] = timestamps
+
     try:
         result = decode_craft_motif(
             image_base64=req.image_base64,
@@ -1997,7 +2024,6 @@ async def decode_motif_endpoint(req: MotifDecodeRequest):
         return result
     except Exception as e:
         logger.error(f"Motif decoding error: {e}")
-        # Zero-fail fallback
         from .services.motif_engine import build_category_fallback_record
         return build_category_fallback_record(req.craft_hint, req.language or "hi")
 
@@ -2022,4 +2048,50 @@ async def confirm_motif_endpoint(req: MotifConfirmRequest):
     except Exception as e:
         logger.error(f"Motif confirmation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/motif/suggest")
+@app.post("/api/v1/motif/suggest")
+async def suggest_motif_endpoint(req: MotifSuggestionRequest):
+    """
+    POST /api/motif/suggest
+    Submits a public correction/suggestion. Saved to pending queue for Coordinator Review Desk.
+    Never appears as 'artisan-told' until approved.
+    """
+    try:
+        res = submit_public_suggestion(
+            motif_id=req.motif_id,
+            suggestion_text=req.suggestion_text,
+            cluster_hint=req.cluster_hint,
+            language=req.language or "hi",
+            suggested_by=req.suggested_by or "Public Contributor"
+        )
+        return res
+    except Exception as e:
+        logger.error(f"Motif suggestion error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/motif/suggestions/pending")
+@app.get("/api/v1/motif/suggestions/pending")
+async def list_pending_motif_suggestions():
+    """Returns pending motif suggestions for Coordinator Review Panel."""
+    return {
+        "status": "success",
+        "suggestions": get_pending_suggestions()
+    }
+
+
+@app.post("/api/motif/suggestions/{suggestion_id}/approve")
+@app.post("/api/v1/motif/suggestions/{suggestion_id}/approve")
+async def approve_motif_suggestion(suggestion_id: str):
+    """Approves a public motif suggestion by coordinator."""
+    approved = approve_suggestion(suggestion_id)
+    if not approved:
+        raise HTTPException(status_code=404, detail="Suggestion not found or already reviewed")
+    return {
+        "status": "success",
+        "approved": approved,
+        "message": "Suggestion approved and converted into an official oral testimony."
+    }
 

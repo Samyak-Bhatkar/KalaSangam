@@ -389,9 +389,15 @@ export default function PublicVerifyScreen({ productId, onBack, onBrowseStorefro
                 <div className="text-xs text-slate-700 leading-relaxed bg-white/80 p-2.5 rounded-xl border border-amber-200/60">
                   <div className="text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-0.5 flex items-center justify-between">
                     <span>सांस्कृतिक अर्थ व प्रतीक</span>
-                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                      🟢 Curated
-                    </span>
+                    {product.decoded_motif.verification_status === 'verified' && (product.decoded_motif.sources?.length > 0) ? (
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        🟢 Curated
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-700 border border-slate-300">
+                        ⚪ Draft (सत्यापन शेष)
+                      </span>
+                    )}
                   </div>
                   {product.decoded_motif.meaning_hi || product.decoded_motif.meaning_en || product.decoded_motif.meaning}
                 </div>

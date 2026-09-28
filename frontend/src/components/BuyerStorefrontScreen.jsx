@@ -22,10 +22,10 @@ import { fetchStorefrontProducts } from '../services/api';
 import IndiaCraftMap from './IndiaCraftMap';
 import TechniqueLineageBadge from './TechniqueLineageBadge';
 
-export default function BuyerStorefrontScreen({ onGoToLogin }) {
+export default function BuyerStorefrontScreen({ onGoToLogin, onScanMotifPublic, initialSearchQuery = '' }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'map'
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showCraftPins, setShowCraftPins] = useState(false);
@@ -100,14 +100,24 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
             </div>
           </div>
 
-          {/* Login Action to switch back to Artisan/Coordinator */}
-          <button
-            onClick={onGoToLogin}
-            className="py-1.5 px-3 rounded-full bg-[#C85A32] hover:bg-[#B44B24] text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95"
-          >
-            <LogIn className="w-3.5 h-3.5" />
-            <span>कारीगर / समन्वयक लॉगिन</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {onScanMotifPublic && (
+              <button
+                onClick={onScanMotifPublic}
+                className="py-1.5 px-3 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-xs font-black flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95 hover:brightness-105"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-slate-950" />
+                <span>रूपांकन पहचानें (Scan Motif)</span>
+              </button>
+            )}
+            <button
+              onClick={onGoToLogin}
+              className="py-1.5 px-3 rounded-full bg-[#C85A32] hover:bg-[#B44B24] text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>कारीगर / समन्वयक लॉगिन</span>
+            </button>
+          </div>
         </header>
 
         {/* Hero Value Banner */}

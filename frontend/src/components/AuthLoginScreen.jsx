@@ -9,11 +9,26 @@ import {
   ShoppingBag,
   CheckCircle2,
   UserCheck,
-  ChevronLeft
+  ChevronLeft,
+  Compass
 } from 'lucide-react';
 import { useArtisan, MOCK_USERS } from '../context/ArtisanContext';
 
-export default function AuthLoginScreen({ onBrowseStorefront }) {
+// Rule B5: Neutral student prototype branding flag (default ON for this submission)
+// Toggle to false for original MoSJE/NBCFDC official branding
+export const IS_STUDENT_PROTOTYPE_BRANDING = true;
+
+const BRANDING = {
+  badge: IS_STUDENT_PROTOTYPE_BRANDING ? 'AICTE MIC' : 'MoSJE',
+  subHeader: IS_STUDENT_PROTOTYPE_BRANDING 
+    ? 'AI छात्र नवाचार • Heritage & Culture Prototype (PS 26197)'
+    : 'AI बाज़ार संपर्क व स्मार्ट कैटलॉगिंग प्रणाली',
+  footer: IS_STUDENT_PROTOTYPE_BRANDING
+    ? 'AICTE / MIC छात्र नवाचार प्रोटोटाइप • Student Innovation (Non-Governmental)'
+    : 'राष्ट्रीय पिछड़ा वर्ग वित्त एवं विकास निगम (NBCFDC) • भारत सरकार'
+};
+
+export default function AuthLoginScreen({ onBrowseStorefront, onScanMotifPublic }) {
   const { loginWithPhone, speakVoice, language } = useArtisan();
 
   // Step 1: Phone input, Step 2: OTP input
@@ -125,11 +140,11 @@ export default function AuthLoginScreen({ onBrowseStorefront }) {
                   शिल्पसेतु <span className="text-[#C85A32]">ShilpSetu</span>
                 </h1>
                 <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-900 font-bold border border-amber-300">
-                  MoSJE
+                  {BRANDING.badge}
                 </span>
               </div>
               <p className="text-[10px] text-slate-500 font-medium">
-                AI बाज़ार संपर्क व स्मार्ट कैटलॉगिंग प्रणाली
+                {BRANDING.subHeader}
               </p>
             </div>
           </div>
@@ -347,8 +362,35 @@ export default function AuthLoginScreen({ onBrowseStorefront }) {
         )}
       </div>
 
+      {/* Prominent Public Motif Scanner Card (Rule A1(a): No Login Needed) */}
+      <div className="pt-3 pb-1">
+        <button
+          type="button"
+          onClick={onScanMotifPublic}
+          className="w-full p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-yellow-500/20 to-orange-500/15 border-2 border-dashed border-amber-500/60 hover:border-amber-500 text-left flex items-center justify-between gap-3 shadow-xs hover:shadow-md active:scale-[0.99] transition-all cursor-pointer group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 text-slate-950 flex items-center justify-center shrink-0 shadow-sm group-hover:rotate-6 transition-transform">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs font-black text-amber-950 flex items-center gap-1.5 flex-wrap">
+                <span>रूपांकन पहचानें (Scan Any Motif)</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
+                  बिना लॉगिन / No Login
+                </span>
+              </div>
+              <p className="text-[10px] text-amber-900/80 mt-0.5 line-clamp-1">
+                साड़ी, बर्तन या मूर्ति की ओर कैमरा करें — AI इसका सांस्कृतिक इतिहास बताएगा
+              </p>
+            </div>
+          </div>
+          <Compass className="w-5 h-5 text-amber-600 shrink-0 group-hover:scale-110 transition-transform" />
+        </button>
+      </div>
+
       {/* Bottom Public Buyer Storefront Link (No Login Needed) */}
-      <div className="pt-4 border-t border-slate-200/80 text-center">
+      <div className="pt-2 border-t border-slate-200/80 text-center">
         <button
           onClick={onBrowseStorefront}
           className="w-full py-3 px-4 rounded-2xl bg-white border border-slate-300/80 hover:border-slate-400 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 shadow-2xs active:scale-[0.98] transition-all cursor-pointer"
@@ -357,7 +399,7 @@ export default function AuthLoginScreen({ onBrowseStorefront }) {
           <span>सार्वजनिक बाज़ार देखें (Browse Live Marketplace Without Login)</span>
         </button>
         <p className="text-[10px] text-slate-400 mt-2">
-          राष्ट्रीय पिछड़ा वर्ग वित्त एवं विकास निगम (NBCFDC) • भारत सरकार
+          {BRANDING.footer}
         </p>
       </div>
     </div>

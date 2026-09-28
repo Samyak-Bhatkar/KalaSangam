@@ -214,8 +214,39 @@ const filterMockDrafts = (filter) => {
 };
 
 export default function CoordinatorReviewPanel({ onClose, onLogout, user }) {
-  // Navigation: 'queue' | 'storefront'
+  // Navigation: 'queue' | 'storefront' | 'motifs'
   const [activeTab, setActiveTab] = useState('queue');
+
+  // Motif Suggestions State (Rule A2)
+  const [pendingMotifSuggestions, setPendingMotifSuggestions] = useState([]);
+  const [isLoadingMotifSuggestions, setIsLoadingMotifSuggestions] = useState(false);
+
+  const loadMotifSuggestions = async () => {
+    setIsLoadingMotifSuggestions(true);
+    try {
+      const res = await fetch('/api/motif/suggestions/pending');
+      if (res.ok) {
+        const data = await res.json();
+        setPendingMotifSuggestions(data.suggestions || []);
+      }
+    } catch (e) {
+      console.warn('Failed to load pending motif suggestions:', e);
+    } finally {
+      setIsLoadingMotifSuggestions(false);
+    }
+  };
+
+  const handleApproveSuggestion = async (id) => {
+    try {
+      const res = await fetch(`/api/motif/suggestions/${id}/approve`, { method: 'POST' });
+      if (res.ok) {
+        setPendingMotifSuggestions(prev => prev.filter(s => s.id !== id));
+        setActionSuccessMessage('सुझाव स्वीकृत और आधिकारिक मौखिक गवाही में दर्ज किया गया!');
+      }
+    } catch (e) {
+      console.warn('Approval failed:', e);
+    }
+  };
 
   // Queue State - Initialized with rich ShilpSetu mock drafts
   const [queueFilter, setQueueFilter] = useState('all'); // 'all' | 'camera' | 'ivr' | 'missing_photo'
@@ -620,15 +651,15 @@ export default function CoordinatorReviewPanel({ onClose, onLogout, user }) {
             )}
           </div>
 
-          {/* 3. 2-Tab Segmented Controller (Full-width row 2 on mobile, Center on desktop) */}
+          {/* 3. 3-Tab Segmented Controller (Full-width row 2 on mobile, Center on desktop) */}
           <div className="w-full md:w-auto order-3 md:order-2 shrink-0">
-            <div className="bg-gray-100 p-1 rounded-xl grid grid-cols-2 md:inline-flex border border-gray-200 text-xs font-medium w-full md:w-auto">
+            <div className="bg-gray-100 p-1 rounded-xl grid grid-cols-3 md:inline-flex border border-gray-200 text-xs font-medium w-full md:w-auto gap-1">
               <button
                 onClick={() => {
                   setSelectedDraftId(null);
                   setActiveTab('queue');
                 }}
-                className={`px-3 sm:px-4 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`px-2.5 sm:px-4 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   activeTab === 'queue'
                     ? 'bg-white text-[#C85A32] shadow-sm font-semibold'
                     : 'text-gray-500 hover:text-gray-700 font-medium'
@@ -650,19 +681,40 @@ export default function CoordinatorReviewPanel({ onClose, onLogout, user }) {
                   setSelectedDraftId(null);
                   setActiveTab('storefront');
                 }}
-                className={`px-3 sm:px-4 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`px-2.5 sm:px-4 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   activeTab === 'storefront'
                     ? 'bg-white text-[#C85A32] shadow-sm font-semibold'
                     : 'text-gray-500 hover:text-gray-700 font-medium'
                 }`}
               >
                 <Store className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">Published Listings</span>
+                <span className="truncate">Published</span>
                 {storefrontProducts.length > 0 && (
                   <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono shrink-0 ${
                     activeTab === 'storefront' ? 'bg-orange-100 text-[#C85A32]' : 'bg-gray-200 text-gray-600'
                   }`}>
                     {storefrontProducts.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setSelectedDraftId(null);
+                  setActiveTab('motifs');
+                  loadMotifSuggestions();
+                }}
+                className={`px-2.5 sm:px-4 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  activeTab === 'motifs'
+                    ? 'bg-white text-[#C85A32] shadow-sm font-semibold'
+                    : 'text-gray-500 hover:text-gray-700 font-medium'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+                <span className="truncate">Motif Ideas</span>
+                {pendingMotifSuggestions.length > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono shrink-0 bg-amber-100 text-amber-900 border border-amber-300">
+                    {pendingMotifSuggestions.length}
                   </span>
                 )}
               </button>
@@ -1314,6 +1366,89 @@ export default function CoordinatorReviewPanel({ onClose, onLogout, user }) {
                       </div>
                     ))}
                   </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {/* TAB 3: MOTIF SUGGESTIONS REVIEW QUEUE (Rule A2)                   */}
+          {/* ─────────────────────────────────────────────────────────────────── */}
+          {activeTab === 'motifs' && (
+            <div className="flex-1 flex flex-col overflow-hidden p-4 md:p-6 space-y-4">
+              <div className="flex items-center justify-between shrink-0">
+                <div>
+                  <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    <span>Public Motif Suggestions Queue (जन सुझाव पटल)</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-semibold">
+                      Student Innovation • Heritage Provenance
+                    </span>
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5 font-normal">
+                    Suggestions submitted by public visitors/tourists. Review and approve to convert into verified oral lore.
+                  </p>
+                </div>
+
+                <button
+                  onClick={loadMotifSuggestions}
+                  className="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:text-gray-900 bg-white cursor-pointer"
+                  title="Refresh suggestions"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingMotifSuggestions ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+
+              {/* Suggestions List */}
+              <div className="flex-1 overflow-y-auto pr-1 space-y-3">
+                {isLoadingMotifSuggestions ? (
+                  <div className="py-24 text-center text-gray-400 flex flex-col items-center gap-2">
+                    <Loader2 className="w-7 h-7 animate-spin text-[#C85A32]" />
+                    <span className="text-xs">Fetching pending suggestions...</span>
+                  </div>
+                ) : pendingMotifSuggestions.length === 0 ? (
+                  <div className="py-24 text-center text-gray-400">
+                    <Sparkles className="w-8 h-8 text-amber-400 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm font-semibold text-gray-900">No pending suggestions</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      When public users suggest a correction on the Motif Scanner, it appears here for coordinator sign-off.
+                    </p>
+                  </div>
+                ) : (
+                  pendingMotifSuggestions.map((sugg) => (
+                    <div
+                      key={sugg.id}
+                      className="p-4 rounded-2xl bg-white border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                            {sugg.id}
+                          </span>
+                          <span className="text-xs font-bold text-amber-900">
+                            Motif: {sugg.motif_id}
+                          </span>
+                          <span className="text-[10px] text-gray-400">
+                            • {sugg.cluster_hint}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-800 font-medium italic">
+                          "{sugg.suggestion_text}"
+                        </p>
+                        <div className="text-[10px] text-gray-500">
+                          Submitted by: {sugg.suggested_by} • {sugg.created_at}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleApproveSuggestion(sugg.id)}
+                        className="py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer shrink-0 active:scale-95"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Approve into Oral Lore (स्वीकार करें)</span>
+                      </button>
+                    </div>
+                  ))
                 )}
               </div>
             </div>

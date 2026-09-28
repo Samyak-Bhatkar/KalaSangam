@@ -417,6 +417,13 @@ class MotifConfirmRequest(BaseModel):
     audio_url: Optional[str] = None
     language: Optional[str] = "hi"
 
+class MotifSuggestionRequest(BaseModel):
+    motif_id: str
+    suggestion_text: str
+    cluster_hint: Optional[str] = None
+    language: Optional[str] = "hi"
+    suggested_by: Optional[str] = "Public Contributor"
+
 # IVR Telephony Schemas (Zero-Smartphone Tier)
 class IVRCatalogDraftRequest(BaseModel):
     product_name: str
