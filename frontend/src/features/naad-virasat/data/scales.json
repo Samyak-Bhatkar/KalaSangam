@@ -1,0 +1,96 @@
+{
+  "baseSaFrequencies": {
+    "C": 261.63,
+    "C#": 277.18,
+    "D": 293.66,
+    "D#": 311.13,
+    "E": 329.63
+  },
+  "defaultBaseSa": 261.63,
+  "ragas": {
+    "mohanam": {
+      "id": "mohanam",
+      "name": "Mohanam (मोहनाम्)",
+      "type": "pentatonic",
+      "arohana": ["Sa", "Ri2", "Ga3", "Pa", "Dha2", "S^"],
+      "swaras": [
+        { "name": "Sa", "ratio": 1.0, "devanagari": "सा", "western": "C" },
+        { "name": "Ri2", "ratio": 1.125, "devanagari": "रे (शुद्ध)", "western": "D" },
+        { "name": "Ga3", "ratio": 1.25, "devanagari": "ग (अन्तर)", "western": "E" },
+        { "name": "Pa", "ratio": 1.5, "devanagari": "प", "western": "G" },
+        { "name": "Dha2", "ratio": 1.6667, "devanagari": "ध (चतुःश्रुति)", "western": "A" },
+        { "name": "S^", "ratio": 2.0, "devanagari": "सां (तार)", "western": "C'" }
+      ],
+      "illustrativePhrase": [
+        { "swara": "Sa", "duration": 0.4 },
+        { "swara": "Ri2", "duration": 0.3 },
+        { "swara": "Ga3", "duration": 0.5 },
+        { "swara": "Pa", "duration": 0.4 },
+        { "swara": "Dha2", "duration": 0.4 },
+        { "swara": "S^", "duration": 0.7 },
+        { "swara": "Dha2", "duration": 0.3 },
+        { "swara": "Pa", "duration": 0.4 },
+        { "swara": "Ga3", "duration": 0.5 },
+        { "swara": "Ri2", "duration": 0.4 },
+        { "swara": "Sa", "duration": 0.8 }
+      ],
+      "verified": true,
+      "source": "Sangita Ratnakara & Natyashastra classical audava (5-note) classification"
+    },
+    "bhairav": {
+      "id": "bhairav",
+      "name": "Bhairav (भैरव)",
+      "type": "heptatonic",
+      "arohana": ["Sa", "re1", "Ga3", "ma1", "Pa", "dha1", "Ni3", "S^"],
+      "swaras": [
+        { "name": "Sa", "ratio": 1.0, "devanagari": "सा", "western": "C" },
+        { "name": "re1", "ratio": 1.0667, "devanagari": "रे (कोमल)", "western": "Db" },
+        { "name": "Ga3", "ratio": 1.25, "devanagari": "ग (शुद्ध)", "western": "E" },
+        { "name": "ma1", "ratio": 1.3333, "devanagari": "म (शुद्ध)", "western": "F" },
+        { "name": "Pa", "ratio": 1.5, "devanagari": "प", "western": "G" },
+        { "name": "dha1", "ratio": 1.6, "devanagari": "ध (कोमल)", "western": "Ab" },
+        { "name": "Ni3", "ratio": 1.875, "devanagari": "नि (शुद्ध)", "western": "B" },
+        { "name": "S^", "ratio": 2.0, "devanagari": "सां (तार)", "western": "C'" }
+      ],
+      "illustrativePhrase": [
+        { "swara": "Sa", "duration": 0.4 },
+        { "swara": "re1", "duration": 0.5 },
+        { "swara": "Sa", "duration": 0.3 },
+        { "swara": "Ga3", "duration": 0.4 },
+        { "swara": "ma1", "duration": 0.5 },
+        { "swara": "Pa", "duration": 0.6 },
+        { "swara": "dha1", "duration": 0.4 },
+        { "swara": "Pa", "duration": 0.5 }
+      ],
+      "verified": true,
+      "source": "Ancient morning raga; Sampurna (7-note) scale"
+    },
+    "bilawal": {
+      "id": "bilawal",
+      "name": "Shuddha Bilawal (बिलावल)",
+      "type": "heptatonic",
+      "arohana": ["Sa", "Ri2", "Ga3", "Ma1", "Pa", "Dha2", "Ni3", "S^"],
+      "swaras": [
+        { "name": "Sa", "ratio": 1.0, "devanagari": "सा", "western": "C" },
+        { "name": "Ri2", "ratio": 1.125, "devanagari": "रे", "western": "D" },
+        { "name": "Ga3", "ratio": 1.25, "devanagari": "ग", "western": "E" },
+        { "name": "Ma1", "ratio": 1.3333, "devanagari": "म", "western": "F" },
+        { "name": "Pa", "ratio": 1.5, "devanagari": "प", "western": "G" },
+        { "name": "Dha2", "ratio": 1.6667, "devanagari": "ध", "western": "A" },
+        { "name": "Ni3", "ratio": 1.875, "devanagari": "नि", "western": "B" },
+        { "name": "S^", "ratio": 2.0, "devanagari": "सां", "western": "C'" }
+      ],
+      "illustrativePhrase": [
+        { "swara": "Sa", "duration": 0.3 },
+        { "swara": "Ri2", "duration": 0.3 },
+        { "swara": "Ga3", "duration": 0.4 },
+        { "swara": "Pa", "duration": 0.5 },
+        { "swara": "Dha2", "duration": 0.3 },
+        { "swara": "Ni3", "duration": 0.3 },
+        { "swara": "S^", "duration": 0.6 }
+      ],
+      "verified": true,
+      "source": "Natural major diatonic scale equivalent in Indian musicology"
+    }
+  }
+}

@@ -1,0 +1,388 @@
+[
+  {
+    "id": "ekatantri-vina",
+    "names": {
+      "en": "Ekatantri Vina",
+      "hi": "एकतन्त्री वीणा",
+      "sa": "एकतन्त्री वीणा"
+    },
+    "family": "tata",
+    "status": "rare",
+    "evidenceLevel": "well_documented",
+    "era": "10th - 13th Century CE",
+    "carvingContext": "Hoysala & Chola temple stone reliefs, Belur and Halebidu sculptures",
+    "modernDescendantId": "saraswati-vina",
+    "modernDescendantName": "Saraswati Vina / Rudra Vina",
+    "comparisonRationale": "The ancient Ekatantri utilized a single gut or brass string over a bamboo danda with a gourd resonator. Over centuries, frets were fixed and multiple melody and drone strings were added, culminating in the contemporary Saraswati Vina.",
+    "synth": {
+      "type": "karplus-strong",
+      "damping": 0.985,
+      "stiffness": 0.002,
+      "pluckComb": 0.22,
+      "jivariBuzz": 0.18,
+      "decaySeconds": 3.8,
+      "bodyResonanceHz": 185
+    },
+    "layout": {
+      "type": "strings",
+      "numStrings": 5,
+      "stringLabels": ["Sa", "Ri2", "Ga3", "Pa", "Dha2"],
+      "orientation": "vertical"
+    },
+    "scales": ["mohanam", "bhairav", "bilawal"],
+    "sources": [
+      {
+        "title": "Natyashastra (Ch. 28-33: Atodyavidhi)",
+        "authorOrInstitution": "Sage Bharata Muni",
+        "kind": "treatise",
+        "verified": false
+      },
+      {
+        "title": "Sangita Ratnakara (Vadyadhyaya)",
+        "authorOrInstitution": "Sarangadeva",
+        "kind": "treatise",
+        "verified": false
+      },
+      {
+        "title": "Musical Instruments in Hoysala Sculpture",
+        "authorOrInstitution": "Archaeological Survey of India / Sangeet Natak Akademi",
+        "kind": "archaeological_study",
+        "verified": false
+      }
+    ]
+  },
+  {
+    "id": "yazh",
+    "names": {
+      "en": "Sengotti Yazh (Bow-Harp)",
+      "hi": "याऴ (धनुर्वीणा)",
+      "sa": "याऴ्"
+    },
+    "family": "tata",
+    "status": "revived",
+    "evidenceLevel": "partial",
+    "era": "2nd Century BCE - 7th Century CE",
+    "carvingContext": "Thirumayam rock-cut cave temple and Amaravati Buddhist stupa reliefs",
+    "modernDescendantId": "harps-carnatic-vina",
+    "modernDescendantName": "Carnatic Vina / Swarabat",
+    "comparisonRationale": "The Yazh was an ancient open-string arched harp of Tamil Sangam literature. As fretted chordophones offered greater continuous microtonal ornamentation (gamaka), the open-string harp gradually ceased being played until 20th-century historical reconstructions.",
+    "synth": {
+      "type": "karplus-strong",
+      "damping": 0.992,
+      "stiffness": 0.0008,
+      "pluckComb": 0.15,
+      "jivariBuzz": 0.05,
+      "decaySeconds": 4.5,
+      "bodyResonanceHz": 220
+    },
+    "layout": {
+      "type": "strings",
+      "numStrings": 7,
+      "stringLabels": ["Sa", "Ri2", "Ga3", "Ma1", "Pa", "Dha2", "Ni3"],
+      "orientation": "curved"
+    },
+    "scales": ["mohanam", "bilawal"],
+    "sources": [
+      {
+        "title": "Silappadikaram (Arangetru Kadai)",
+        "authorOrInstitution": "Ilango Adigal",
+        "kind": "literary_epic",
+        "verified": false
+      },
+      {
+        "title": "Yazh Nool",
+        "authorOrInstitution": "Swami Vipulananda",
+        "kind": "monograph",
+        "verified": false
+      },
+      {
+        "title": "Sangam Era Musical Sculptures",
+        "authorOrInstitution": "IGNCA Archives",
+        "kind": "archive",
+        "verified": false
+      }
+    ]
+  },
+  {
+    "id": "mridangam",
+    "names": {
+      "en": "Classical Mridangam / Pushkara",
+      "hi": "मृदंगम् / पुष्कर",
+      "sa": "मृदङ्गम्"
+    },
+    "family": "avanaddha",
+    "status": "living",
+    "evidenceLevel": "well_documented",
+    "era": "5th Century BCE - Present",
+    "carvingContext": "Chidambaram Nataraja Temple dancing Karanas and Badami cave friezes",
+    "modernDescendantId": "carnatic-mridangam",
+    "modernDescendantName": "Concert Mridangam / Pakhawaj",
+    "comparisonRationale": "The tripartite drum (Pushkara) described in Natyashastra evolved into the bilateral tuned barrel drum. The black iron-paste coating (karanai/siyahi) on the right head produces near-harmonic partials unique among world membranophones.",
+    "synth": {
+      "type": "modal-drum",
+      "centerFreq": 146.83,
+      "rimFreq": 293.66,
+      "pitchDropAmount": 38,
+      "pitchDropTime": 0.055,
+      "harmonicPurity": 0.92,
+      "dampingSeconds": 1.4
+    },
+    "layout": {
+      "type": "pads",
+      "numPads": 3,
+      "pads": [
+        { "id": "tha", "label": "Tha", "devanagari": "था", "type": "bass", "sublabel": "Center Left" },
+        { "id": "dheem", "label": "Dheem", "devanagari": "धीम्", "type": "tonal", "sublabel": "Karanai Center" },
+        { "id": "nam", "label": "Nam", "devanagari": "नम्", "type": "rim", "sublabel": "Vettu Rim" }
+      ]
+    },
+    "scales": ["mohanam"],
+    "sources": [
+      {
+        "title": "Natyashastra (Ch. 33: Avanaddha Vidhi)",
+        "authorOrInstitution": "Sage Bharata Muni",
+        "kind": "treatise",
+        "verified": false
+      },
+      {
+        "title": "Mridanga Vadyam & Acoustics",
+        "authorOrInstitution": "Sir C.V. Raman (On the Indian Musical Drums)",
+        "kind": "scientific_paper",
+        "verified": false
+      }
+    ]
+  },
+  {
+    "id": "damaru",
+    "names": {
+      "en": "Sacred Damaru",
+      "hi": "डमरू",
+      "sa": "डमरुः"
+    },
+    "family": "avanaddha",
+    "status": "living",
+    "evidenceLevel": "well_documented",
+    "era": "Vedic Era - Present",
+    "carvingContext": "Shiva Nataraja cosmic dance bronzes and Ellora cave 16 reliefs",
+    "modernDescendantId": "folk-damaru",
+    "modernDescendantName": "Ritual & Folk Damaru / Udukkai",
+    "comparisonRationale": "The hourglass rattle drum is iconographically associated with the primal sound of creation (Sphota/A-U-M). By squeezing the waist cords, the tension and pitch sharply modulate.",
+    "synth": {
+      "type": "modal-drum",
+      "centerFreq": 210.0,
+      "rimFreq": 380.0,
+      "pitchDropAmount": 85,
+      "pitchDropTime": 0.08,
+      "harmonicPurity": 0.45,
+      "dampingSeconds": 0.65
+    },
+    "layout": {
+      "type": "pads",
+      "numPads": 2,
+      "pads": [
+        { "id": "dhak", "label": "Dhak", "devanagari": "ढक्", "type": "high-tension", "sublabel": "Squeezed Waist" },
+        { "id": "dhum", "label": "Dhum", "devanagari": "धुम्", "type": "open-flutter", "sublabel": "Open Strike" }
+      ]
+    },
+    "scales": ["mohanam"],
+    "sources": [
+      {
+        "title": "Maheshwara Sutrani / Shiva Sutra",
+        "authorOrInstitution": "Panini Grammar Tradition",
+        "kind": "treatise",
+        "verified": false
+      },
+      {
+        "title": "Elements of Hindu Iconography",
+        "authorOrInstitution": "T.A. Gopinatha Rao",
+        "kind": "monograph",
+        "verified": false
+      }
+    ]
+  },
+  {
+    "id": "venu-flute",
+    "names": {
+      "en": "Temple Venu / Bamboo Bansuri",
+      "hi": "वेणु / बांसुरी",
+      "sa": "वेणुः"
+    },
+    "family": "sushira",
+    "status": "living",
+    "evidenceLevel": "well_documented",
+    "era": "Ancient - Present",
+    "carvingContext": "Venugopala sculptures at Belur and Somnathpur Hoysala temples",
+    "modernDescendantId": "carnatic-venu",
+    "modernDescendantName": "8-Hole Carnatic Venu / North Indian Bansuri",
+    "comparisonRationale": "Depicted with 6 to 8 fingerholes in temple art. The sound relies on an edge embouchure producing rich odd and even harmonics, driven by turbulent breath noise and microtonal finger-sliding.",
+    "synth": {
+      "type": "wind-breath",
+      "noiseRatio": 0.14,
+      "vibratoRate": 5.2,
+      "vibratoDepth": 0.015,
+      "formantCutoffHz": 1850,
+      "attackSeconds": 0.08,
+      "releaseSeconds": 0.35
+    },
+    "layout": {
+      "type": "wind-strip",
+      "swaras": ["Sa", "Ri2", "Ga3", "Pa", "Dha2", "S^"],
+      "continuousSlide": true
+    },
+    "scales": ["mohanam", "bilawal", "bhairav"],
+    "sources": [
+      {
+        "title": "Natyashastra (Ch. 30: Sushiravadhividhi)",
+        "authorOrInstitution": "Sage Bharata Muni",
+        "kind": "treatise",
+        "verified": false
+      },
+      {
+        "title": "Sangita Ratnakara (Venu Lakshanam)",
+        "authorOrInstitution": "Sarangadeva",
+        "kind": "treatise",
+        "verified": false
+      }
+    ]
+  },
+  {
+    "id": "shankha",
+    "names": {
+      "en": "Sacred Shankha (Conch Aerophone)",
+      "hi": "शंख (नाद)",
+      "sa": "शङ्खः"
+    },
+    "family": "sushira",
+    "status": "living",
+    "evidenceLevel": "well_documented",
+    "era": "Vedic Antiquity - Present",
+    "carvingContext": "Mahabalipuram shore temple and Vishnu sculpture friezes across India",
+    "modernDescendantId": "ritual-shankha",
+    "modernDescendantName": "Ritual Conch Shell (Turbinella pyrum)",
+    "comparisonRationale": "A natural spiral conical horn producing a powerful, piercing fundamental with prominent odd harmonics. It serves as a heraldic signal and sacred acoustic sanctifier in temple rituals.",
+    "synth": {
+      "type": "wind-conch",
+      "fundamentalHz": 220.0,
+      "swellAttack": 0.65,
+      "lipBuzzModulation": 0.28,
+      "harmonicCount": 9,
+      "decaySeconds": 2.2
+    },
+    "layout": {
+      "type": "single-blow",
+      "label": "Deep Breath & Blow",
+      "devanagari": "नाद विस्फोट"
+    },
+    "scales": ["mohanam"],
+    "sources": [
+      {
+        "title": "Bhagavad Gita (Ch. 1: Verses 12-19 on Shankhas of Warriors)",
+        "authorOrInstitution": "Mahabharata Epic",
+        "kind": "epic_literature",
+        "verified": false
+      },
+      {
+        "title": "Acoustics of the Sacred Conch Shell",
+        "authorOrInstitution": "Sangeet Natak Akademi Studies",
+        "kind": "study",
+        "verified": false
+      }
+    ]
+  },
+  {
+    "id": "ghanta",
+    "names": {
+      "en": "Sacred Temple Ghanta (Ritual Bell)",
+      "hi": "मन्दिर घण्टा (कांस्य वाद्य)",
+      "sa": "घण्टा"
+    },
+    "family": "ghana",
+    "status": "living",
+    "evidenceLevel": "well_documented",
+    "era": "Ancient - Present",
+    "carvingContext": "Mandapa doorway lintels, Khajuraho and Konark relief panels",
+    "modernDescendantId": "panchaloha-bell",
+    "modernDescendantName": "Panchaloha Temple Bell / Bastar Bell Metal",
+    "comparisonRationale": "Cast in sacred alloy (Panchaloha / bronze), the bell exhibits inharmonic cluster modes with prominent minor-third and octave humtones that resonate for several seconds, calming temple visitors.",
+    "synth": {
+      "type": "fm-bell",
+      "baseFreq": 587.33,
+      "modIndex": 2.6,
+      "inharmonicPartials": [1.0, 1.48, 2.05, 2.82, 4.15],
+      "partialAmplitudes": [1.0, 0.65, 0.42, 0.25, 0.15],
+      "decaySeconds": 5.5,
+      "shimmerRate": 4.8
+    },
+    "layout": {
+      "type": "strike-zones",
+      "numZones": 3,
+      "zones": [
+        { "id": "rim", "label": "Edge Strike", "pitchShift": 1.0 },
+        { "id": "waist", "label": "Body Strike", "pitchShift": 1.48 },
+        { "id": "lip", "label": "Clapper Swell", "pitchShift": 0.5 }
+      ]
+    },
+    "scales": ["mohanam"],
+    "sources": [
+      {
+        "title": "Agama Shastra (Temple Architecture & Sound Sanctification)",
+        "authorOrInstitution": "Temple Ritual Agamas",
+        "kind": "treatise",
+        "verified": false
+      },
+      {
+        "title": "Acoustic Spectra of Indian Bell Metal Idiophones",
+        "authorOrInstitution": "IGNCA Research Journal",
+        "kind": "research",
+        "verified": false
+      }
+    ]
+  },
+  {
+    "id": "manjira",
+    "names": {
+      "en": "Manjira / Jalra (Devotional Cymbals)",
+      "hi": "मंजीरा / करताल",
+      "sa": "मञ्जीरा"
+    },
+    "family": "ghana",
+    "status": "living",
+    "evidenceLevel": "well_documented",
+    "era": "Ancient - Present",
+    "carvingContext": "Konark Sun Temple celestial musician friezes & Halebidu dancers",
+    "modernDescendantId": "brass-manjira",
+    "modernDescendantName": "Classical Brass Manjira / Talam",
+    "comparisonRationale": "Small cup-shaped brass or bell-metal cymbals tied by a cord. When struck rim-to-rim, they produce a sharp, bright, chiming transient with metallic ring-out used for rhythmic timekeeping (tala).",
+    "synth": {
+      "type": "fm-bell",
+      "baseFreq": 1760.0,
+      "modIndex": 1.8,
+      "inharmonicPartials": [1.0, 2.14, 3.42, 5.1],
+      "partialAmplitudes": [1.0, 0.8, 0.4, 0.2],
+      "decaySeconds": 2.4,
+      "shimmerRate": 8.0
+    },
+    "layout": {
+      "type": "cymbal-pair",
+      "zones": [
+        { "id": "clink", "label": "Open Clink", "damping": 2.4 },
+        { "id": "mute", "label": "Muffled Stroke", "damping": 0.45 }
+      ]
+    },
+    "scales": ["mohanam"],
+    "sources": [
+      {
+        "title": "Natyashastra (Ghana Vadya Classification)",
+        "authorOrInstitution": "Sage Bharata Muni",
+        "kind": "treatise",
+        "verified": false
+      },
+      {
+        "title": "Sangita Ratnakara (Tala Adhyaya)",
+        "authorOrInstitution": "Sarangadeva",
+        "kind": "treatise",
+        "verified": false
+      }
+    ]
+  }
+]
