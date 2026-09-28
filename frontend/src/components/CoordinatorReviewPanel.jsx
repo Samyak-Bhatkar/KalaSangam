@@ -584,6 +584,18 @@ export default function CoordinatorReviewPanel({ onClose, onLogout, user }) {
               </div>
             )}
 
+            {/* Direct Switch to Buyer Storefront */}
+            <button
+              onClick={() => {
+                window.location.href = '/?view=storefront';
+              }}
+              title="बाज़ार देखें (Public Buyer Storefront)"
+              className="py-1.5 px-3 rounded-full bg-amber-50 hover:bg-amber-100 text-[#C85A32] border border-amber-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-2xs shrink-0"
+            >
+              <Store className="w-3.5 h-3.5 text-[#C85A32]" />
+              <span>🛍️ बाज़ार देखें</span>
+            </button>
+
             {/* Always-visible Responsive Log Out Action */}
             {onLogout && (
               <button

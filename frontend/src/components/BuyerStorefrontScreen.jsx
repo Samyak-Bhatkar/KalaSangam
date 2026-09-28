@@ -19,11 +19,13 @@ import {
   Pause,
 } from 'lucide-react';
 import { fetchStorefrontProducts } from '../services/api';
+import IndiaCraftMap from './IndiaCraftMap';
 
 export default function BuyerStorefrontScreen({ onGoToLogin }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'map'
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showCraftPins, setShowCraftPins] = useState(false);
   const [activePinId, setActivePinId] = useState(null);
@@ -135,22 +137,59 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="mt-5 relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="कलाकृति, कारीगर या श्रेणी खोजें (जैसे: टेराकोटा, चंदेरी, शांति देवी)..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-slate-400 text-xs md:text-sm focus:outline-none focus:border-amber-400 backdrop-blur-sm transition-colors"
-            />
+          {/* Search Bar & View Toggle */}
+          <div className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="कलाकृति, कारीगर या श्रेणी खोजें (जैसे: टेराकोटा, चंदेरी, शांति देवी)..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-slate-400 text-xs md:text-sm focus:outline-none focus:border-amber-400 backdrop-blur-sm transition-colors"
+              />
+            </div>
+
+            {/* View Switcher Toggle */}
+            <div className="flex items-center p-1 rounded-xl bg-slate-900/70 border border-white/20 shrink-0 self-start sm:self-auto shadow-inner">
+              <button
+                type="button"
+                id="toggle-view-grid"
+                onClick={() => setViewMode('grid')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  viewMode === 'grid'
+                    ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
+                    : 'text-slate-300 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <span>🛍️</span>
+                <span>ग्रिड दृश्य</span>
+              </button>
+              <button
+                type="button"
+                id="toggle-view-map"
+                onClick={() => setViewMode('map')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  viewMode === 'map'
+                    ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
+                    : 'text-slate-300 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <span>🗺️</span>
+                <span>शिल्प मानचित्र</span>
+              </button>
+            </div>
           </div>
         </section>
 
-        {/* Product Grid */}
+        {/* Product Grid or Interactive Craft Map */}
         <main className="flex-1 p-5 overflow-y-auto">
-          {loading ? (
+          {viewMode === 'map' ? (
+            <IndiaCraftMap
+              products={products}
+              onSelectProduct={(p) => setSelectedProduct(p)}
+            />
+          ) : loading ? (
             <div className="py-20 text-center">
               <div className="w-10 h-10 border-3 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
               <p className="text-xs font-bold text-slate-500">प्रमाणित उत्पाद लोड हो रहे हैं...</p>
