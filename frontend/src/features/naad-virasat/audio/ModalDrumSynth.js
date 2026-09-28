@@ -19,9 +19,9 @@ export class ModalDrumSynth {
       centerFreq = 146.83, // D3
       rimFreq = 293.66,    // D4
       dampingSeconds = 1.2,
-      pitchDropHz = 35,
       harmonicPurity = 0.9
     } = options;
+    let dropHz = options.pitchDropHz || 35;
 
     const cacheKey = `${strokeType}_${Math.round(centerFreq)}_${Math.round(dampingSeconds * 100)}`;
     if (this.bufferCache.has(cacheKey)) {
@@ -43,7 +43,7 @@ export class ModalDrumSynth {
 
     if (strokeType === 'bass' || strokeType === 'tha') {
       initialPitch = centerFreq * 0.65;
-      pitchDropHz = 40;
+      dropHz = 40;
       modes = [
         { ratio: 1.0, amp: 1.0, decay: dampingSeconds * 1.1 },
         { ratio: 1.8, amp: 0.35, decay: dampingSeconds * 0.6 },
@@ -52,7 +52,7 @@ export class ModalDrumSynth {
       noiseMix = 0.25;
     } else if (strokeType === 'rim' || strokeType === 'nam' || strokeType === 'dhak') {
       initialPitch = rimFreq;
-      pitchDropHz = 15;
+      dropHz = 15;
       modes = [
         { ratio: 1.0, amp: 0.8, decay: dampingSeconds * 0.5 },
         { ratio: 1.62, amp: 0.65, decay: dampingSeconds * 0.35 },
@@ -87,7 +87,7 @@ export class ModalDrumSynth {
       let currentFundamental = initialPitch;
       if (t < pitchDropDuration) {
         const dropProgress = 1 - (t / pitchDropDuration);
-        currentFundamental += pitchDropHz * Math.pow(dropProgress, 2);
+        currentFundamental += dropHz * Math.pow(dropProgress, 2);
       }
 
       // Sum modes

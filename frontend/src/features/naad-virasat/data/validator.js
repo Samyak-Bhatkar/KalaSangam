@@ -82,7 +82,7 @@ export function validateDatasets() {
 }
 
 // Standalone runner when invoked via node
-if (process.argv[1] && process.argv[1].endsWith('validator.js')) {
+if (typeof process !== 'undefined' && process?.argv?.[1]?.endsWith('validator.js')) {
   const result = validateDatasets();
   if (!result.valid) {
     console.error('❌ Naad-Virasat Dataset Validation FAILED:');

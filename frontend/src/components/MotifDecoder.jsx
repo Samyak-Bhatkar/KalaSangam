@@ -64,7 +64,8 @@ export default function MotifDecoder({
   craftHint = 'Terracotta & Pottery',
   clusterHint = 'Gorakhpur, Uttar Pradesh',
   onAttachSuccess,
-  onExploreCraft
+  onExploreCraft,
+  onPlayAuralHeritage
 }) {
   const { language, speakVoice, setDecodedMotif, currentProductId, selectedPreset } = useArtisan();
 
@@ -697,6 +698,19 @@ export default function MotifDecoder({
                   <Search className="w-4 h-4" />
                   <span>{isHi ? 'इस शिल्प को देखें' : 'Explore Craft'}</span>
                 </button>
+
+                {/* Button 3 (Optional): Play its sound in Naad-Virasat */}
+                {onPlayAuralHeritage && (
+                  <button
+                    type="button"
+                    onClick={onPlayAuralHeritage}
+                    className="min-h-[44px] py-2.5 px-3 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg active:scale-95"
+                    title={isHi ? 'नाद धरोहर में इसकी वाद्य ध्वनि सुनें' : 'Hear acoustic reconstruction in Naad-Virasat'}
+                  >
+                    <span>🪕</span>
+                    <span>{isHi ? 'ध्वनि सुनें' : 'Play Sound'}</span>
+                  </button>
+                )}
               </div>
             )}
 

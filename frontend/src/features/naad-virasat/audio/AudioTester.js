@@ -182,7 +182,7 @@ export function runNaadTests() {
 }
 
 // Standalone runner
-if (process.argv[1] && process.argv[1].endsWith('AudioTester.js')) {
+if (typeof process !== 'undefined' && process?.argv?.[1]?.endsWith('AudioTester.js')) {
   const summary = runNaadTests();
   if (summary.failed > 0) {
     process.exit(1);

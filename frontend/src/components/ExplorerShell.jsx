@@ -22,6 +22,9 @@ import MotifDecoder from './MotifDecoder';
 import { EXPLORER_STRINGS } from '../i18n/explorer';
 import { BRANDING_CONFIG } from '../config/branding';
 
+const NaadVirasatContainer = React.lazy(() => import('../features/naad-virasat'));
+
+
 export default function ExplorerShell({ onBack, onOpenMarketplace, initialTab = 'scan', language = 'hi', onToggleLanguage }) {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [studentLensActive, setStudentLensActive] = useState(false);
@@ -108,6 +111,20 @@ export default function ExplorerShell({ onBack, onOpenMarketplace, initialTab = 
             <span className="hidden sm:inline">{t.citeThis}</span>
           </button>
 
+          {/* Aural Heritage / Naad-Virasat Header Button */}
+          <button
+            onClick={() => setActiveTab('naad')}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
+              activeTab === 'naad'
+                ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm shadow-amber-500/30'
+                : 'bg-amber-950/40 text-amber-300 hover:bg-amber-900/50 border-amber-500/40'
+            }`}
+            title={language === 'hi' ? 'नाद धरोहर: पाषाण वाद्य अन्वेषण' : 'Aural Heritage: Ancient Instrument Studio'}
+          >
+            <span>🪕</span>
+            <span className="hidden xs:inline">{language === 'hi' ? 'नाद धरोहर' : 'Aural Heritage'}</span>
+          </button>
+
           {/* Language Toggle */}
           {onToggleLanguage && (
             <button
@@ -150,7 +167,21 @@ export default function ExplorerShell({ onBack, onOpenMarketplace, initialTab = 
               language={language}
               onClose={onBack}
               onExploreCraft={() => setActiveTab('atlas')}
+              onPlayAuralHeritage={() => setActiveTab('naad')}
             />
+          </div>
+        )}
+
+        {/* TAB: AURAL HERITAGE / NAAD-VIRASAT */}
+        {activeTab === 'naad' && (
+          <div className="w-full animate-in fade-in duration-300">
+            <React.Suspense fallback={
+              <div className="flex items-center justify-center py-24 text-amber-400 font-bold">
+                लोड हो रहा है... (Loading Naad-Virasat Studio)
+              </div>
+            }>
+              <NaadVirasatContainer />
+            </React.Suspense>
           </div>
         )}
 
@@ -280,9 +311,10 @@ export default function ExplorerShell({ onBack, onOpenMarketplace, initialTab = 
 
       {/* Bottom Navigation Bar (Sticky Footer) */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 safe-area-bottom">
-        <div className="max-w-md sm:max-w-lg mx-auto grid grid-cols-5 h-16">
+        <div className="max-w-md sm:max-w-xl mx-auto grid grid-cols-6 h-16">
           {[
             { id: 'scan', label: t.tabs.scan, icon: Camera },
+            { id: 'naad', label: language === 'hi' ? 'नाद धरोहर' : 'Aural', icon: Sparkles },
             { id: 'atlas', label: t.tabs.atlas, icon: MapPin },
             { id: 'stories', label: t.tabs.stories, icon: BookOpen },
             { id: 'learn', label: t.tabs.learn, icon: GraduationCap },
