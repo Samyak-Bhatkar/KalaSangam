@@ -1,39 +1,58 @@
 [
   {
-    "id": "story-warli-circle",
-    "element_id": "warli-painting",
-    "kind": "origin_myth",
-    "title_en": "The Sacred Spiral of Tarpa & Life",
-    "title_hi": "तारपा और जीवन का पवित्र चक्र",
-    "retelling_en": "Centuries ago, the elders of the Sahyadri mountains observed that no tree in the forest grows in straight lines. Rivers curve, vines twist, and the seasons turn in an eternal circle. To honor this unbroken cycle, the Warli women took white rice paste and painted men and women holding hands, circling the Tarpa player. In the Warli circle, there is no master and no servant, no beginning and no end. As long as the Tarpa breathes, the village moves together as one living soul.",
-    "retelling_hi": "सह्याद्री के घने जंगलों में बुजुर्गों ने देखा कि प्रकृति कभी सीधी रेखाओं में नहीं चलती। नदियाँ मुड़ती हैं, बेलें घूमती हैं और ऋतुएं चक्र में लौटती हैं। इस चक्र का सम्मान करने के लिए वारली माताओं ने सफेद चावल के लेप से तारपा वादक के चारों ओर गोल घेरा बनाया। इस घेरे में न कोई आगे है, न कोई पीछे। जब तक तारपा की धुन गूंजती है, पूरा गाँव एक धड़कन बनकर घूमता है।",
-    "source": "Sahapedia Oral Heritage Archive (https://www.sahapedia.org/warli-myths)",
-    "is_retelling": true,
-    "placeholder": true
+    "id": "story_baba_pithora",
+    "element_id": "baba_pithora_origin",
+    "kind": "legend",
+    "title_en": "The Birth of Baba Pithora",
+    "title_hi": "बाबा पिथौरा का जन्म",
+    "retelling_en": "Baba Pithora was born to Rani Kali Koyal. Afraid of societal wrath for having an illegitimate child, she abandoned him in a river. Rani Kajal, the sister of Baba Ind, found the baby while drawing water and raised him. When Pithora grew up, he demanded his half of the kingdom, leading to a massive struggle with Baba Ind and his ultimate deification among the Rathva people.",
+    "retelling_hi": "रानी काली कोयल ने समाज के डर से अपने नवजात बेटे पिथौरा को नदी में छोड़ दिया। बाबा इंद्र की बहन रानी काजल ने उसे पाला। बड़े होने पर, पिथौरा ने अपने हिस्से के राज्य की मांग की, जिससे बाबा इंद्र के साथ उसका संघर्ष हुआ और बाद में रथवा लोगों के बीच उसका देवत्वकरण हुआ।",
+    "source": {
+      "title": "Pithora of the Rathvas",
+      "url": "http://www.sahapedia.org/pithora-of-the-rathvas"
+    },
+    "is_retelling": true
   },
   {
-    "id": "story-kailash-temple",
-    "element_id": "ellora-caves",
-    "kind": "origin_myth",
-    "title_en": "The Mountain Carved from the Sky Down",
-    "title_hi": "आकाश से नीचे तराशा गया कैलाश पर्वत",
-    "retelling_en": "Legend recounts that Queen Manikavati of the Rashtrakutas prayed for the miraculous recovery of her ailing husband, King Krishna I, vowing to fast until she saw the shikhara spire of a magnificent temple dedicated to Shiva. To save the queen from starving, a master artisan named Kokasa conceived an audacity never before witnessed on earth: instead of building stone upon stone from the ground up, his guild climbed the peak of the Charanandri hill and carved the temple from the sky downward, chiseling two hundred thousand tons of basalt until Lord Shiva's abode emerged whole from the mountain.",
-    "retelling_hi": "राष्ट्रकूट रानी मणिकावती ने राजा कृष्ण प्रथम के स्वास्थ्य के लिए प्रण लिया कि जब तक वे शिव मंदिर का शिखर नहीं देख लेंगी, अन्न ग्रहण नहीं करेंगी। रानी को बचाने के लिए शिल्पकार कोकस ने एक अभूतपूर्व युक्ति सोची: नीचे से पत्थर जोड़ने के बजाय, वे पहाड़ की चोटी पर चढ़े और मंदिर को आकाश से नीचे की ओर तराशना शुरू किया। दो लाख टन बेसाल्ट पत्थर हटाकर स्वयं कैलाश पर्वत को चट्टान से प्रकट कर दिया गया।",
-    "retelling_hi": "राष्ट्रकूट रानी मणिकावती ने राजा कृष्ण प्रथम के स्वास्थ्य के लिए प्रण लिया कि जब तक वे शिव मंदिर का शिखर नहीं देख लेंगी, अन्न ग्रहण नहीं करेंगी। रानी को बचाने के लिए शिल्पकार कोकस ने एक अभूतपूर्व युक्ति सोची: नीचे से पत्थर जोड़ने के बजाय, वे पहाड़ की चोटी पर चढ़े और मंदिर को आकाश से नीचे की ओर तराशना शुरू किया। दो लाख टन बेसाल्ट पत्थर हटाकर स्वयं कैलाश पर्वत को चट्टान से प्रकट कर दिया गया।",
-    "source": "Archaeological Survey of India Legends Series (https://asi.nic.in/ellora-caves/)",
-    "is_retelling": true,
-    "placeholder": true
+    "id": "story_mahua_parsi",
+    "element_id": "mahua_parsi_legend",
+    "kind": "legend",
+    "title_en": "How the Parsi Trader Brought Death",
+    "title_hi": "पारसी व्यापारी कैसे मौत लाया",
+    "retelling_en": "An adivasi carpenter, married to a Brahmin's daughter, cleverly trapped Yama's messengers inside a beautifully carved wooden cupboard in the forest, preventing them from taking his father-in-law's soul. However, years later, a generous Parsi liquor vendor intoxicated the carpenter. While drunk, the carpenter carelessly opened the sealed cupboard, releasing the messengers, thus allowing death to finally claim him and curse his people.",
+    "retelling_hi": "एक आदिवासी बढ़ई ने यम के दूतों को जंगल में एक सुंदर लकड़ी की अलमारी में फंसा दिया। वर्षों बाद, एक पारसी शराब विक्रेता ने बढ़ई को नशे में धुत कर दिया। नशे की हालत में, बढ़ई ने लापरवाही से अलमारी खोल दी, जिससे दूत मुक्त हो गए और मृत्यु ने उसे अपना शिकार बना लिया।",
+    "source": {
+      "title": "In Conversation with Shiraz Bulsara Prabhu",
+      "url": "http://www.sahapedia.org/conversation-shiraz-bulsara-prabhu-politics-mahua-and-warlis-search-new-source-livelihood"
+    },
+    "is_retelling": true
   },
   {
-    "id": "story-paithani-peacock",
-    "element_id": "paithani-saree",
-    "kind": "artisan_lore",
-    "title_en": "The Gold Weaver's Oath to the Godavari",
-    "title_hi": "गोदावरी तट पर बुनकर की स्वर्ण प्रतिज्ञा",
-    "retelling_en": "In the ancient trade port of Pratishthana, weavers washed raw mulberry silk in the holy waters of the Godavari before weaving single threads of pure beaten gold into the pallu. It is said that a master weaver sat beside the river for forty days, watching a peacock dance in the monsoon rain. He vowed never to cut the silk with shears, but to interlock the warp and weft by hand using tiny bamboo needles (tilis), so that the feather of the bird would shimmer in sunlight with the iridescent green and gold of the river herself.",
-    "retelling_hi": "प्राचीन प्रतिष्ठान नगरी में बुनकर गोदावरी के जल में रेशम को धोकर शुद्ध सोने के तारों से पल्लू बुनते थे। कहते हैं कि एक बुनकर ने चालीस दिन तक वर्षा में नाचते मोर को निहारा और प्रतिज्ञा ली कि वह कैंची से धागे नहीं काटेगा, बल्कि बाँस की तीलियों से ऐसा ताना-बाना गूंथेगा कि मोर का पंख धूप में गोदावरी की लहरों की तरह झिलमिला उठे।",
-    "source": "IndianCulture.gov.in Paithani Heritage Lore (https://indianculture.gov.in/)",
-    "is_retelling": true,
-    "placeholder": true
+    "id": "story_bheema_rain",
+    "element_id": "bheema_rain_myth",
+    "kind": "legend",
+    "title_en": "Bheema the Rainmaker",
+    "title_hi": "बारिश लाने वाला भीम",
+    "retelling_en": "In Gond mythology, Bheema is revered not just as a strongman, but as the supreme rainmaker. Before the monsoon, the spirit of Bheema is suffocated by encasing a wooden pole representing him in cow dung. Angered, Bheema pleads to Lord Indra. The villagers play the rhythmic Mandar Baja, which coerces Indra to release heavy rains to wash the dung away and free Bheema.",
+    "retelling_hi": "गोंड पौराणिक कथाओं में, भीम को बारिश लाने वाले के रूप में पूजा जाता है। मानसून से पहले, भीम का प्रतिनिधित्व करने वाले लकड़ी के खंभे को गोबर से ढक दिया जाता है। भीम की प्रार्थना और ग्रामीणों द्वारा मंदर बाजा बजाने से, इंद्र बारिश करते हैं ताकि गोबर धुल जाए और भीम मुक्त हो सकें।",
+    "source": {
+      "title": "Bheema: Hero of Gond Pandvani",
+      "url": "http://www.sahapedia.org/bheema-hero-gond-pandvani"
+    },
+    "is_retelling": true
+  },
+  {
+    "id": "story_dharmapada",
+    "element_id": "dharmapada_konark",
+    "kind": "legend",
+    "title_en": "Dharmapada and the Sun Temple",
+    "title_hi": "धर्मपद और सूर्य मंदिर",
+    "retelling_en": "For twelve years, 1,200 artisans toiled to build the Konark Sun Temple but were unable to place the crowning stone. Under a strict royal deadline threatening their execution, Dharmapada, the 12-year-old son of the chief architect, arrived and solved the architectural puzzle. However, fearing the king would kill the 1,200 men for relying on a child, the boy threw himself off the temple into the sea.",
+    "retelling_hi": "1,200 कारीगर 12 वर्षों तक कोणार्क सूर्य मंदिर का निर्माण करने में लगे रहे, लेकिन वे शीर्ष पत्थर को रखने में असमर्थ थे। मुख्य वास्तुकार के 12 वर्षीय बेटे धर्मपद ने इसे हल किया। राजा के क्रोध से 1,200 कारीगरों को बचाने के लिए, उसने खुद को मंदिर से समुद्र में फेंक कर बलिदान दे दिया।",
+    "source": {
+      "title": "Konark Sun Temple",
+      "url": "http://www.sahapedia.org/konark-sun-temple-unique-marriage-of-form-and-concept"
+    },
+    "is_retelling": true
   }
 ]

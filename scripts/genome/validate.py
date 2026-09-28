@@ -33,7 +33,8 @@ VALID_SNAPSHOTS = {1200, 1500, 1800, 1947, 2026}
 STATE_ALIASES = {
     "orissa": "odisha",
     "uttaranchal": "uttarakhand",
-    "jammu & kashmir": "jammu and kashmir"
+    "jammu & kashmir": "jammu and kashmir",
+    "dadra and nagar haveli and daman and diu": "dadra and nagar haveli"
 }
 
 def normalize_state_name(name):
@@ -43,17 +44,22 @@ def normalize_state_name(name):
     return STATE_ALIASES.get(n, n)
 
 def point_in_polygon(x, y, poly):
-    """Ray casting algorithm to test if point (x=lng, y=lat) is in polygon ring."""
+    """Robust ray casting algorithm to test if point (x=lng, y=lat) is in polygon ring."""
     inside = False
     n = len(poly)
-    for i in range(n):
-        p1x, p1y = poly[i]
-        p2x, p2y = poly[(i + 1) % n]
-        if min(p1y, p2y) < y <= max(p1y, p2y):
-            if p1y != p2y:
-                xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
-                if p1x == p2x or x <= xinters:
-                    inside = not inside
+    if n < 3:
+        return False
+    p1x, p1y = poly[0]
+    for i in range(1, n + 1):
+        p2x, p2y = poly[i % n]
+        if y > min(p1y, p2y):
+            if y <= max(p1y, p2y):
+                if x <= max(p1x, p2x):
+                    if p1y != p2y:
+                        xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+                    if p1x == p2x or x <= xinters:
+                        inside = not inside
+        p1x, p1y = p2x, p2y
     return inside
 
 def point_in_feature(lng, lat, feature):

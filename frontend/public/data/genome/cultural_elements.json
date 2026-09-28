@@ -1,458 +1,1432 @@
 [
   {
-    "id": "warli-painting",
-    "name_en": "Warli Tribal Painting",
-    "name_hi": "वारली आदिवासी चित्रकला",
+    "id": "warli_painting",
+    "name_en": "Warli Painting",
+    "name_hi": "वर्ली चित्रकला",
     "type": "craft",
     "state": "Maharashtra",
     "district": "Palghar",
-    "place_name": "Dahanu / Jawhar",
-    "lat": 19.9723,
-    "lng": 73.2307,
-    "precision": "village",
-    "start_year": -2500,
+    "place_name": "Dahanu",
+    "lat": 19.9912,
+    "lng": 72.7397,
+    "precision": "town",
+    "start_year": 1000,
     "end_year": null,
     "typical_month": null,
-    "description_en": "Ancient ritualistic tribal art practiced by the Warli community using rice paste and natural gum on red ochre mud walls, depicting agrarian harmony, community circles, and the sacred Mother Goddess Palghat.",
-    "description_hi": "गेरू की मिट्टी की दीवारों पर चावल के लेप और गोंद से बनाई जाने वाली प्राचीन जनजातीय भित्ति चित्रकला, जो कृषि जीवन, सामूहिकता और माता पालघाट को समर्पित है।",
+    "description_en": "A tribal wall art form from the Sahyadri range, created mostly by women using white rice flour paste on mud backgrounds. It features geometric motifs symbolizing nature, weddings, and daily village life.",
+    "description_hi": "सह्याद्री क्षेत्र की एक आदिवासी भित्ति कला, जिसे मुख्य रूप से महिलाओं द्वारा मिट्टी की पृष्ठभूमि पर चावल के पेस्ट से बनाया जाता है। इसमें प्रकृति और जीवन के ज्यामितीय रूपांकन होते हैं।",
     "rarity": 2,
     "documentation_status": "well",
     "sources": [
       {
-        "title": "Sahapedia - Warli Painting Tradition",
-        "url": "https://www.sahapedia.org/warli-painting"
-      },
-      {
-        "title": "GI Registry India - Warli Painting GI #166",
-        "url": "https://search.ipindia.gov.in/GIRPublic/"
+        "title": "Warli painting",
+        "url": "http://www.sahapedia.org/warli-painting"
       }
     ],
-    "confidence": 0.98,
-    "placeholder": true
+    "confidence": "high"
   },
   {
-    "id": "tarpa-instrument",
-    "name_en": "Tarpa Wind Horn",
-    "name_hi": "तारपा सुशिर वाद्य",
-    "type": "instrument",
-    "state": "Maharashtra",
-    "district": "Palghar",
-    "place_name": "Jawhar",
-    "lat": 19.9142,
-    "lng": 73.2325,
-    "precision": "village",
-    "start_year": -1000,
-    "end_year": null,
-    "typical_month": 10,
-    "description_en": "A sacred indigenous wind instrument crafted from dried gourd, bamboo pipes, and palm leaves. Played by a village elder (Tarpakar), its hypnotic drone guides the concentric spirals of the Warli community dance.",
-    "description_hi": "सूखे कद्दू, बांस और ताड़ के पत्तों से निर्मित पवित्र जनजातीय वाद्य। तारपा वादक की धुन पर पूरा समुदाय चक्राकार नृत्य करता है।",
-    "rarity": 4,
-    "documentation_status": "partial",
-    "sources": [
-      {
-        "title": "Sangeet Natak Akademi - Indigenous Instruments",
-        "url": "https://sangeetnatak.gov.in/"
-      },
-      {
-        "title": "IndianCulture.gov.in - Tarpa Heritage",
-        "url": "https://indianculture.gov.in/"
-      }
-    ],
-    "confidence": 0.95,
-    "placeholder": true
-  },
-  {
-    "id": "bohada-festival",
-    "name_en": "Bohada Mask Festival",
-    "name_hi": "बोहड़ा मुखौटा उत्सव",
-    "type": "festival",
-    "state": "Maharashtra",
-    "district": "Palghar",
-    "place_name": "Mokhada",
-    "lat": 19.9348,
-    "lng": 73.3401,
-    "precision": "village",
-    "start_year": 1600,
-    "end_year": null,
-    "typical_month": 4,
-    "description_en": "A vibrant 3-day nocturnal tribal carnival where performers wear gigantic, hand-carved and painted wooden masks representing 52 animistic and epic deities, accompanied by continuous Tarpa beats.",
-    "description_hi": "तीन दिवसीय आदिवासी रात्रि उत्सव जिसमें 52 देवी-देवताओं के विशाल हस्तनिर्मित काष्ठ मुखौटे पहनकर तारपा की थाप पर नृत्य किया जाता है।",
-    "rarity": 4,
-    "documentation_status": "partial",
-    "sources": [
-      {
-        "title": "Sahapedia - Bohada Mask Festival",
-        "url": "https://www.sahapedia.org/bohada-tribal-festival"
-      }
-    ],
-    "confidence": 0.92,
-    "placeholder": true
-  },
-  {
-    "id": "varli-dialect",
-    "name_en": "Varli Language & Idioms",
-    "name_hi": "वारली लोक बोली",
-    "type": "dialect",
-    "state": "Maharashtra",
-    "district": "Palghar",
-    "place_name": "Dahanu",
-    "lat": 19.9701,
-    "lng": 72.7311,
+    "id": "pithora_painting",
+    "name_en": "Pithora Painting",
+    "name_hi": "पिथौरा चित्रकला",
+    "type": "craft",
+    "state": "Gujarat",
+    "district": "Chhota Udepur",
+    "place_name": "Chhota Udepur",
+    "lat": 22.3023,
+    "lng": 74.0152,
     "precision": "district",
     "start_year": 1200,
     "end_year": null,
     "typical_month": null,
-    "description_en": "An Indo-Aryan tribal dialect synthesizing Marathi, Konkani, and Gujarati linguistic layers, containing rich botanical idioms, nature riddles, and oral ritual hymns.",
-    "description_hi": "मराठी, कोंकणी और गुजराती के संगम से बनी आदिवासी बोली, जिसमें प्रकृति, कृषि और अनुष्ठानों की समृद्ध मौखिक शब्दावली है।",
+    "description_en": "A ritualistic painting style practiced by the Rathva and Bhil tribes, made on the inner walls of houses. It is intimately tied to the worship of their chief deity, Baba Pithora, and involves elaborate ceremonies.",
+    "description_hi": "राठवा और भील जनजातियों द्वारा घरों की भीतरी दीवारों पर की जाने वाली एक अनुष्ठानिक चित्रकला। यह उनके मुख्य देवता बाबा पिथौरा की पूजा से गहराई से जुड़ी है।",
     "rarity": 3,
-    "documentation_status": "poor",
+    "documentation_status": "well",
     "sources": [
       {
-        "title": "Peoples Linguistic Survey of India - PLSI Maharashtra",
-        "url": "https://www.peopleslinguisticsurvey.org/"
+        "title": "Pithora of the Rathvas",
+        "url": "http://www.sahapedia.org/pithora-of-the-rathvas"
       }
     ],
-    "confidence": 0.88,
-    "placeholder": true
+    "confidence": "high"
   },
   {
-    "id": "kansari-devi-myth",
-    "name_en": "Kansari Devi (Corn Mother Myth)",
-    "name_hi": "कंसाड़ी देवी (अन्नपूर्णा लोककथा)",
-    "type": "folk_story",
-    "state": "Maharashtra",
-    "district": "Palghar",
-    "place_name": "Jawhar",
-    "lat": 19.9211,
-    "lng": 73.2291,
-    "precision": "village",
-    "start_year": -500,
+    "id": "saura_art",
+    "name_en": "Saura Art",
+    "name_hi": "सौरा कला",
+    "type": "craft",
+    "state": "Odisha",
+    "district": "Gajapati",
+    "place_name": "Gajapati",
+    "lat": 18.9184,
+    "lng": 84.1523,
+    "precision": "district",
+    "start_year": 1500,
     "end_year": null,
-    "typical_month": 11,
-    "description_en": "Sacred mythological ballad of the Corn Goddess Kansari who fled famine to bless indigenous farmers with life-giving millets and rice, immortalized at the center of all bridal Warli chauks.",
-    "description_hi": "अन्न और समृद्धि की देवी कंसाड़ी की लोकगाथा, जिसे हर वारली विवाह चौक के केंद्र में अन्न-समृद्धि के प्रतीक रूप में चित्रित किया जाता है।",
+    "typical_month": null,
+    "description_en": "Traditional wall murals created by the Saura tribe of Odisha, featuring elongated, stick-like figures and intricate geometric patterns. Often compared to Warli art, it is deeply rooted in nature and tribal lore.",
+    "description_hi": "ओडिशा की सौरा जनजाति द्वारा बनाए गए पारंपरिक भित्ति चित्र, जिनमें छड़ी जैसी आकृतियाँ और जटिल ज्यामितीय पैटर्न होते हैं। यह प्रकृति और लोककथाओं पर आधारित है।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Saora Art: Tale of the Man and the Snake",
+        "url": "http://www.sahapedia.org/saora-art-tale-of-the-man-and-the-snake"
+      }
+    ],
+    "confidence": "medium"
+  },
+  {
+    "id": "gond_painting",
+    "name_en": "Gond Painting",
+    "name_hi": "गोंड चित्रकला",
+    "type": "craft",
+    "state": "Chhattisgarh",
+    "district": "Bastar",
+    "place_name": "Bastar",
+    "lat": 19.2064,
+    "lng": 81.9427,
+    "precision": "district",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A vibrant tribal art form characterized by intricate dot and line patterns creating highly textured images of flora, fauna, and folklore. Evolved significantly as a contemporary genre since the 1980s.",
+    "description_hi": "एक जीवंत आदिवासी कला जिसमें बिंदुओं और रेखाओं के जटिल पैटर्न से वनस्पतियों, जीवों और लोककथाओं के चित्र बनाए जाते हैं। 1980 के दशक से यह समकालीन शैली के रूप में विकसित हुई है।",
+    "rarity": 3,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Gond: Tale of the Lion and the Crow",
+        "url": "http://www.sahapedia.org/gond-tale-of-the-lion-and-the-crow"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "madhubani_art",
+    "name_en": "Madhubani Painting",
+    "name_hi": "मधुबनी चित्रकला",
+    "type": "craft",
+    "state": "Bihar",
+    "district": "Madhubani",
+    "place_name": "Madhubani",
+    "lat": 26.3533,
+    "lng": 86.0792,
+    "precision": "district",
+    "start_year": 1500,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Also known as Mithila art, this vibrant painting style is traditionally done by women on freshly plastered mud walls using natural dyes. It depicts epics, nature, and deities with striking geometric precision.",
+    "description_hi": "इसे मिथिला कला के नाम से भी जाना जाता है, जिसे पारंपरिक रूप से महिलाओं द्वारा ताजी मिट्टी की दीवारों पर प्राकृतिक रंगों से बनाया जाता है। इसमें महाकाव्य और प्रकृति दर्शाए जाते हैं।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Mithila Painting",
+        "url": "http://www.sahapedia.org/mithila-painting-0"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "jharkhand_mud_murals",
+    "name_en": "Jharkhand Mud Murals",
+    "name_hi": "झारखंड भित्ति चित्र",
+    "type": "craft",
+    "state": "Jharkhand",
+    "district": "Hazaribagh",
+    "place_name": "Hazaribagh",
+    "lat": 23.9925,
+    "lng": 85.3638,
+    "precision": "district",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Intricate mud murals created as part of domestic architecture by indigenous communities in Hazaribagh. The artwork is intimately tied to everyday household life, rituals, and seasonal maintenance.",
+    "description_hi": "हजारीबाग में स्वदेशी समुदायों द्वारा घरेलू वास्तुकला के हिस्से के रूप में बनाए गए जटिल भित्ति चित्र। यह कला रोजमर्रा के घरेलू जीवन और अनुष्ठानों से जुड़ी है।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Production of Mud Murals",
+        "url": "https://www.sahapedia.org/tag/hazaribagh"
+      }
+    ],
+    "confidence": "medium"
+  },
+  {
+    "id": "sawantwadi_wooden_craft",
+    "name_en": "Sawantwadi Wooden Craft",
+    "name_hi": "सावंतवाड़ी लकड़ी शिल्प",
+    "type": "craft",
+    "state": "Maharashtra",
+    "district": "Sindhudurg",
+    "place_name": "Sawantwadi",
+    "lat": 15.9015,
+    "lng": 73.8184,
+    "precision": "town",
+    "start_year": 1700,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Traditional hand-painted wooden crafts and toys native to Sawantwadi in the Konkan region. The town is highly renowned for these colorful artifacts and intricate wooden furniture.",
+    "description_hi": "कोंकण क्षेत्र के सावंतवाड़ी के पारंपरिक हाथ से रंगे लकड़ी के शिल्प और खिलौने। यह शहर इन रंगीन कलाकृतियों और फर्नीचर के लिए प्रसिद्ध है।",
+    "rarity": 3,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Sawantwadi",
+        "url": "https://en.wikipedia.org/wiki/Sawantwadi"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "kutchi_embroidery",
+    "name_en": "Kutchi Embroidery",
+    "name_hi": "कच्छी कढ़ाई",
+    "type": "craft",
+    "state": "Gujarat",
+    "district": "Kutch",
+    "place_name": "Bhuj",
+    "lat": 23.242,
+    "lng": 69.6669,
+    "precision": "district",
+    "start_year": 1600,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A signature handicraft of the Kutch region featuring extensive mirror work and vibrant threads. Practiced by communities like the Ahir and Meghwal, it adorns traditional clothing, bags, and home decor.",
+    "description_hi": "कच्छ क्षेत्र का एक प्रमुख हस्तशिल्प जिसमें दर्पण का काम और जीवंत धागे होते हैं। यह अहीर और मेघवाल समुदायों द्वारा किया जाता है।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Kutch Museum: Overview",
+        "url": "http://www.sahapedia.org/kutch-museum-overview"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "bastar_painting",
+    "name_en": "Bastar Painting",
+    "name_hi": "बस्तर चित्रकला",
+    "type": "craft",
+    "state": "Chhattisgarh",
+    "district": "Bastar",
+    "place_name": "Jagdalpur",
+    "lat": 19.074,
+    "lng": 82.029,
+    "precision": "district",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Tribal paintings from Bastar that often narrate folktales, myths, and legends of the jungle. Characterized by raw visual storytelling that differs significantly from formal, realistic Indian art.",
+    "description_hi": "बस्तर के आदिवासी चित्र जो अक्सर जंगल की लोककथाओं और मिथकों को बयां करते हैं। इनकी अनूठी दृश्य कहानी इन्हें पारंपरिक कला से अलग बनाती है।",
     "rarity": 3,
     "documentation_status": "partial",
     "sources": [
       {
-        "title": "Sahapedia - Warli Oral Traditions",
-        "url": "https://www.sahapedia.org/warli-myths"
+        "title": "Bastar Painting: Tale of the Arrogant Tiger",
+        "url": "http://www.sahapedia.org/bastar-painting-tale-of-the-arrogant-tiger"
       }
     ],
-    "confidence": 0.94,
-    "placeholder": true
+    "confidence": "medium"
   },
   {
-    "id": "paithani-saree",
-    "name_en": "Paithani Royal Silk Saree",
-    "name_hi": "पैठणी शाही रेशम साड़ी",
-    "type": "textile",
-    "state": "Maharashtra",
-    "district": "Chhatrapati Sambhajinagar",
-    "place_name": "Paithan",
-    "lat": 19.4795,
-    "lng": 75.3855,
-    "precision": "town",
-    "start_year": -200,
+    "id": "pattachitra",
+    "name_en": "Pattachitra",
+    "name_hi": "पट्टचित्र",
+    "type": "craft",
+    "state": "Odisha",
+    "district": "Puri",
+    "place_name": "Puri",
+    "lat": 19.8135,
+    "lng": 85.8312,
+    "precision": "district",
+    "start_year": 1200,
     "end_year": null,
     "typical_month": null,
-    "description_en": "The legendary 'Queen of Silks' woven with pure gold zari and fine mulberry silk on tapestry looms, celebrated for oblique square borders and kaleidoscopic peacock (Mor) motifs.",
-    "description_hi": "शुद्ध स्वर्ण ज़री और शहतूत रेशम से बुनी 'साड़ियों की महारानी', जो तिरछे चौकोर पल्लू और मोर की बारीक आकृतियों के लिए विश्वविख्यात है।",
-    "rarity": 2,
-    "documentation_status": "well",
-    "sources": [
-      {
-        "title": "GI Registry India - Paithani Saree GI #17",
-        "url": "https://search.ipindia.gov.in/GIRPublic/"
-      },
-      {
-        "title": "IndianCulture.gov.in - Paithani Weaving",
-        "url": "https://indianculture.gov.in/"
-      }
-    ],
-    "confidence": 0.99,
-    "placeholder": true
-  },
-  {
-    "id": "ellora-caves",
-    "name_en": "Ellora Rock-Cut Monolithic Caves",
-    "name_hi": "एलोरा एकाश्म शैलकृत गुफाएं",
-    "type": "monument",
-    "state": "Maharashtra",
-    "district": "Chhatrapati Sambhajinagar",
-    "place_name": "Verul",
-    "lat": 20.0258,
-    "lng": 75.1780,
-    "precision": "town",
-    "start_year": 600,
-    "end_year": 1000,
-    "typical_month": null,
-    "description_en": "UNESCO World Heritage site featuring 34 monumental monasteries and temples carved out of the Charanandri hills, headlined by the monolithic Kailash Temple (Cave 16) carved top-down from a single basalt cliff.",
-    "description_hi": "यूनेस्को विश्व धरोहर जिसमें 34 शैलकृत मंदिर व गुफाएं हैं, विशेषकर गुफा 16 का कैलाश मंदिर जिसे शीर्ष से नीचे की ओर एक ही चट्टान तराश कर बनाया गया।",
-    "rarity": 1,
-    "documentation_status": "well",
-    "sources": [
-      {
-        "title": "Archaeological Survey of India - Ellora Caves",
-        "url": "https://asi.nic.in/ellora-caves/"
-      },
-      {
-        "title": "UNESCO World Heritage Centre - Ellora",
-        "url": "https://whc.unesco.org/en/list/243"
-      }
-    ],
-    "confidence": 1.0,
-    "placeholder": true
-  },
-  {
-    "id": "trimbakeshwar-temple",
-    "name_en": "Trimbakeshwar Jyotirlinga & Godavari Origin",
-    "name_hi": "त्र्यंबकेश्वर ज्योतिर्लिंग व गोदावरी उद्गम",
-    "type": "monument",
-    "state": "Maharashtra",
-    "district": "Nashik",
-    "place_name": "Trimbak",
-    "lat": 19.9328,
-    "lng": 73.5308,
-    "precision": "town",
-    "start_year": 1755,
-    "end_year": null,
-    "typical_month": null,
-    "description_en": "Historic black basalt Jyotirlinga shrine situated at the foothills of Brahmagiri mountain, the sacred geographical source of the Godavari river, embodying classic Hemadpanthi stone masonry.",
-    "description_hi": "ब्रह्मगिरि पर्वत की तलहटी में स्थित पवित्र ज्योतिर्लिंग व गोदावरी नदी का उद्गम स्थल, जो काले बेसाल्ट पत्थर और हेमाडपंथी वास्तुकला का अनुपम उदाहरण है।",
-    "rarity": 2,
-    "documentation_status": "well",
-    "sources": [
-      {
-        "title": "Maharashtra Tourism - Trimbakeshwar",
-        "url": "https://www.maharashtratourism.gov.in/"
-      }
-    ],
-    "confidence": 0.98,
-    "placeholder": true
-  },
-  {
-    "id": "nashik-misal",
-    "name_en": "Nashik Misal & Tarri Cuisine",
-    "name_hi": "नासिक मिसळ व तर्री व्यंजन",
-    "type": "cuisine",
-    "state": "Maharashtra",
-    "district": "Nashik",
-    "place_name": "Panchavati",
-    "lat": 20.0063,
-    "lng": 73.7915,
-    "precision": "town",
-    "start_year": 1920,
-    "end_year": null,
-    "typical_month": null,
-    "description_en": "Iconic fiery sprouted moth bean curry layered with farsan, chopped onions, and lemon, drenched in red-spiced 'Kat' or 'Tarri' broth, served alongside fresh pav bread.",
-    "description_hi": "अंकुरित मोठ, तीखी रसीली तर्री (कट), फरसाण और नीबू के मिश्रण से तैयार नासिक का विख्यात पारंपरिक नाश्ता।",
-    "rarity": 2,
-    "documentation_status": "well",
-    "sources": [
-      {
-        "title": "IndianCulture.gov.in - Culinary Traditions of Maharashtra",
-        "url": "https://indianculture.gov.in/"
-      }
-    ],
-    "confidence": 0.95,
-    "placeholder": true
-  },
-  {
-    "id": "nashik-kumbh-mela",
-    "name_en": "Nashik-Trimbakeshwar Simhastha Kumbh",
-    "name_hi": "नासिक-त्र्यंबकेश्वर सिंहस्थ कुंभ मेला",
-    "type": "festival",
-    "state": "Maharashtra",
-    "district": "Nashik",
-    "place_name": "Ramkund",
-    "lat": 20.0076,
-    "lng": 73.7947,
-    "precision": "town",
-    "start_year": 500,
-    "end_year": null,
-    "typical_month": 8,
-    "description_en": "One of the four sacred Kumbh Melas held every 12 years when Jupiter enters Leo (Simha), drawing millions of pilgrims for ritual bathing in the holy Godavari river at Ramkund and Kushavarta.",
-    "description_hi": "प्रत्येक 12 वर्ष में बृहस्पति के सिंह राशि में प्रवेश पर आयोजित होने वाला महापर्व, जिसमें लाखों श्रद्धालु गोदावरी के पावन रामकुंड में शाही स्नान करते हैं।",
-    "rarity": 1,
-    "documentation_status": "well",
-    "sources": [
-      {
-        "title": "UNESCO Intangible Cultural Heritage - Kumbh Mela",
-        "url": "https://ich.unesco.org/en/RL/kumbh-mela-01258"
-      }
-    ],
-    "confidence": 1.0,
-    "placeholder": true
-  },
-  {
-    "id": "mumbai-natya-sangeet",
-    "name_en": "Marathi Natya Sangeet & Theatre Music",
-    "name_hi": "मराठी नाट्य संगीत परंपरा",
-    "type": "music",
-    "state": "Maharashtra",
-    "district": "Mumbai",
-    "place_name": "Girgaon / Shivaji Park",
-    "lat": 18.9553,
-    "lng": 72.8184,
-    "precision": "town",
-    "start_year": 1880,
-    "end_year": null,
-    "typical_month": null,
-    "description_en": "A sophisticated genre of semi-classical dramatic music popularized by Bal Gandharva and Master Dinanath Mangeshkar, wedding Indian classical ragas to theatrical narratives.",
-    "description_hi": "भारतीय शास्त्रीय रागों और रंगमंचीय संवादों के संयोजन से विकसित समृद्ध नाट्य संगीत, जिसे बालगंधर्व और मास्टर दीनानाथ मंगेशकर ने अमर किया।",
+    "description_en": "A traditional cloth-based scroll painting known for its intricate details and mythological narratives, primarily revolving around Lord Jagannath and the Vaishnava sect.",
+    "description_hi": "एक पारंपरिक कपड़ा आधारित स्क्रॉल पेंटिंग जो अपने जटिल विवरणों और पौराणिक आख्यानों के लिए जानी जाती है, मुख्य रूप से भगवान जगन्नाथ पर केंद्रित है।",
     "rarity": 3,
     "documentation_status": "well",
     "sources": [
       {
-        "title": "Sangeet Natak Akademi - Natya Sangeet",
-        "url": "https://sangeetnatak.gov.in/"
+        "title": "Storytelling in Folk Paintings",
+        "url": "http://www.sahapedia.org/storytelling-folk-paintings"
       }
     ],
-    "confidence": 0.96,
-    "placeholder": true
+    "confidence": "high"
   },
   {
-    "id": "kathak-dance",
-    "name_en": "Kathak Classical Dance (Lucknow Gharana)",
-    "name_hi": "कथक शास्त्रीय नृत्य (लखनऊ घराना)",
+    "id": "lavani_dance",
+    "name_en": "Lavani",
+    "name_hi": "लावणी",
+    "type": "dance",
+    "state": "Maharashtra",
+    "district": "Pune",
+    "place_name": "Pune",
+    "lat": 18.5204,
+    "lng": 73.8567,
+    "precision": "district",
+    "start_year": 1700,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A powerful genre of song and dance from Maharashtra driven by the rhythmic beats of the dholki. Originally prominent in Peshwa courts, it blends folk theater (Tamasha) with evocative poetry.",
+    "description_hi": "महाराष्ट्र का एक शक्तिशाली गीत और नृत्य शैली जो ढोलकी की ताल पर आधारित है। पेशवा काल में प्रमुख, यह लोक रंगमंच और कविता का मिश्रण है।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Lavani",
+        "url": "https://en.wikipedia.org/wiki/Lavani"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "kathak",
+    "name_en": "Kathak",
+    "name_hi": "कथक",
     "type": "dance",
     "state": "Uttar Pradesh",
     "district": "Lucknow",
-    "place_name": "Qaisar Bagh",
-    "lat": 26.8524,
-    "lng": 80.9328,
+    "place_name": "Lucknow",
+    "lat": 26.8467,
+    "lng": 80.9462,
     "precision": "town",
-    "start_year": 1200,
+    "start_year": 1500,
     "end_year": null,
     "typical_month": null,
-    "description_en": "One of India's preeminent classical dances originating from nomadic storytellers (Kathakars), evolving through Vaishnav temple devotion into the refined courtly abhinaya and tatkar of the Awadh Nawabs.",
-    "description_hi": "कथा कहने वाले प्राचीन कथाकारों से आरंभ हुआ शास्त्रीय नृत्य, जो वैष्णव मंदिरों से अवध के नवाबों के दरबार में भाव, लय और तत्कार का शिखर बना।",
+    "description_en": "One of India's classical dances originating from traveling bards (Kathakaars). Renowned for its intricate footwork, rapid spins, and expressive storytelling influenced by both Hindu and Mughal cultures.",
+    "description_hi": "कथाकारों से उत्पन्न भारत का एक शास्त्रीय नृत्य। यह अपने जटिल पैरों के काम, तेज़ चक्करों और हिंदू तथा मुगल संस्कृतियों से प्रभावित कहानी कहने के लिए प्रसिद्ध है।",
     "rarity": 1,
     "documentation_status": "well",
     "sources": [
       {
-        "title": "Sangeet Natak Akademi - Kathak Traditions",
-        "url": "https://sangeetnatak.gov.in/"
-      },
-      {
-        "title": "IndianCulture.gov.in - Classical Dances",
-        "url": "https://indianculture.gov.in/"
+        "title": "Kathak: Aesthetics, History and Influences",
+        "url": "http://www.sahapedia.org/kathak-aesthetics-history-and-influences"
       }
     ],
-    "confidence": 0.99,
-    "placeholder": true
+    "confidence": "high"
   },
   {
-    "id": "gorakhpur-terracotta",
-    "name_en": "Gorakhpur Terracotta Craft",
-    "name_hi": "गोरखपुर टेराकोटा शिल्प",
-    "type": "craft",
-    "state": "Uttar Pradesh",
-    "district": "Gorakhpur",
-    "place_name": "Aurangabad",
-    "lat": 26.7642,
-    "lng": 83.3812,
+    "id": "garba",
+    "name_en": "Garba",
+    "name_hi": "गरबा",
+    "type": "dance",
+    "state": "Gujarat",
+    "district": "Ahmedabad",
+    "place_name": "Ahmedabad",
+    "lat": 23.0225,
+    "lng": 72.5714,
+    "precision": "district",
+    "start_year": 1500,
+    "end_year": null,
+    "typical_month": 10,
+    "description_en": "A devotional circle dance native to Gujarat, performed primarily during the Navaratri festival. It honors the divine feminine (Shakti) and represents the cyclical nature of life.",
+    "description_hi": "गुजरात का एक भक्तिपूर्ण वृत्ताकार नृत्य, जो मुख्य रूप से नवरात्रि के दौरान किया जाता है। यह दिव्य स्त्री (शक्ति) का सम्मान करता है।",
+    "rarity": 1,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Garba of Gujarat",
+        "url": "https://ich.unesco.org/en/RL/garba-of-gujarat-01962"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "tarpa_dance",
+    "name_en": "Tarpa Dance",
+    "name_hi": "तर्पा नृत्य",
+    "type": "dance",
+    "state": "Dadra and Nagar Haveli and Daman and Diu",
+    "district": "Dadra and Nagar Haveli",
+    "place_name": "Silvassa",
+    "lat": 20.271,
+    "lng": 73.01,
+    "precision": "district",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A harvest dance performed by the Warli and Kokana tribes to the music of the Tarpa wind instrument. Dancers form circles, symbolizing unity, joyous celebration, and nature's cycles.",
+    "description_hi": "वर्ली और कोकना जनजातियों द्वारा तर्पा वाद्ययंत्र के संगीत पर किया जाने वाला एक फसल नृत्य। नर्तक एकता का प्रतीक घेरा बनाते हैं।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Sacred Spirits of the Warlis",
+        "url": "http://www.sahapedia.org/sacred-spirits-warlis-mahua-tadi-and-tappers-0"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "mayurbhanj_chhau",
+    "name_en": "Mayurbhanj Chhau",
+    "name_hi": "मयूरभंज छऊ",
+    "type": "dance",
+    "state": "Odisha",
+    "district": "Mayurbhanj",
+    "place_name": "Mayurbhanj",
+    "lat": 21.9333,
+    "lng": 86.7333,
+    "precision": "district",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A martial and semi-classical dance evolving from ancient royal warrior camps (paik akhadas). It uniquely combines vigorous acrobatics with narratives from epics without using masks.",
+    "description_hi": "प्राचीन योद्धा शिविरों से विकसित एक मार्शल और अर्ध-शास्त्रीय नृत्य। यह बिना मुखौटे के कलाबाजी और महाकाव्यों की कहानियों का अनूठा संयोजन है।",
+    "rarity": 3,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "The dance of royal warriors",
+        "url": "https://www.indianculture.gov.in/videos/page=10/title=The_dance_of_royal_warriors:_a_documentary_on_the_tribal_dance_form_on_North_Orissa,_India/nid=227150"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "gotipua",
+    "name_en": "Gotipua",
+    "name_hi": "गोटीपुआ",
+    "type": "dance",
+    "state": "Odisha",
+    "district": "Puri",
+    "place_name": "Puri",
+    "lat": 19.8135,
+    "lng": 85.8312,
+    "precision": "district",
+    "start_year": 1600,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "The historical precursor to classical Odissi, Gotipua is performed by young boys dressed as women. The acrobatic dance offers praise to Lord Jagannath and Krishna.",
+    "description_hi": "शास्त्रीय ओडिसी का ऐतिहासिक अग्रदूत, गोटीपुआ महिलाओं के कपड़े पहने युवा लड़कों द्वारा किया जाता है। यह जगन्नाथ और कृष्ण की स्तुति करता है।",
+    "rarity": 3,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Gotipua",
+        "url": "https://en.wikipedia.org/wiki/Gotipua"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "konkani_khele",
+    "name_en": "Konkani Khele",
+    "name_hi": "कोंकणी खेले",
+    "type": "dance",
+    "state": "Maharashtra",
+    "district": "Sindhudurg",
+    "place_name": "Sindhudurg",
+    "lat": 16.1066,
+    "lng": 73.8184,
+    "precision": "district",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": 3,
+    "description_en": "A dramatic folk performance from the Konkan region closely associated with Holi. Featuring male actors in female roles (gavalans), elaborate wooden masks, and a narrative of good triumphing over evil.",
+    "description_hi": "कोंकण क्षेत्र का एक नाटकीय लोक प्रदर्शन जो होली से जुड़ा है। इसमें विस्तृत लकड़ी के मुखौटे और बुराई पर अच्छाई की जीत की कहानी होती है।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Transformations of Konkani Khele",
+        "url": "http://www.sahapedia.org/transformations-konkani-khele-between-bollywood-and-natya-shastra"
+      }
+    ],
+    "confidence": "medium"
+  },
+  {
+    "id": "pandavani",
+    "name_en": "Pandavani",
+    "name_hi": "पंडवानी",
+    "type": "music",
+    "state": "Chhattisgarh",
+    "district": "Durg",
+    "place_name": "Ganiyari",
+    "lat": 21.1938,
+    "lng": 81.2849,
     "precision": "village",
     "start_year": 1700,
     "end_year": null,
     "typical_month": null,
-    "description_en": "Centuries-old natural clay sculpting tradition famous for ornamental terracotta horses, elephants, and Ganesha bells crafted by hand without modern molds, baked using local sal leaves.",
-    "description_hi": "सालों पुरानी प्राकृतिक मिट्टी की कला, जिसमें कारीगर बिना सांचों के अपने हाथों से सजावटी हाथी, घोड़े व दीये बनाकर साल के पत्तों की आग में पकाते हैं।",
-    "rarity": 2,
+    "description_en": "An energetic folk singing style narrating tales from the Mahabharata with Bhima as the central hero. Performances feature musical accompaniment, famously popularized globally by Teejan Bai.",
+    "description_hi": "महाभारत की कहानियों का वर्णन करने वाली एक ऊर्जावान लोक गायन शैली जिसमें भीम मुख्य नायक हैं। इसे तीजन बाई ने विश्व स्तर पर लोकप्रिय बनाया।",
+    "rarity": 3,
     "documentation_status": "well",
     "sources": [
       {
-        "title": "GI Registry India - Gorakhpur Terracotta GI #687",
-        "url": "https://search.ipindia.gov.in/GIRPublic/"
+        "title": "Pandavani",
+        "url": "http://www.sahapedia.org/gond-pandvani"
       }
     ],
-    "confidence": 0.98,
-    "placeholder": true
+    "confidence": "high"
   },
   {
-    "id": "chanderi-silk",
-    "name_en": "Chanderi Handloom Weaving",
-    "name_hi": "चंदेरी हथकरघा वस्त्र",
-    "type": "textile",
-    "state": "Madhya Pradesh",
-    "district": "Ashoknagar",
-    "place_name": "Chanderi",
-    "lat": 24.7128,
-    "lng": 78.1051,
+    "id": "thumri",
+    "name_en": "Thumri",
+    "name_hi": "ठुमरी",
+    "type": "music",
+    "state": "Uttar Pradesh",
+    "district": "Lucknow",
+    "place_name": "Lucknow",
+    "lat": 26.8467,
+    "lng": 80.9462,
     "precision": "town",
-    "start_year": 1300,
+    "start_year": 1800,
     "end_year": null,
     "typical_month": null,
-    "description_en": "Gossamer-light sheer handloom textiles woven with fine unbleached cotton and mulberry silk enriched with real gold and silver zari buttis, patronized by the Scindias and Bundela kings.",
-    "description_hi": "पारदर्शी और अत्यंत हल्की हथकरघा कला, जिसमें मलबरी रेशम और महीन सूत पर शुद्ध सोने-चांदी की ज़री से बूटियां उकेरी जाती हैं।",
+    "description_en": "A highly evocative semi-classical vocal genre of Hindustani music. Associated historically with courtesans, it expresses romantic and erotic themes, serving as a vital accompaniment to Kathak dance.",
+    "description_hi": "हिंदुस्तानी संगीत की एक अर्ध-शास्त्रीय मुखर शैली। ऐतिहासिक रूप से तवायफों से जुड़ी, यह रोमांटिक विषयों को व्यक्त करती है और कथक नृत्य का अहम हिस्सा है।",
     "rarity": 2,
     "documentation_status": "well",
     "sources": [
       {
-        "title": "GI Registry India - Chanderi Fabric GI #7",
-        "url": "https://search.ipindia.gov.in/GIRPublic/"
+        "title": "Kathak Thumri",
+        "url": "http://www.sahapedia.org/kathak-thumri-guru-malti-shyam"
       }
     ],
-    "confidence": 0.98,
-    "placeholder": true
+    "confidence": "high"
   },
   {
-    "id": "rogan-art",
-    "name_en": "Rogan Painting of Nirona",
-    "name_hi": "निरोणा की रोगन कला",
-    "type": "craft",
+    "id": "koli_songs",
+    "name_en": "Koli Folk Songs",
+    "name_hi": "कोली लोक गीत",
+    "type": "music",
+    "state": "Maharashtra",
+    "district": "Mumbai City",
+    "place_name": "Mumbai",
+    "lat": 19.076,
+    "lng": 72.8777,
+    "precision": "district",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Lively folk songs of Mumbai's indigenous fishing community (Koliwadas), usually accompanied by local brass bands. These songs document the sea-faring lifestyle and are crucial for safeguarding Koli heritage.",
+    "description_hi": "मुंबई के स्वदेशी मछली पकड़ने वाले समुदाय के जीवंत लोकगीत, जो अक्सर पीतल के बैंड के साथ गाए जाते हैं। ये गीत समुद्र तटीय जीवन शैली को दर्शाते हैं।",
+    "rarity": 3,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Brass by the Bay",
+        "url": "https://map.sahapedia.org/video/Brass-by%20the%20Bay/11721"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "sanjari_folk_music",
+    "name_en": "Sanjari Folk Music",
+    "name_hi": "संजारी लोक संगीत",
+    "type": "music",
+    "state": "Dadra and Nagar Haveli and Daman and Diu",
+    "district": "Dadra and Nagar Haveli",
+    "place_name": "Silvassa",
+    "lat": 20.271,
+    "lng": 73.01,
+    "precision": "town",
+    "start_year": 1900,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Traditional folk songs sung by tribes like the Warli, Kokana, and Koli in Dadra and Nagar Haveli. The music provides relief from hard labor and brings the community together during festivities.",
+    "description_hi": "दादरा और नगर हवेली में वर्ली, कोकना और कोली जनजातियों द्वारा गाए जाने वाले पारंपरिक लोकगीत, जो कड़ी मेहनत से राहत देते हैं।",
+    "rarity": 4,
+    "documentation_status": "poor",
+    "sources": [
+      {
+        "title": "Sanjari: Folk Music of Dadra Nagar Haveli",
+        "url": "https://www.indianculture.gov.in/videos/page=9/title=Sanjari_:_Folk_Music_of_Dadra_Nagar_Haveli_by_Sunil_Korda_%E0%A4%B8%E0%A4%82%E0%A4%9C%E0%A4%BE%E0%A4%B0%E0%A5%80:_%E0%A4%A6%E0%A4%BE%E0%A4%A6%E0%A4%B0%E0%A4%BE_%E0%A4%A8%E0%A4%97%E0%A4%B0_%E0%A4%B9%E0%A4%B5%E0%A5%87%E0%A4%B2%E0%A5%80_%E0%A4%95%E0%A5%87_%E0%A4%B2%E0%A5%8B%E0%A4%95_%E0%A4%97%E0%A5%80%E0%A4%A4_-_%E0%A4%B8%E0%A5%81%E0%A4%A8%E0%A5%80%E0%A4%B2_%E0%A4%95%E0%A5%8B%E0%A4%B0%E0%A4%A1%E0%A4%BE/nid=2733344"
+      }
+    ],
+    "confidence": "medium"
+  },
+  {
+    "id": "bhavageete",
+    "name_en": "Bhavageete",
+    "name_hi": "भावगीत",
+    "type": "music",
+    "state": "Maharashtra",
+    "district": "Pune",
+    "place_name": "Pune",
+    "lat": 18.5204,
+    "lng": 73.8567,
+    "precision": "district",
+    "start_year": 1900,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A light musical poetry genre akin to ghazals but free of strict meter, expressing philosophy, nature, and deep emotions. Widely popular in Maharashtra and Karnataka.",
+    "description_hi": "गज़लों के समान एक हल्की संगीत कविता शैली, जो दर्शन, प्रकृति और गहरी भावनाओं को व्यक्त करती है।",
+    "rarity": 3,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Bhavageete",
+        "url": "https://en.wikipedia.org/wiki/Bhavageete"
+      }
+    ],
+    "confidence": "low"
+  },
+  {
+    "id": "ektara",
+    "name_en": "Ektara",
+    "name_hi": "एकतारा",
+    "type": "instrument",
+    "state": "Maharashtra",
+    "district": "Pune",
+    "place_name": "Pune",
+    "lat": 18.5204,
+    "lng": 73.8567,
+    "precision": "district",
+    "start_year": 1000,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A primitive single-stringed drone instrument made of a gourd, parchment, and bamboo. Plucked by finger, it is an essential accompaniment for traveling bards and traditional folk singers.",
+    "description_hi": "लौकी, चर्मपत्र और बांस से बना एक प्राचीन एकल-तार वाद्ययंत्र। यह पारंपरिक लोक गायकों के लिए एक आवश्यक संगत है।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Ektara",
+        "url": "https://www.indianculture.gov.in/musical-instruments-of-india/tat-vadya/title=EKTARA/nid=2686717"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "tarpa_instrument",
+    "name_en": "Tarpa",
+    "name_hi": "तर्पा (वाद्ययंत्र)",
+    "type": "instrument",
+    "state": "Dadra and Nagar Haveli and Daman and Diu",
+    "district": "Dadra and Nagar Haveli",
+    "place_name": "Silvassa",
+    "lat": 20.271,
+    "lng": 73.01,
+    "precision": "district",
+    "start_year": 1700,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A distinct tribal wind instrument made locally from a gourd, bamboo, and palm leaves. Its resonant sound dictates the rhythm and direction of the circular tribal Tarpa dance.",
+    "description_hi": "लौकी, बांस और ताड़ के पत्तों से बना एक विशिष्ट आदिवासी वाद्ययंत्र। इसकी ध्वनि तर्पा नृत्य की लय तय करती है।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Sanjari: Folk Music of Dadra Nagar Haveli",
+        "url": "https://www.indianculture.gov.in/videos/page=9/title=Sanjari_:_Folk_Music_of_Dadra_Nagar_Haveli_by_Sunil_Korda_%E0%A4%B8%E0%A4%82%E0%A4%9C%E0%A4%BE%E0%A4%B0%E0%A5%80:_%E0%A4%A6%E0%A4%BE%E0%A4%A6%E0%A4%B0%E0%A4%BE_%E0%A4%A8%E0%A4%97%E0%A4%B0_%E0%A4%B9%E0%A4%B5%E0%A5%87%E0%A4%B2%E0%A5%80_%E0%A4%95%E0%A5%87_%E0%A4%B2%E0%A5%8B%E0%A4%95_%E0%A4%97%E0%A5%80%E0%A4%A4_-_%E0%A4%B8%E0%A5%81%E0%A4%A8%E0%A5%80%E0%A4%B2_%E0%A4%95%E0%A5%8B%E0%A4%B0%E0%A4%A1%E0%A4%BE/nid=2733344"
+      }
+    ],
+    "confidence": "medium"
+  },
+  {
+    "id": "mandar_baja",
+    "name_en": "Mandar Baja",
+    "name_hi": "मंदर बाजा",
+    "type": "instrument",
+    "state": "Chhattisgarh",
+    "district": "Bastar",
+    "place_name": "Kopabeda",
+    "lat": 19.1234,
+    "lng": 81.9567,
+    "precision": "village",
+    "start_year": 1600,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A tribal drum from Bastar intimately tied to the Gond myth of Bheema. It is believed that playing this instrument invokes rain by appeasing Lord Indra.",
+    "description_hi": "बस्तर का एक आदिवासी ढोल जो गोंड मिथक भीम से जुड़ा है। माना जाता है कि इसे बजाने से भगवान इंद्र प्रसन्न होकर बारिश करते हैं।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Bheema: Hero of Gond Pandvani",
+        "url": "http://www.sahapedia.org/bheema-hero-gond-pandvani"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "dholki",
+    "name_en": "Dholki",
+    "name_hi": "ढोलकी",
+    "type": "instrument",
+    "state": "Maharashtra",
+    "district": "Pune",
+    "place_name": "Pune",
+    "lat": 18.5204,
+    "lng": 73.8567,
+    "precision": "district",
+    "start_year": 1700,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A hollow, wooden double-headed drum integral to Maharashtrian folk music. It produces sharp, lively rhythmic beats that are the driving force behind energetic Lavani performances.",
+    "description_hi": "एक खोखला, लकड़ी का ढोल जो महाराष्ट्रीयन लोक संगीत का अभिन्न अंग है। इसके जीवंत ताल लावणी प्रदर्शनों की प्रेरक शक्ति हैं।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Lavani",
+        "url": "https://en.wikipedia.org/wiki/Lavani"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "misal_pav",
+    "name_en": "Misal Pav",
+    "name_hi": "मिसल पाव",
+    "type": "cuisine",
+    "state": "Maharashtra",
+    "district": "Kolhapur",
+    "place_name": "Kolhapur",
+    "lat": 16.705,
+    "lng": 74.2433,
+    "precision": "town",
+    "start_year": 1900,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A quintessential Maharashtrian dish consisting of a spicy moth bean curry topped with crunchy farsan, onions, and coriander, served alongside toasted bread rolls (pav).",
+    "description_hi": "एक उत्कृष्ट महाराष्ट्रीयन व्यंजन जिसमें मसालेदार मटकी करी के ऊपर कुरकुरा फरसाण और प्याज डालकर पाव के साथ परोसा जाता है।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Misal pav",
+        "url": "https://en.wikipedia.org/wiki/Misal_pav"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "mahua_liquor",
+    "name_en": "Moha Daru / Mahua",
+    "name_hi": "महुआ शराब",
+    "type": "cuisine",
+    "state": "Maharashtra",
+    "district": "Palghar",
+    "place_name": "Dahanu",
+    "lat": 19.9912,
+    "lng": 72.7397,
+    "precision": "district",
+    "start_year": 1000,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Traditional indigenous liquor brewed from the sweet flowers of the Mahua tree. It holds immense spiritual, ritualistic, and ecological significance among the Warlis and Gonds.",
+    "description_hi": "महुआ के पेड़ के मीठे फूलों से बनी पारंपरिक देसी शराब। वर्ली और गोंड आदिवासियों के बीच इसका अत्यधिक आध्यात्मिक और कर्मकांडीय महत्व है।",
+    "rarity": 3,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Sacred Spirits of the Warlis",
+        "url": "http://www.sahapedia.org/sacred-spirits-warlis-mahua-tadi-and-tappers-0"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "konkan_oondhiyoo",
+    "name_en": "Konkani Oondhiyoo",
+    "name_hi": "कोंकणी ऊंधीयू",
+    "type": "cuisine",
+    "state": "Maharashtra",
+    "district": "Sindhudurg",
+    "place_name": "Sawantwadi",
+    "lat": 15.9015,
+    "lng": 73.8184,
+    "precision": "district",
+    "start_year": 1900,
+    "end_year": null,
+    "typical_month": 1,
+    "description_en": "A regional adaptation of the traditional mixed vegetable stew, prepared communally in South Konkan post the Sankranti harvest festival, demonstrating migrant culinary blending.",
+    "description_hi": "दक्षिण कोंकण में मकर संक्रांति के बाद सामूहिक रूप से तैयार किया जाने वाला पारंपरिक मिश्रित सब्जियों का व्यंजन।",
+    "rarity": 4,
+    "documentation_status": "poor",
+    "sources": [
+      {
+        "title": "Carving Memories: Migration, Cuisine and Identity",
+        "url": "http://www.sahapedia.org/carving-memories-migration-cuisine-and-identity-south-konkan"
+      }
+    ],
+    "confidence": "low"
+  },
+  {
+    "id": "diwali_faraal_pohe",
+    "name_en": "Diwali Faraal (Pohe & Sweet Potato)",
+    "name_hi": "दिवाली फराल",
+    "type": "cuisine",
+    "state": "Maharashtra",
+    "district": "Sindhudurg",
+    "place_name": "Sawantwadi",
+    "lat": 15.9015,
+    "lng": 73.8184,
+    "precision": "district",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": 11,
+    "description_en": "Traditional, frugal Diwali festive foods in historical Konkan villages, which originally relied on flattened rice (pohe) and locally grown sweet potatoes before modern sweets became prevalent.",
+    "description_hi": "ऐतिहासिक कोंकण गांवों में दिवाली के पारंपरिक खाद्य पदार्थ, जो आधुनिक मिठाइयों के प्रचलन से पहले पोहे और शकरकंद पर आधारित थे।",
+    "rarity": 3,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Carving Memories: Migration, Cuisine and Identity",
+        "url": "http://www.sahapedia.org/carving-memories-migration-cuisine-and-identity-south-konkan"
+      }
+    ],
+    "confidence": "medium"
+  },
+  {
+    "id": "shetuk_dry_fish",
+    "name_en": "Shetuk Dry Fish",
+    "name_hi": "शेटुक सूखी मछली",
+    "type": "cuisine",
+    "state": "Maharashtra",
+    "district": "Sindhudurg",
+    "place_name": "Vengurla",
+    "lat": 15.8596,
+    "lng": 73.63,
+    "precision": "town",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A highly prized local variety of fish (shetuk) caught in Konkan creeks, historically bartered for tobacco by freezing fishermen, dried and salted for monsoon rationing.",
+    "description_hi": "कोंकण की खाड़ियों में पकड़ी जाने वाली एक स्थानीय मछली, जिसे ऐतिहासिक रूप से मानसून के लिए सुखाया और नमकीन किया जाता था।",
+    "rarity": 5,
+    "documentation_status": "poor",
+    "sources": [
+      {
+        "title": "Carving Memories: Migration, Cuisine and Identity",
+        "url": "http://www.sahapedia.org/carving-memories-migration-cuisine-and-identity-south-konkan"
+      }
+    ],
+    "confidence": "low"
+  },
+  {
+    "id": "east_indian_khuddi_curry",
+    "name_en": "East Indian Chicken Khuddi Curry",
+    "name_hi": "ईस्ट इंडियन चिकन खुड्डी करी",
+    "type": "cuisine",
+    "state": "Maharashtra",
+    "district": "Mumbai Suburban",
+    "place_name": "Mumbai",
+    "lat": 19.076,
+    "lng": 72.8777,
+    "precision": "town",
+    "start_year": 1600,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A distinctive, slow-cooked coconut-based chicken curry originating from the indigenous East Indian Catholic community of Mumbai, often using bottle masala.",
+    "description_hi": "मुंबई के मूल ईस्ट इंडियन कैथोलिक समुदाय की एक विशिष्ट, धीमी आंच पर पकाई जाने वाली नारियल आधारित चिकन करी।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Sociological Study of the East Indian Community",
+        "url": "http://www.sahapedia.org/sociological-study-of-the-east-indian-community-of-mumbai"
+      }
+    ],
+    "confidence": "low"
+  },
+  {
+    "id": "paithani_sari",
+    "name_en": "Paithani Sari",
+    "name_hi": "पैठणी साड़ी",
+    "type": "textile",
+    "state": "Maharashtra",
+    "district": "Chhatrapati Sambhajinagar",
+    "place_name": "Paithan",
+    "lat": 19.482,
+    "lng": 75.385,
+    "precision": "town",
+    "start_year": 200,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "An exquisite silk sari handwoven with real gold and silver zari, tracing its origins back nearly 2000 years to the Yadavas. Characterized by sloping borders and peacock motifs.",
+    "description_hi": "सोने और चांदी की ज़री के साथ हाथ से बुनी गई एक उत्कृष्ट रेशमी साड़ी, जिसकी उत्पत्ति 2000 साल पहले यादवों से हुई थी।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Paithani",
+        "url": "https://en.wikipedia.org/wiki/Paithani"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "himroo",
+    "name_en": "Himroo",
+    "name_hi": "हिमरू",
+    "type": "textile",
+    "state": "Maharashtra",
+    "district": "Chhatrapati Sambhajinagar",
+    "place_name": "Chhatrapati Sambhajinagar",
+    "lat": 19.8762,
+    "lng": 75.3433,
+    "precision": "town",
+    "start_year": 1327,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A fabric woven from locally grown cotton and silk, brought to the region during Mohammad Tughlaq's capital shift to Daulatabad. Translating to 'similar' in Persian, it acts as a faux-brocade.",
+    "description_hi": "स्थानीय रूप से उगाए गए कपास और रेशम से बुना हुआ कपड़ा, जिसे मोहम्मद तुगलक के समय में लाया गया था।",
+    "rarity": 4,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Himroo",
+        "url": "https://en.wikipedia.org/wiki/Himroo"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "sambalpuri_ikat",
+    "name_en": "Sambalpuri Ikat",
+    "name_hi": "संबलपुरी इकत",
+    "type": "textile",
+    "state": "Odisha",
+    "district": "Sambalpur",
+    "place_name": "Sambalpur",
+    "lat": 21.4667,
+    "lng": 83.9833,
+    "precision": "district",
+    "start_year": 1200,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A renowned tie-and-dye weaving technique from Odisha where warp and weft threads are resist-dyed before weaving, creating intricate blurred-edge motifs of shells, wheels, and flowers.",
+    "description_hi": "ओडिशा की एक प्रसिद्ध टाई-एंड-डाई बुनाई तकनीक जिसमें बुनाई से पहले धागों को रंगा जाता है, जिससे शंख, पहियों और फूलों के जटिल रूपांकन बनते हैं।",
+    "rarity": 3,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "The Sambalpuri Ikat of Odisha",
+        "url": "http://www.sahapedia.org/the-sambalpuri-ikat-of-odisha-history-symbolism-and-contemporary-trends"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "patan_patola",
+    "name_en": "Patan Patola",
+    "name_hi": "पाटन पटोला",
+    "type": "textile",
+    "state": "Gujarat",
+    "district": "Patan",
+    "place_name": "Patan",
+    "lat": 23.8493,
+    "lng": 72.1266,
+    "precision": "town",
+    "start_year": 1100,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A highly complex double-ikat woven sari from Patan where both the warp and weft are precisely resist-dyed before weaving, creating identical vibrant patterns on both sides.",
+    "description_hi": "पाटन की एक अत्यधिक जटिल डबल-इकत बुनी हुई साड़ी जहाँ ताने और बाने दोनों को बुनाई से पहले रंगा जाता है।",
+    "rarity": 3,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "The Sambalpuri Ikat of Odisha",
+        "url": "http://www.sahapedia.org/the-sambalpuri-ikat-of-odisha-history-symbolism-and-contemporary-trends"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "banarasi_brocade",
+    "name_en": "Banarasi Brocade",
+    "name_hi": "बनारसी ब्रोकेड",
+    "type": "textile",
+    "state": "Uttar Pradesh",
+    "district": "Varanasi",
+    "place_name": "Varanasi",
+    "lat": 25.3176,
+    "lng": 83.0062,
+    "precision": "town",
+    "start_year": 1400,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Intricate handwoven silk textiles incorporating opulent gold and silver threads (zari). Influenced heavily by Mughal aesthetics, it represents the pinnacle of North Indian brocading.",
+    "description_hi": "जटिल हाथ से बुने हुए रेशमी वस्त्र जिनमें भव्य सोने और चांदी के धागे (ज़री) शामिल होते हैं। यह उत्तर भारतीय ब्रोकेड का शिखर है।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Woven Embroidery: The Brocades of Banaras",
+        "url": "http://www.sahapedia.org/woven-embroidery-the-brocades-of-banaras"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "vadha_koli_embroidery",
+    "name_en": "Vadha Koli Embroidery",
+    "name_hi": "वाढा कोली कढ़ाई",
+    "type": "textile",
     "state": "Gujarat",
     "district": "Kutch",
-    "place_name": "Nirona",
-    "lat": 23.4072,
-    "lng": 69.5857,
-    "precision": "village",
-    "start_year": 1700,
+    "place_name": "Bhuj",
+    "lat": 23.242,
+    "lng": 69.6669,
+    "precision": "district",
+    "start_year": 1800,
     "end_year": null,
     "typical_month": null,
-    "description_en": "Extremely rare 400-year-old art practiced by a single family in Kutch, boiling castor oil into a thick paste and painting intricate motifs on dark fabric using a thin metal stylus without touching the cloth.",
-    "description_hi": "कच्छ में एक ही परिवार द्वारा संरक्षित 400 साल पुरानी दुर्लभ कला, जिसमें अरंडी के तेल को उबालकर धातु की सलाई से बिना कपड़े को छुए धागों की तरह कलाकृतियां बनाई जाती हैं।",
-    "rarity": 5,
+    "description_en": "Distinctive rustic embroidery and leatherwork practiced by the Vadha Koli community in the Banni grasslands of Kutch, closely tied to their pastoralist lifestyle.",
+    "description_hi": "कच्छ के बन्नी घास के मैदानों में वाढा कोली समुदाय द्वारा की जाने वाली विशिष्ट देहाती कढ़ाई, जो उनकी देहाती जीवन शैली से जुड़ी है।",
+    "rarity": 4,
+    "documentation_status": "poor",
+    "sources": [
+      {
+        "title": "Maldharis: Silvipastoralists of Banni",
+        "url": "http://www.sahapedia.org/maldharis-the-silvipastoralists-of-the-banni-grasslands"
+      }
+    ],
+    "confidence": "low"
+  },
+  {
+    "id": "ajanta_caves",
+    "name_en": "Ajanta Caves",
+    "name_hi": "अजंता गुफाएं",
+    "type": "monument",
+    "state": "Maharashtra",
+    "district": "Chhatrapati Sambhajinagar",
+    "place_name": "Ajanta",
+    "lat": 20.5519,
+    "lng": 75.7033,
+    "precision": "village",
+    "start_year": -200,
+    "end_year": 480,
+    "typical_month": null,
+    "description_en": "A constellation of rock-cut Buddhist caves featuring masterful narrative mural paintings that pre-date many tribal arts, narrating Jataka tales and events from the Buddha's life.",
+    "description_hi": "बौद्ध गुफाओं का एक समूह जिसमें शानदार भित्ति चित्र हैं, जो जातक कथाओं और बुद्ध के जीवन की घटनाओं को बयां करते हैं।",
+    "rarity": 1,
     "documentation_status": "well",
     "sources": [
       {
-        "title": "UNESCO / Craftmark - Rogan Art of Kutch",
-        "url": "https://www.craftmark.org/"
-      },
-      {
-        "title": "IndianCulture.gov.in - Rare Rogan Art",
-        "url": "https://indianculture.gov.in/"
+        "title": "Ajanta Caves",
+        "url": "https://www.indianculture.gov.in/ajanta-caves/caves/title=Cave_9/nid=2801017"
       }
     ],
-    "confidence": 0.99,
-    "placeholder": true
+    "confidence": "high"
   },
   {
-    "id": "channapatna-toys",
-    "name_en": "Channapatna Lacquerware Toys",
-    "name_hi": "चन्नपटना लाख-काष्ठ खिलौने",
-    "type": "craft",
-    "state": "Karnataka",
-    "district": "Ramanagara",
-    "place_name": "Channapatna",
-    "lat": 12.6525,
-    "lng": 77.2098,
+    "id": "ellora_caves",
+    "name_en": "Ellora Caves",
+    "name_hi": "एलोरा गुफाएं",
+    "type": "monument",
+    "state": "Maharashtra",
+    "district": "Chhatrapati Sambhajinagar",
+    "place_name": "Ellora",
+    "lat": 20.0258,
+    "lng": 75.178,
+    "precision": "village",
+    "start_year": 600,
+    "end_year": 1000,
+    "typical_month": null,
+    "description_en": "A monumental rock-cut cave complex showcasing religious harmony through Buddhist, Hindu, and Jain sanctuaries, most notably featuring the monolithic Kailasa Temple (Cave 16).",
+    "description_hi": "एक विशाल रॉक-कट गुफा परिसर जो बौद्ध, हिंदू और जैन अभयारण्यों के माध्यम से धार्मिक सद्भाव को दर्शाता है, जिसमें विशेष रूप से कैलाश मंदिर (गुफा 16) शामिल है।",
+    "rarity": 1,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Cave 16 (Kailasa)",
+        "url": "https://www.indianculture.gov.in/photo-archives/page=412/title=Cave_16_(Kailasa)/nid=2560848"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "konark_sun_temple",
+    "name_en": "Konark Sun Temple",
+    "name_hi": "कोणार्क सूर्य मंदिर",
+    "type": "monument",
+    "state": "Odisha",
+    "district": "Puri",
+    "place_name": "Konark",
+    "lat": 19.8876,
+    "lng": 86.0945,
     "precision": "town",
-    "start_year": 1780,
+    "start_year": 1243,
+    "end_year": 1255,
+    "typical_month": null,
+    "description_en": "A 13th-century architectural marvel built by Narasimhadeva-I of the Ganga dynasty. Designed as a colossal stone chariot with sundial wheels, honoring the Sun God Surya.",
+    "description_hi": "गंग वंश के नरसिंहदेव प्रथम द्वारा निर्मित 13वीं शताब्दी का वास्तुकला चमत्कार। इसे सूर्य देव को समर्पित एक विशाल रथ के रूप में डिजाइन किया गया है।",
+    "rarity": 1,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Konark Sun Temple",
+        "url": "http://www.sahapedia.org/konark-sun-temple-unique-marriage-of-form-and-concept"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "kutch_museum",
+    "name_en": "Kutch Museum",
+    "name_hi": "कच्छ संग्रहालय",
+    "type": "monument",
+    "state": "Gujarat",
+    "district": "Kutch",
+    "place_name": "Bhuj",
+    "lat": 23.242,
+    "lng": 69.6669,
+    "precision": "town",
+    "start_year": 1877,
     "end_year": null,
     "typical_month": null,
-    "description_en": "Eco-friendly wooden toys turned on lathes from soft ivory wood (Wrightia tinctoria) and polished to a brilliant luster using natural non-toxic vegetable dyes and lac, historic legacy of Tipu Sultan.",
-    "description_hi": "टीपू सुल्तान के काल से प्रचलित पर्यावरण-अनुकूल खिलौना कला, जिसे आले मारा की लकड़ी को खराद पर घुमाकर प्राकृतिक लाख और वानस्पतिक रंगों से चमकदार बनाया जाता है।",
+    "description_en": "The oldest museum in Gujarat, exhibiting a vast array of Harappan seals, Kutchi script artifacts, ethnological dioramas of local tribes, and traditional textiles.",
+    "description_hi": "गुजरात का सबसे पुराना संग्रहालय, जिसमें हड़प्पा काल की मुहरें, कच्छी लिपि की कलाकृतियाँ और स्थानीय जनजातियों के चित्रमाला प्रदर्शित हैं।",
+    "rarity": 3,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Kutch Museum Overview",
+        "url": "http://www.sahapedia.org/kutch-museum-overview"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "tribal_cultural_museum_pune",
+    "name_en": "Tribal Cultural Museum",
+    "name_hi": "आदिवासी सांस्कृतिक संग्रहालय",
+    "type": "monument",
+    "state": "Maharashtra",
+    "district": "Pune",
+    "place_name": "Pune",
+    "lat": 18.5204,
+    "lng": 73.8567,
+    "precision": "town",
+    "start_year": 1965,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A dedicated museum in Pune founded to preserve the artifacts, masks, and traditional art forms of over 45 tribal communities of Maharashtra, including Warli and Gond.",
+    "description_hi": "पुणे में एक समर्पित संग्रहालय जिसे महाराष्ट्र के 45 से अधिक आदिवासी समुदायों की कलाकृतियों और पारंपरिक कलाओं को संरक्षित करने के लिए स्थापित किया गया है।",
+    "rarity": 3,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Tribal Cultural Museum",
+        "url": "https://map.sahapedia.org/search/article/Tribal%20Cultural%20Museum/2848"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "navaratri_garba",
+    "name_en": "Navaratri Garba Festival",
+    "name_hi": "नवरात्रि गरबा उत्सव",
+    "type": "festival",
+    "state": "Gujarat",
+    "district": "Ahmedabad",
+    "place_name": "Ahmedabad",
+    "lat": 23.0225,
+    "lng": 72.5714,
+    "precision": "district",
+    "start_year": 1500,
+    "end_year": null,
+    "typical_month": 10,
+    "description_en": "A nine-night Hindu festival celebrating the goddess Durga through communal, ritualistic Garba dancing, breaking down social structures to foster massive community participation.",
+    "description_hi": "देवी दुर्गा का जश्न मनाने वाला नौ रातों का हिंदू त्योहार, जिसमें सामूहिक रूप से गरबा नृत्य किया जाता है।",
+    "rarity": 1,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Garba of Gujarat",
+        "url": "https://ich.unesco.org/en/RL/garba-of-gujarat-01962"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "durga_puja_kolkata",
+    "name_en": "Durga Puja",
+    "name_hi": "दुर्गा पूजा",
+    "type": "festival",
+    "state": "West Bengal",
+    "district": "Kolkata",
+    "place_name": "Kolkata",
+    "lat": 22.5726,
+    "lng": 88.3639,
+    "precision": "town",
+    "start_year": 1700,
+    "end_year": null,
+    "typical_month": 10,
+    "description_en": "An immersive annual festival in Kolkata characterized by magnificent clay idols of Goddess Durga, public pandals, and vibrant sociocultural gatherings recognized by UNESCO.",
+    "description_hi": "कोलकाता का एक वार्षिक त्योहार जिसमें देवी दुर्गा की शानदार मिट्टी की मूर्तियां और सार्वजनिक पंडाल शामिल होते हैं, जिसे यूनेस्को द्वारा मान्यता प्राप्त है।",
+    "rarity": 1,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Durga Puja in Kolkata",
+        "url": "https://ich.unesco.org/en/RL/durga-puja-in-kolkata-00703"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "shigma_holi",
+    "name_en": "Shigma (Holi)",
+    "name_hi": "शिग्मा (होली)",
+    "type": "festival",
+    "state": "Maharashtra",
+    "district": "Sindhudurg",
+    "place_name": "Sawantwadi",
+    "lat": 15.9015,
+    "lng": 73.8184,
+    "precision": "district",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": 3,
+    "description_en": "The Konkani variant of Holi celebrated with the felling and burning of a sacred mango trunk, accompanied by the dramatic theatrical performances known as Khele.",
+    "description_hi": "होली का कोंकणी संस्करण, जिसे पवित्र आम के पेड़ को जलाकर और खेले नामक नाटकीय प्रदर्शन के साथ मनाया जाता है।",
+    "rarity": 3,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Transformations of Konkani Khele",
+        "url": "http://www.sahapedia.org/transformations-konkani-khele-between-bollywood-and-natya-shastra"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "gond_devari",
+    "name_en": "Devari",
+    "name_hi": "देवरी",
+    "type": "festival",
+    "state": "Chhattisgarh",
+    "district": "Bastar",
+    "place_name": "Bastar",
+    "lat": 19.2064,
+    "lng": 81.9427,
+    "precision": "district",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": 11,
+    "description_en": "The Gond tribal equivalent of Diwali. Instead of Rama's return, it celebrates the labor of village herders and the first mythical marriage within the Gond pantheon.",
+    "description_hi": "दिवाली के समान गोंड आदिवासी त्योहार। यह गांव के चरवाहों की मेहनत और गोंड पंथ में पहले पौराणिक विवाह का जश्न मनाता है।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Devari: The Other Diwali in Chhattisgarh",
+        "url": "http://www.sahapedia.org/devari-other-diwali-chhattisgarh-0"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "bheem_jatra",
+    "name_en": "Bheem Jatra",
+    "name_hi": "भीम जात्रा",
+    "type": "festival",
+    "state": "Chhattisgarh",
+    "district": "Bastar",
+    "place_name": "Bastar",
+    "lat": 19.2064,
+    "lng": 81.9427,
+    "precision": "district",
+    "start_year": 1700,
+    "end_year": null,
+    "typical_month": 6,
+    "description_en": "A Gond festival preceding the rains where an aniconic pole representing Bhima is covered in dung. Playing the Mandar Baja forces Indra to wash it away, bringing rain.",
+    "description_hi": "बारिश से पहले एक गोंड त्योहार जहां भीम का प्रतिनिधित्व करने वाले एक खंभे को गोबर से ढक दिया जाता है। मंदर बाजा बजाने से इंद्र बारिश करते हैं।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Bheema: Hero of Gond Pandvani",
+        "url": "http://www.sahapedia.org/bheema-hero-gond-pandvani"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "kachargarh_jatra",
+    "name_en": "Kachargarh Jatra",
+    "name_hi": "कचारगढ़ जात्रा",
+    "type": "festival",
+    "state": "Maharashtra",
+    "district": "Gondia",
+    "place_name": "Dhanegaon",
+    "lat": 21.2583,
+    "lng": 80.4042,
+    "precision": "village",
+    "start_year": 1980,
+    "end_year": null,
+    "typical_month": 2,
+    "description_en": "An annual post-harvest pilgrimage revived in the 1980s by the Gonds. It centers on the Kali Kankali shrine in the Kachargarh caves, asserting Gondi cultural and linguistic heritage.",
+    "description_hi": "1980 के दशक में गोंडों द्वारा पुनर्जीवित की गई एक वार्षिक तीर्थयात्रा। यह कचारगढ़ गुफाओं में काली कंकाली मंदिर पर केंद्रित है, जो गोंडी विरासत का दावा करती है।",
+    "rarity": 3,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Kachargarh Pilgrimage of the Gond Adivasis",
+        "url": "http://www.sahapedia.org/kachargarh-pilgrimage-of-the-gond-adivasis-0"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "narsimha_jayanti_utsav",
+    "name_en": "Narsimha Jayanti Utsav",
+    "name_hi": "नरसिंह जयंती उत्सव",
+    "type": "festival",
+    "state": "Maharashtra",
+    "district": "Pune",
+    "place_name": "Pune",
+    "lat": 18.5204,
+    "lng": 73.8567,
+    "precision": "town",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": 5,
+    "description_en": "A festival celebrating the incarnation of Lord Narsimha, marked heavily by the Narad kirtan and devotional songs at local temples in Pune, fostering deep community faith.",
+    "description_hi": "भगवान नरसिंह के अवतार का जश्न मनाने वाला त्योहार, जिसे पुणे के स्थानीय मंदिरों में नारद कीर्तन और भक्ति गीतों के साथ मनाया जाता है।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Narsimha Laxmi Mandir",
+        "url": "https://map.sahapedia.org/article/Narsimha-Laxmi-Mandir/3009"
+      }
+    ],
+    "confidence": "medium"
+  },
+  {
+    "id": "mahashivratri_datta_mandir",
+    "name_en": "Mahashivratri at Datta Mandir",
+    "name_hi": "दत्त मंदिर में महाशिवरात्रि",
+    "type": "festival",
+    "state": "Maharashtra",
+    "district": "Pune",
+    "place_name": "Pune",
+    "lat": 18.5204,
+    "lng": 73.8567,
+    "precision": "town",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": 2,
+    "description_en": "A localized observance of Mahashivratri at the Laxmibai Dagdusheth Halwai Datta Mandir, where devotees offer bael leaves to the lingam and women pray for marital bliss.",
+    "description_hi": "लक्ष्मीबाई दगड़ूशेठ हलवाई दत्त मंदिर में महाशिवरात्रि का स्थानीय रूप, जहाँ भक्त शिवलिंग पर बेलपत्र चढ़ाते हैं और महिलाएं वैवाहिक सुख की प्रार्थना करती हैं।",
+    "rarity": 3,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Laxmibai Dagdusheth Halwai Datta Mandir",
+        "url": "https://map.sahapedia.org/article/Laxmibai-Dagdusheth%20Halwai%20Datta%20Mandir/3061"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "baba_pithora_origin",
+    "name_en": "Myth of Baba Pithora",
+    "name_hi": "बाबा पिथौरा का मिथक",
+    "type": "folk_story",
+    "state": "Gujarat",
+    "district": "Chhota Udepur",
+    "place_name": "Chhota Udepur",
+    "lat": 22.3023,
+    "lng": 74.0152,
+    "precision": "district",
+    "start_year": 1200,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "The mythological origin story of Baba Pithora, tracing his birth to Rani Kali Koyal, his rescue by Rani Kajal from the river, and his subsequent conflict with Baba Ind.",
+    "description_hi": "बाबा पिथौरा के जन्म, रानी काजल द्वारा नदी से उनके बचाव और उसके बाद बाबा इंद्र के साथ उनके संघर्ष की पौराणिक कहानी।",
+    "rarity": 3,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Pithora of the Rathvas",
+        "url": "http://www.sahapedia.org/pithora-of-the-rathvas"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "mahua_parsi_legend",
+    "name_en": "The Parsi and the Cupboard",
+    "name_hi": "पारसी और अलमारी",
+    "type": "folk_story",
+    "state": "Maharashtra",
+    "district": "Palghar",
+    "place_name": "Dahanu",
+    "lat": 19.9912,
+    "lng": 72.7397,
+    "precision": "district",
+    "start_year": 1800,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A Warli folklore recounting how commercial liquor sold by a Parsi trader caused an adivasi carpenter to mistakenly release Yama's messengers from a magic cupboard, unleashing death.",
+    "description_hi": "एक वर्ली लोककथा जिसमें बताया गया है कि कैसे एक पारसी व्यापारी की शराब ने यम के दूतों को जादुई अलमारी से मुक्त कर दिया, जिससे मृत्यु फैल गई।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "In Conversation with Shiraz Bulsara Prabhu",
+        "url": "http://www.sahapedia.org/conversation-shiraz-bulsara-prabhu-politics-mahua-and-warlis-search-new-source-livelihood"
+      }
+    ],
+    "confidence": "medium"
+  },
+  {
+    "id": "bheema_rain_myth",
+    "name_en": "Bheema and the Rain",
+    "name_hi": "भीम और बारिश",
+    "type": "folk_story",
+    "state": "Chhattisgarh",
+    "district": "Bastar",
+    "place_name": "Kopabeda",
+    "lat": 19.1234,
+    "lng": 81.9567,
+    "precision": "village",
+    "start_year": 1600,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A Gond mythological tale positing the Mahabharata's Bhima as an indigenous rain-maker who plays the Mandar Baja drum to compel Lord Indra into releasing the monsoon rains.",
+    "description_hi": "एक गोंड पौराणिक कथा जिसमें महाभारत के भीम को एक स्वदेशी बारिश निर्माता के रूप में दर्शाया गया है जो मंदर बाजा बजाकर इंद्र को बारिश करने के लिए मजबूर करते हैं।",
+    "rarity": 4,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Bheema: Hero of Gond Pandvani",
+        "url": "http://www.sahapedia.org/bheema-hero-gond-pandvani"
+      }
+    ],
+    "confidence": "high"
+  },
+  {
+    "id": "dharmapada_konark",
+    "name_en": "Dharmapada's Sacrifice",
+    "name_hi": "धर्मपद का बलिदान",
+    "type": "folk_story",
+    "state": "Odisha",
+    "district": "Puri",
+    "place_name": "Konark",
+    "lat": 19.8876,
+    "lng": 86.0945,
+    "precision": "town",
+    "start_year": 1255,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "The tragic local legend of Dharmapada, a 12-year-old boy who successfully capped the Konark Sun Temple after 1,200 master artisans failed, eventually sacrificing himself to protect their pride.",
+    "description_hi": "धर्मपद की दुखद स्थानीय किंवदंती, एक 12 वर्षीय लड़का जिसने 1,200 कारीगरों के विफल होने के बाद कोणार्क सूर्य मंदिर को सफलतापूर्वक पूरा किया और अपने प्राणों की आहुति दे दी।",
     "rarity": 2,
     "documentation_status": "well",
     "sources": [
       {
-        "title": "GI Registry India - Channapatna Toys GI #18",
-        "url": "https://search.ipindia.gov.in/GIRPublic/"
+        "title": "Konark Sun Temple",
+        "url": "http://www.sahapedia.org/konark-sun-temple-unique-marriage-of-form-and-concept"
       }
     ],
-    "confidence": 0.97,
-    "placeholder": true
+    "confidence": "high"
   }
 ]

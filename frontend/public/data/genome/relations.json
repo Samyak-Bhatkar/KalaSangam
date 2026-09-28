@@ -1,74 +1,189 @@
 [
   {
-    "from_id": "warli-painting",
-    "to_id": "tarpa-instrument",
-    "kind": "uses",
-    "weight": 0.95,
-    "rationale": "The Tarpa wind horn is the visual and rhythmic center of Warli community paintings; dancers form concentric spirals around the Tarpakar player.",
-    "source": "Sahapedia - Warli Art and Organology (https://www.sahapedia.org/warli-painting)",
-    "placeholder": true
-  },
-  {
-    "from_id": "warli-painting",
-    "to_id": "kansari-devi-myth",
-    "kind": "celebrated_at",
-    "weight": 0.92,
-    "rationale": "Warli ritual wedding chauks prominently feature the sacred Mother Goddess Palghat and Kansari Devi as the protector of fertility and harvests.",
-    "source": "Sahapedia - Warli Oral Traditions (https://www.sahapedia.org/warli-myths)",
-    "placeholder": true
-  },
-  {
-    "from_id": "warli-painting",
-    "to_id": "bohada-festival",
-    "kind": "related",
-    "weight": 0.85,
-    "rationale": "Both traditions share the same animistic cosmological symbolism, visual geometry, and ceremonial invocation of the 52 forest deities.",
-    "source": "Tribal Research and Training Institute Maharashtra (https://trti.maharashtra.gov.in/)",
-    "placeholder": true
-  },
-  {
-    "from_id": "warli-painting",
-    "to_id": "varli-dialect",
-    "kind": "same_family",
-    "weight": 0.88,
-    "rationale": "Ritual Suvasinis chant oral hymns and riddles in the native Varli dialect while applying white rice paste onto ochre walls.",
-    "source": "Peoples Linguistic Survey of India (https://www.peopleslinguisticsurvey.org/)",
-    "placeholder": true
-  },
-  {
-    "from_id": "tarpa-instrument",
-    "to_id": "bohada-festival",
+    "from_id": "ektara",
+    "to_id": "pandavani",
     "kind": "uses",
     "weight": 0.9,
-    "rationale": "Tarpa players lead the nightly ritual procession of mask-wearing deity impersonators through the village square.",
-    "source": "Sangeet Natak Akademi (https://sangeetnatak.gov.in/)",
-    "placeholder": true
+    "rationale": "Performers of Pandavani, like Teejan Bai, often use the ektara as an instrumental drone while narrating the epics.",
+    "source": {
+      "title": "Teejan Bai",
+      "url": "https://www.indianculture.gov.in/videos/page=10/title=Teejan_Bai/nid=2141857"
+    }
   },
   {
-    "from_id": "trimbakeshwar-temple",
-    "to_id": "nashik-kumbh-mela",
-    "kind": "celebrated_at",
-    "weight": 0.98,
-    "rationale": "The Simhastha Kumbh Mela ritual bath begins at the sacred Kushavarta pond located right beside the Trimbakeshwar shrine.",
-    "source": "UNESCO ICH - Kumbh Mela (https://ich.unesco.org/en/RL/kumbh-mela-01258)",
-    "placeholder": true
+    "from_id": "dholki",
+    "to_id": "lavani_dance",
+    "kind": "uses",
+    "weight": 1.0,
+    "rationale": "Lavani dance is fundamentally characterized and driven by the sharp, energetic rhythmic beats of the dholki drum.",
+    "source": {
+      "title": "Lavani",
+      "url": "https://en.wikipedia.org/wiki/Lavani"
+    }
   },
   {
-    "from_id": "trimbakeshwar-temple",
-    "to_id": "nashik-misal",
-    "kind": "related",
-    "weight": 0.65,
-    "rationale": "Pilgrims visiting the Trimbakeshwar and Godavari river banks customarily partake in traditional Nashik culinary fare.",
-    "source": "Maharashtra Tourism (https://www.maharashtratourism.gov.in/)",
-    "placeholder": true
-  },
-  {
-    "from_id": "ellora-caves",
-    "to_id": "paithani-saree",
+    "from_id": "thumri",
+    "to_id": "kathak",
     "kind": "influenced",
-    "weight": 0.78,
-    "rationale": "Classic Paithani border motifs (peacocks, lotuses, parrots) draw direct stylistic inspiration from the stone carvings of Ajanta and Ellora.",
-    "source": "IndianCulture.gov.in - Paithani Art (https://indianculture.gov.in/)",
-    "placeholder": true
+    "weight": 0.8,
+    "rationale": "Thumri's evocative, emotional repertoire deeply influences Kathak abhinaya (expressions) and they are frequently performed together.",
+    "source": {
+      "title": "Kathak Thumri",
+      "url": "http://www.sahapedia.org/kathak-thumri-guru-malti-shyam"
+    }
+  },
+  {
+    "from_id": "tarpa_instrument",
+    "to_id": "tarpa_dance",
+    "kind": "uses",
+    "weight": 1.0,
+    "rationale": "The Tarpa dance gets its name from, and completely relies upon, the music produced by the Tarpa instrument.",
+    "source": {
+      "title": "Sacred Spirits of the Warlis",
+      "url": "http://www.sahapedia.org/sacred-spirits-warlis-mahua-tadi-and-tappers-0"
+    }
+  },
+  {
+    "from_id": "mandar_baja",
+    "to_id": "bheem_jatra",
+    "kind": "uses",
+    "weight": 0.9,
+    "rationale": "The Mandar Baja is played specifically during Bheem Jatra celebrations to appease the deities and summon rain.",
+    "source": {
+      "title": "Bheema: Hero of Gond Pandvani",
+      "url": "http://www.sahapedia.org/bheema-hero-gond-pandvani"
+    }
+  },
+  {
+    "from_id": "baba_pithora_origin",
+    "to_id": "pithora_painting",
+    "kind": "related",
+    "weight": 1.0,
+    "rationale": "The ritualistic motifs inside a traditional Pithora painting are literal physical depictions of the lore surrounding the birth and ascension of Baba Pithora.",
+    "source": {
+      "title": "Pithora of the Rathvas",
+      "url": "http://www.sahapedia.org/pithora-of-the-rathvas"
+    }
+  },
+  {
+    "from_id": "garba",
+    "to_id": "navaratri_garba",
+    "kind": "celebrated_at",
+    "weight": 1.0,
+    "rationale": "The Garba dance is intrinsically and primarily celebrated during the nine-night Navaratri festival.",
+    "source": {
+      "title": "Garba of Gujarat",
+      "url": "https://ich.unesco.org/en/RL/garba-of-gujarat-01962"
+    }
+  },
+  {
+    "from_id": "tarpa_dance",
+    "to_id": "warli_painting",
+    "kind": "related",
+    "weight": 0.95,
+    "rationale": "The central motif of traditional Warli canvas and wall paintings is the spiraling Tarpa dance circle, symbolizing cosmic order and community harmony.",
+    "source": {
+      "title": "Warli painting",
+      "url": "http://www.sahapedia.org/warli-painting"
+    }
+  },
+  {
+    "from_id": "mahua_liquor",
+    "to_id": "warli_painting",
+    "kind": "related",
+    "weight": 0.8,
+    "rationale": "The sacred Mahua tree (Madhuca longifolia) and ceremonial liquor brewing are revered sacred motifs featured in Warli harvest and marriage murals.",
+    "source": {
+      "title": "Sacred Spirits of the Warlis",
+      "url": "http://www.sahapedia.org/sacred-spirits-warlis-mahua-tadi-and-tappers-0"
+    }
+  },
+  {
+    "from_id": "saura_art",
+    "to_id": "warli_painting",
+    "kind": "same_family",
+    "weight": 0.85,
+    "rationale": "Saura pictograms of Odisha and Warli murals of Maharashtra share ancient prehistoric stick-figure aesthetics painted with rice paste on red mud walls.",
+    "source": {
+      "title": "Saora Art: Tale of the Man and the Snake",
+      "url": "http://www.sahapedia.org/saora-art-tale-of-the-man-and-the-snake"
+    }
+  },
+  {
+    "from_id": "mahua_parsi_legend",
+    "to_id": "mahua_liquor",
+    "kind": "related",
+    "weight": 0.9,
+    "rationale": "The Warli folk narrative directly concerns the spiritual reverence for homemade Mahua versus the disruption caused by commercial distillers.",
+    "source": {
+      "title": "In Conversation with Shiraz Bulsara Prabhu",
+      "url": "http://www.sahapedia.org/conversation-shiraz-bulsara-prabhu-politics-mahua-and-warlis-search-new-source-livelihood"
+    }
+  },
+  {
+    "from_id": "dharmapada_konark",
+    "to_id": "konark_sun_temple",
+    "kind": "related",
+    "weight": 1.0,
+    "rationale": "Dharmapada's legend is the foundational folk memory of the capping and architectural climax of the 13th-century Konark Sun Temple.",
+    "source": {
+      "title": "Konark Sun Temple",
+      "url": "http://www.sahapedia.org/konark-sun-temple-unique-marriage-of-form-and-concept"
+    }
+  },
+  {
+    "from_id": "bheema_rain_myth",
+    "to_id": "mandar_baja",
+    "kind": "uses",
+    "weight": 0.95,
+    "rationale": "Gond lore dictates that playing the Mandar Baja appeases Indra to wash away the dung encasing Bheema, releasing monsoon rains.",
+    "source": {
+      "title": "Bheema: Hero of Gond Pandvani",
+      "url": "http://www.sahapedia.org/bheema-hero-gond-pandvani"
+    }
+  },
+  {
+    "from_id": "gotipua",
+    "to_id": "pattachitra",
+    "kind": "related",
+    "weight": 0.8,
+    "rationale": "Gotipua acrobats and Pattachitra master painters in Raghurajpur share sacred narrative themes centered around Lord Jagannath and the Gita Govinda.",
+    "source": {
+      "title": "Storytelling in Folk Paintings",
+      "url": "http://www.sahapedia.org/storytelling-folk-paintings"
+    }
+  },
+  {
+    "from_id": "patan_patola",
+    "to_id": "sambalpuri_ikat",
+    "kind": "same_family",
+    "weight": 0.85,
+    "rationale": "Patan Patola (Gujarat double ikat) and Sambalpuri Ikat (Odisha resist dye) represent India's twin apex traditions of geometric tie-and-dye weaving.",
+    "source": {
+      "title": "The Sambalpuri Ikat of Odisha",
+      "url": "http://www.sahapedia.org/the-sambalpuri-ikat-of-odisha-history-symbolism-and-contemporary-trends"
+    }
+  },
+  {
+    "from_id": "ajanta_caves",
+    "to_id": "ellora_caves",
+    "kind": "same_family",
+    "weight": 0.9,
+    "rationale": "Situated in the same Sahyadri Deccan basalt ridge, Ajanta and Ellora together showcase the multi-century zenith of ancient Indian rock-cut art and sculpture.",
+    "source": {
+      "title": "Ajanta Caves",
+      "url": "https://www.indianculture.gov.in/ajanta-caves/caves/title=Cave_9/nid=2801017"
+    }
+  },
+  {
+    "from_id": "shigma_holi",
+    "to_id": "konkani_khele",
+    "kind": "celebrated_at",
+    "weight": 0.95,
+    "rationale": "Konkani Khele folk theater is exclusively performed during the annual Shigma spring celebrations across Konkan villages.",
+    "source": {
+      "title": "Transformations of Konkani Khele",
+      "url": "http://www.sahapedia.org/transformations-konkani-khele-between-bollywood-and-natya-shastra"
+    }
   }
 ]
