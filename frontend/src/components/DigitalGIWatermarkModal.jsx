@@ -82,10 +82,10 @@ export default function DigitalGIWatermarkModal() {
             </div>
             <div>
               <div className="text-xs font-extrabold uppercase tracking-wider text-purple-300">
-                Digital GI Steganography
+                Digital GI Sovereign Seal
               </div>
               <div className="text-[10px] text-slate-400">
-                Anti-Counterfeit Frequency Watermark
+                डिजिटल जीआई संप्रभु सील • Anti-Counterfeit Frequency Seal
               </div>
             </div>
           </div>
@@ -146,7 +146,7 @@ export default function DigitalGIWatermarkModal() {
               className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs tracking-wider uppercase shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <Lock className="w-4 h-4" />
-              <span>{isProcessing ? 'Embedding...' : 'Embed DCT Watermark'}</span>
+              <span>{isProcessing ? 'Embedding...' : 'Embed Digital GI Seal'}</span>
             </button>
 
             <button
@@ -163,7 +163,7 @@ export default function DigitalGIWatermarkModal() {
           {embedStatus && (
             <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0" />
-              <span>Watermark successfully embedded into frequency coefficients! Imperceptible to eye.</span>
+              <span>Digital GI Sovereign Seal successfully embedded into frequency coefficients! Imperceptible to eye.</span>
             </div>
           )}
 

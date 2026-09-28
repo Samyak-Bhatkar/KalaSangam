@@ -96,7 +96,7 @@ export default function PublicVerifyScreen({ productId, onBack, onBrowseStorefro
       <div className="min-h-[500px] flex flex-col items-center justify-center p-6 text-center bg-[#FDFBF7]">
         <Loader2 className="w-10 h-10 text-amber-600 animate-spin mb-3" />
         <h3 className="text-base font-bold text-slate-800">MoSJE ShilpSetu Verification</h3>
-        <p className="text-xs text-slate-500 mt-1">Verifying cryptographic digital watermark & ONDC listing...</p>
+        <p className="text-xs text-slate-500 mt-1">Verifying cryptographic Digital GI Sovereign Seal & ONDC listing...</p>
       </div>
     );
   }

@@ -75,10 +75,9 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
   });
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex justify-center font-sans select-none">
-      <div className="w-full md:max-w-4xl min-h-screen bg-[#FAF9F5] shadow-2xl flex flex-col">
-        {/* Top Public Header */}
-        <header className="sticky top-0 z-30 px-5 py-3.5 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs flex items-center justify-between">
+    <div className="min-h-screen bg-[#FAF9F5] text-slate-900 flex flex-col font-sans select-none w-full">
+      {/* Top Public Header */}
+      <header className="sticky top-0 z-30 px-4 md:px-8 lg:px-12 py-3.5 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
               src="/brand_emblem.png"
@@ -112,7 +111,7 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
         </header>
 
         {/* Hero Value Banner */}
-        <section className="px-5 py-6 bg-gradient-to-br from-[#1E2A4A] via-[#172036] to-[#0F172A] text-white">
+        <section className="px-4 md:px-8 lg:px-12 py-7 bg-gradient-to-br from-[#1E2A4A] via-[#172036] to-[#0F172A] text-white">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider mb-2 border border-amber-400/30">
@@ -123,7 +122,7 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
                 भारत के हाशिए पर स्थित कारीगरों का डिजिटल बाज़ार
               </h2>
               <p className="text-xs md:text-sm text-slate-300 mt-1 max-w-xl">
-                शिल्पसेतु AI द्वारा सत्यापित उत्पाद, डिजिटल जीआई (GI) वाटरमार्क एवं प्रामाणिक ब्लॉकचेन क्यूआर कोड के साथ।
+                शिल्पसेतु AI द्वारा सत्यापित उत्पाद, डिजिटल जीआई संप्रभु सील (Digital GI Sovereign Seal) एवं प्रामाणिक क्यूआर कोड के साथ।
               </p>
             </div>
 
@@ -177,14 +176,14 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
                 }`}
               >
                 <span>🗺️</span>
-                <span>शिल्प मानचित्र</span>
+                <span>भारत धरोहर एटलस</span>
               </button>
             </div>
           </div>
         </section>
 
         {/* Product Grid or Interactive Craft Map */}
-        <main className="flex-1 p-5 overflow-y-auto">
+        <main className="flex-1 px-4 md:px-8 lg:px-12 py-8 overflow-y-auto">
           {viewMode === 'map' ? (
             <IndiaCraftMap
               products={products}
@@ -202,7 +201,7 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
               <p className="text-xs text-slate-500 mt-1">कृपया कोई अन्य शब्द खोजें</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-6">
               {filteredProducts.map((p) => (
                 <div
                   key={p.id}
@@ -273,7 +272,7 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-emerald-600" />
                   <h3 className="text-sm font-black text-slate-900">
-                    डिजिटल जीआई प्रामाणिकता प्रमाणपत्र
+                    डिजिटल जीआई संप्रभु सील एवं प्रामाणिकता प्रमाणपत्र
                   </h3>
                 </div>
                 <button
@@ -478,7 +477,6 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }

@@ -97,7 +97,7 @@ export default function IndiaCraftMap({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm md:text-base font-black text-white tracking-wide">
-                डिजिटल शिल्प मानचित्र
+                भारत धरोहर एटलस (Bharat Heritage Atlas)
               </h3>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-extrabold border border-amber-500/30">
                 8 मुख्य सांस्कृतिक क्लस्टर
