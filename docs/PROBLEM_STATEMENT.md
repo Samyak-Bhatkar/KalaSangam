@@ -1,6 +1,11 @@
-# Smart India Hackathon (SIH) — Problem Statement Details
+# Smart India Hackathon (SIH 2026) — Problem Statement Details
 
-## Identification & Title
+> 🚨 **ACTIVE SUBMISSION UPDATE**: This project has been submitted under **SIH 2026 Problem Statement 26197**: *"Student Innovation — Ideas that showcase the rich cultural heritage and traditions of India"* (Theme: **Heritage & Culture**, Organization: **AICTE / MIC**).  
+> 📖 For full details and the 20 Heritage Innovations, read [docs/SIH_2026_PROBLEM_STATEMENT_26197_HERITAGE_CULTURE.md](file:///c:/SAMYAKFILES/Users/AppData/Local/Programs/DATA%20SCIENCE%20COURSE/SIH/ShilpSetu/docs/SIH_2026_PROBLEM_STATEMENT_26197_HERITAGE_CULTURE.md).
+
+---
+
+## Historical Identification (Original Problem Statement)
 - **Problem Statement ID**: `26090`
 - **Problem Statement Title**: AI-Driven Market Linkage and Smart Cataloging Mobile Application for Marginalized Artisans
 - **Client Organization / Ministry**: Ministry of Social Justice and Empowerment (MoSJE), Department of Social Justice and Empowerment, Government of India

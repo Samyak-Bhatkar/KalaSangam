@@ -22,7 +22,8 @@ import {
   Check,
   Eye,
   Sliders,
-  Loader2
+  Loader2,
+  Compass
 } from 'lucide-react';
 import { useArtisan } from '../context/ArtisanContext';
 import {
@@ -35,6 +36,7 @@ import {
 } from '../services/visionHeuristics';
 import { checkPhotoQuality } from '../services/api';
 import StudioQualityReviewModal from './StudioQualityReviewModal';
+import MotifDecoder from './MotifDecoder';
 
 export default function CameraViewfinder() {
   const {
@@ -70,6 +72,9 @@ export default function CameraViewfinder() {
 
   // Sound / Voice prompts toggle
   const [isVoiceActive, setIsVoiceActive] = useState(true);
+
+  // Cultural Heritage Motif Decoder Mode (Theme: Heritage & Culture | PS 26197)
+  const [isMotifMode, setIsMotifMode] = useState(false);
 
   // Auto-capture toggle (default: true when AI guide is on)
   const [autoCaptureEnabled, setAutoCaptureEnabled] = useState(true);
@@ -446,6 +451,24 @@ export default function CameraViewfinder() {
       });
     }
   };
+
+  // Immediate frame extraction for Motif Decoder without modal opening
+  const getImmediateFrameBase64 = useCallback(() => {
+    if (videoRef.current && isStreaming) {
+      const video = videoRef.current;
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 1280;
+      canvas.height = video.videoHeight || 1280;
+      const ctx = canvas.getContext('2d');
+      if (facingMode === 'user') {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL('image/jpeg', 0.94);
+    }
+    return rawImageBase64 || rawImageUrl || null;
+  }, [isStreaming, facingMode, rawImageBase64, rawImageUrl]);
 
   // Upload photo from device gallery
   const handleFileUpload = (e) => {
@@ -992,7 +1015,28 @@ export default function CameraViewfinder() {
           </div>
         </button>
 
-        {/* 3. Device Gallery Upload */}
+        {/* 3. Decode Motif Mode Toggle Button (Theme: Heritage & Culture | PS 26197) */}
+        <button
+          type="button"
+          onClick={() => setIsMotifMode(!isMotifMode)}
+          title="Decode Motif / रूपांकन पहचानें"
+          className={`flex flex-col items-center gap-1 transition-all cursor-pointer group ${
+            isMotifMode ? 'text-amber-400' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <div className={`w-12 h-12 rounded-full border flex items-center justify-center active:scale-95 transition-all ${
+            isMotifMode
+              ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.6)] ring-2 ring-amber-400/60'
+              : 'bg-white/10 group-hover:bg-white/20 border-white/15'
+          }`}>
+            <Compass className={`w-5 h-5 ${isMotifMode ? 'text-slate-950 animate-spin' : 'text-amber-400'}`} style={{ animationDuration: '8s' }} />
+          </div>
+          <span className="text-[10px] font-bold">
+            {language === 'hi' ? 'रूपांकन' : 'Motif'}
+          </span>
+        </button>
+
+        {/* 4. Device Gallery Upload */}
         <button
           onClick={() => fileInputRef.current?.click()}
           title="Upload from Device Gallery"
@@ -1031,6 +1075,17 @@ export default function CameraViewfinder() {
           setIsReviewModalOpen(false);
           startLiveCamera(facingMode, false);
         }}
+      />
+
+      {/* ==================================================================== */}
+      {/* CULTURAL HERITAGE MOTIF DECODER MODAL / RETICLE (Theme: PS 26197)    */}
+      {/* ==================================================================== */}
+      <MotifDecoder
+        isOpen={isMotifMode}
+        onClose={() => setIsMotifMode(false)}
+        getFrameBase64={getImmediateFrameBase64}
+        craftHint={selectedPreset?.craft_category || activeCategoryMode}
+        clusterHint={selectedPreset?.cluster_pin}
       />
     </div>
   );

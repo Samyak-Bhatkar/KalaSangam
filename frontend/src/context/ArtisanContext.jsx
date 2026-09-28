@@ -170,6 +170,9 @@ export function ArtisanProvider({ children }) {
   // Annotated Flattened Image for ONDC / E-Commerce Syndication
   const [annotatedImageUrl, setAnnotatedImageUrl] = useState(null);
 
+  // Cultural Heritage Motif Story (Theme: Heritage & Culture | PS 26197)
+  const [decodedMotif, setDecodedMotif] = useState(null);
+
   // Craft Honesty & Authenticity Pins (Tap-to-Annotate Details & Natural Variations)
   const [craftPins, setCraftPins] = useState([
     {
@@ -504,6 +507,7 @@ export function ArtisanProvider({ children }) {
         lifestyle_image_url: lifestyleImageUrl || '',
         annotated_image_url: annotatedImageUrl || '',
         craft_pins: craftPins,
+        decoded_motif: decodedMotif,
       };
       const res = await saveProductDraft(payload);
       setProductStatus('draft');
@@ -547,6 +551,7 @@ export function ArtisanProvider({ children }) {
         lifestyle_image_url: lifestyleImageUrl || '',
         annotated_image_url: annotatedImageUrl || '',
         craft_pins: craftPins,
+        decoded_motif: decodedMotif,
       };
       const res = await publishProduct(productId, {
         productData: payload,
@@ -723,6 +728,8 @@ export function ArtisanProvider({ children }) {
     currentUser,
     loginWithPhone,
     logout,
+    decodedMotif,
+    setDecodedMotif,
   };
 
   return (

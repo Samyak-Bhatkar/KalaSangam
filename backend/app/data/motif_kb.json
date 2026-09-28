@@ -1,0 +1,116 @@
+{
+  "version": "1.0.0",
+  "comment": "Seeded placeholder records for National Handicrafts & Handloom Motif Knowledge Base. All entries marked with TODO_VERIFY_SOURCE.",
+  "motifs": [
+    {
+      "motif_id": "MOTIF-TERRA-MAYUR-001",
+      "name_en": "Mayur (Peacock) Motif",
+      "name_hi": "मयूर रूपांकन",
+      "name_local": "मोर पंख नक्काशी (Bhojpuri)",
+      "craft_category": "Terracotta & Pottery",
+      "cluster_hint": "Gorakhpur, Uttar Pradesh",
+      "gi_tag_ref": "GI-421 Gorakhpur Terracotta",
+      "meaning_en": "Ancient Vedic emblem of monsoon arrival, fertility, and grace. In Gorakhpur potter folklore, the dancing peacock protects the household vessel and welcomes rain for good clay harvesting.",
+      "meaning_hi": "प्राचीन वैदिक प्रतीक जो वर्षा के आगमन, उर्वरता और सौंदर्य का द्योतक है। गोरखपुर के कुंभकारों की लोककथा के अनुसार मयूर बर्तन की रक्षा करता है और अच्छी मिट्टी की फसल लाता है।",
+      "technique_note_en": "Deeply hand-incised with a pointed bamboo stylus on leather-hard alluvial clay, followed by slow baking with sal tree foliage smoke to produce natural black-ochre luster.",
+      "technique_note_hi": "चमड़े जैसी सख्त गीली मिट्टी पर नुकीली बांस की तीली से उकेरी गई नक्काशी, जिसे साल के पत्तों के धुएं में प्राकृतिक रूप से पकाया जाता है।",
+      "sources": {
+        "motif_name": "CURATED",
+        "meaning": "CURATED",
+        "technique": "AI_OBSERVED",
+        "verification_status": "TODO_VERIFY_SOURCE",
+        "citation": "National Crafts Council Field Documentation (Gorakhpur Cluster) [TODO_VERIFY_SOURCE]"
+      },
+      "narration_hi": "यह गोरखपुर का 300 वर्ष पुराना मयूर रूपांकन है, जो वर्षा, उर्वरता और समृद्धि का प्रतीक है। इसे बांस की तीली से गीली मिट्टी पर उकेरा गया है।",
+      "narration_en": "This is a 300-year-old Gorakhpur Mayur motif symbolizing rainfall and prosperity, hand-incised on alluvial clay with natural wood-smoke glaze."
+    },
+    {
+      "motif_id": "MOTIF-POT-KALASH-001",
+      "name_en": "Mangal Kalash Motif",
+      "name_hi": "मंगल कलश रूपांकन",
+      "name_local": "कलसा व आम्रपल्लव (Awadhi)",
+      "craft_category": "Terracotta & Pottery",
+      "cluster_hint": "Gorakhpur / Varanasi, Uttar Pradesh",
+      "gi_tag_ref": "GI-421 Gorakhpur Terracotta",
+      "meaning_en": "Sacred vessel of cosmic creation and divine abundance, crowned with mango foliage and coconut, invoked during rural harvest rituals.",
+      "meaning_hi": "ब्रह्मांडीय सृजन और दैवीय संपन्नता का प्रतीक मांगलिक पात्र, जिसे आम की पत्तियों और नारियल से सुशोभित कर ग्रामीण अनुष्ठानों में स्थापित किया जाता है।",
+      "technique_note_en": "Wheel-turned spherical pot body with hand-molded clay coil bands and serrated rim incisions applied before pit firing.",
+      "technique_note_hi": "चाक पर गढ़ा गया गोलाकार कलश, जिस पर हाथ से चिकनी मिट्टी की पट्टियां और उभार बनाकर भट्टी में पकाया जाता है।",
+      "sources": {
+        "motif_name": "CURATED",
+        "meaning": "CURATED",
+        "technique": "AI_OBSERVED",
+        "verification_status": "TODO_VERIFY_SOURCE",
+        "citation": "Vedic Craft Iconography Archive [TODO_VERIFY_SOURCE]"
+      },
+      "narration_hi": "यह पवित्र मंगल कलश रूपांकन है, जो जीवन, पवित्रता और दैवीय संपन्नता का द्योतक है।",
+      "narration_en": "This is the sacred Mangal Kalash motif representing cosmic creation, purity, and divine abundance."
+    },
+    {
+      "motif_id": "MOTIF-TEXTILE-KALKA-001",
+      "name_en": "Kalka (Paisley) Buti Motif",
+      "name_hi": "कालका / आम्र-बूटा रूपांकन",
+      "name_local": "कैरी / आम का बौर (Bundeli)",
+      "craft_category": "Handloom Textiles",
+      "cluster_hint": "Chanderi, Madhya Pradesh",
+      "gi_tag_ref": "GI-02 Chanderi Saree",
+      "meaning_en": "Inspired by the budding raw mango seed (Kairi), symbolizing youth, fertility, and renewal in royal Bundelkhand handloom heritage.",
+      "meaning_hi": "कच्ची अमिया (कैरी) के अंकुरण से प्रेरित, जो बुंदेलखंड की शाही बुनाई परंपरा में नवजीवन, यौवन और समृद्धि का परिचायक है।",
+      "technique_note_en": "Woven on pit loom using extra-weft fine metallic zari with the traditional Fekwa weaving technique across mulberry silk warp and cotton weft.",
+      "technique_note_hi": "गड्ढा करघे पर शहतूत रेशम के ताने और सूती बाने में फेरवा तकनीक द्वारा शुद्ध ज़री से बुना गया कलात्मक बूटा।",
+      "sources": {
+        "motif_name": "CURATED",
+        "meaning": "CURATED",
+        "technique": "AI_OBSERVED",
+        "verification_status": "TODO_VERIFY_SOURCE",
+        "citation": "Chanderi Master Weavers Guild Ledger [TODO_VERIFY_SOURCE]"
+      },
+      "narration_hi": "यह चंदेरी का ऐतिहासिक कालका बूटा है, जो आम की बौर और नवजीवन का प्रतीक है। शुद्ध ज़री से फेरवा तकनीक द्वारा बुना गया है।",
+      "narration_en": "This is the historic Chanderi Kalka paisley motif, symbolizing life and renewal, woven with fine metallic zari."
+    },
+    {
+      "motif_id": "MOTIF-DHOKRA-ELEPHANT-001",
+      "name_en": "Gaja (Royal Elephant) Motif",
+      "name_hi": "गज / हाथी रूपांकन",
+      "name_local": "हाथी डोकरा (Halbi/Gondi)",
+      "craft_category": "Dhokra & Metalware",
+      "cluster_hint": "Bastar, Chhattisgarh",
+      "gi_tag_ref": "GI-83 Bastar Dhokra",
+      "meaning_en": "Venerated tribal guardian deity embodying forest power, calm endurance, and royal ancestral protection in Bastar indigenous culture.",
+      "meaning_hi": "बस्तर की जनजातीय संस्कृति में हाथी वन-शक्ति, धैर्य और पूर्वजों के आशीर्वाद का पवित्र संरक्षक माना जाता है।",
+      "technique_note_en": "4,000-year-old lost-wax bell metal casting (Cire Perdue) with hand-pulled beeswax thread spirals wrapped over river-clay core.",
+      "technique_note_hi": "नदी की मिट्टी के कोर पर मधुमक्खी के मोम के बारीक तार लपेटकर 4,000 वर्ष पुरानी खोई-मोम (लॉस्ट-वैक्स) ढलाई तकनीक।",
+      "sources": {
+        "motif_name": "CURATED",
+        "meaning": "CURATED",
+        "technique": "AI_OBSERVED",
+        "verification_status": "TODO_VERIFY_SOURCE",
+        "citation": "Tribal Cooperative Marketing Development Federation Archive [TODO_VERIFY_SOURCE]"
+      },
+      "narration_hi": "यह बस्तर का पारंपरिक गज रूपांकन है, जो जनजातीय शक्ति और वन-संरक्षण का प्रतीक है। मोम-तार ढलाई से निर्मित है।",
+      "narration_en": "This is a Bastar Dhokra elephant motif representing ancestral strength, cast using ancient lost-wax technique."
+    },
+    {
+      "motif_id": "MOTIF-MADHU-TREE-001",
+      "name_en": "Kalpavriksha (Tree of Life) Motif",
+      "name_hi": "कल्पवृक्ष / जीवन वृक्ष रूपांकन",
+      "name_local": "गाछी-बिरिछ (Maithili)",
+      "craft_category": "Folk Painting",
+      "cluster_hint": "Mithila, Bihar",
+      "gi_tag_ref": "GI-105 Madhubani Painting",
+      "meaning_en": "The cosmic tree uniting earth, humanity, and divine cosmos, representing boundless fertility, wisdom, and ecological harmony.",
+      "meaning_hi": "पृथ्वी, मानव और ब्रह्मांड को जोड़ने वाला कल्पवृक्ष, जो असीम उर्वरता, ज्ञान और प्रकृति के साथ एकाकार जीवन का प्रतीक है।",
+      "technique_note_en": "Delicate double line drawing filled with intricate Kachni parallel hatched lines using hand-carved bamboo nibs and soot-indigo ink.",
+      "technique_note_hi": "बांस की कलम और काजल-नील की स्याही से बनाई गई दोहरी रूपरेखा, जिसके भीतर सूक्ष्म कचनी रेखांकन किया गया है।",
+      "sources": {
+        "motif_name": "CURATED",
+        "meaning": "CURATED",
+        "technique": "AI_OBSERVED",
+        "verification_status": "TODO_VERIFY_SOURCE",
+        "citation": "Mithila Folk Heritage Society Documentation [TODO_VERIFY_SOURCE]"
+      },
+      "narration_hi": "यह मिथिला का कल्पवृक्ष रूपांकन है, जो प्रकृति, उर्वरता और ब्रह्मांडीय संतुलन का परिचायक है।",
+      "narration_en": "This is the Mithila Tree of Life motif representing harmony between nature and humanity, drawn in fine Kachni line work."
+    }
+  ]
+}

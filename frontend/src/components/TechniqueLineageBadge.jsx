@@ -87,6 +87,18 @@ export default function TechniqueLineageBadge({
                 <p className="text-[10px] text-slate-300 leading-relaxed font-normal">
                   {technique.description}
                 </p>
+
+                {product?.decoded_motif && (
+                  <div className="pt-1.5 border-t border-slate-800/80">
+                    <div className="text-[9px] font-black text-amber-400 uppercase flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                      <span>रूपांकन: {product.decoded_motif.name_hi || product.decoded_motif.name_en}</span>
+                    </div>
+                    <p className="text-[9.5px] text-slate-300 italic mt-0.5 leading-snug">
+                      "{product.decoded_motif.meaning_hi || product.decoded_motif.meaning_en}"
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </>

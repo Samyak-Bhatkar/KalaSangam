@@ -337,6 +337,7 @@ class ProductDraftSaveRequest(BaseModel):
     watermarked_image_url: Optional[str] = ""
     annotated_image_url: Optional[str] = ""
     craft_pins: Optional[List[CraftPin]] = []
+    decoded_motif: Optional[Dict[str, Any]] = None
 
 class ProductPublishRequest(BaseModel):
     product_data: Optional[ProductDraftSaveRequest] = None
@@ -366,6 +367,7 @@ class ProductResponse(BaseModel):
     watermarked_image_url: Optional[str] = None
     annotated_image_url: Optional[str] = None
     craft_pins: Optional[List[CraftPin]] = []
+    decoded_motif: Optional[Dict[str, Any]] = None
     status: str  # 'draft' | 'pending' | 'approved' | 'rejected' | 'published'
     qr_code_url: Optional[str] = None
     channel: Optional[str] = "camera"
@@ -393,11 +395,27 @@ class ProductPublicVerifyResponse(BaseModel):
     watermarked_image_url: Optional[str] = None
     annotated_image_url: Optional[str] = None
     craft_pins: Optional[List[CraftPin]] = []
+    decoded_motif: Optional[Dict[str, Any]] = None
     published_at: Optional[str] = None
     qr_code_url: Optional[str] = None
     ondc_buy_url: str
     fair_wage_guarantee: str = "₹120/hr statutory floor compliant (NBCFDC/NSFDC)"
     authenticity_seal: str = "MoSJE GI Certified Authentic Handcrafted Indian Product"
+
+# Motif Cultural Knowledge Vault Schemas
+class MotifDecodeRequest(BaseModel):
+    image_base64: Optional[str] = None
+    craft_hint: Optional[str] = None
+    cluster_hint: Optional[str] = None
+    language: Optional[str] = "hi"
+
+class MotifConfirmRequest(BaseModel):
+    motif_id: str
+    product_id: Optional[str] = None
+    correction_text: Optional[str] = None
+    artisan_name: Optional[str] = "Master Artisan"
+    audio_url: Optional[str] = None
+    language: Optional[str] = "hi"
 
 # IVR Telephony Schemas (Zero-Smartphone Tier)
 class IVRCatalogDraftRequest(BaseModel):

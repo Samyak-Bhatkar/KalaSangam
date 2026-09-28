@@ -355,6 +355,73 @@ export default function PublicVerifyScreen({ productId, onBack, onBrowseStorefro
             {/* Craft Family Tree Technique Lineage Badge */}
             <TechniqueLineageBadge product={product} variant="detail" />
 
+            {/* ─── CULTURAL HERITAGE MOTIF STORY (Theme: Heritage & Culture | PS 26197) ─── */}
+            {product.decoded_motif && (
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50/90 to-yellow-50/60 border border-amber-300 shadow-xs space-y-2 text-left">
+                <div className="flex items-center justify-between gap-2 border-b border-amber-200/80 pb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-amber-600" />
+                    <span className="text-xs font-black text-amber-900 tracking-wide uppercase">
+                      रूपांकन कथा (Motif Heritage Story)
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-200/70 text-amber-900 text-[10px] font-black border border-amber-300">
+                    {product.decoded_motif.confidence_pct || '95%'} Provenance
+                  </span>
+                </div>
+
+                <div>
+                  <div className="text-sm font-black text-slate-900">
+                    {product.decoded_motif.name_hi || product.decoded_motif.name_en}
+                    {product.decoded_motif.name_en && (
+                      <span className="text-xs font-semibold text-slate-500 ml-1.5">
+                        ({product.decoded_motif.name_en})
+                      </span>
+                    )}
+                  </div>
+                  {product.decoded_motif.name_local && (
+                    <div className="text-[11px] font-bold text-amber-800">
+                      स्थानिक नाम: {product.decoded_motif.name_local}
+                    </div>
+                  )}
+                </div>
+
+                <div className="text-xs text-slate-700 leading-relaxed bg-white/80 p-2.5 rounded-xl border border-amber-200/60">
+                  <div className="text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-0.5 flex items-center justify-between">
+                    <span>सांस्कृतिक अर्थ व प्रतीक</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      🟢 Curated
+                    </span>
+                  </div>
+                  {product.decoded_motif.meaning_hi || product.decoded_motif.meaning_en || product.decoded_motif.meaning}
+                </div>
+
+                <div className="text-xs text-slate-700 leading-relaxed bg-white/80 p-2.5 rounded-xl border border-amber-200/60">
+                  <div className="text-[10px] font-bold text-teal-800 uppercase tracking-wider mb-0.5 flex items-center justify-between">
+                    <span>पारंपरिक निर्माण तकनीक</span>
+                    <span className="text-[9px] font-black px-1.5 py-0.2 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-300">
+                      🟡 AI-observed
+                    </span>
+                  </div>
+                  {product.decoded_motif.technique_note_hi || product.decoded_motif.technique_note_en || product.decoded_motif.technique_note}
+                </div>
+
+                {product.decoded_motif.artisan_testimony && (
+                  <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 flex items-start gap-2">
+                    <Award className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[10px] font-black text-blue-800 uppercase">
+                        🔵 Artisan-told (कारीगर मौखिक पुष्टि)
+                      </div>
+                      <div className="italic mt-0.5">
+                        "{product.decoded_motif.artisan_testimony}"
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <p className="text-xs text-slate-700 leading-relaxed">
               {product.description_hi || product.description_en}
             </p>

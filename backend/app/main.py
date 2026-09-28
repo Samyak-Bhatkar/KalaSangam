@@ -69,8 +69,15 @@ from .models.schemas import (
     KarigarBazaarIndexRequest,
     PriceSimulationRequest,
     PriceApplyRequest,
+    MotifDecodeRequest,
+    MotifConfirmRequest,
 )
 from .models.mock_data import CRAFT_FIXTURES
+from .services.motif_engine import (
+    decode_craft_motif,
+    confirm_or_correct_motif,
+    get_confirmed_motif_for_product
+)
 from .services.craft_pin_service import (
     classify_and_format_pin_callout,
     save_pin_audio_file,
@@ -1201,7 +1208,24 @@ async def verify_product_public_endpoint(product_id: str):
                 qr_code_url=f"/static/uploads/qr_{fixture['id']}.png",
                 ondc_buy_url=ondc_url,
                 fair_wage_guarantee="₹120/hr statutory floor compliant (NBCFDC/NSFDC)",
-                authenticity_seal=f"MoSJE GI Certified Authentic Handcrafted Indian Product ({fixture.get('gi_tag_name', 'GI Certified')})"
+                authenticity_seal=f"MoSJE GI Certified Authentic Handcrafted Indian Product ({fixture.get('gi_tag_name', 'GI Certified')})",
+                decoded_motif=fixture.get("decoded_motif") or {
+                    "motif_id": "MOTIF-TERRA-MAYUR-001",
+                    "name_en": "Mayur (Peacock) Motif",
+                    "name_hi": "मयूर रूपांकन",
+                    "name_local": "मोर पंख नक्काशी (Bhojpuri)",
+                    "meaning_en": "Ancient Vedic emblem of monsoon rains, fertility, grace, and eternal vigilance.",
+                    "meaning_hi": "प्राचीन वैदिक प्रतीक जो वर्षा के आगमन, उर्वरता और समृद्धि का द्योतक है।",
+                    "technique_note_en": "Deeply hand-incised with a pointed bamboo stylus on leather-hard alluvial clay.",
+                    "technique_note_hi": "चमड़े जैसी सख्त गीली मिट्टी पर नुकीली बांस की तीली से उकेरी गई पारंपरिक नक्काशी।",
+                    "sources": {
+                        "name": "🟢 Curated",
+                        "meaning": "🟢 Curated",
+                        "technique": "🟡 AI-observed",
+                        "verification_status": "TODO_VERIFY_SOURCE"
+                    },
+                    "confidence_pct": "95%"
+                }
             )
 
         # Raise generic 404 without leaking whether a draft exists
@@ -1211,6 +1235,9 @@ async def verify_product_public_endpoint(product_id: str):
         )
 
     ondc_url = f"ondc://beckn.retail.org/discover?item_id={product_id}&provider=MoSJE-Artisans"
+    confirmed_motif = get_confirmed_motif_for_product(product_id)
+    motif_payload = product.get("decoded_motif") or confirmed_motif
+
     return ProductPublicVerifyResponse(
         status="verified",
         id=product["id"],
@@ -1228,6 +1255,7 @@ async def verify_product_public_endpoint(product_id: str):
         studio_image_url=product.get("studio_image_url"),
         watermarked_image_url=product.get("watermarked_image_url"),
         craft_pins=product.get("craft_pins") or [],
+        decoded_motif=motif_payload,
         published_at=str(product.get("published_at") or ""),
         qr_code_url=product.get("qr_code_url"),
         ondc_buy_url=ondc_url,
@@ -1944,3 +1972,54 @@ async def get_system_architecture_slide():
     if not slide_path.exists():
         raise HTTPException(status_code=404, detail="Architecture slide HTML file not found")
     return FileResponse(str(slide_path), media_type="text/html")
+
+
+# ==============================================================================
+# MOTIF CULTURAL KNOWLEDGE VAULT ROUTES (Theme: Heritage & Culture | PS 26197)
+# ==============================================================================
+
+@app.post("/api/motif/decode")
+@app.post("/api/v1/motif/decode")
+async def decode_motif_endpoint(req: MotifDecodeRequest):
+    """
+    POST /api/motif/decode or /api/v1/motif/decode
+    Accepts craft photo, candidate matches, runs Gemini Flash iconographer prompt,
+    enforces candidate validation, and returns cultural knowledge record.
+    Falls back safely to category-level craft record on offline/error.
+    """
+    try:
+        result = decode_craft_motif(
+            image_base64=req.image_base64,
+            craft_hint=req.craft_hint,
+            cluster_hint=req.cluster_hint,
+            language=req.language or "hi"
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Motif decoding error: {e}")
+        # Zero-fail fallback
+        from .services.motif_engine import build_category_fallback_record
+        return build_category_fallback_record(req.craft_hint, req.language or "hi")
+
+
+@app.post("/api/motif/confirm")
+@app.post("/api/v1/motif/confirm")
+async def confirm_motif_endpoint(req: MotifConfirmRequest):
+    """
+    POST /api/motif/confirm or /api/v1/motif/confirm
+    Appends artisan testimony (🔵 Artisan-told) to the motif record for this product.
+    """
+    try:
+        confirmed = confirm_or_correct_motif(
+            motif_id=req.motif_id,
+            product_id=req.product_id,
+            correction_text=req.correction_text,
+            artisan_name=req.artisan_name or "Master Artisan",
+            audio_url=req.audio_url,
+            language=req.language or "hi"
+        )
+        return confirmed
+    except Exception as e:
+        logger.error(f"Motif confirmation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
