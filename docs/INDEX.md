@@ -2,7 +2,7 @@
 
 | # | Name | Tier | Status | Commit | Doc Link |
 |---|------|------|--------|--------|----------|
-| 01 | Explorer interface shell (public, no login) | Foundation | In Progress | - | [01-explorer-shell.md](file:///c:/SAMYAKFILES/Users/AppData/Local/Programs/DATA%20SCIENCE%20COURSE/SIH/ShilpSetu/docs/innovations/01-explorer-shell.md) |
+| 01 | Explorer interface shell (public, no login) | Foundation | Built & verified | [feat(explorer)] | [01-explorer-shell.md](file:///c:/SAMYAKFILES/Users/AppData/Local/Programs/DATA%20SCIENCE%20COURSE/SIH/ShilpSetu/docs/innovations/01-explorer-shell.md) |
 | 02 | Decode Motif fixes + public Scan Any Motif | MUST | Built & verified | `12f30bc` | [02-decode-motif-public.md](file:///c:/SAMYAKFILES/Users/AppData/Local/Programs/DATA%20SCIENCE%20COURSE/SIH/ShilpSetu/docs/innovations/02-decode-motif-public.md) |
 | 03 | Consent & Knowledge Sovereignty layer | Foundation | Planned | - | [03-consent-sovereignty.md](file:///c:/SAMYAKFILES/Users/AppData/Local/Programs/DATA%20SCIENCE%20COURSE/SIH/ShilpSetu/docs/innovations/03-consent-sovereignty.md) |
 | 04 | Living Technique Archive (Craft Knowledge Vault) | MUST | Planned | - | [04-technique-archive.md](file:///c:/SAMYAKFILES/Users/AppData/Local/Programs/DATA%20SCIENCE%20COURSE/SIH/ShilpSetu/docs/innovations/04-technique-archive.md) |

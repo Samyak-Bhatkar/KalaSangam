@@ -13,22 +13,11 @@ import {
   Compass
 } from 'lucide-react';
 import { useArtisan, MOCK_USERS } from '../context/ArtisanContext';
+import { BRANDING_CONFIG, IS_STUDENT_PROTOTYPE_BRANDING } from '../config/branding';
 
-// Rule B5: Neutral student prototype branding flag (default ON for this submission)
-// Toggle to false for original MoSJE/NBCFDC official branding
-export const IS_STUDENT_PROTOTYPE_BRANDING = true;
+const BRANDING = BRANDING_CONFIG;
 
-const BRANDING = {
-  badge: IS_STUDENT_PROTOTYPE_BRANDING ? 'AICTE MIC' : 'MoSJE',
-  subHeader: IS_STUDENT_PROTOTYPE_BRANDING 
-    ? 'AI छात्र नवाचार • Heritage & Culture Prototype (PS 26197)'
-    : 'AI बाज़ार संपर्क व स्मार्ट कैटलॉगिंग प्रणाली',
-  footer: IS_STUDENT_PROTOTYPE_BRANDING
-    ? 'AICTE / MIC छात्र नवाचार प्रोटोटाइप • Student Innovation (Non-Governmental)'
-    : 'राष्ट्रीय पिछड़ा वर्ग वित्त एवं विकास निगम (NBCFDC) • भारत सरकार'
-};
-
-export default function AuthLoginScreen({ onBrowseStorefront, onScanMotifPublic }) {
+export default function AuthLoginScreen({ onBrowseStorefront, onScanMotifPublic, onOpenExplorer }) {
   const { loginWithPhone, speakVoice, language } = useArtisan();
 
   // Step 1: Phone input, Step 2: OTP input
@@ -362,30 +351,36 @@ export default function AuthLoginScreen({ onBrowseStorefront, onScanMotifPublic 
         )}
       </div>
 
-      {/* Prominent Public Motif Scanner Card (Rule A1(a): No Login Needed) */}
+      {/* Prominent Public Heritage Explorer Card (Card 1: No Login Needed) */}
       <div className="pt-3 pb-1">
         <button
           type="button"
-          onClick={onScanMotifPublic}
+          onClick={() => {
+            if (onOpenExplorer) {
+              onOpenExplorer();
+            } else if (onScanMotifPublic) {
+              onScanMotifPublic();
+            }
+          }}
           className="w-full p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-yellow-500/20 to-orange-500/15 border-2 border-dashed border-amber-500/60 hover:border-amber-500 text-left flex items-center justify-between gap-3 shadow-xs hover:shadow-md active:scale-[0.99] transition-all cursor-pointer group"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 text-slate-950 flex items-center justify-center shrink-0 shadow-sm group-hover:rotate-6 transition-transform">
-              <Sparkles className="w-5 h-5" />
+              <Compass className="w-5 h-5" />
             </div>
             <div>
               <div className="text-xs font-black text-amber-950 flex items-center gap-1.5 flex-wrap">
-                <span>रूपांकन पहचानें (Scan Any Motif)</span>
+                <span>धरोहर अन्वेषक (Heritage Explorer)</span>
                 <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
                   बिना लॉगिन / No Login
                 </span>
               </div>
               <p className="text-[10px] text-amber-900/80 mt-0.5 line-clamp-1">
-                साड़ी, बर्तन या मूर्ति की ओर कैमरा करें — AI इसका सांस्कृतिक इतिहास बताएगा
+                रूपांकन स्कैन करें, शिल्प एटलस देखें व मौखिक कथाएं सुनें — छात्र व शोधकर्ता लेंस
               </p>
             </div>
           </div>
-          <Compass className="w-5 h-5 text-amber-600 shrink-0 group-hover:scale-110 transition-transform" />
+          <Sparkles className="w-5 h-5 text-amber-600 shrink-0 group-hover:scale-110 transition-transform" />
         </button>
       </div>
 

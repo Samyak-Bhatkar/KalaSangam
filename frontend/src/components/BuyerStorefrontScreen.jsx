@@ -17,12 +17,13 @@ import {
   MapPin,
   Play,
   Pause,
+  Compass,
 } from 'lucide-react';
 import { fetchStorefrontProducts } from '../services/api';
 import IndiaCraftMap from './IndiaCraftMap';
 import TechniqueLineageBadge from './TechniqueLineageBadge';
 
-export default function BuyerStorefrontScreen({ onGoToLogin, onScanMotifPublic, initialSearchQuery = '' }) {
+export default function BuyerStorefrontScreen({ onGoToLogin, onScanMotifPublic, onOpenExplorer, initialSearchQuery = '' }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
@@ -101,6 +102,15 @@ export default function BuyerStorefrontScreen({ onGoToLogin, onScanMotifPublic, 
           </div>
 
           <div className="flex items-center gap-2">
+            {onOpenExplorer && (
+              <button
+                onClick={onOpenExplorer}
+                className="py-1.5 px-3 rounded-full bg-slate-900 border border-slate-700 hover:border-amber-400 text-amber-300 text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95"
+              >
+                <Compass className="w-3.5 h-3.5 text-amber-400" />
+                <span>धरोहर अन्वेषक (Explorer)</span>
+              </button>
+            )}
             {onScanMotifPublic && (
               <button
                 onClick={onScanMotifPublic}

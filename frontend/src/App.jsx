@@ -52,6 +52,7 @@ import AuthLoginScreen from './components/AuthLoginScreen';
 import BuyerStorefrontScreen from './components/BuyerStorefrontScreen';
 import VyaparNitiScreen from './components/VyaparNitiScreen';
 import MotifDecoder from './components/MotifDecoder';
+import ExplorerShell from './components/ExplorerShell';
 
 export default function App() {
   const {
@@ -84,6 +85,15 @@ export default function App() {
   // Slide-over Profile Drawer State
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
 
+  // Support public heritage explorer shell with NO login (/explore, ?view=explore, ?explore=true)
+  const [publicExplorerOpen, setPublicExplorerOpen] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const pathname = window.location.pathname;
+    if (pathname === '/explore' || pathname.startsWith('/explore')) return true;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('view') === 'explore' || params.get('explore') === 'true';
+  });
+
   // Support public motif scanner route with NO login (?view=scan or ?scan=true)
   const [publicScanOpen, setPublicScanOpen] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -99,7 +109,7 @@ export default function App() {
     return params.get('view') === 'storefront' || params.get('storefront') === 'true';
   });
 
-  // Support public item & QR verification route (/item/:id, /verify/:id, ?item=:id, ?verify=:id, ?id=:id)
+  // Support public item & QR verification route (/item/:id, /verify/:id, /record/:id, ?item=:id, ?verify=:id, ?id=:id)
   const [verifyId, setVerifyId] = useState(() => {
     if (typeof window === 'undefined') return null;
     const pathname = window.location.pathname;
@@ -108,6 +118,9 @@ export default function App() {
     }
     if (pathname.startsWith('/item/')) {
       return pathname.replace('/item/', '').replace(/\/$/, '');
+    }
+    if (pathname.startsWith('/record/')) {
+      return pathname.replace('/record/', '').replace(/\/$/, '');
     }
     const params = new URLSearchParams(window.location.search);
     return params.get('item') || params.get('verify') || params.get('id') || null;
@@ -125,7 +138,26 @@ export default function App() {
     }
   }, [setActiveModal, setCurrentStep]);
 
-  // 0. PUBLIC MOTIF SCANNER (Zero login required - Rule A1)
+  // 0. PUBLIC HERITAGE EXPLORER SHELL (Card 1: Zero login required)
+  if (publicExplorerOpen) {
+    return (
+      <ExplorerShell
+        language={language}
+        onToggleLanguage={() => setLanguage(language === 'hi' ? 'en' : 'hi')}
+        onBack={() => {
+          window.history.pushState({}, '', '/');
+          setPublicExplorerOpen(false);
+        }}
+        onOpenMarketplace={() => {
+          window.history.pushState({}, '', '?view=storefront');
+          setPublicExplorerOpen(false);
+          setPublicStorefront(true);
+        }}
+      />
+    );
+  }
+
+  // 0.1 PUBLIC MOTIF SCANNER (Zero login required - Rule A1)
   if (publicScanOpen) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-0 md:p-6 select-none font-sans">
@@ -156,6 +188,11 @@ export default function App() {
         onGoToLogin={() => {
           window.history.pushState({}, '', '/');
           setPublicStorefront(false);
+        }}
+        onOpenExplorer={() => {
+          window.history.pushState({}, '', '/explore');
+          setPublicStorefront(false);
+          setPublicExplorerOpen(true);
         }}
         onScanMotifPublic={() => {
           window.history.pushState({}, '', '?view=scan');
@@ -197,6 +234,10 @@ export default function App() {
             onScanMotifPublic={() => {
               window.history.pushState({}, '', '?view=scan');
               setPublicScanOpen(true);
+            }}
+            onOpenExplorer={() => {
+              window.history.pushState({}, '', '/explore');
+              setPublicExplorerOpen(true);
             }}
           />
         </div>
