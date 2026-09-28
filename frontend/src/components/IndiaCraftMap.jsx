@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { INDIA_VIEWBOX, INDIA_STATES_PATHS } from '../data/indiaMapData';
 import { CRAFT_CLUSTERS, ANCHOR_STATE_IDS } from '../data/craftClusters';
+import TechniqueLineageBadge from './TechniqueLineageBadge';
 
 export default function IndiaCraftMap({
   products = [],
@@ -409,6 +410,9 @@ export default function IndiaCraftMap({
                           <h5 className="text-xs font-bold text-white truncate group-hover:text-amber-300">
                             {p.title_hi || p.title_en}
                           </h5>
+                          <div className="my-0.5">
+                            <TechniqueLineageBadge product={p} variant="compact" />
+                          </div>
                           <p className="text-[10px] text-slate-400 truncate">
                             {p.artisan_name || 'प्रमाणित कारीगर'}
                           </p>

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { fetchStorefrontProducts } from '../services/api';
 import IndiaCraftMap from './IndiaCraftMap';
+import TechniqueLineageBadge from './TechniqueLineageBadge';
 
 export default function BuyerStorefrontScreen({ onGoToLogin }) {
   const [products, setProducts] = useState([]);
@@ -234,6 +235,9 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
                       <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
                         {p.title_en}
                       </p>
+                      <div className="mt-1">
+                        <TechniqueLineageBadge product={p} variant="compact" />
+                      </div>
                       <p className="text-[10px] text-slate-600 line-clamp-2 mt-1.5 font-normal">
                         {p.description_hi || p.description_en}
                       </p>
@@ -423,6 +427,9 @@ export default function BuyerStorefrontScreen({ onGoToLogin }) {
                   </h4>
                   <p className="text-xs text-slate-500">{selectedProduct.title_en}</p>
                 </div>
+
+                {/* Craft Family Tree Technique Lineage Badge (Detail Variant) */}
+                <TechniqueLineageBadge product={selectedProduct} variant="detail" />
 
                 <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-1.5 text-xs">
                   <div className="flex justify-between">

@@ -22,6 +22,7 @@ import {
   Store,
 } from 'lucide-react';
 import { verifyPublicProduct } from '../services/api';
+import TechniqueLineageBadge from './TechniqueLineageBadge';
 
 export default function PublicVerifyScreen({ productId, onBack, onBrowseStorefront }) {
   const [product, setProduct] = useState(null);
@@ -350,6 +351,9 @@ export default function PublicVerifyScreen({ productId, onBack, onBrowseStorefro
                 </p>
               )}
             </div>
+
+            {/* Craft Family Tree Technique Lineage Badge */}
+            <TechniqueLineageBadge product={product} variant="detail" />
 
             <p className="text-xs text-slate-700 leading-relaxed">
               {product.description_hi || product.description_en}
