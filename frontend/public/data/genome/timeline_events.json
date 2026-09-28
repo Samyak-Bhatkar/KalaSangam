@@ -1,0 +1,62 @@
+[
+  {
+    "tradition_id": "kathak-dance",
+    "year": 1200,
+    "snapshot": 1200,
+    "place": "Varanasi Temple Courtyards, Uttar Pradesh",
+    "lat": 25.3176,
+    "lng": 82.9739,
+    "event": "Nomadic Vedic storytellers known as 'Kathakars' recite epics and Puranas through mime, rhythmic footwork, and song in northern Indian temple courtyards.",
+    "source": "Sangeet Natak Akademi - Historical Evolution of Kathak (https://sangeetnatak.gov.in/)",
+    "confidence": 0.95,
+    "placeholder": true
+  },
+  {
+    "tradition_id": "kathak-dance",
+    "year": 1500,
+    "snapshot": 1500,
+    "place": "Vrindavan / Braj Bhoomi, Uttar Pradesh",
+    "lat": 27.5804,
+    "lng": 77.6977,
+    "event": "The Vaishnavite Bhakti movement infuses Kathak with devotional 'Raas Leela' enactments celebrating Radha and Krishna, developing the lyrical Gat Bhav and expressive eye movements.",
+    "source": "Sahapedia - Kathak and the Bhakti Movement (https://www.sahapedia.org/kathak-bhakti)",
+    "confidence": 0.94,
+    "placeholder": true
+  },
+  {
+    "tradition_id": "kathak-dance",
+    "year": 1800,
+    "snapshot": 1800,
+    "place": "Qaisar Bagh Palace, Lucknow, Awadh",
+    "lat": 26.8524,
+    "lng": 80.9328,
+    "event": "Under the patronage of Nawab Wajid Ali Shah and court maestro Thakur Prasad Maharaj, the Lucknow Gharana is codified, introducing swift chakkars (pirouettes), intricate tatkar, and courtly Thumri abhinaya.",
+    "source": "IndianCulture.gov.in - Lucknow Court Arts (https://indianculture.gov.in/)",
+    "confidence": 0.99,
+    "placeholder": true
+  },
+  {
+    "tradition_id": "kathak-dance",
+    "year": 1947,
+    "snapshot": 1947,
+    "place": "Rabindra Bhavan, New Delhi",
+    "lat": 28.6253,
+    "lng": 77.2307,
+    "event": "Post-independence revival championed by Madame Menaka, Shambhu Maharaj, and the creation of the National Institute of Kathak Dance (Kathak Kendra) in New Delhi, taking classical dance to national auditoriums.",
+    "source": "Kathak Kendra National Institute (https://sangeetnatak.gov.in/kathakkendra/)",
+    "confidence": 0.98,
+    "placeholder": true
+  },
+  {
+    "tradition_id": "kathak-dance",
+    "year": 2026,
+    "snapshot": 2026,
+    "place": "Lucknow & Global Digital Archives",
+    "lat": 26.8524,
+    "lng": 80.9328,
+    "event": "Preservation through AI motion analysis, spatial audio archiving, and open cultural provenance on ShilpSetu, bridging generational gharana masters to global learners.",
+    "source": "Ministry of Culture - National Cultural Audiovisual Archives (https://ncaa.gov.in/)",
+    "confidence": 0.99,
+    "placeholder": true
+  }
+]

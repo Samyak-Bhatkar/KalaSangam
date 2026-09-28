@@ -1,0 +1,458 @@
+[
+  {
+    "id": "warli-painting",
+    "name_en": "Warli Tribal Painting",
+    "name_hi": "वारली आदिवासी चित्रकला",
+    "type": "craft",
+    "state": "Maharashtra",
+    "district": "Palghar",
+    "place_name": "Dahanu / Jawhar",
+    "lat": 19.9723,
+    "lng": 73.2307,
+    "precision": "village",
+    "start_year": -2500,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Ancient ritualistic tribal art practiced by the Warli community using rice paste and natural gum on red ochre mud walls, depicting agrarian harmony, community circles, and the sacred Mother Goddess Palghat.",
+    "description_hi": "गेरू की मिट्टी की दीवारों पर चावल के लेप और गोंद से बनाई जाने वाली प्राचीन जनजातीय भित्ति चित्रकला, जो कृषि जीवन, सामूहिकता और माता पालघाट को समर्पित है।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Sahapedia - Warli Painting Tradition",
+        "url": "https://www.sahapedia.org/warli-painting"
+      },
+      {
+        "title": "GI Registry India - Warli Painting GI #166",
+        "url": "https://search.ipindia.gov.in/GIRPublic/"
+      }
+    ],
+    "confidence": 0.98,
+    "placeholder": true
+  },
+  {
+    "id": "tarpa-instrument",
+    "name_en": "Tarpa Wind Horn",
+    "name_hi": "तारपा सुशिर वाद्य",
+    "type": "instrument",
+    "state": "Maharashtra",
+    "district": "Palghar",
+    "place_name": "Jawhar",
+    "lat": 19.9142,
+    "lng": 73.2325,
+    "precision": "village",
+    "start_year": -1000,
+    "end_year": null,
+    "typical_month": 10,
+    "description_en": "A sacred indigenous wind instrument crafted from dried gourd, bamboo pipes, and palm leaves. Played by a village elder (Tarpakar), its hypnotic drone guides the concentric spirals of the Warli community dance.",
+    "description_hi": "सूखे कद्दू, बांस और ताड़ के पत्तों से निर्मित पवित्र जनजातीय वाद्य। तारपा वादक की धुन पर पूरा समुदाय चक्राकार नृत्य करता है।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Sangeet Natak Akademi - Indigenous Instruments",
+        "url": "https://sangeetnatak.gov.in/"
+      },
+      {
+        "title": "IndianCulture.gov.in - Tarpa Heritage",
+        "url": "https://indianculture.gov.in/"
+      }
+    ],
+    "confidence": 0.95,
+    "placeholder": true
+  },
+  {
+    "id": "bohada-festival",
+    "name_en": "Bohada Mask Festival",
+    "name_hi": "बोहड़ा मुखौटा उत्सव",
+    "type": "festival",
+    "state": "Maharashtra",
+    "district": "Palghar",
+    "place_name": "Mokhada",
+    "lat": 19.9348,
+    "lng": 73.3401,
+    "precision": "village",
+    "start_year": 1600,
+    "end_year": null,
+    "typical_month": 4,
+    "description_en": "A vibrant 3-day nocturnal tribal carnival where performers wear gigantic, hand-carved and painted wooden masks representing 52 animistic and epic deities, accompanied by continuous Tarpa beats.",
+    "description_hi": "तीन दिवसीय आदिवासी रात्रि उत्सव जिसमें 52 देवी-देवताओं के विशाल हस्तनिर्मित काष्ठ मुखौटे पहनकर तारपा की थाप पर नृत्य किया जाता है।",
+    "rarity": 4,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Sahapedia - Bohada Mask Festival",
+        "url": "https://www.sahapedia.org/bohada-tribal-festival"
+      }
+    ],
+    "confidence": 0.92,
+    "placeholder": true
+  },
+  {
+    "id": "varli-dialect",
+    "name_en": "Varli Language & Idioms",
+    "name_hi": "वारली लोक बोली",
+    "type": "dialect",
+    "state": "Maharashtra",
+    "district": "Palghar",
+    "place_name": "Dahanu",
+    "lat": 19.9701,
+    "lng": 72.7311,
+    "precision": "district",
+    "start_year": 1200,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "An Indo-Aryan tribal dialect synthesizing Marathi, Konkani, and Gujarati linguistic layers, containing rich botanical idioms, nature riddles, and oral ritual hymns.",
+    "description_hi": "मराठी, कोंकणी और गुजराती के संगम से बनी आदिवासी बोली, जिसमें प्रकृति, कृषि और अनुष्ठानों की समृद्ध मौखिक शब्दावली है।",
+    "rarity": 3,
+    "documentation_status": "poor",
+    "sources": [
+      {
+        "title": "Peoples Linguistic Survey of India - PLSI Maharashtra",
+        "url": "https://www.peopleslinguisticsurvey.org/"
+      }
+    ],
+    "confidence": 0.88,
+    "placeholder": true
+  },
+  {
+    "id": "kansari-devi-myth",
+    "name_en": "Kansari Devi (Corn Mother Myth)",
+    "name_hi": "कंसाड़ी देवी (अन्नपूर्णा लोककथा)",
+    "type": "folk_story",
+    "state": "Maharashtra",
+    "district": "Palghar",
+    "place_name": "Jawhar",
+    "lat": 19.9211,
+    "lng": 73.2291,
+    "precision": "village",
+    "start_year": -500,
+    "end_year": null,
+    "typical_month": 11,
+    "description_en": "Sacred mythological ballad of the Corn Goddess Kansari who fled famine to bless indigenous farmers with life-giving millets and rice, immortalized at the center of all bridal Warli chauks.",
+    "description_hi": "अन्न और समृद्धि की देवी कंसाड़ी की लोकगाथा, जिसे हर वारली विवाह चौक के केंद्र में अन्न-समृद्धि के प्रतीक रूप में चित्रित किया जाता है।",
+    "rarity": 3,
+    "documentation_status": "partial",
+    "sources": [
+      {
+        "title": "Sahapedia - Warli Oral Traditions",
+        "url": "https://www.sahapedia.org/warli-myths"
+      }
+    ],
+    "confidence": 0.94,
+    "placeholder": true
+  },
+  {
+    "id": "paithani-saree",
+    "name_en": "Paithani Royal Silk Saree",
+    "name_hi": "पैठणी शाही रेशम साड़ी",
+    "type": "textile",
+    "state": "Maharashtra",
+    "district": "Chhatrapati Sambhajinagar",
+    "place_name": "Paithan",
+    "lat": 19.4795,
+    "lng": 75.3855,
+    "precision": "town",
+    "start_year": -200,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "The legendary 'Queen of Silks' woven with pure gold zari and fine mulberry silk on tapestry looms, celebrated for oblique square borders and kaleidoscopic peacock (Mor) motifs.",
+    "description_hi": "शुद्ध स्वर्ण ज़री और शहतूत रेशम से बुनी 'साड़ियों की महारानी', जो तिरछे चौकोर पल्लू और मोर की बारीक आकृतियों के लिए विश्वविख्यात है।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "GI Registry India - Paithani Saree GI #17",
+        "url": "https://search.ipindia.gov.in/GIRPublic/"
+      },
+      {
+        "title": "IndianCulture.gov.in - Paithani Weaving",
+        "url": "https://indianculture.gov.in/"
+      }
+    ],
+    "confidence": 0.99,
+    "placeholder": true
+  },
+  {
+    "id": "ellora-caves",
+    "name_en": "Ellora Rock-Cut Monolithic Caves",
+    "name_hi": "एलोरा एकाश्म शैलकृत गुफाएं",
+    "type": "monument",
+    "state": "Maharashtra",
+    "district": "Chhatrapati Sambhajinagar",
+    "place_name": "Verul",
+    "lat": 20.0258,
+    "lng": 75.1780,
+    "precision": "town",
+    "start_year": 600,
+    "end_year": 1000,
+    "typical_month": null,
+    "description_en": "UNESCO World Heritage site featuring 34 monumental monasteries and temples carved out of the Charanandri hills, headlined by the monolithic Kailash Temple (Cave 16) carved top-down from a single basalt cliff.",
+    "description_hi": "यूनेस्को विश्व धरोहर जिसमें 34 शैलकृत मंदिर व गुफाएं हैं, विशेषकर गुफा 16 का कैलाश मंदिर जिसे शीर्ष से नीचे की ओर एक ही चट्टान तराश कर बनाया गया।",
+    "rarity": 1,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Archaeological Survey of India - Ellora Caves",
+        "url": "https://asi.nic.in/ellora-caves/"
+      },
+      {
+        "title": "UNESCO World Heritage Centre - Ellora",
+        "url": "https://whc.unesco.org/en/list/243"
+      }
+    ],
+    "confidence": 1.0,
+    "placeholder": true
+  },
+  {
+    "id": "trimbakeshwar-temple",
+    "name_en": "Trimbakeshwar Jyotirlinga & Godavari Origin",
+    "name_hi": "त्र्यंबकेश्वर ज्योतिर्लिंग व गोदावरी उद्गम",
+    "type": "monument",
+    "state": "Maharashtra",
+    "district": "Nashik",
+    "place_name": "Trimbak",
+    "lat": 19.9328,
+    "lng": 73.5308,
+    "precision": "town",
+    "start_year": 1755,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Historic black basalt Jyotirlinga shrine situated at the foothills of Brahmagiri mountain, the sacred geographical source of the Godavari river, embodying classic Hemadpanthi stone masonry.",
+    "description_hi": "ब्रह्मगिरि पर्वत की तलहटी में स्थित पवित्र ज्योतिर्लिंग व गोदावरी नदी का उद्गम स्थल, जो काले बेसाल्ट पत्थर और हेमाडपंथी वास्तुकला का अनुपम उदाहरण है।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Maharashtra Tourism - Trimbakeshwar",
+        "url": "https://www.maharashtratourism.gov.in/"
+      }
+    ],
+    "confidence": 0.98,
+    "placeholder": true
+  },
+  {
+    "id": "nashik-misal",
+    "name_en": "Nashik Misal & Tarri Cuisine",
+    "name_hi": "नासिक मिसळ व तर्री व्यंजन",
+    "type": "cuisine",
+    "state": "Maharashtra",
+    "district": "Nashik",
+    "place_name": "Panchavati",
+    "lat": 20.0063,
+    "lng": 73.7915,
+    "precision": "town",
+    "start_year": 1920,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Iconic fiery sprouted moth bean curry layered with farsan, chopped onions, and lemon, drenched in red-spiced 'Kat' or 'Tarri' broth, served alongside fresh pav bread.",
+    "description_hi": "अंकुरित मोठ, तीखी रसीली तर्री (कट), फरसाण और नीबू के मिश्रण से तैयार नासिक का विख्यात पारंपरिक नाश्ता।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "IndianCulture.gov.in - Culinary Traditions of Maharashtra",
+        "url": "https://indianculture.gov.in/"
+      }
+    ],
+    "confidence": 0.95,
+    "placeholder": true
+  },
+  {
+    "id": "nashik-kumbh-mela",
+    "name_en": "Nashik-Trimbakeshwar Simhastha Kumbh",
+    "name_hi": "नासिक-त्र्यंबकेश्वर सिंहस्थ कुंभ मेला",
+    "type": "festival",
+    "state": "Maharashtra",
+    "district": "Nashik",
+    "place_name": "Ramkund",
+    "lat": 20.0076,
+    "lng": 73.7947,
+    "precision": "town",
+    "start_year": 500,
+    "end_year": null,
+    "typical_month": 8,
+    "description_en": "One of the four sacred Kumbh Melas held every 12 years when Jupiter enters Leo (Simha), drawing millions of pilgrims for ritual bathing in the holy Godavari river at Ramkund and Kushavarta.",
+    "description_hi": "प्रत्येक 12 वर्ष में बृहस्पति के सिंह राशि में प्रवेश पर आयोजित होने वाला महापर्व, जिसमें लाखों श्रद्धालु गोदावरी के पावन रामकुंड में शाही स्नान करते हैं।",
+    "rarity": 1,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "UNESCO Intangible Cultural Heritage - Kumbh Mela",
+        "url": "https://ich.unesco.org/en/RL/kumbh-mela-01258"
+      }
+    ],
+    "confidence": 1.0,
+    "placeholder": true
+  },
+  {
+    "id": "mumbai-natya-sangeet",
+    "name_en": "Marathi Natya Sangeet & Theatre Music",
+    "name_hi": "मराठी नाट्य संगीत परंपरा",
+    "type": "music",
+    "state": "Maharashtra",
+    "district": "Mumbai",
+    "place_name": "Girgaon / Shivaji Park",
+    "lat": 18.9553,
+    "lng": 72.8184,
+    "precision": "town",
+    "start_year": 1880,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "A sophisticated genre of semi-classical dramatic music popularized by Bal Gandharva and Master Dinanath Mangeshkar, wedding Indian classical ragas to theatrical narratives.",
+    "description_hi": "भारतीय शास्त्रीय रागों और रंगमंचीय संवादों के संयोजन से विकसित समृद्ध नाट्य संगीत, जिसे बालगंधर्व और मास्टर दीनानाथ मंगेशकर ने अमर किया।",
+    "rarity": 3,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Sangeet Natak Akademi - Natya Sangeet",
+        "url": "https://sangeetnatak.gov.in/"
+      }
+    ],
+    "confidence": 0.96,
+    "placeholder": true
+  },
+  {
+    "id": "kathak-dance",
+    "name_en": "Kathak Classical Dance (Lucknow Gharana)",
+    "name_hi": "कथक शास्त्रीय नृत्य (लखनऊ घराना)",
+    "type": "dance",
+    "state": "Uttar Pradesh",
+    "district": "Lucknow",
+    "place_name": "Qaisar Bagh",
+    "lat": 26.8524,
+    "lng": 80.9328,
+    "precision": "town",
+    "start_year": 1200,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "One of India's preeminent classical dances originating from nomadic storytellers (Kathakars), evolving through Vaishnav temple devotion into the refined courtly abhinaya and tatkar of the Awadh Nawabs.",
+    "description_hi": "कथा कहने वाले प्राचीन कथाकारों से आरंभ हुआ शास्त्रीय नृत्य, जो वैष्णव मंदिरों से अवध के नवाबों के दरबार में भाव, लय और तत्कार का शिखर बना।",
+    "rarity": 1,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "Sangeet Natak Akademi - Kathak Traditions",
+        "url": "https://sangeetnatak.gov.in/"
+      },
+      {
+        "title": "IndianCulture.gov.in - Classical Dances",
+        "url": "https://indianculture.gov.in/"
+      }
+    ],
+    "confidence": 0.99,
+    "placeholder": true
+  },
+  {
+    "id": "gorakhpur-terracotta",
+    "name_en": "Gorakhpur Terracotta Craft",
+    "name_hi": "गोरखपुर टेराकोटा शिल्प",
+    "type": "craft",
+    "state": "Uttar Pradesh",
+    "district": "Gorakhpur",
+    "place_name": "Aurangabad",
+    "lat": 26.7642,
+    "lng": 83.3812,
+    "precision": "village",
+    "start_year": 1700,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Centuries-old natural clay sculpting tradition famous for ornamental terracotta horses, elephants, and Ganesha bells crafted by hand without modern molds, baked using local sal leaves.",
+    "description_hi": "सालों पुरानी प्राकृतिक मिट्टी की कला, जिसमें कारीगर बिना सांचों के अपने हाथों से सजावटी हाथी, घोड़े व दीये बनाकर साल के पत्तों की आग में पकाते हैं।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "GI Registry India - Gorakhpur Terracotta GI #687",
+        "url": "https://search.ipindia.gov.in/GIRPublic/"
+      }
+    ],
+    "confidence": 0.98,
+    "placeholder": true
+  },
+  {
+    "id": "chanderi-silk",
+    "name_en": "Chanderi Handloom Weaving",
+    "name_hi": "चंदेरी हथकरघा वस्त्र",
+    "type": "textile",
+    "state": "Madhya Pradesh",
+    "district": "Ashoknagar",
+    "place_name": "Chanderi",
+    "lat": 24.7128,
+    "lng": 78.1051,
+    "precision": "town",
+    "start_year": 1300,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Gossamer-light sheer handloom textiles woven with fine unbleached cotton and mulberry silk enriched with real gold and silver zari buttis, patronized by the Scindias and Bundela kings.",
+    "description_hi": "पारदर्शी और अत्यंत हल्की हथकरघा कला, जिसमें मलबरी रेशम और महीन सूत पर शुद्ध सोने-चांदी की ज़री से बूटियां उकेरी जाती हैं।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "GI Registry India - Chanderi Fabric GI #7",
+        "url": "https://search.ipindia.gov.in/GIRPublic/"
+      }
+    ],
+    "confidence": 0.98,
+    "placeholder": true
+  },
+  {
+    "id": "rogan-art",
+    "name_en": "Rogan Painting of Nirona",
+    "name_hi": "निरोणा की रोगन कला",
+    "type": "craft",
+    "state": "Gujarat",
+    "district": "Kutch",
+    "place_name": "Nirona",
+    "lat": 23.4072,
+    "lng": 69.5857,
+    "precision": "village",
+    "start_year": 1700,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Extremely rare 400-year-old art practiced by a single family in Kutch, boiling castor oil into a thick paste and painting intricate motifs on dark fabric using a thin metal stylus without touching the cloth.",
+    "description_hi": "कच्छ में एक ही परिवार द्वारा संरक्षित 400 साल पुरानी दुर्लभ कला, जिसमें अरंडी के तेल को उबालकर धातु की सलाई से बिना कपड़े को छुए धागों की तरह कलाकृतियां बनाई जाती हैं।",
+    "rarity": 5,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "UNESCO / Craftmark - Rogan Art of Kutch",
+        "url": "https://www.craftmark.org/"
+      },
+      {
+        "title": "IndianCulture.gov.in - Rare Rogan Art",
+        "url": "https://indianculture.gov.in/"
+      }
+    ],
+    "confidence": 0.99,
+    "placeholder": true
+  },
+  {
+    "id": "channapatna-toys",
+    "name_en": "Channapatna Lacquerware Toys",
+    "name_hi": "चन्नपटना लाख-काष्ठ खिलौने",
+    "type": "craft",
+    "state": "Karnataka",
+    "district": "Ramanagara",
+    "place_name": "Channapatna",
+    "lat": 12.6525,
+    "lng": 77.2098,
+    "precision": "town",
+    "start_year": 1780,
+    "end_year": null,
+    "typical_month": null,
+    "description_en": "Eco-friendly wooden toys turned on lathes from soft ivory wood (Wrightia tinctoria) and polished to a brilliant luster using natural non-toxic vegetable dyes and lac, historic legacy of Tipu Sultan.",
+    "description_hi": "टीपू सुल्तान के काल से प्रचलित पर्यावरण-अनुकूल खिलौना कला, जिसे आले मारा की लकड़ी को खराद पर घुमाकर प्राकृतिक लाख और वानस्पतिक रंगों से चमकदार बनाया जाता है।",
+    "rarity": 2,
+    "documentation_status": "well",
+    "sources": [
+      {
+        "title": "GI Registry India - Channapatna Toys GI #18",
+        "url": "https://search.ipindia.gov.in/GIRPublic/"
+      }
+    ],
+    "confidence": 0.97,
+    "placeholder": true
+  }
+]

@@ -1,0 +1,39 @@
+[
+  {
+    "id": "story-warli-circle",
+    "element_id": "warli-painting",
+    "kind": "origin_myth",
+    "title_en": "The Sacred Spiral of Tarpa & Life",
+    "title_hi": "तारपा और जीवन का पवित्र चक्र",
+    "retelling_en": "Centuries ago, the elders of the Sahyadri mountains observed that no tree in the forest grows in straight lines. Rivers curve, vines twist, and the seasons turn in an eternal circle. To honor this unbroken cycle, the Warli women took white rice paste and painted men and women holding hands, circling the Tarpa player. In the Warli circle, there is no master and no servant, no beginning and no end. As long as the Tarpa breathes, the village moves together as one living soul.",
+    "retelling_hi": "सह्याद्री के घने जंगलों में बुजुर्गों ने देखा कि प्रकृति कभी सीधी रेखाओं में नहीं चलती। नदियाँ मुड़ती हैं, बेलें घूमती हैं और ऋतुएं चक्र में लौटती हैं। इस चक्र का सम्मान करने के लिए वारली माताओं ने सफेद चावल के लेप से तारपा वादक के चारों ओर गोल घेरा बनाया। इस घेरे में न कोई आगे है, न कोई पीछे। जब तक तारपा की धुन गूंजती है, पूरा गाँव एक धड़कन बनकर घूमता है।",
+    "source": "Sahapedia Oral Heritage Archive (https://www.sahapedia.org/warli-myths)",
+    "is_retelling": true,
+    "placeholder": true
+  },
+  {
+    "id": "story-kailash-temple",
+    "element_id": "ellora-caves",
+    "kind": "origin_myth",
+    "title_en": "The Mountain Carved from the Sky Down",
+    "title_hi": "आकाश से नीचे तराशा गया कैलाश पर्वत",
+    "retelling_en": "Legend recounts that Queen Manikavati of the Rashtrakutas prayed for the miraculous recovery of her ailing husband, King Krishna I, vowing to fast until she saw the shikhara spire of a magnificent temple dedicated to Shiva. To save the queen from starving, a master artisan named Kokasa conceived an audacity never before witnessed on earth: instead of building stone upon stone from the ground up, his guild climbed the peak of the Charanandri hill and carved the temple from the sky downward, chiseling two hundred thousand tons of basalt until Lord Shiva's abode emerged whole from the mountain.",
+    "retelling_hi": "राष्ट्रकूट रानी मणिकावती ने राजा कृष्ण प्रथम के स्वास्थ्य के लिए प्रण लिया कि जब तक वे शिव मंदिर का शिखर नहीं देख लेंगी, अन्न ग्रहण नहीं करेंगी। रानी को बचाने के लिए शिल्पकार कोकस ने एक अभूतपूर्व युक्ति सोची: नीचे से पत्थर जोड़ने के बजाय, वे पहाड़ की चोटी पर चढ़े और मंदिर को आकाश से नीचे की ओर तराशना शुरू किया। दो लाख टन बेसाल्ट पत्थर हटाकर स्वयं कैलाश पर्वत को चट्टान से प्रकट कर दिया गया।",
+    "retelling_hi": "राष्ट्रकूट रानी मणिकावती ने राजा कृष्ण प्रथम के स्वास्थ्य के लिए प्रण लिया कि जब तक वे शिव मंदिर का शिखर नहीं देख लेंगी, अन्न ग्रहण नहीं करेंगी। रानी को बचाने के लिए शिल्पकार कोकस ने एक अभूतपूर्व युक्ति सोची: नीचे से पत्थर जोड़ने के बजाय, वे पहाड़ की चोटी पर चढ़े और मंदिर को आकाश से नीचे की ओर तराशना शुरू किया। दो लाख टन बेसाल्ट पत्थर हटाकर स्वयं कैलाश पर्वत को चट्टान से प्रकट कर दिया गया।",
+    "source": "Archaeological Survey of India Legends Series (https://asi.nic.in/ellora-caves/)",
+    "is_retelling": true,
+    "placeholder": true
+  },
+  {
+    "id": "story-paithani-peacock",
+    "element_id": "paithani-saree",
+    "kind": "artisan_lore",
+    "title_en": "The Gold Weaver's Oath to the Godavari",
+    "title_hi": "गोदावरी तट पर बुनकर की स्वर्ण प्रतिज्ञा",
+    "retelling_en": "In the ancient trade port of Pratishthana, weavers washed raw mulberry silk in the holy waters of the Godavari before weaving single threads of pure beaten gold into the pallu. It is said that a master weaver sat beside the river for forty days, watching a peacock dance in the monsoon rain. He vowed never to cut the silk with shears, but to interlock the warp and weft by hand using tiny bamboo needles (tilis), so that the feather of the bird would shimmer in sunlight with the iridescent green and gold of the river herself.",
+    "retelling_hi": "प्राचीन प्रतिष्ठान नगरी में बुनकर गोदावरी के जल में रेशम को धोकर शुद्ध सोने के तारों से पल्लू बुनते थे। कहते हैं कि एक बुनकर ने चालीस दिन तक वर्षा में नाचते मोर को निहारा और प्रतिज्ञा ली कि वह कैंची से धागे नहीं काटेगा, बल्कि बाँस की तीलियों से ऐसा ताना-बाना गूंथेगा कि मोर का पंख धूप में गोदावरी की लहरों की तरह झिलमिला उठे।",
+    "source": "IndianCulture.gov.in Paithani Heritage Lore (https://indianculture.gov.in/)",
+    "is_retelling": true,
+    "placeholder": true
+  }
+]

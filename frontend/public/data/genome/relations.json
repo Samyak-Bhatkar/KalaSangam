@@ -1,0 +1,74 @@
+[
+  {
+    "from_id": "warli-painting",
+    "to_id": "tarpa-instrument",
+    "kind": "uses",
+    "weight": 0.95,
+    "rationale": "The Tarpa wind horn is the visual and rhythmic center of Warli community paintings; dancers form concentric spirals around the Tarpakar player.",
+    "source": "Sahapedia - Warli Art and Organology (https://www.sahapedia.org/warli-painting)",
+    "placeholder": true
+  },
+  {
+    "from_id": "warli-painting",
+    "to_id": "kansari-devi-myth",
+    "kind": "celebrated_at",
+    "weight": 0.92,
+    "rationale": "Warli ritual wedding chauks prominently feature the sacred Mother Goddess Palghat and Kansari Devi as the protector of fertility and harvests.",
+    "source": "Sahapedia - Warli Oral Traditions (https://www.sahapedia.org/warli-myths)",
+    "placeholder": true
+  },
+  {
+    "from_id": "warli-painting",
+    "to_id": "bohada-festival",
+    "kind": "related",
+    "weight": 0.85,
+    "rationale": "Both traditions share the same animistic cosmological symbolism, visual geometry, and ceremonial invocation of the 52 forest deities.",
+    "source": "Tribal Research and Training Institute Maharashtra (https://trti.maharashtra.gov.in/)",
+    "placeholder": true
+  },
+  {
+    "from_id": "warli-painting",
+    "to_id": "varli-dialect",
+    "kind": "same_family",
+    "weight": 0.88,
+    "rationale": "Ritual Suvasinis chant oral hymns and riddles in the native Varli dialect while applying white rice paste onto ochre walls.",
+    "source": "Peoples Linguistic Survey of India (https://www.peopleslinguisticsurvey.org/)",
+    "placeholder": true
+  },
+  {
+    "from_id": "tarpa-instrument",
+    "to_id": "bohada-festival",
+    "kind": "uses",
+    "weight": 0.9,
+    "rationale": "Tarpa players lead the nightly ritual procession of mask-wearing deity impersonators through the village square.",
+    "source": "Sangeet Natak Akademi (https://sangeetnatak.gov.in/)",
+    "placeholder": true
+  },
+  {
+    "from_id": "trimbakeshwar-temple",
+    "to_id": "nashik-kumbh-mela",
+    "kind": "celebrated_at",
+    "weight": 0.98,
+    "rationale": "The Simhastha Kumbh Mela ritual bath begins at the sacred Kushavarta pond located right beside the Trimbakeshwar shrine.",
+    "source": "UNESCO ICH - Kumbh Mela (https://ich.unesco.org/en/RL/kumbh-mela-01258)",
+    "placeholder": true
+  },
+  {
+    "from_id": "trimbakeshwar-temple",
+    "to_id": "nashik-misal",
+    "kind": "related",
+    "weight": 0.65,
+    "rationale": "Pilgrims visiting the Trimbakeshwar and Godavari river banks customarily partake in traditional Nashik culinary fare.",
+    "source": "Maharashtra Tourism (https://www.maharashtratourism.gov.in/)",
+    "placeholder": true
+  },
+  {
+    "from_id": "ellora-caves",
+    "to_id": "paithani-saree",
+    "kind": "influenced",
+    "weight": 0.78,
+    "rationale": "Classic Paithani border motifs (peacocks, lotuses, parrots) draw direct stylistic inspiration from the stone carvings of Ajanta and Ellora.",
+    "source": "IndianCulture.gov.in - Paithani Art (https://indianculture.gov.in/)",
+    "placeholder": true
+  }
+]
