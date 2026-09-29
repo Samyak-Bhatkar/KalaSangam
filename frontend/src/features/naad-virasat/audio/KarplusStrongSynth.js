@@ -136,12 +136,12 @@ export class KarplusStrongSynth {
     source.buffer = audioBuffer;
 
     const gainNode = this.ctx.createGain();
-    const now = this.ctx.currentTime;
+    const now = Math.max(this.ctx.currentTime, 0.001);
 
     // Velocity scale with natural dynamic curve
-    const dynamicGain = Math.min(1.0, Math.max(0.1, velocity * 0.9));
-    gainNode.gain.setValueAtTime(0.001, now);
-    gainNode.gain.exponentialRampToValueAtTime(dynamicGain, now + 0.003); // anti-click attack
+    const dynamicGain = Math.min(1.25, Math.max(0.2, velocity * 1.05));
+    gainNode.gain.setValueAtTime(0.0001, now);
+    gainNode.gain.linearRampToValueAtTime(dynamicGain, now + 0.006); // robust anti-click attack
 
     source.connect(gainNode);
     gainNode.connect(destination);

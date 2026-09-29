@@ -32,11 +32,14 @@ export default function TataStringOverlay({
     }
 
     // Audio trigger
-    audioEngine.triggerInstrument(instrument, {
-      frequency: freq,
-      velocity,
-      pluckPoint: 0.22
-    });
+    if (audioEngine) {
+      audioEngine.resume();
+      audioEngine.triggerInstrument(instrument, {
+        frequency: freq,
+        velocity,
+        pluckPoint: 0.22
+      });
+    }
 
     if (onSwaraTriggered) {
       onSwaraTriggered(displayedSwaras[index]?.name);
@@ -55,6 +58,28 @@ export default function TataStringOverlay({
       });
     }, 450);
   }, [audioEngine, displayedSwaras, instrument, onSwaraTriggered]);
+
+  // Synchronize physical vibration when activeSwara changes (e.g. from Illustrative Phrase playback)
+  useEffect(() => {
+    if (!activeSwara) return;
+    const matchIdx = displayedSwaras.findIndex(s => s.name === activeSwara);
+    if (matchIdx !== -1) {
+      setVibratingStrings(prev => ({
+        ...prev,
+        [matchIdx]: { amplitude: 14, timestamp: Date.now() }
+      }));
+
+      const timer = setTimeout(() => {
+        setVibratingStrings(prev => {
+          const next = { ...prev };
+          delete next[matchIdx];
+          return next;
+        });
+      }, 450);
+
+      return () => clearTimeout(timer);
+    }
+  }, [activeSwara, displayedSwaras]);
 
   // Pointer move / strum detection
   const handlePointerDown = (e) => {
@@ -159,42 +184,50 @@ export default function TataStringOverlay({
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: '12px 0',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              background: isCurrentlyActive
+                ? 'radial-gradient(ellipse at center, rgba(234, 179, 8, 0.18) 0%, transparent 75%)'
+                : 'transparent',
+              transition: 'background 0.2s ease'
             }}
           >
             {/* Top Swara Label */}
             <div
               style={{
                 fontSize: '11px',
-                fontWeight: 700,
-                color: isCurrentlyActive ? '#fef08a' : '#d4af37',
-                background: 'rgba(20, 15, 10, 0.75)',
-                border: isCurrentlyActive ? '1px solid #eab308' : '1px solid rgba(212, 175, 55, 0.3)',
-                padding: '2px 6px',
-                borderRadius: '4px',
+                fontWeight: 800,
+                color: isCurrentlyActive ? '#1c1917' : '#d4af37',
+                background: isCurrentlyActive
+                  ? 'linear-gradient(135deg, #fef08a 0%, #eab308 100%)'
+                  : 'rgba(20, 15, 10, 0.75)',
+                border: isCurrentlyActive ? '1px solid #fef08a' : '1px solid rgba(212, 175, 55, 0.3)',
+                boxShadow: isCurrentlyActive ? '0 0 14px rgba(234, 179, 8, 0.9)' : 'none',
+                padding: '2px 8px',
+                borderRadius: '5px',
                 backdropFilter: 'blur(4px)',
                 transition: 'all 0.15s ease',
-                transform: isCurrentlyActive ? 'scale(1.1)' : 'scale(1)'
+                transform: isCurrentlyActive ? 'scale(1.22)' : 'scale(1)',
+                zIndex: 2
               }}
             >
               {swara.devanagari}
             </div>
 
-            {/* Glowing Physical String */}
+            {/* Glowing Physical String with Dynamic Sine-wave Vibration */}
             <div
               style={{
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
                 left: '50%',
-                width: isCurrentlyActive ? '3px' : '2px',
+                width: isCurrentlyActive ? '3.5px' : '2px',
                 background: isCurrentlyActive
-                  ? 'linear-gradient(to bottom, #fef08a, #f59e0b, #fef08a)'
+                  ? 'linear-gradient(to bottom, #ffffff, #fef08a, #f59e0b, #fef08a, #ffffff)'
                   : 'linear-gradient(to bottom, rgba(212,175,55,0.4), rgba(212,175,55,0.85), rgba(212,175,55,0.4))',
                 boxShadow: isCurrentlyActive
-                  ? '0 0 12px #eab308, 0 0 24px rgba(245, 158, 11, 0.8)'
+                  ? '0 0 16px #eab308, 0 0 32px rgba(245, 158, 11, 0.9), 0 0 48px rgba(254, 240, 138, 0.7)'
                   : '0 0 4px rgba(212, 175, 55, 0.3)',
-                transform: `translateX(-50%) ${vib ? `translateX(${Math.sin((Date.now() - vib.timestamp) * 0.1) * vib.amplitude}px)` : ''}`,
+                transform: `translateX(-50%) ${vib ? `translateX(${Math.sin((Date.now() - vib.timestamp) * 0.12) * vib.amplitude}px)` : ''}`,
                 transition: vib ? 'none' : 'transform 0.2s ease, box-shadow 0.2s ease',
                 pointerEvents: 'none'
               }}

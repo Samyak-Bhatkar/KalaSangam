@@ -23,11 +23,15 @@ import { EXPLORER_STRINGS } from '../i18n/explorer';
 import { BRANDING_CONFIG } from '../config/branding';
 
 const NaadVirasatContainer = React.lazy(() => import('../features/naad-virasat'));
+const GenomeApp = React.lazy(() => import('../genome/GenomeApp'));
 
 export default function ExplorerShell({ onBack, onOpenMarketplace, initialTab = 'scan', language = 'hi', onToggleLanguage }) {
   const [activeTab, setActiveTab] = useState(() => {
     if (typeof window !== 'undefined') {
       const p = new URLSearchParams(window.location.search);
+      if (p.get('view') === 'genome' || p.get('tab') === 'atlas' || p.get('view') === 'atlas' || p.get('genome') === 'true') {
+        return 'atlas';
+      }
       if (p.get('view') === 'naad' || p.get('tab') === 'naad' || p.get('naad') === 'true' || p.get('demo') === '1') {
         return 'naad';
       }
@@ -119,6 +123,20 @@ export default function ExplorerShell({ onBack, onOpenMarketplace, initialTab = 
             <span className="hidden sm:inline">{t.citeThis}</span>
           </button>
 
+          {/* Cultural Genome / Atlas Header Button */}
+          <button
+            onClick={() => setActiveTab('atlas')}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
+              activeTab === 'atlas'
+                ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm shadow-amber-500/30'
+                : 'bg-indigo-950/40 text-cyan-300 hover:bg-indigo-900/50 border-cyan-500/40'
+            }`}
+            title={language === 'hi' ? 'सांस्कृतिक जीनोम मानचित्र (10 स्तर व समयरेखा)' : 'Cultural Genome Map (10 Layers & Timeline)'}
+          >
+            <span>🧬</span>
+            <span className="hidden xs:inline">{language === 'hi' ? 'सांस्कृतिक जीनोम' : 'Cultural Genome'}</span>
+          </button>
+
           {/* Aural Heritage / Naad-Virasat Header Button */}
           <button
             onClick={() => setActiveTab('naad')}
@@ -193,47 +211,17 @@ export default function ExplorerShell({ onBack, onOpenMarketplace, initialTab = 
           </div>
         )}
 
-        {/* TAB 2: HERITAGE ATLAS (COMING SOON PREVIEW) */}
+        {/* TAB 2: BHARAT CULTURAL GENOME MAP (PS 26197) */}
         {activeTab === 'atlas' && (
-          <div className="max-w-3xl mx-auto px-4 py-8 space-y-6 animate-in fade-in duration-300">
-            <div className="text-center space-y-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold">
-                <Compass className="w-3.5 h-3.5" />
-                {t.comingSoon.tag}
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-100">
-                {t.comingSoon.atlasTitle}
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-400 max-w-lg mx-auto">
-                {t.comingSoon.atlasDesc}
-              </p>
-            </div>
-
-            {/* Teaser Cluster Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
-              {[
-                { name: 'Gorakhpur Terracotta', state: 'Uttar Pradesh', motifs: 'Mayur, Elephant, Horse', status: 'Curated' },
-                { name: 'Chanderi Handloom', state: 'Madhya Pradesh', motifs: 'Kalka (Paisley), Ashavali', status: 'Curated' },
-                { name: 'Bastar Dhokra', state: 'Chhattisgarh', motifs: 'Gaja, Tribal Bell, Deer', status: 'Curated' },
-                { name: 'Mithila Folk Painting', state: 'Bihar', motifs: 'Tree of Life, Fish, Sun', status: 'Curated' }
-              ].map((c, i) => (
-                <div key={i} className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-amber-300">{c.name}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium">
-                      {c.state}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400">
-                    <strong className="text-slate-300">रूपांकन / Motifs:</strong> {c.motifs}
-                  </p>
-                  <div className="pt-2 flex items-center justify-between text-[11px] text-amber-500 font-bold border-t border-slate-800/80">
-                    <span>{t.comingSoon.badge}</span>
-                    <span className="text-[10px] text-slate-500">{t.comingSoon.plannedMilestone} (Card 8)</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="w-full h-[calc(100vh-65px)] pb-16 animate-in fade-in duration-300">
+            <React.Suspense fallback={
+              <div className="w-full h-full flex flex-col items-center justify-center py-24 text-amber-400 font-bold gap-3">
+                <div className="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                <span>भारत सांस्कृतिक जीनोम मानचित्र लोड हो रहा है...</span>
+              </div>
+            }>
+              <GenomeApp onBack={onBack} />
+            </React.Suspense>
           </div>
         )}
 

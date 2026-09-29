@@ -100,18 +100,24 @@ export default function NaadVirasatContainer() {
       }
     }
 
-    // AudioContext unlock on first user gesture (Safari iOS compliance)
+    // AudioContext unlock on first user gesture (using capture: true to bypass stopPropagation)
     const unlockAudio = () => {
-      audioEngine.init();
-      window.removeEventListener('click', unlockAudio);
-      window.removeEventListener('touchstart', unlockAudio);
+      audioEngine.resume();
+      window.removeEventListener('click', unlockAudio, true);
+      window.removeEventListener('pointerdown', unlockAudio, true);
+      window.removeEventListener('touchstart', unlockAudio, true);
+      window.removeEventListener('keydown', unlockAudio, true);
     };
-    window.addEventListener('click', unlockAudio);
-    window.addEventListener('touchstart', unlockAudio);
+    window.addEventListener('click', unlockAudio, true);
+    window.addEventListener('pointerdown', unlockAudio, true);
+    window.addEventListener('touchstart', unlockAudio, true);
+    window.addEventListener('keydown', unlockAudio, true);
 
     return () => {
-      window.removeEventListener('click', unlockAudio);
-      window.removeEventListener('touchstart', unlockAudio);
+      window.removeEventListener('click', unlockAudio, true);
+      window.removeEventListener('pointerdown', unlockAudio, true);
+      window.removeEventListener('touchstart', unlockAudio, true);
+      window.removeEventListener('keydown', unlockAudio, true);
       audioEngine.stopAll();
     };
   }, [audioEngine]);

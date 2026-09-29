@@ -2,18 +2,18 @@
   {
     "id": "ekatantri-vina",
     "names": {
-      "en": "Ekatantri Vina",
-      "hi": "एकतन्त्री वीणा",
-      "sa": "एकतन्त्री वीणा"
+      "en": "Saraswati Vina",
+      "hi": "सरस्वती वीणा",
+      "sa": "सरस्वती वीणा"
     },
     "family": "tata",
     "status": "rare",
     "evidenceLevel": "well_documented",
-    "era": "10th - 13th Century CE",
-    "carvingContext": "Hoysala & Chola temple stone reliefs, Belur and Halebidu sculptures",
+    "era": "12th Century CE (Hoysala Relief)",
+    "carvingContext": "Hoysala temple stone reliefs, Belur Chennakeshava & Halebidu sculptures",
     "modernDescendantId": "saraswati-vina",
-    "modernDescendantName": "Saraswati Vina / Rudra Vina",
-    "comparisonRationale": "The ancient Ekatantri utilized a single gut or brass string over a bamboo danda with a gourd resonator. Over centuries, frets were fixed and multiple melody and drone strings were added, culminating in the contemporary Saraswati Vina.",
+    "modernDescendantName": "तंजावुर सरस्वती वीणा / Thanjavur Saraswati Vina",
+    "comparisonRationale": "The 12th-century Belur stone relief depicts Goddess Saraswati holding the sacred Vina with resonator gourd, bamboo danda, and ancient sruti positions. Over centuries, 24 fixed brass frets and drone strings evolved into the modern Thanjavur Saraswati Vina.",
     "synth": {
       "type": "karplus-strong",
       "damping": 0.985,

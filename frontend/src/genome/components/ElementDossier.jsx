@@ -87,7 +87,7 @@ export default function ElementDossier({
                 <span>{element.documentation_status} Verified</span>
               </div>
               <div className="text-[9px] text-slate-400 mt-0.5">
-                विश्वसनीयता: {Math.round((element.confidence || 0.95) * 100)}%
+                विश्वसनीयता: {typeof element.confidence === 'number' ? `${Math.round(element.confidence * 100)}%` : element.confidence === 'high' ? 'उच्च (98%)' : element.confidence === 'medium' ? 'मध्यम (85%)' : 'उच्च (95%)'}
               </div>
             </div>
           </div>

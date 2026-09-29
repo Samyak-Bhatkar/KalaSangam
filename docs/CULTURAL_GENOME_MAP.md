@@ -87,15 +87,37 @@ scripts/
 
 ---
 
-## 3. Implementation Plan by Phase
+## 3. Implementation Status by Phase
 
 - [x] **Step 0**: Analyse live app, study tokens, write `docs/CULTURAL_GENOME_MAP.md`.
-- [ ] **Phase 1**: Data layer + Validator. Install `maplibre-gl` in `package.json`, create schemas, seed valid verified datasets, and write `scripts/genome/validate.py`.
-- [ ] **Phase 2**: Map & Layer Toggles. Standalone entry `genome.html`, MapLibre local offline GeoJSON, 10 type toggles, element pins, and side-panel dossier.
-- [ ] **Phase 3**: Cultural DNA Explorer & Similarity Heatmap. Warli hero demo, dynamic relational links, and border-agnostic glowing heat blobs.
-- [ ] **Phase 4**: Story Map. Cultural story cards, Web Speech API narration ("AI-narrated retelling - Source: X").
-- [ ] **Phase 5**: Time Slider (Kathak Heritage). 1200 → 1500 → 1800 → 1947 → Today temporal progression.
-- [ ] **Phase 6**: "Unknown India" Discovery Mode. Zoom-triggered discovery of rarity >= 4 elements with "Did You Know?" cards.
-- [ ] **Phase 7**: Journey Planner. Curated Mumbai → Nashik → Chhatrapati Sambhajinagar heritage trail.
-- [ ] **Phase 8**: Commerce Hook & Storefront Link. "Support this tradition" connecting back to ShilpSetu artisans without editing existing files.
-- [ ] **Phase 9**: Demo Mode (`/genome.html?demo=1`), keyboard shortcuts (1-7), `INTEGRATION.patch`, and QA audit.
+- [x] **Phase 1**: Data layer + Validator. Installed `maplibre-gl`, created schemas, integrated 100% of user prompt raw dataset (66 elements, 29 relations, 12 stories, 18 timeline events) with zero omissions/hallucinations, and wrote `scripts/genome/validate.py` and `scripts/genome/audit_against_prompt.py`.
+- [x] **Phase 2**: Map & Layer Toggles. Standalone entry `genome.html`, MapLibre local offline GeoJSON (Survey of India boundary), 10 cultural type toggle chips, element pins, and bilingual side-panel dossier with live metrics.
+- [x] **Phase 3**: Cultural DNA Explorer & Similarity Heatmap. Warli hero demo (Key 3), dynamic relational links with weights, and border-agnostic glowing heat blobs with "why related" rationale.
+- [x] **Phase 4**: Story Map. Cultural story cards, Web Speech API narration with bilingual toggle ("AI-narrated retelling - Source: X") (Key 4).
+- [x] **Phase 5**: Time Slider (Kathak Heritage). 1200 → 1500 → 1800 → 1947 → Today spatial-temporal slider with confidence badges (Key 5).
+- [x] **Phase 6**: "Unknown India" Discovery Mode. Zoom-triggered discovery of rarity >= 4 elements with "Did You Know?" drawer (Key 6).
+- [x] **Phase 7**: Journey Planner. Curated Mumbai → Nashik → Chhatrapati Sambhajinagar heritage trail with SVG connector path and stops (Key 7).
+- [x] **Phase 8**: Commerce Hook. "Support this tradition" modal connecting back to ShilpSetu artisan catalog without modifying core files.
+- [x] **Phase 9 (Stretch)**: 
+  - **Festival Pulse Month Selector (Key 8)**: Interactive 12-month calendar ribbon highlighting active monthly festivals (Navratri, Durga Puja, Bastar Dussehra, etc.).
+  - **Ask the Atlas Smart Search (Key 9)**: Real-time bilingual search with auto-suggest across all elements, flying the map camera directly to matching pins.
+- [x] **Demo Mode**: `/genome.html?demo=1` with deterministic keys `1-9`, Data & Sources modal, and Reset button.
+- [x] **Storefront & Explorer Integration**: Direct buttons in storefront header, view mode switchers, and Explorer tab.
+
+---
+
+## 4. Demo Keys Quick Reference
+
+| Key | Scene / Feature | Description |
+| :--- | :--- | :--- |
+| **`1`** | **All 10 Cultural Layers** | Overview of all 10 cultural layers across India with layer chips. |
+| **`2`** | **Warli Dossier** | Warli Painting deep dossier with bilingual history, MoSJE tag, and source links. |
+| **`3`** | **Cultural DNA Heatmap** | Relational similarity graph linking Warli to Pithora, Saura, and Gond art. |
+| **`4`** | **Oral Lore & Narration** | Folklore card with Web Speech audio narration and attribution. |
+| **`5`** | **Kathak Timeline Slider** | 1200 to 2026 spatial-temporal historical evolution of Kathak. |
+| **`6`** | **Unknown India** | Rarity >= 4 elements discovery drawer with "Did you know?" cards. |
+| **`7`** | **Curated Journey** | Mumbai → Nashik → Chhatrapati Sambhajinagar heritage route. |
+| **`8`** | **Festival Pulse** | 12-month festival cycle selector (Navratri, Durga Puja, Bastar Dussehra). |
+| **`9`** | **Ask the Atlas** | Bilingual smart search flying directly to any tradition on the map. |
+| **`Esc`** | **Close Overlays** | Closes active modals and drawers. |
+

@@ -11,34 +11,89 @@ export default function DescendantCompareModal({
   audioEngine
 }) {
   const [playingAOrB, setPlayingAOrB] = useState(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   if (!isOpen || !instrument) return null;
 
-  // A/B Audio triggers
-  const handlePlayAncient = () => {
-    setPlayingAOrB('ancient');
-    audioEngine.triggerInstrument(instrument, {
-      frequency: 261.63,
-      velocity: 0.85
-    });
-    setTimeout(() => setPlayingAOrB(null), 1200);
+  // Cleanup speech on close
+  const handleClose = () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsSpeaking(false);
+    onClose();
   };
 
-  const handlePlayModern = () => {
+  // A/B Audio triggers
+  const handlePlayAncient = async () => {
+    setPlayingAOrB('ancient');
+    if (audioEngine) {
+      await audioEngine.resume();
+      // Ancient Ekatantri Vina: deep resonant 220Hz fundamental with open bamboo/gourd resonance
+      audioEngine.triggerInstrument(instrument, {
+        frequency: 220.0,
+        velocity: 1.0,
+        pluckPoint: 0.28
+      });
+    }
+    setTimeout(() => setPlayingAOrB(null), 1400);
+  };
+
+  const handlePlayModern = async () => {
     setPlayingAOrB('modern');
-    // Modern descendant: brighter, higher damping, contemporary tone
-    audioEngine.triggerInstrument(instrument, {
-      frequency: 261.63,
-      velocity: 0.95,
-      pluckPoint: 0.12 // struck closer to bridge for brighter modern attack
-    });
-    setTimeout(() => setPlayingAOrB(null), 1200);
+    if (audioEngine) {
+      await audioEngine.resume();
+      // Modern Saraswati Vina: bright 261.63Hz concert pitch, struck near bridge for brilliance
+      audioEngine.triggerInstrument(instrument, {
+        frequency: 261.63,
+        velocity: 1.15,
+        pluckPoint: 0.12
+      });
+    }
+    setTimeout(() => setPlayingAOrB(null), 1400);
+  };
+
+  // Spoken voice narration using browser SpeechSynthesis
+  const handleSpeakExplanation = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const voices = window.speechSynthesis.getVoices();
+    const hiVoice = voices.find(v => v.lang.startsWith('hi') || v.lang === 'hi_IN');
+    const naturalEnVoice = voices.find(v => v.lang.startsWith('en-IN') || v.lang.startsWith('en-GB') || v.lang.startsWith('en')) || voices[0];
+
+    // If a dedicated Hindi voice exists, speak Hindi; otherwise speak crisp English to prevent phonetic mangling
+    let textToSpeak = '';
+    let selectedVoice = null;
+    if (hiVoice) {
+      selectedVoice = hiVoice;
+      textToSpeak = `${instrument.names?.hi || instrument.names?.en}। ${instrument.carvingContext || ''}। इसका आधुनिक रूप ${instrument.modernDescendantName} है। ${instrument.comparisonRationale || ''}`;
+    } else {
+      selectedVoice = naturalEnVoice;
+      textToSpeak = `${instrument.names?.en || 'Instrument'}. Ancient sculpted form: ${instrument.carvingContext || ''}. Modern concert descendant: ${instrument.modernDescendantName}. ${instrument.comparisonRationale || ''}`;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    if (selectedVoice) utterance.voice = selectedVoice;
+
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
   };
 
   return (
     <div
       className="nv-modal-backdrop"
-      onClick={onClose}
+      onClick={handleClose}
       style={{
         position: 'fixed',
         inset: 0,
@@ -76,22 +131,45 @@ export default function DescendantCompareModal({
               Tracing the morphological evolution across 1,000 years of living tradition
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              background: 'rgba(255,255,255,0.1)',
-              border: 'none',
-              color: '#fff',
-              fontSize: '18px',
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              cursor: 'pointer'
-            }}
-          >
-            ✕
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={handleSpeakExplanation}
+              title="Listen to spoken audio explanation"
+              style={{
+                background: isSpeaking ? 'rgba(234, 179, 8, 0.35)' : 'rgba(212, 175, 55, 0.15)',
+                border: isSpeaking ? '1px solid #eab308' : '1px solid rgba(212, 175, 55, 0.4)',
+                color: '#fef08a',
+                fontSize: '12px',
+                fontWeight: 700,
+                padding: '6px 12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span>{isSpeaking ? '⏹️ Stop Voice' : '🎙️ Listen to Explanation (बोलकर सुनें)'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleClose}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: 'none',
+                color: '#fff',
+                fontSize: '18px',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                cursor: 'pointer'
+              }}
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* Side-by-Side Comparison Grid */}

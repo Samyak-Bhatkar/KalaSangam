@@ -63,7 +63,10 @@ export default function PlayingStudio({
   const handleToggleDrone = () => {
     const next = !isDroneOn;
     setIsDroneOn(next);
-    audioEngine.setDrone(next, baseSa);
+    if (audioEngine) {
+      audioEngine.resume();
+      audioEngine.setDrone(next, baseSa);
+    }
   };
 
   // Play Illustrative Phrase
@@ -72,27 +75,37 @@ export default function PlayingStudio({
       audioEngine.stopIllustrativePhrase();
       setIsPlayingPhrase(false);
       setActiveSwara(null);
+      setLastNoteFeedback(null);
       return;
     }
 
-    setIsPlayingPhrase(true);
-    audioEngine.playIllustrativePhrase(instrument, currentScale, baseSa, (idx, swara) => {
-      if (idx === -1) {
-        setIsPlayingPhrase(false);
-        setActiveSwara(null);
-      } else {
-        setActiveSwara(swara);
-        setLastNoteFeedback(`${swara}`);
-      }
-    });
+    if (audioEngine) {
+      audioEngine.resume().then(() => {
+        setIsPlayingPhrase(true);
+        audioEngine.playIllustrativePhrase(instrument, currentScale, baseSa, (idx, swara) => {
+          if (idx === -1) {
+            setIsPlayingPhrase(false);
+            setActiveSwara(null);
+            setLastNoteFeedback(null);
+          } else {
+            setActiveSwara(swara);
+            const swaraObj = currentScale?.swaras?.find(s => s.name === swara);
+            const dev = swaraObj ? swaraObj.devanagari : swara;
+            setLastNoteFeedback(`${dev} (${swara})`);
+          }
+        });
+      });
+    }
   };
 
   // Handle note triggering feedback
   const handleSwaraTriggered = useCallback((swaraName) => {
     setActiveSwara(swaraName);
-    setLastNoteFeedback(swaraName);
+    const swaraObj = currentScale?.swaras?.find(s => s.name === swaraName);
+    const dev = swaraObj ? swaraObj.devanagari : swaraName;
+    setLastNoteFeedback(`${dev} (${swaraName})`);
     setTimeout(() => setActiveSwara(null), 350);
-  }, []);
+  }, [currentScale]);
 
   const handleBolTriggered = useCallback((label, devanagari) => {
     setLastNoteFeedback(`${devanagari} (${label})`);

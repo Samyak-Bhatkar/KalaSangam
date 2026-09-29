@@ -61,10 +61,13 @@ export default function AvanaddhaDrumOverlay({
     }
 
     // Trigger audio DSP
-    audioEngine.triggerInstrument(instrument, {
-      strokeType,
-      velocity
-    });
+    if (audioEngine) {
+      audioEngine.resume();
+      audioEngine.triggerInstrument(instrument, {
+        strokeType,
+        velocity
+      });
+    }
 
     setActivePad(pad.id);
     if (onBolTriggered) {

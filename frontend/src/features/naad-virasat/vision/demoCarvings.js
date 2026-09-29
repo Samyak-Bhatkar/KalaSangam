@@ -44,15 +44,15 @@ export const DEMO_CARVINGS = [
   {
     id: 'demo-ekatantri-vina',
     instrumentId: 'ekatantri-vina',
-    title: 'Hoysala Saraswati Relief (Belur)',
-    titleHi: 'बेलूर होयसल वीणा शिल्प',
+    title: 'Hoysala Saraswati Vina (Belur)',
+    titleHi: 'सरस्वती वीणा (बेलूर होयसल शिल्प)',
     era: '12th Century CE',
     temple: 'Chennakeshava Temple, Belur, Karnataka',
     symbol: '🪕',
-    imageSrc: generateCarvingSvg('Ekatantri Vina Relief', '🪕', '12th Century CE (Hoysala)', 'Chennakeshava Temple, Belur'),
+    imageSrc: generateCarvingSvg('Saraswati Vina Relief', '🪕', '12th Century CE (Hoysala)', 'Chennakeshava Temple, Belur'),
     boundingBox: { x: 0.22, y: 0.16, w: 0.56, h: 0.68 },
-    confidence: 0.94,
-    rationale: 'Long danda bamboo tube with gourd resonator held diagonally across the torso with visible bridge position.'
+    confidence: 0.96,
+    rationale: 'Sacred Saraswati Vina relief carving. Diagonally held danda (fretboard) and bridge position identified with high confidence.'
   },
   {
     id: 'demo-yazh',

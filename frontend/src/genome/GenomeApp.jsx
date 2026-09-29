@@ -16,10 +16,12 @@ import UnknownIndiaDrawer from './components/UnknownIndiaDrawer';
 import JourneyPlanner, { CURATED_JOURNEY } from './components/JourneyPlanner';
 import CommerceHookModal from './components/CommerceHookModal';
 import DemoControlBar, { DataSourcesModal } from './components/DemoControlBar';
+import AskTheAtlasSearch from './components/AskTheAtlasSearch';
+import FestivalPulse from './components/FestivalPulse';
 import { CULTURAL_TYPES, MAP_CENTER_INDIA } from './utils/constants';
-import { Compass, Sparkles, Navigation, Layers, Flame, BookOpen, Clock, AlertCircle } from 'lucide-react';
+import { Compass, Sparkles, Navigation, Layers, Flame, BookOpen, Clock, AlertCircle, Search } from 'lucide-react';
 
-export default function GenomeApp() {
+export default function GenomeApp({ onBack = null }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,6 +44,9 @@ export default function GenomeApp() {
   const [journeyStopIndex, setJourneyStopIndex] = useState(0);
   const [commerceElement, setCommerceElement] = useState(null);
   const [isSourcesOpen, setIsSourcesOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isFestivalPulseOpen, setIsFestivalPulseOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(10); // Default October (Navratri, Durga Puja, Bastar Dussehra)
   const [activeDemoScene, setActiveDemoScene] = useState('1');
 
   // Load Data on Mount
@@ -134,6 +139,8 @@ export default function GenomeApp() {
     setIsUnknownIndiaMode(false);
     setIsJourneyActive(false);
     setCommerceElement(null);
+    setIsSearchOpen(false);
+    setIsFestivalPulseOpen(false);
     setActiveDemoScene('1');
   }, []);
 
@@ -209,6 +216,23 @@ export default function GenomeApp() {
         setJourneyStopIndex(0);
         break;
       }
+      case '8': {
+        // Festival Pulse Month Selector (Phase 9 Stretch)
+        handleReset();
+        setActiveDemoScene('8');
+        setSelectedMonth(10);
+        setIsFestivalPulseOpen(true);
+        const fest = data.elementsById.get('navaratri_garba_festival') || data.elementsById.get('durga_puja') || data.elementsById.get('bastar_dussehra');
+        if (fest) setSelectedElement(fest);
+        break;
+      }
+      case '9': {
+        // Ask the Atlas Smart Search (Phase 9 Stretch)
+        handleReset();
+        setActiveDemoScene('9');
+        setIsSearchOpen(true);
+        break;
+      }
       default:
         break;
     }
@@ -220,10 +244,12 @@ export default function GenomeApp() {
       // Ignore if typing in input
       if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
 
-      if (e.key >= '1' && e.key <= '7') {
+      if (e.key >= '1' && e.key <= '9') {
         handleTriggerScene(e.key);
       } else if (e.key === 'Escape') {
-        if (activeStory) setActiveStory(null);
+        if (isSearchOpen) setIsSearchOpen(false);
+        else if (isFestivalPulseOpen) setIsFestivalPulseOpen(false);
+        else if (activeStory) setActiveStory(null);
         else if (commerceElement) setCommerceElement(null);
         else if (isSourcesOpen) setIsSourcesOpen(false);
         else if (dnaOriginElement) setDnaOriginElement(null);
@@ -238,7 +264,7 @@ export default function GenomeApp() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleTriggerScene, activeStory, commerceElement, isSourcesOpen, dnaOriginElement, isTimelineActive, isJourneyActive, isUnknownIndiaMode, selectedElement]);
+  }, [handleTriggerScene, isSearchOpen, isFestivalPulseOpen, activeStory, commerceElement, isSourcesOpen, dnaOriginElement, isTimelineActive, isJourneyActive, isUnknownIndiaMode, selectedElement]);
 
   // Check URL query parameters for ?demo=1
   useEffect(() => {
@@ -281,7 +307,7 @@ export default function GenomeApp() {
   }
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden flex flex-col bg-[#070D1D]">
+    <div className={`relative ${onBack ? 'w-full h-[88vh] min-h-[720px] rounded-2xl border border-slate-800 shadow-2xl' : 'w-screen h-screen'} overflow-hidden flex flex-col bg-[#070D1D]`}>
       {/* Top Demo & Brand Bar */}
       <DemoControlBar
         isDemoActive={true}
@@ -289,6 +315,9 @@ export default function GenomeApp() {
         onTriggerScene={handleTriggerScene}
         onReset={handleReset}
         onOpenSources={() => setIsSourcesOpen(true)}
+        onOpenSearch={() => setIsSearchOpen(true)}
+        onOpenFestivalPulse={() => setIsFestivalPulseOpen(!isFestivalPulseOpen)}
+        onBack={onBack}
       />
 
       {/* Main Map Viewport */}
@@ -323,6 +352,30 @@ export default function GenomeApp() {
 
         {/* Floating Mode Switcher Pills (Top Center-Right) */}
         <div className="absolute top-4 right-4 z-20 flex flex-wrap items-center gap-1.5 pointer-events-auto">
+          {/* Ask the Atlas Search Pill */}
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-lg backdrop-blur-md bg-slate-900/90 text-amber-300 border-amber-500/40 hover:bg-slate-800"
+            title="परंपरा या स्थान खोजें (Key: 9)"
+          >
+            <Search className="w-3.5 h-3.5 text-amber-400" />
+            <span>एटलस से पूछें (Search)</span>
+          </button>
+
+          {/* Festival Pulse Toggle Pill */}
+          <button
+            onClick={() => setIsFestivalPulseOpen(!isFestivalPulseOpen)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-lg backdrop-blur-md ${
+              isFestivalPulseOpen
+                ? 'bg-orange-500 text-slate-950 font-black border-orange-400 scale-105'
+                : 'bg-slate-900/90 text-orange-300 border-orange-500/40 hover:bg-slate-800'
+            }`}
+            title="मासिक उत्सव चक्र (Key: 8)"
+          >
+            <Flame className="w-3.5 h-3.5" />
+            <span>उत्सव पल्स (Festivals)</span>
+          </button>
+
           {/* Unknown India Discovery Mode Toggle */}
           <button
             onClick={() => {
@@ -455,6 +508,24 @@ export default function GenomeApp() {
           </div>
         </div>
       </div>
+
+      {/* Ask the Atlas Smart Search (Phase 9 Stretch) */}
+      <AskTheAtlasSearch
+        elements={data?.elements || []}
+        onSelectElement={(el) => setSelectedElement(el)}
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
+
+      {/* Festival Pulse Month Selector (Phase 9 Stretch) */}
+      <FestivalPulse
+        elements={data?.elements || []}
+        selectedMonth={selectedMonth}
+        onSelectMonth={(m) => setSelectedMonth(m)}
+        onSelectElement={(el) => setSelectedElement(el)}
+        isOpen={isFestivalPulseOpen}
+        onClose={() => setIsFestivalPulseOpen(false)}
+      />
 
       {/* Story Map Modal (Phase 4) */}
       {activeStory && (

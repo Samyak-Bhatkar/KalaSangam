@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { CULTURAL_TYPES, MAP_CENTER_INDIA, MAP_DEFAULT_ZOOM } from '../utils/constants';
+
+// Configure MapLibre Web Worker for Vite
+maplibregl.setWorkerUrl(workerUrl);
 
 export default function GenomeMap({
   elements = [],
@@ -16,6 +20,20 @@ export default function GenomeMap({
   const mapRef = useRef(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const markersRef = useRef(new Map());
+
+  // Handle container and window resize
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const t = setTimeout(() => {
+      mapRef.current?.resize();
+    }, 150);
+    const handleResize = () => mapRef.current?.resize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [mapLoaded]);
 
   // Initialize MapLibre GL
   useEffect(() => {
@@ -384,6 +402,17 @@ export default function GenomeMap({
       essential: true
     });
   }, [timelineActiveEvent, mapLoaded]);
+
+  // Fly to selected element
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded || !selectedElement) return;
+    mapRef.current.flyTo({
+      center: [selectedElement.lng, selectedElement.lat],
+      zoom: Math.max(mapRef.current.getZoom(), 6.5),
+      duration: 1200,
+      essential: true
+    });
+  }, [selectedElement, mapLoaded]);
 
   return (
     <div className="relative w-full h-full overflow-hidden select-none bg-slate-950">

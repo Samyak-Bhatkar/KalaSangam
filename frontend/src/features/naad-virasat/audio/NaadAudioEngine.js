@@ -44,12 +44,31 @@ export class NaadAudioEngine {
   }
 
   /**
+   * Unconditionally unlocks / resumes the AudioContext in user gesture
+   */
+  async resume() {
+    if (!this.ctx || !this.isInitialized) {
+      await this.init();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      try {
+        await this.ctx.resume();
+      } catch (e) {
+        console.warn('AudioContext resume error:', e);
+      }
+    }
+    return this.ctx;
+  }
+
+  /**
    * Initializes or resumes the AudioContext on user interaction
    */
   async init() {
     if (this.isInitialized && this.ctx) {
       if (this.ctx.state === 'suspended') {
-        await this.ctx.resume();
+        try {
+          await this.ctx.resume();
+        } catch {}
       }
       return;
     }
@@ -75,9 +94,9 @@ export class NaadAudioEngine {
     this.analyser.fftSize = 256;
     this.analyser.smoothingTimeConstant = 0.8;
 
-    // Master Volume Gain
+    // Master Volume Gain - boosted to 1.15 for rich audible projection
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.setValueAtTime(0.9, this.ctx.currentTime);
+    this.masterGain.gain.setValueAtTime(1.15, this.ctx.currentTime);
 
     // Dry bus
     this.dryGain = this.ctx.createGain();
@@ -100,9 +119,10 @@ export class NaadAudioEngine {
     this.convolverGain.connect(this.masterGain);
     this.dryGain.connect(this.masterGain);
 
-    // Master bus to output
+    // Master bus to output (both through limiter and direct to analyser for zero-ducking safety)
     this.masterGain.connect(this.limiter);
     this.limiter.connect(this.analyser);
+    this.masterGain.connect(this.analyser);
     this.analyser.connect(this.ctx.destination);
 
     // Instantiate DSP synths
@@ -124,7 +144,9 @@ export class NaadAudioEngine {
     this.isInitialized = true;
 
     if (this.ctx.state === 'suspended') {
-      await this.ctx.resume();
+      try {
+        await this.ctx.resume();
+      } catch {}
     }
   }
 
@@ -157,12 +179,20 @@ export class NaadAudioEngine {
   triggerInstrument(instrument, params = {}) {
     const startMeasure = performance.now();
 
-    if (!this.ctx || this.ctx.state === 'suspended') {
+    if (!this.ctx) {
       this.init();
     }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      try {
+        this.ctx.resume();
+      } catch {}
+    }
 
+    if (!this.ctx) return null;
     const inputNode = this.getInputNode();
-    const family = instrument.family;
+    if (!inputNode) return null;
+
+    const family = instrument?.family || 'tata';
     const velocity = params.velocity || 0.8;
     const freq = params.frequency || 261.63;
     let voice = null;
@@ -244,22 +274,88 @@ export class NaadAudioEngine {
   }
 
   /**
-   * Play an illustrative melodic phrase in Mohanam
+   * Play recorded Saraswati Vani audio or synthesized illustrative phrase
    */
-  playIllustrativePhrase(instrument, scaleData, baseSa = 261.63, onProgress = null) {
+  async playIllustrativePhrase(instrument, scaleData, baseSa = 261.63, onProgress = null) {
     this.stopIllustrativePhrase();
-    if (!scaleData || !Array.isArray(scaleData.illustrativePhrase)) return;
+    await this.resume();
 
-    let delay = 0;
-    scaleData.illustrativePhrase.forEach((note, index) => {
+    const audioUrl = '/audio/saraswati_vani.mp3';
+    let playedViaWebAudio = false;
+
+    // 1. Attempt high-fidelity Web Audio decode & playback (routes into Analyser RMS & Mandapa Reverb)
+    try {
+      if (!this.saraswatiAudioBuffer && typeof fetch !== 'undefined') {
+        const resp = await fetch(audioUrl);
+        if (resp.ok) {
+          const arrBuf = await resp.arrayBuffer();
+          if (this.ctx) {
+            this.saraswatiAudioBuffer = await this.ctx.decodeAudioData(arrBuf);
+          }
+        }
+      }
+
+      if (this.saraswatiAudioBuffer && this.ctx) {
+        const source = this.ctx.createBufferSource();
+        source.buffer = this.saraswatiAudioBuffer;
+        const inputNode = this.getInputNode();
+        source.connect(inputNode);
+
+        source.onended = () => {
+          if (this.currentRecordedSource === source) {
+            this.currentRecordedSource = null;
+            if (onProgress) onProgress(-1, null);
+          }
+        };
+
+        source.start(0);
+        this.currentRecordedSource = source;
+        playedViaWebAudio = true;
+      }
+    } catch (e) {
+      console.warn('Web Audio buffer playback error, using HTML5 audio fallback:', e);
+    }
+
+    // 2. HTML5 Audio element fallback if Web Audio decoding was unavailable
+    if (!playedViaWebAudio && typeof Audio !== 'undefined') {
+      try {
+        if (!this.htmlAudioFallback) {
+          this.htmlAudioFallback = new Audio(audioUrl);
+        } else {
+          this.htmlAudioFallback.src = audioUrl;
+        }
+        this.htmlAudioFallback.currentTime = 0;
+        await this.htmlAudioFallback.play();
+        this.htmlAudioFallback.onended = () => {
+          if (onProgress) onProgress(-1, null);
+        };
+      } catch (err) {
+        console.warn('HTML5 audio play error:', err);
+      }
+    }
+
+    // 3. Drive realistic synchronized string vibrations & swara illuminations
+    // Follows classic Mohanam Vina phrase progression
+    const phrasePattern = [
+      { swara: 'Sa', duration: 0.65 },
+      { swara: 'Ri2', duration: 0.55 },
+      { swara: 'Ga3', duration: 0.65 },
+      { swara: 'Pa', duration: 0.70 },
+      { swara: 'Dha2', duration: 0.60 },
+      { swara: 'Sa', duration: 0.85 },
+      { swara: 'Dha2', duration: 0.50 },
+      { swara: 'Pa', duration: 0.55 },
+      { swara: 'Ga3', duration: 0.60 },
+      { swara: 'Ri2', duration: 0.55 },
+      { swara: 'Sa', duration: 0.90 },
+      { swara: 'Ga3', duration: 0.65 },
+      { swara: 'Pa', duration: 0.70 },
+      { swara: 'Sa', duration: 1.20 }
+    ];
+
+    let delay = 0.1;
+    phrasePattern.forEach((note, index) => {
       const timeoutId = setTimeout(() => {
-        const swaraObj = scaleData.swaras.find(s => s.name === note.swara);
-        const freq = baseSa * (swaraObj ? swaraObj.ratio : 1.0);
-        this.triggerInstrument(instrument, {
-          frequency: freq,
-          velocity: 0.82,
-          strokeType: index % 2 === 0 ? 'dheem' : 'nam'
-        });
         if (onProgress) {
           onProgress(index, note.swara);
         }
@@ -278,6 +374,19 @@ export class NaadAudioEngine {
   stopIllustrativePhrase() {
     this.phraseTimeouts.forEach(t => clearTimeout(t));
     this.phraseTimeouts = [];
+    if (this.currentRecordedSource) {
+      try {
+        this.currentRecordedSource.stop();
+        this.currentRecordedSource.disconnect();
+      } catch {}
+      this.currentRecordedSource = null;
+    }
+    if (this.htmlAudioFallback) {
+      try {
+        this.htmlAudioFallback.pause();
+        this.htmlAudioFallback.currentTime = 0;
+      } catch {}
+    }
   }
 
   /**

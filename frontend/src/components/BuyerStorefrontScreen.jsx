@@ -23,11 +23,20 @@ import { fetchStorefrontProducts } from '../services/api';
 import IndiaCraftMap from './IndiaCraftMap';
 import TechniqueLineageBadge from './TechniqueLineageBadge';
 
+const GenomeApp = React.lazy(() => import('../genome/GenomeApp'));
+
 export default function BuyerStorefrontScreen({ onGoToLogin, onScanMotifPublic, onOpenExplorer, initialSearchQuery = '' }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'map'
+  const [viewMode, setViewMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('view') === 'genome' || p.get('genome') === 'true') return 'genome';
+      if (p.get('view') === 'map') return 'map';
+    }
+    return 'grid';
+  });
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showCraftPins, setShowCraftPins] = useState(false);
   const [activePinId, setActivePinId] = useState(null);
@@ -102,6 +111,18 @@ export default function BuyerStorefrontScreen({ onGoToLogin, onScanMotifPublic, 
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setViewMode(viewMode === 'genome' ? 'grid' : 'genome')}
+              className={`py-1.5 px-3 rounded-full text-xs font-black flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95 border ${
+                viewMode === 'genome'
+                  ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md scale-105'
+                  : 'bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 text-amber-300 border-amber-500/50 hover:border-amber-400'
+              }`}
+              title="10-स्तरीय सांस्कृतिक जीनोम मानचित्र, कथक समयरेखा व DNA संबंध"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>सांस्कृतिक जीनोम (Genome Map)</span>
+            </button>
             {onOpenExplorer && (
               <button
                 onClick={onOpenExplorer}
@@ -198,16 +219,51 @@ export default function BuyerStorefrontScreen({ onGoToLogin, onScanMotifPublic, 
                 <span>🗺️</span>
                 <span>भारत धरोहर एटलस</span>
               </button>
+              <button
+                type="button"
+                id="toggle-view-genome"
+                onClick={() => setViewMode('genome')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  viewMode === 'genome'
+                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black shadow-xs'
+                    : 'text-amber-300 hover:text-white hover:bg-white/10'
+                }`}
+                title="10 सांस्कृतिक स्तर, कथक समयरेखा व जीनोम संबंध"
+              >
+                <span>🧬</span>
+                <span>सांस्कृतिक जीनोम (10 स्तर)</span>
+              </button>
+              <a
+                href="/genome.html?demo=1"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="नये टैब में पूर्ण स्क्रीन खोलें"
+                className="flex items-center p-1.5 text-slate-400 hover:text-amber-300 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
         </section>
 
-        {/* Product Grid or Interactive Craft Map */}
+        {/* Product Grid or Interactive Craft Map or Cultural Genome Map */}
         <main className="flex-1 px-4 md:px-8 lg:px-12 py-8 overflow-y-auto">
-          {viewMode === 'map' ? (
+          {viewMode === 'genome' ? (
+            <div className="w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-800 animate-in fade-in duration-300">
+              <React.Suspense fallback={
+                <div className="w-full h-[700px] bg-[#070D1D] flex flex-col items-center justify-center text-amber-400 font-bold gap-3">
+                  <div className="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                  <span>भारत सांस्कृतिक जीनोम मानचित्र लोड हो रहा है...</span>
+                </div>
+              }>
+                <GenomeApp onBack={() => setViewMode('grid')} />
+              </React.Suspense>
+            </div>
+          ) : viewMode === 'map' ? (
             <IndiaCraftMap
               products={products}
               onSelectProduct={(p) => setSelectedProduct(p)}
+              onSwitchToGenome={() => setViewMode('genome')}
             />
           ) : loading ? (
             <div className="py-20 text-center">

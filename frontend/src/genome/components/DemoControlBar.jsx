@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, RotateCcw, Database, PlayCircle, KeyRound, ExternalLink, X, ShieldCheck } from 'lucide-react';
+import { Sparkles, RotateCcw, Database, PlayCircle, KeyRound, ExternalLink, X, ShieldCheck, ArrowLeft, Search, Flame } from 'lucide-react';
 import { CULTURAL_TYPES } from '../utils/constants';
 
 export const DEMO_SCENES = [
@@ -9,7 +9,9 @@ export const DEMO_SCENES = [
   { key: '4', title: '4. मौखिक लोककथा व वाचन', desc: 'Story Map with Web Speech Narration' },
   { key: '5', title: '5. स्थानिक-कालिक समयरेखा', desc: 'Kathak 1200-2026 Temporal Slider' },
   { key: '6', title: '6. अपरिचित भारत (दुर्लभता ≥ 4)', desc: 'Unknown India Discovery Mode' },
-  { key: '7', title: '7. क्यूरेटेड सांस्कृतिक यात्रा', desc: 'Mumbai-Nashik-Sambhajinagar Route' }
+  { key: '7', title: '7. क्यूरेटेड सांस्कृतिक यात्रा', desc: 'Mumbai-Nashik-Sambhajinagar Route' },
+  { key: '8', title: '8. उत्सव पल्स (मासिक चक्र)', desc: 'Festival Pulse Month Selector' },
+  { key: '9', title: '9. एटलस से पूछें (खोज)', desc: 'Ask the Atlas Smart Search' }
 ];
 
 export default function DemoControlBar({
@@ -17,12 +19,25 @@ export default function DemoControlBar({
   activeScene = '1',
   onTriggerScene = () => {},
   onReset = () => {},
-  onOpenSources = () => {}
+  onOpenSources = () => {},
+  onOpenSearch = () => {},
+  onOpenFestivalPulse = () => {},
+  onBack = null
 }) {
   return (
     <header className="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between gap-3 text-xs z-30 select-none">
       {/* Title & Brand */}
       <div className="flex items-center gap-2.5">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold transition-all cursor-pointer mr-1 active:scale-95 shadow-xs"
+            title="वापस जाएं (Back to Storefront / App)"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">वापस</span>
+          </button>
+        )}
         <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-terracotta flex items-center justify-center text-slate-950 font-black shadow-md">
           <Sparkles className="w-4 h-4 fill-slate-950" />
         </div>
@@ -66,14 +81,32 @@ export default function DemoControlBar({
         })}
       </div>
 
-      {/* Action Controls: Reset & Sources */}
+      {/* Action Controls: Search, Festival Pulse, Sources, Reset */}
       <div className="flex items-center gap-2">
+        <button
+          onClick={onOpenSearch}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-amber-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
+          title="एटलस में किसी भी परंपरा या स्थान को खोजें (Key: 9)"
+        >
+          <Search className="w-3.5 h-3.5 text-amber-400" />
+          <span className="hidden sm:inline">खोजें (Search)</span>
+        </button>
+
+        <button
+          onClick={onOpenFestivalPulse}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-orange-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
+          title="मासिक भारतीय उत्सव चक्र (Key: 8)"
+        >
+          <Flame className="w-3.5 h-3.5 text-orange-400" />
+          <span className="hidden sm:inline">उत्सव पल्स</span>
+        </button>
+
         <button
           onClick={onOpenSources}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
         >
           <Database className="w-3.5 h-3.5 text-cyan-400" />
-          <span>डेटा व स्रोत (Sources)</span>
+          <span>डेटा व स्रोत</span>
         </button>
 
         <button

@@ -20,7 +20,8 @@ import TechniqueLineageBadge from './TechniqueLineageBadge';
 
 export default function IndiaCraftMap({
   products = [],
-  onSelectProduct = () => {}
+  onSelectProduct = () => {},
+  onSwitchToGenome = null
 }) {
   const [clusters, setClusters] = useState(CRAFT_CLUSTERS);
   const [selectedStateId, setSelectedStateId] = useState('up'); // Default select UP (Gorakhpur Terracotta) for instant rich view
@@ -109,15 +110,27 @@ export default function IndiaCraftMap({
           </div>
         </div>
 
-        {/* Legend */}
-        <div className="flex items-center gap-3 text-[11px] bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-700/50">
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-md bg-[#F59E0B] shadow-xs inline-block" />
-            <span className="text-slate-200 font-semibold">सक्रिय क्लस्टर</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-md bg-[#1E293B] border border-slate-700 inline-block" />
-            <span className="text-slate-400">आगामी क्लस्टर</span>
+        {/* Legend & Switch to Genome Map */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {onSwitchToGenome && (
+            <button
+              onClick={onSwitchToGenome}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95"
+              title="अखिल भारतीय 10-स्तरीय सांस्कृतिक जीनोम व कथक समयरेखा खोलें"
+            >
+              <span>🧬</span>
+              <span>10-स्तरीय सांस्कृतिक जीनोम मानचित्र →</span>
+            </button>
+          )}
+          <div className="flex items-center gap-3 text-[11px] bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-700/50">
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md bg-[#F59E0B] shadow-xs inline-block" />
+              <span className="text-slate-200 font-semibold">सक्रिय क्लस्टर</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-md bg-[#1E293B] border border-slate-700 inline-block" />
+              <span className="text-slate-400">आगामी क्लस्टर</span>
+            </div>
           </div>
         </div>
       </div>

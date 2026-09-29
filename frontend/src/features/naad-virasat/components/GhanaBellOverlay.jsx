@@ -34,11 +34,14 @@ export default function GhanaBellOverlay({
     const baseFreq = instrument.synth?.baseFreq || 587.33;
     const freq = baseFreq * (zone.pitchShift || 1.0);
 
-    audioEngine.triggerInstrument(instrument, {
-      frequency: freq,
-      isMuffled: zone.isMuffled || false,
-      velocity
-    });
+    if (audioEngine) {
+      audioEngine.resume();
+      audioEngine.triggerInstrument(instrument, {
+        frequency: freq,
+        isMuffled: zone.isMuffled || false,
+        velocity
+      });
+    }
 
     setActiveZone(zone.id);
     setRippleActive(true);

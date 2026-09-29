@@ -31,10 +31,13 @@ export default function SushiraWindOverlay({
       try { navigator.vibrate(isShankha ? 40 : 18); } catch {}
     }
 
-    audioEngine.triggerInstrument(instrument, {
-      frequency: freq,
-      velocity: 0.85
-    });
+    if (audioEngine) {
+      audioEngine.resume();
+      audioEngine.triggerInstrument(instrument, {
+        frequency: freq,
+        velocity: 0.85
+      });
+    }
 
     if (onSwaraTriggered && name) {
       onSwaraTriggered(name);

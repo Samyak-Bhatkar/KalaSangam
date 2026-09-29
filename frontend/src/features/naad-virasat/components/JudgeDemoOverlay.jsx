@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { DEMO_CARVINGS } from '../vision/demoCarvings.js';
 import instruments from '../data/instruments.json' with { type: 'json' };
 import scalesData from '../data/scales.json' with { type: 'json' };
@@ -16,7 +16,35 @@ export default function JudgeDemoOverlay({
 }) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [currentStage, setCurrentStage] = useState(0);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false); // Muted by default so presenter can speak freely
   const timerRef = useRef(null);
+
+  const speakCurrentScript = useCallback((script) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      // Use clean English script text so standard desktop TTS voices sound clear without garbling Devanagari
+      const textToSpeak = `${script.title}. ${script.caption}`;
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
+      const voices = window.speechSynthesis.getVoices();
+      const naturalVoice = voices.find(v => v.lang.startsWith('en-IN') || v.lang.startsWith('en-GB') || v.lang.startsWith('en')) || voices[0];
+      if (naturalVoice) utterance.voice = naturalVoice;
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.warn('Speech narration error:', e);
+    }
+  }, []);
+
+  // Cleanup speech on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   // Scripted Demo Stages
   const SCRIPT_STAGES = [
@@ -24,14 +52,14 @@ export default function JudgeDemoOverlay({
       time: 0,
       title: 'Phase 1: Artifact Capture & EXIF Stripping',
       titleHi: 'शिल्प चयन एवं भू-अवस्थिति संरक्षण',
-      caption: 'Loading 12th-century Hoysala stone carving of Ekatantri Vina from Belur Chennakeshava Temple. In-memory metadata stripping ensures complete privacy.',
+      caption: 'Loading 12th-century Hoysala stone carving of Saraswati Vina from Belur Chennakeshava Temple. In-memory metadata stripping ensures complete privacy.',
       action: 'select_belur'
     },
     {
       time: 14,
       title: 'Phase 2: Organology Vision Pipeline & Natyashastra Taxonomy',
       titleHi: 'नाट्यशास्त्र वर्गीकरण एवं तत वाद्य अभिज्ञान',
-      caption: 'Organological detection matches morphology with 94% confidence: Tata Vadya (Chordophone) with hollow bamboo danda and gourd resonator.',
+      caption: 'Organological detection matches morphology with 96% confidence: Tata Vadya (Chordophone) with hollow bamboo danda and gourd resonator.',
       action: 'scan_and_classify'
     },
     {
@@ -52,7 +80,7 @@ export default function JudgeDemoOverlay({
       time: 68,
       title: 'Phase 5: A/B Evolutionary Lineage & Modern Descendant',
       titleHi: 'सहस्राब्दी कालक्रम — सरस्वती वीणा तुलना',
-      caption: 'Comparing 12th-century Ekatantri with its 24-fretted modern concert descendant: the Saraswati Vina.',
+      caption: 'Comparing 12th-century Hoysala Saraswati Vina with its modern 24-fretted concert descendant: the Thanjavur Saraswati Vina.',
       action: 'open_compare'
     },
     {
@@ -97,18 +125,32 @@ export default function JudgeDemoOverlay({
         onStepChange(stage.action);
       }
 
+      // Automated speech narration for each demo phase
+      if (isVoiceEnabled) {
+        speakCurrentScript(stage);
+      }
+
       // Automated sound events during demo
       if (stage.action === 'strum_strings' && audioEngine) {
-        const vina = instruments.find(i => i.id === 'ekatantri-vina');
-        const mohanam = scalesData.ragas.mohanam;
-        audioEngine.playIllustrativePhrase(vina, mohanam, 261.63);
+        audioEngine.resume().then(() => {
+          const vina = instruments.find(i => i.id === 'ekatantri-vina');
+          const mohanam = scalesData.ragas.mohanam;
+          audioEngine.playIllustrativePhrase(vina, mohanam, 261.63);
+        });
       } else if (stage.action === 'mandapa_on' && audioEngine) {
         audioEngine.setMandapaAcoustics(true);
       }
     }
-  }, [elapsedSeconds, currentStage, isOpen, onStepChange, audioEngine]);
+  }, [elapsedSeconds, currentStage, isOpen, onStepChange, audioEngine, isVoiceEnabled, speakCurrentScript]);
 
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    onClose();
+  };
 
   const currentScript = SCRIPT_STAGES[currentStage] || SCRIPT_STAGES[0];
   const progressPercent = Math.min(100, Math.round((elapsedSeconds / 90) * 100));
@@ -122,7 +164,7 @@ export default function JudgeDemoOverlay({
         left: '50%',
         transform: 'translateX(-50%)',
         width: '94%',
-        maxWidth: '820px',
+        maxWidth: '840px',
         background: 'rgba(18, 14, 10, 0.96)',
         border: '2px solid #eab308',
         boxShadow: '0 0 35px rgba(234, 179, 8, 0.5), 0 16px 40px rgba(0,0,0,0.95)',
@@ -155,14 +197,46 @@ export default function JudgeDemoOverlay({
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Voice Narration Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              const next = !isVoiceEnabled;
+              setIsVoiceEnabled(next);
+              if (!next) {
+                if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                  window.speechSynthesis.cancel();
+                }
+              } else {
+                speakCurrentScript(currentScript);
+              }
+            }}
+            style={{
+              background: isVoiceEnabled ? 'rgba(234, 179, 8, 0.25)' : 'rgba(255, 255, 255, 0.08)',
+              border: isVoiceEnabled ? '1px solid #eab308' : '1px solid rgba(255, 255, 255, 0.2)',
+              color: isVoiceEnabled ? '#fef08a' : '#d6d3d1',
+              fontSize: '11px',
+              fontWeight: 800,
+              padding: '3px 10px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}
+            title="Toggle spoken AI narrator on/off"
+          >
+            <span>{isVoiceEnabled ? '🔊 Voice Narration: ON' : '🔇 Voice Narration: OFF'}</span>
+          </button>
+
           <span style={{ fontSize: '13px', fontFamily: 'monospace', fontWeight: 700, color: '#fde047' }}>
             {String(Math.floor(elapsedSeconds / 60)).padStart(2, '0')}:
             {String(elapsedSeconds % 60).padStart(2, '0')} / 01:30
           </span>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             style={{
               background: 'rgba(239, 68, 68, 0.2)',
               border: '1px solid rgba(239, 68, 68, 0.5)',
@@ -203,11 +277,43 @@ export default function JudgeDemoOverlay({
 
       {/* Script Caption */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-        <span style={{ fontSize: '20px' }}>🎙️</span>
-        <div>
-          <h4 style={{ margin: '0 0 3px 0', fontSize: '14px', color: '#fef08a' }}>
-            {currentScript.title}
-          </h4>
+        <button
+          type="button"
+          onClick={() => speakCurrentScript(currentScript)}
+          title="Click to replay spoken voice narration"
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '22px',
+            cursor: 'pointer',
+            padding: 0,
+            lineHeight: 1
+          }}
+        >
+          🎙️
+        </button>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+            <h4 style={{ margin: 0, fontSize: '14px', color: '#fef08a' }}>
+              {currentScript.title}
+            </h4>
+            <button
+              type="button"
+              onClick={() => speakCurrentScript(currentScript)}
+              style={{
+                background: 'rgba(234, 179, 8, 0.15)',
+                border: '1px solid rgba(234, 179, 8, 0.4)',
+                color: '#fef08a',
+                fontSize: '10px',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              🔊 Replay Voice
+            </button>
+          </div>
           <p style={{ margin: 0, fontSize: '12px', color: '#e7e5e4', lineHeight: 1.45 }}>
             {currentScript.caption}
           </p>
