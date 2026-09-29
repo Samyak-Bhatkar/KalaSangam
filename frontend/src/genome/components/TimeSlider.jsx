@@ -124,7 +124,18 @@ export default function TimeSlider({
           </p>
 
           <div className="text-[10px] text-slate-500 italic pt-1 truncate">
-            ऐतिहासिक संदर्भ: {activeEvent.source}
+            ऐतिहासिक संदर्भ:{' '}
+            {typeof activeEvent.source === 'object' ? (
+              activeEvent.source?.url ? (
+                <a href={activeEvent.source.url} target="_blank" rel="noopener noreferrer" className="hover:text-amber-300 underline">
+                  {activeEvent.source.title || activeEvent.source.url}
+                </a>
+              ) : (
+                activeEvent.source?.title || 'प्रमाणित अभिलेख'
+              )
+            ) : (
+              activeEvent.source
+            )}
           </div>
         </div>
       </div>

@@ -99,7 +99,18 @@ export default function StoryModal({
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
               <span className="font-bold">
-                AI-narrated retelling • Source: {story.source}
+                AI-narrated retelling • Source:{' '}
+                {typeof story.source === 'object' ? (
+                  story.source?.url ? (
+                    <a href={story.source.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white">
+                      {story.source.title || story.source.url}
+                    </a>
+                  ) : (
+                    story.source?.title || 'Verified Heritage Archive'
+                  )
+                ) : (
+                  story.source
+                )}
               </span>
             </div>
             <span className="text-[10px] px-2 py-0.5 rounded-md bg-black/40 text-amber-300 font-extrabold">

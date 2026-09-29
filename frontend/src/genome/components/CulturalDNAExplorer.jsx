@@ -130,7 +130,17 @@ export default function CulturalDNAExplorer({
 
                   {/* Source */}
                   <div className="mt-1 text-[9px] text-slate-500 italic truncate">
-                    स्रोत: {rel.source}
+                    स्रोत: {typeof rel.source === 'object' ? (
+                      rel.source?.url ? (
+                        <a href={rel.source.url} target="_blank" rel="noopener noreferrer" className="hover:text-amber-300 underline">
+                          {rel.source.title || rel.source.url}
+                        </a>
+                      ) : (
+                        rel.source?.title || 'प्रमाणित स्रोत'
+                      )
+                    ) : (
+                      rel.source
+                    )}
                   </div>
                 </div>
               );

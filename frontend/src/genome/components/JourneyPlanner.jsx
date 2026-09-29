@@ -12,34 +12,34 @@ export const CURATED_JOURNEY = {
       id: 'mumbai',
       city: 'Mumbai',
       city_hi: 'मुंबई',
-      theme: 'शहरी रंगमंच व संगीत',
-      theme_en: 'Urban Classical Stage & Theatre',
-      lat: 18.9553,
-      lng: 72.8184,
-      elements: ['mumbai-natya-sangeet'],
-      highlights: 'गिरगांव व शिवाजी पार्क के ऐतिहासिक संगीत रंगमंच, बालगंधर्व की नाट्य परंपरा'
+      theme: 'कोली लोकगीत व ईस्ट इंडियन विरासत',
+      theme_en: 'Coastal Koli Music & East Indian Culinary Heritage',
+      lat: 19.0760,
+      lng: 72.8777,
+      elements: ['koli_songs', 'east_indian_khuddi_curry'],
+      highlights: 'माहिम व वरली कोलीवाडा के ब्रास बैंड लोकगीत, ऐतिहासिक ईस्ट इंडियन खुड्डी करी परंपरा'
     },
     {
       id: 'nashik',
-      city: 'Nashik & Trimbak',
-      city_hi: 'नासिक व त्र्यंबकेश्वर',
-      theme: 'गोदावरी उद्गम व सिंहस्थ कुंभ',
-      theme_en: 'Sacred River Springs & Culinary Soul',
-      lat: 19.9328,
-      lng: 73.5308,
-      elements: ['trimbakeshwar-temple', 'nashik-misal', 'nashik-kumbh-mela'],
-      highlights: 'त्र्यंबकेश्वर ज्योतिर्लिंग, गोदावरी नदी का उद्गम, पंचवटी की तीखी तर्री मिसळ'
+      city: 'Western Maharashtra & Konkan',
+      city_hi: 'पश्चिम महाराष्ट्र व कोंकण',
+      theme: 'मिसळ परंपरा व सावंतवाड़ी काष्ठकला',
+      theme_en: 'Spicy Misal Soul & Sawantwadi Woodcraft',
+      lat: 16.7050,
+      lng: 74.2433,
+      elements: ['misal_pav', 'sawantwadi_wooden_craft'],
+      highlights: 'कोल्हापुरी व पुणेरी तीखी तर्री मिसळ पाव, सावंतवाड़ी के हाथ से रंगे पारंपरिक लकड़ी के खिलौने'
     },
     {
       id: 'sambhajinagar',
       city: 'Chhatrapati Sambhajinagar',
       city_hi: 'छत्रपति संभाजीनगर (पैठण)',
       theme: 'एलोरा शैलकृत गुफाएं व शाही पैठणी',
-      theme_en: 'Monolithic Cave Wonders & Royal Zari Weaving',
+      theme_en: 'Monolithic Cave Wonders, Himroo & Royal Paithani',
       lat: 20.0258,
       lng: 75.1780,
-      elements: ['ellora-caves', 'paithani-saree'],
-      highlights: 'आकाश से नीचे तराशा गया कैलाश मंदिर, प्रतिष्ठान की स्वर्ण-ज़री पैठणी साड़ी'
+      elements: ['ellora_caves', 'paithani_sari', 'himroo'],
+      highlights: 'आकाश से नीचे तराशा गया कैलाश मंदिर, प्रतिष्ठान की स्वर्ण-ज़री पैठणी साड़ी व ऐतिहासिक हिमरू वस्त्र'
     }
   ]
 };

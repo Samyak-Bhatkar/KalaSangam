@@ -14,6 +14,20 @@
     "confidence": "high"
   },
   {
+    "tradition_id": "paithani_sari",
+    "year": 200,
+    "snapshot": 1200,
+    "place": "Paithan",
+    "lat": 19.482,
+    "lng": 75.385,
+    "event": "Satavahana dynasty patronizes the gold and silver metallic zari weaving of Paithani saris on the Godavari banks.",
+    "source": {
+      "title": "Paithani",
+      "url": "https://en.wikipedia.org/wiki/Paithani"
+    },
+    "confidence": "high"
+  },
+  {
     "tradition_id": "konark_sun_temple",
     "year": 1243,
     "snapshot": 1200,
@@ -28,6 +42,20 @@
     "confidence": "high"
   },
   {
+    "tradition_id": "kathak",
+    "year": 1200,
+    "snapshot": 1200,
+    "place": "Vrindavan",
+    "lat": 27.565,
+    "lng": 77.6593,
+    "event": "Early traveling bards known as Kathakaars use rhythmic footwork and hand gestures to narrate epics in temples around ancient North India.",
+    "source": {
+      "title": "Kathak: Aesthetics, History and Influences",
+      "url": "http://www.sahapedia.org/looking-the-origins-of-kathak-journey-the-16th-20th-century"
+    },
+    "confidence": "low"
+  },
+  {
     "tradition_id": "himroo",
     "year": 1327,
     "snapshot": 1500,
@@ -40,6 +68,104 @@
       "url": "https://en.wikipedia.org/wiki/Himroo"
     },
     "confidence": "high"
+  },
+  {
+    "tradition_id": "madhubani_art",
+    "year": 1500,
+    "snapshot": 1500,
+    "place": "Madhubani",
+    "lat": 26.3533,
+    "lng": 86.0792,
+    "event": "Mithila wall painting spreads across village courtyards during marriage rituals and religious observances.",
+    "source": {
+      "title": "Mithila Painting",
+      "url": "http://www.sahapedia.org/mithila-painting-0"
+    },
+    "confidence": "high"
+  },
+  {
+    "tradition_id": "kathak",
+    "year": 1550,
+    "snapshot": 1500,
+    "place": "Mathura",
+    "lat": 27.4924,
+    "lng": 77.6737,
+    "event": "Bhakti movement heavily influences Kathak; 16th-century poet Surdas explicitly documents intricate dance compositions and rhythmic syllables like 'ta ta thai' in Sur Sagar.",
+    "source": {
+      "title": "Kathak: Aesthetics, History and Influences",
+      "url": "http://www.sahapedia.org/looking-the-origins-of-kathak-journey-the-16th-20th-century"
+    },
+    "confidence": "high"
+  },
+  {
+    "tradition_id": "lavani_dance",
+    "year": 1780,
+    "snapshot": 1800,
+    "place": "Pune",
+    "lat": 18.5204,
+    "lng": 73.8567,
+    "event": "Peshwa court in Pune officially patronizes Lavani performances and dholki rhythmic theater.",
+    "source": {
+      "title": "Lavani",
+      "url": "https://en.wikipedia.org/wiki/Lavani"
+    },
+    "confidence": "high"
+  },
+  {
+    "tradition_id": "sawantwadi_wooden_craft",
+    "year": 1750,
+    "snapshot": 1800,
+    "place": "Sawantwadi",
+    "lat": 15.9015,
+    "lng": 73.8184,
+    "event": "Royal rulers of Sawantwadi establish craft workshops for lacquerware toys and wooden ganjifa cards.",
+    "source": {
+      "title": "Sawantwadi",
+      "url": "https://en.wikipedia.org/wiki/Sawantwadi"
+    },
+    "confidence": "high"
+  },
+  {
+    "tradition_id": "pandavani",
+    "year": 1700,
+    "snapshot": 1800,
+    "place": "Ganiyari",
+    "lat": 21.1938,
+    "lng": 81.2849,
+    "event": "Gond bards formalize musical recitation of Mahabharata epics through Kapalik and Vedamati styles.",
+    "source": {
+      "title": "Pandavani",
+      "url": "http://www.sahapedia.org/gond-pandvani"
+    },
+    "confidence": "high"
+  },
+  {
+    "tradition_id": "kathak",
+    "year": 1856,
+    "snapshot": 1800,
+    "place": "Lucknow",
+    "lat": 26.8467,
+    "lng": 80.9462,
+    "event": "Kathak flourishes in the Awadh court of Wajid Ali Shah at Matiaburj. Books like Ma'dan al-Musiqi document specific Kathak dancers and performers.",
+    "source": {
+      "title": "Kathak: Aesthetics, History and Influences",
+      "url": "http://www.sahapedia.org/looking-the-origins-of-kathak-journey-the-16th-20th-century"
+    },
+    "confidence": "high"
+  },
+  {
+    "tradition_id": "kathak",
+    "year": 1947,
+    "snapshot": 1947,
+    "place": "New Delhi",
+    "lat": 28.6139,
+    "lng": 77.209,
+    "event": "Following Independence, masters transition their orally transmitted Thumri and Bhajan repertoires into institutionalized classical teaching in New Delhi and Lucknow.",
+    "source": {
+      "title": "Kathak: Aesthetics, History and Influences",
+      "url": "http://www.sahapedia.org/looking-the-origins-of-kathak-journey-the-16th-20th-century"
+    },
+    "confidence": "medium"
   },
   {
     "tradition_id": "tribal_cultural_museum_pune",
@@ -70,90 +196,6 @@
     "confidence": "high"
   },
   {
-    "tradition_id": "paithani_sari",
-    "year": 200,
-    "snapshot": 1200,
-    "place": "Paithan",
-    "lat": 19.482,
-    "lng": 75.385,
-    "event": "Paithan emerges as an ancient trading hub under the Satavahanas, exporting gold-and-silk tapestries to the Roman Empire.",
-    "source": {
-      "title": "Paithani",
-      "url": "https://en.wikipedia.org/wiki/Paithani"
-    },
-    "confidence": "high"
-  },
-  {
-    "tradition_id": "kathak",
-    "year": 1500,
-    "snapshot": 1500,
-    "place": "Lucknow",
-    "lat": 26.8467,
-    "lng": 80.9462,
-    "event": "Kathak evolves from temple recitation into courtly abhinaya during the Bhakti movement and early Mughal patronage.",
-    "source": {
-      "title": "Kathak: Aesthetics, History and Influences",
-      "url": "http://www.sahapedia.org/kathak-aesthetics-history-and-influences"
-    },
-    "confidence": "high"
-  },
-  {
-    "tradition_id": "madhubani_art",
-    "year": 1500,
-    "snapshot": 1500,
-    "place": "Madhubani",
-    "lat": 26.3533,
-    "lng": 86.0792,
-    "event": "Mithila women preserve ritual Kohbar wall art on mud plasters depicting Rama-Sita wedding narratives.",
-    "source": {
-      "title": "Mithila Painting",
-      "url": "http://www.sahapedia.org/mithila-painting-0"
-    },
-    "confidence": "high"
-  },
-  {
-    "tradition_id": "lavani_dance",
-    "year": 1780,
-    "snapshot": 1800,
-    "place": "Pune",
-    "lat": 18.5204,
-    "lng": 73.8567,
-    "event": "Lavani and Tamasha reach peak patronage under the Peshwas, serving both as soldier morale booster and theatrical poetry.",
-    "source": {
-      "title": "Lavani",
-      "url": "https://en.wikipedia.org/wiki/Lavani"
-    },
-    "confidence": "high"
-  },
-  {
-    "tradition_id": "sawantwadi_wooden_craft",
-    "year": 1750,
-    "snapshot": 1800,
-    "place": "Sawantwadi",
-    "lat": 15.9015,
-    "lng": 73.8184,
-    "event": "Royal Sawant Bhonsle rulers patronize local lacquerware artisans and Ganjifa playing card painters.",
-    "source": {
-      "title": "Sawantwadi",
-      "url": "https://en.wikipedia.org/wiki/Sawantwadi"
-    },
-    "confidence": "high"
-  },
-  {
-    "tradition_id": "pandavani",
-    "year": 1700,
-    "snapshot": 1800,
-    "place": "Ganiyari",
-    "lat": 21.1938,
-    "lng": 81.2849,
-    "event": "Oral Mahabharata bardic recitations with ektara establish Vedamati and Kapalik singing traditions in rural Chhattisgarh.",
-    "source": {
-      "title": "Pandavani",
-      "url": "http://www.sahapedia.org/gond-pandvani"
-    },
-    "confidence": "high"
-  },
-  {
     "tradition_id": "durga_puja_kolkata",
     "year": 2021,
     "snapshot": 2026,
@@ -174,7 +216,7 @@
     "place": "Ahmedabad",
     "lat": 23.0225,
     "lng": 72.5714,
-    "event": "UNESCO officially inscribes the Garba of Gujarat as an Intangible Cultural Heritage of Humanity.",
+    "event": "Garba of Gujarat is formally recognized and inscribed onto the UNESCO Intangible Cultural Heritage list.",
     "source": {
       "title": "Garba of Gujarat",
       "url": "https://ich.unesco.org/en/RL/garba-of-gujarat-01962"
@@ -188,10 +230,24 @@
     "place": "Dahanu",
     "lat": 19.9912,
     "lng": 72.7397,
-    "event": "Warli indigenous motifs achieve global design recognition and GI tag protection as a contemporary living tradition.",
+    "event": "GI-tagged Warli painting modern cooperatives and tribal collectives scale direct artisan-to-buyer digital channels across India.",
     "source": {
       "title": "Warli painting",
       "url": "http://www.sahapedia.org/warli-painting"
+    },
+    "confidence": "high"
+  },
+  {
+    "tradition_id": "kathak",
+    "year": 2026,
+    "snapshot": 2026,
+    "place": "Lucknow",
+    "lat": 26.8467,
+    "lng": 80.9462,
+    "event": "Kathak stands globally recognized; the extensive choreography and poetic works of legends continue to define modern classical performances.",
+    "source": {
+      "title": "Kathak: Aesthetics, History and Influences",
+      "url": "http://www.sahapedia.org/looking-the-origins-of-kathak-journey-the-16th-20th-century"
     },
     "confidence": "high"
   }

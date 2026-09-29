@@ -77,11 +77,143 @@
     }
   },
   {
+    "from_id": "saura_art",
+    "to_id": "warli_painting",
+    "kind": "related",
+    "weight": 0.8,
+    "rationale": "Small stick-like figures and narrative dot elements in Saora paintings evoke close similarities to Warli paintings of Maharashtra.",
+    "source": {
+      "title": "Saora Art: Tale of the Man and the Snake",
+      "url": "http://www.sahapedia.org/saora-art-tale-of-the-man-and-the-snake"
+    }
+  },
+  {
+    "from_id": "gond_painting",
+    "to_id": "warli_painting",
+    "kind": "same_family",
+    "weight": 0.9,
+    "rationale": "Gond and Warli are frequently grouped together as some of the most famous and well-documented adivasi domestic art traditions.",
+    "source": {
+      "title": "Mural Traditions of Jharkhand",
+      "url": "http://www.sahapedia.org/mural-traditions-of-jharkhand-1"
+    }
+  },
+  {
+    "from_id": "madhubani_art",
+    "to_id": "warli_painting",
+    "kind": "same_family",
+    "weight": 0.9,
+    "rationale": "Mithila or Madhubani art is classified alongside Warli and Gond as a highly recognized form of traditional domestic wall art in India.",
+    "source": {
+      "title": "Mural Traditions of Jharkhand",
+      "url": "http://www.sahapedia.org/mural-traditions-of-jharkhand-1"
+    }
+  },
+  {
+    "from_id": "jharkhand_mud_murals",
+    "to_id": "warli_painting",
+    "kind": "related",
+    "weight": 0.7,
+    "rationale": "The mud mural traditions of Jharkhand's adivasi dwellings belong to the same overarching context of domestic architectural art as Warli.",
+    "source": {
+      "title": "Mural Traditions of Jharkhand",
+      "url": "https://www.sahapedia.org/tag/santal"
+    }
+  },
+  {
+    "from_id": "tribal_cultural_museum_pune",
+    "to_id": "warli_painting",
+    "kind": "related",
+    "weight": 1.0,
+    "rationale": "The Tribal Cultural Museum in Pune actively preserves and exhibits the traditional artifacts and heritage of the Warli tribe.",
+    "source": {
+      "title": "Tribal Cultural Museum",
+      "url": "https://map.sahapedia.org/search/article/Tribal%20Cultural%20Museum/2848"
+    }
+  },
+  {
+    "from_id": "tribal_cultural_museum_pune",
+    "to_id": "gond_painting",
+    "kind": "related",
+    "weight": 1.0,
+    "rationale": "Gond tribal artifacts are part of the vast collection housed at the Tribal Cultural Museum in Pune.",
+    "source": {
+      "title": "Tribal Cultural Museum",
+      "url": "https://map.sahapedia.org/search/article/Tribal%20Cultural%20Museum/2848"
+    }
+  },
+  {
+    "from_id": "sanjari_folk_music",
+    "to_id": "warli_painting",
+    "kind": "related",
+    "weight": 0.8,
+    "rationale": "The Warli people, alongside their visual arts, participate in Sanjari folk music in Dadra and Nagar Haveli to relieve labor fatigue.",
+    "source": {
+      "title": "Sanjari: Folk Music of Dadra Nagar Haveli",
+      "url": "https://www.indianculture.gov.in/videos/page=9/title=Sanjari_:_Folk_Music_of_Dadra_Nagar_Haveli_by_Sunil_Korda_%E0%A4%B8%E0%A4%82%E0%A4%9C%E0%A4%BE%E0%A4%B0%E0%A5%80:_%E0%A4%A6%E0%A4%BE%E0%A4%A6%E0%A4%B0%E0%A4%BE_%E0%A4%A8%E0%A4%97%E0%A4%B0_%E0%A4%B9%E0%A4%B5%E0%A5%87%E0%A4%B2%E0%A5%80_%E0%A4%95%E0%A5%87_%E0%A4%B2%E0%A5%8B%E0%A4%95_%E0%A4%97%E0%A5%80%E0%A4%A4_-_%E0%A4%B8%E0%A5%81%E0%A4%A8%E0%A5%80%E0%A4%B2_%E0%A4%95%E0%A5%8B%E0%A4%B0%E0%A4%A1%E0%A4%BE/nid=2733344"
+    }
+  },
+  {
+    "from_id": "koli_songs",
+    "to_id": "sanjari_folk_music",
+    "kind": "same_family",
+    "weight": 0.9,
+    "rationale": "The Koli tribe engages in the singing of Sanjari folk music within Dadra and Nagar Haveli, sharing this musical tradition with the Warli and Kokana.",
+    "source": {
+      "title": "Sanjari: Folk Music of Dadra Nagar Haveli",
+      "url": "https://www.indianculture.gov.in/videos/page=9/title=Sanjari_:_Folk_Music_of_Dadra_Nagar_Haveli_by_Sunil_Korda_%E0%A4%B8%E0%A4%82%E0%A4%9C%E0%A4%BE%E0%A4%B0%E0%A5%80:_%E0%A4%A6%E0%A4%BE%E0%A4%A6%E0%A4%B0%E0%A4%BE_%E0%A4%A8%E0%A4%97%E0%A4%B0_%E0%A4%B9%E0%A4%B5%E0%A5%87%E0%A4%B2%E0%A5%80_%E0%A4%95%E0%A5%87_%E0%A4%B2%E0%A5%8B%E0%A4%95_%E0%A4%97%E0%A5%80%E0%A4%A4_-_%E0%A4%B8%E0%A5%81%E0%A4%A8%E0%A5%80%E0%A4%B2_%E0%A4%95%E0%A5%8B%E0%A4%B0%E0%A4%A1%E0%A4%BE/nid=2733344"
+    }
+  },
+  {
+    "from_id": "vadha_koli_embroidery",
+    "to_id": "koli_songs",
+    "kind": "related",
+    "weight": 0.6,
+    "rationale": "Both traditions originate from different subsets of the broader Koli community, spanning from the Banni grasslands to the Mumbai coast.",
+    "source": {
+      "title": "Maldharis: the Silvipastoralists of the Banni Grasslands",
+      "url": "http://www.sahapedia.org/maldharis-the-silvipastoralists-of-the-banni-grasslands"
+    }
+  },
+  {
+    "from_id": "east_indian_khuddi_curry",
+    "to_id": "koli_songs",
+    "kind": "related",
+    "weight": 0.7,
+    "rationale": "The Koli Christians are one of the foundational groups that make up the East Indian community of Mumbai, known for both their distinctive cuisine and historic church-building.",
+    "source": {
+      "title": "Sociological Study of the East Indian Community",
+      "url": "http://www.sahapedia.org/sociological-study-of-the-east-indian-community-of-mumbai"
+    }
+  },
+  {
+    "from_id": "diwali_faraal_pohe",
+    "to_id": "shetuk_dry_fish",
+    "kind": "related",
+    "weight": 0.6,
+    "rationale": "Both were essential, resourceful components of the South Konkan village diet during times of severe rationing, bartering, and harsh monsoons.",
+    "source": {
+      "title": "Carving Memories: Migration, Cuisine and Identity",
+      "url": "http://www.sahapedia.org/carving-memories-migration-cuisine-and-identity-south-konkan"
+    }
+  },
+  {
+    "from_id": "bhavageete",
+    "to_id": "thumri",
+    "kind": "related",
+    "weight": 0.5,
+    "rationale": "Both represent deeply expressive, poetry-driven forms of Indian semi-classical or pop-traditional music dealing with themes of love and nature.",
+    "source": {
+      "title": "Bhavageete",
+      "url": "https://en.wikipedia.org/wiki/Bhavageete"
+    }
+  },
+  {
     "from_id": "tarpa_dance",
     "to_id": "warli_painting",
     "kind": "related",
-    "weight": 0.95,
-    "rationale": "The central motif of traditional Warli canvas and wall paintings is the spiraling Tarpa dance circle, symbolizing cosmic order and community harmony.",
+    "weight": 0.9,
+    "rationale": "The central spiral motifs of the Warli painting tradition are pictorial representations of the communal Tarpa dance circle.",
     "source": {
       "title": "Warli painting",
       "url": "http://www.sahapedia.org/warli-painting"
@@ -92,21 +224,10 @@
     "to_id": "warli_painting",
     "kind": "related",
     "weight": 0.8,
-    "rationale": "The sacred Mahua tree (Madhuca longifolia) and ceremonial liquor brewing are revered sacred motifs featured in Warli harvest and marriage murals.",
+    "rationale": "Mahua trees and ritual offerings feature prominently in traditional Warli domestic painting iconography.",
     "source": {
       "title": "Sacred Spirits of the Warlis",
       "url": "http://www.sahapedia.org/sacred-spirits-warlis-mahua-tadi-and-tappers-0"
-    }
-  },
-  {
-    "from_id": "saura_art",
-    "to_id": "warli_painting",
-    "kind": "same_family",
-    "weight": 0.85,
-    "rationale": "Saura pictograms of Odisha and Warli murals of Maharashtra share ancient prehistoric stick-figure aesthetics painted with rice paste on red mud walls.",
-    "source": {
-      "title": "Saora Art: Tale of the Man and the Snake",
-      "url": "http://www.sahapedia.org/saora-art-tale-of-the-man-and-the-snake"
     }
   },
   {
@@ -114,7 +235,7 @@
     "to_id": "mahua_liquor",
     "kind": "related",
     "weight": 0.9,
-    "rationale": "The Warli folk narrative directly concerns the spiritual reverence for homemade Mahua versus the disruption caused by commercial distillers.",
+    "rationale": "The Warli legend explains the mythical consequences of colonial commercial distillation replacing traditional indigenous Mahua brewing.",
     "source": {
       "title": "In Conversation with Shiraz Bulsara Prabhu",
       "url": "http://www.sahapedia.org/conversation-shiraz-bulsara-prabhu-politics-mahua-and-warlis-search-new-source-livelihood"
@@ -125,7 +246,7 @@
     "to_id": "konark_sun_temple",
     "kind": "related",
     "weight": 1.0,
-    "rationale": "Dharmapada's legend is the foundational folk memory of the capping and architectural climax of the 13th-century Konark Sun Temple.",
+    "rationale": "The legend of Dharmapada directly recounts the historic completion and consecration crisis of the Konark Sun Temple.",
     "source": {
       "title": "Konark Sun Temple",
       "url": "http://www.sahapedia.org/konark-sun-temple-unique-marriage-of-form-and-concept"
@@ -135,19 +256,30 @@
     "from_id": "bheema_rain_myth",
     "to_id": "mandar_baja",
     "kind": "uses",
-    "weight": 0.95,
-    "rationale": "Gond lore dictates that playing the Mandar Baja appeases Indra to wash away the dung encasing Bheema, releasing monsoon rains.",
+    "weight": 0.9,
+    "rationale": "Playing the Mandar Baja is the central ritual mechanism in the Gond myth used to awaken Lord Indra.",
     "source": {
       "title": "Bheema: Hero of Gond Pandvani",
       "url": "http://www.sahapedia.org/bheema-hero-gond-pandvani"
     }
   },
   {
+    "from_id": "bastar_dussehra",
+    "to_id": "bastar_painting",
+    "kind": "related",
+    "weight": 0.8,
+    "rationale": "Bastar Dussehra chariot and deity processions are frequent subjects in Bastar folk painting narratives.",
+    "source": {
+      "title": "Bastaria Dussehra",
+      "url": "http://www.sahapedia.org/bastaria-dussehra-coming-together-of-deities"
+    }
+  },
+  {
     "from_id": "gotipua",
     "to_id": "pattachitra",
     "kind": "related",
-    "weight": 0.8,
-    "rationale": "Gotipua acrobats and Pattachitra master painters in Raghurajpur share sacred narrative themes centered around Lord Jagannath and the Gita Govinda.",
+    "weight": 0.7,
+    "rationale": "Both Gotipua acrobatic dance and Pattachitra cloth scrolls share sacred Vaishnava Jagannath iconography in Puri.",
     "source": {
       "title": "Storytelling in Folk Paintings",
       "url": "http://www.sahapedia.org/storytelling-folk-paintings"
@@ -157,8 +289,8 @@
     "from_id": "patan_patola",
     "to_id": "sambalpuri_ikat",
     "kind": "same_family",
-    "weight": 0.85,
-    "rationale": "Patan Patola (Gujarat double ikat) and Sambalpuri Ikat (Odisha resist dye) represent India's twin apex traditions of geometric tie-and-dye weaving.",
+    "weight": 0.8,
+    "rationale": "Patan Patola and Sambalpuri Ikat represent India's twin apex traditions of resist-dyed warp-and-weft ikat weaving.",
     "source": {
       "title": "The Sambalpuri Ikat of Odisha",
       "url": "http://www.sahapedia.org/the-sambalpuri-ikat-of-odisha-history-symbolism-and-contemporary-trends"
@@ -169,7 +301,7 @@
     "to_id": "ellora_caves",
     "kind": "same_family",
     "weight": 0.9,
-    "rationale": "Situated in the same Sahyadri Deccan basalt ridge, Ajanta and Ellora together showcase the multi-century zenith of ancient Indian rock-cut art and sculpture.",
+    "rationale": "Ajanta and Ellora form a contiguous ancient Deccan rock-cut architectural and fresco tradition in Sambhajinagar.",
     "source": {
       "title": "Ajanta Caves",
       "url": "https://www.indianculture.gov.in/ajanta-caves/caves/title=Cave_9/nid=2801017"
@@ -179,8 +311,8 @@
     "from_id": "shigma_holi",
     "to_id": "konkani_khele",
     "kind": "celebrated_at",
-    "weight": 0.95,
-    "rationale": "Konkani Khele folk theater is exclusively performed during the annual Shigma spring celebrations across Konkan villages.",
+    "weight": 0.9,
+    "rationale": "Konkani Khele theatrical performances are performed specifically during the festive days of Shigma.",
     "source": {
       "title": "Transformations of Konkani Khele",
       "url": "http://www.sahapedia.org/transformations-konkani-khele-between-bollywood-and-natya-shastra"

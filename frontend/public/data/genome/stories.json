@@ -1,7 +1,7 @@
 [
   {
     "id": "story_baba_pithora",
-    "element_id": "baba_pithora_origin",
+    "element_id": "pithora_painting",
     "kind": "legend",
     "title_en": "The Birth of Baba Pithora",
     "title_hi": "बाबा पिथौरा का जन्म",
@@ -14,8 +14,36 @@
     "is_retelling": true
   },
   {
+    "id": "story_kali_koyal_love",
+    "element_id": "pithora_painting",
+    "kind": "legend",
+    "title_en": "Kali Koyal and Sawariya Maulan",
+    "title_hi": "काली कोयल और सावरिया मौलान",
+    "retelling_en": "While grazing cows near the sea, young Rani Kali Koyal met the handsome Kandu Raja Sawariya Maulan. She fell instantly in love and deceitfully claimed a black thorn had pricked her foot just so he would touch her. From this fateful encounter, her fourth incarnation bore the divine child, Baba Pithora. Fearing exile, she wrapped the child and floated him down the Ganga-Jamna rivers upon a lotus.",
+    "retelling_hi": "समुद्र के पास गायों को चराते समय, युवा रानी काली कोयल की मुलाकात सावरिया मौलान से हुई। वह प्यार में पड़ गई और दावा किया कि उसके पैर में कांटा चुभ गया है ताकि वह उसे छू सके। इस मिलन से उनके चौथे अवतार में दिव्य बालक बाबा पिथौरा का जन्म हुआ। निर्वासन के डर से, उसने बच्चे को कमल पर नदियों में बहा दिया।",
+    "source": {
+      "title": "History, Mythology and Significance of Baba Pithora Painting",
+      "url": "http://www.sahapedia.org/history-mythology-and-significance-of-baba-pithora-painting"
+    },
+    "is_retelling": true
+  },
+  {
+    "id": "story_pithora_heaven",
+    "element_id": "pithora_painting",
+    "kind": "legend",
+    "title_en": "Pithora's Ascent to Heaven",
+    "title_hi": "पिथौरा का स्वर्ग की ओर प्रस्थान",
+    "retelling_en": "Determined to claim his rightful share of the kingdom, young Pithora set out to find his elusive Uncle Ind. Informed that his uncle resided in heaven, Pithora called upon Mama Karodiya, the magical spider, to weave a path into the sky. Though his journey into the celestial realm did not immediately secure his throne, the audacious ascent confirmed his godly stature among the tribes.",
+    "retelling_hi": "अपने राज्य का हिस्सा पाने के लिए दृढ़ संकल्पित, युवा पिथौरा अपने चाचा इंद्र को खोजने निकल पड़े। यह जानकर कि उनके चाचा स्वर्ग में हैं, पिथौरा ने जादुई मकड़ी मामा करोडिया को आसमान में रास्ता बनाने के लिए बुलाया। हालांकि उनका यह सफर तुरंत उन्हें गद्दी नहीं दिला पाया, लेकिन इससे उनका दिव्य दर्जा साबित हो गया।",
+    "source": {
+      "title": "History, Mythology and Significance of Baba Pithora Painting",
+      "url": "http://www.sahapedia.org/history-mythology-and-significance-of-baba-pithora-painting"
+    },
+    "is_retelling": true
+  },
+  {
     "id": "story_mahua_parsi",
-    "element_id": "mahua_parsi_legend",
+    "element_id": "mahua_liquor",
     "kind": "legend",
     "title_en": "How the Parsi Trader Brought Death",
     "title_hi": "पारसी व्यापारी कैसे मौत लाया",
@@ -29,6 +57,90 @@
   },
   {
     "id": "story_bheema_rain",
+    "element_id": "bheem_jatra",
+    "kind": "legend",
+    "title_en": "Bheema the Rainmaker",
+    "title_hi": "बारिश लाने वाला भीम",
+    "retelling_en": "In Gond mythology, Bheema is revered not just as a strongman, but as the supreme rainmaker. Before the monsoon, the spirit of Bheema is suffocated by encasing a wooden pole representing him in cow dung. Angered, Bheema pleads to Lord Indra. The villagers play the rhythmic Mandar Baja, which coerces Indra to release heavy rains to wash the dung away and free Bheema.",
+    "retelling_hi": "गोंड पौराणिक कथाओं में, भीम को बारिश लाने वाले के रूप में पूजा जाता है। मानसून से पहले, भीम का प्रतिनिधित्व करने वाले लकड़ी के खंभे को गोबर से ढक दिया जाता है। भीम की प्रार्थना और ग्रामीणों द्वारा मंदर बाजा बजाने से, इंद्र बारिश करते हैं ताकि गोबर धुल जाए और भीम मुक्त हो सकें।",
+    "source": {
+      "title": "Bheema: Hero of Gond Pandvani",
+      "url": "http://www.sahapedia.org/bheema-hero-gond-pandvani"
+    },
+    "is_retelling": true
+  },
+  {
+    "id": "story_bastar_dussehra_wood",
+    "element_id": "bastar_dussehra",
+    "kind": "legend",
+    "title_en": "The Sacrifice for the Chariot",
+    "title_hi": "रथ के लिए बलिदान",
+    "retelling_en": "The grand Bastar Dussehra begins not with Rama, but deep in the woods during the new moon. The massive festival chariot requires the sturdiest Sal wood from the Machkot or Bilori forests. Before construction begins, a ritualistic offering is made to the wood itself—a living entity. A walking catfish (Mangur) is sacrificed as a substitute for ancient human offerings to appease the forest spirits.",
+    "retelling_hi": "भव्य बस्तर दशहरा राम के साथ नहीं, बल्कि नए चंद्रमा के दौरान जंगल में शुरू होता है। विशाल रथ के लिए मचकोट या बिलोरी के जंगलों से मजबूत साल की लकड़ी की आवश्यकता होती है। निर्माण शुरू होने से पहले, लकड़ी को ही एक अनुष्ठानिक भेंट दी जाती है जिसमें प्राचीन काल की तरह एक मछली का बलिदान दिया जाता है।",
+    "source": {
+      "title": "Bastaria Dussehra",
+      "url": "http://www.sahapedia.org/bastaria-dussehra-coming-together-of-deities"
+    },
+    "is_retelling": true
+  },
+  {
+    "id": "story_bastar_kachin_devi",
+    "element_id": "bastar_dussehra",
+    "kind": "legend",
+    "title_en": "The Swing of Thorns",
+    "title_hi": "कांटों का झूला",
+    "retelling_en": "A central spectacle of Bastar Dussehra is the invocation of Goddess Kachin Devi. A young, prepubescent girl from the Mirgan community is chosen to act as her vessel. Dressed beautifully, she is made to lie flat on a swing crafted entirely of sharp bel thorns. Only when she sits on this perilous seat and grants spiritual permission can the royal Maharaja officially commence the Dussehra festivities.",
+    "retelling_hi": "बस्तर दशहरे का एक मुख्य आकर्षण देवी कचीन का आह्वान है। मिर्गन समुदाय की एक युवा लड़की को चुना जाता है। उसे बेल के कांटों से बने झूले पर लिटाया जाता है। जब वह इस खतरनाक सीट पर बैठकर आध्यात्मिक अनुमति देती है, तभी महाराजा दशहरे का उत्सव शुरू कर सकते हैं।",
+    "source": {
+      "title": "Bastaria Dussehra",
+      "url": "http://www.sahapedia.org/bastaria-dussehra-coming-together-of-deities"
+    },
+    "is_retelling": true
+  },
+  {
+    "id": "story_dharmapada",
+    "element_id": "konark_sun_temple",
+    "kind": "legend",
+    "title_en": "Dharmapada and the Sun Temple",
+    "title_hi": "धर्मपद और सूर्य मंदिर",
+    "retelling_en": "For twelve years, 1,200 artisans toiled to build the Konark Sun Temple but were unable to place the crowning stone. Under a strict royal deadline threatening their execution, Dharmapada, the 12-year-old son of the chief architect, arrived and solved the architectural puzzle. However, fearing the king would kill the 1,200 men for relying on a child, the boy threw himself off the temple into the sea.",
+    "retelling_hi": "1,200 कारीगर 12 वर्षों तक कोणार्क सूर्य मंदिर का निर्माण करने में लगे रहे, लेकिन वे शीर्ष पत्थर को रखने में असमर्थ थे। मुख्य वास्तुकार के 12 वर्षीय बेटे धर्मपद ने इसे हल किया। राजा के क्रोध से 1,200 कारीगरों को बचाने के लिए, उसने खुद को मंदिर से समुद्र में फेंक कर बलिदान दे दिया।",
+    "source": {
+      "title": "Konark Sun Temple",
+      "url": "http://www.sahapedia.org/konark-sun-temple-unique-marriage-of-form-and-concept"
+    },
+    "is_retelling": true
+  },
+  {
+    "id": "story_baba_pithora_node",
+    "element_id": "baba_pithora_origin",
+    "kind": "legend",
+    "title_en": "The Birth of Baba Pithora",
+    "title_hi": "बाबा पिथौरा का जन्म",
+    "retelling_en": "Baba Pithora was born to Rani Kali Koyal. Afraid of societal wrath for having an illegitimate child, she abandoned him in a river. Rani Kajal, the sister of Baba Ind, found the baby while drawing water and raised him. When Pithora grew up, he demanded his half of the kingdom, leading to a massive struggle with Baba Ind and his ultimate deification among the Rathva people.",
+    "retelling_hi": "रानी काली कोयल ने समाज के डर से अपने नवजात बेटे पिथौरा को नदी में छोड़ दिया। बाबा इंद्र की बहन रानी काजल ने उसे पाला। बड़े होने पर, पिथौरा ने अपने हिस्से के राज्य की मांग की, जिससे बाबा इंद्र के साथ उसका संघर्ष हुआ और बाद में रथवा लोगों के बीच उसका देवत्वकरण हुआ।",
+    "source": {
+      "title": "Pithora of the Rathvas",
+      "url": "http://www.sahapedia.org/pithora-of-the-rathvas"
+    },
+    "is_retelling": true
+  },
+  {
+    "id": "story_mahua_parsi_node",
+    "element_id": "mahua_parsi_legend",
+    "kind": "legend",
+    "title_en": "How the Parsi Trader Brought Death",
+    "title_hi": "पारसी व्यापारी कैसे मौत लाया",
+    "retelling_en": "An adivasi carpenter, married to a Brahmin's daughter, cleverly trapped Yama's messengers inside a beautifully carved wooden cupboard in the forest, preventing them from taking his father-in-law's soul. However, years later, a generous Parsi liquor vendor intoxicated the carpenter. While drunk, the carpenter carelessly opened the sealed cupboard, releasing the messengers, thus allowing death to finally claim him and curse his people.",
+    "retelling_hi": "एक आदिवासी बढ़ई ने यम के दूतों को जंगल में एक सुंदर लकड़ी की अलमारी में फंसा दिया। वर्षों बाद, एक पारसी शराब विक्रेता ने बढ़ई को नशे में धुत कर दिया। नशे की हालत में, बढ़ई ने लापरवाही से अलमारी खोल दी, जिससे दूत मुक्त हो गए और मृत्यु ने उसे अपना शिकार बना लिया।",
+    "source": {
+      "title": "In Conversation with Shiraz Bulsara Prabhu",
+      "url": "http://www.sahapedia.org/conversation-shiraz-bulsara-prabhu-politics-mahua-and-warlis-search-new-source-livelihood"
+    },
+    "is_retelling": true
+  },
+  {
+    "id": "story_bheema_rain_node",
     "element_id": "bheema_rain_myth",
     "kind": "legend",
     "title_en": "Bheema the Rainmaker",
@@ -42,7 +154,7 @@
     "is_retelling": true
   },
   {
-    "id": "story_dharmapada",
+    "id": "story_dharmapada_node",
     "element_id": "dharmapada_konark",
     "kind": "legend",
     "title_en": "Dharmapada and the Sun Temple",

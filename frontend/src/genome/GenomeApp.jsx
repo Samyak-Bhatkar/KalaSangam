@@ -93,7 +93,7 @@ export default function GenomeApp() {
   // Timeline events for Kathak
   const kathakTimeline = useMemo(() => {
     if (!data) return [];
-    return getTimelineForTradition(data, 'kathak-dance');
+    return getTimelineForTradition(data, 'kathak') || getTimelineForTradition(data, 'kathak-dance');
   }, [data]);
 
   // Discovery elements (rarity >= 4)
@@ -152,7 +152,7 @@ export default function GenomeApp() {
         // Select Warli Painting Dossier
         handleReset();
         setActiveDemoScene('2');
-        const warli = data.elementsById.get('warli-painting');
+        const warli = data.elementsById.get('warli_painting') || data.elementsById.get('warli-painting');
         if (warli) setSelectedElement(warli);
         break;
       }
@@ -160,7 +160,7 @@ export default function GenomeApp() {
         // Cultural DNA Explorer & Heatmap (Hero: Warli)
         handleReset();
         setActiveDemoScene('3');
-        const warli = data.elementsById.get('warli-painting');
+        const warli = data.elementsById.get('warli_painting') || data.elementsById.get('warli-painting');
         if (warli) {
           setSelectedElement(warli);
           setDnaOriginElement(warli);
@@ -168,13 +168,13 @@ export default function GenomeApp() {
         break;
       }
       case '4': {
-        // Story Map
+        // Story Map (Hero: Baba Pithora / Warli)
         handleReset();
         setActiveDemoScene('4');
-        const warli = data.elementsById.get('warli-painting');
-        if (warli) {
-          setSelectedElement(warli);
-          const stories = getStoriesForElement(data, warli.id);
+        const heroWithStory = data.elementsById.get('pithora_painting') || data.elementsById.get('bastar_dussehra') || data.elementsById.get('warli_painting') || data.elementsById.get('warli-painting');
+        if (heroWithStory) {
+          setSelectedElement(heroWithStory);
+          const stories = getStoriesForElement(data, heroWithStory.id);
           if (stories.length > 0) {
             setActiveStory(stories[0]);
           }
@@ -185,7 +185,7 @@ export default function GenomeApp() {
         // Kathak Timeline Slider
         handleReset();
         setActiveDemoScene('5');
-        const kathak = data.elementsById.get('kathak-dance');
+        const kathak = data.elementsById.get('kathak') || data.elementsById.get('kathak-dance');
         if (kathak) {
           setSelectedElement(kathak);
           setIsTimelineActive(true);
@@ -197,8 +197,8 @@ export default function GenomeApp() {
         handleReset();
         setActiveDemoScene('6');
         setIsUnknownIndiaMode(true);
-        const rogan = data.elementsById.get('rogan-art');
-        if (rogan) setSelectedElement(rogan);
+        const rare = data.elementsById.get('chadar_badar') || data.elementsById.get('kurmi_comb_cut_murals') || data.elementsById.get('saura_art') || data.elementsById.get('rogan-art');
+        if (rare) setSelectedElement(rare);
         break;
       }
       case '7': {
