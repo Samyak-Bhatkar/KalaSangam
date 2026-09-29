@@ -20,6 +20,8 @@ import AskTheAtlasSearch from './components/AskTheAtlasSearch';
 import FestivalPulse from './components/FestivalPulse';
 import { CULTURAL_TYPES, MAP_CENTER_INDIA } from './utils/constants';
 import { Compass, Sparkles, Navigation, Layers, Flame, BookOpen, Clock, AlertCircle, Search } from 'lucide-react';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import './genome.css';
 
 export default function GenomeApp({ onBack = null }) {
   const [data, setData] = useState(null);
@@ -491,21 +493,21 @@ export default function GenomeApp({ onBack = null }) {
             <span>प्रमुख सांस्कृतिक केंद्र (Quick Focus):</span>
           </div>
           <div className="flex flex-wrap gap-1">
-            {['warli-painting', 'kathak-dance', 'rogan-art', 'paithani-saree', 'ellora-caves'].map((id) => {
-              const el = data?.elementsById?.get(id);
+            {['warli_painting', 'kathak', 'paithani_sari', 'ellora_caves', 'chadar_badar', 'saraswati_vina_hoysala'].map((id) => {
+              const el = data?.elementsById?.get(id) || data?.elementsById?.get(id.replace(/_/g, '-')) || data?.elementsById?.get(id.replace(/-/g, '_'));
               if (!el) return null;
-              const isSelected = selectedElement?.id === id;
+              const isSelected = selectedElement?.id === el.id;
               return (
                 <button
                   key={id}
                   onClick={() => setSelectedElement(el)}
                   className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                      ? 'bg-amber-500 text-slate-950 font-black shadow-xs ring-1 ring-amber-300'
                       : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
                   }`}
                 >
-                  {el.name_hi}
+                  {el.name_hi || el.name_en}
                 </button>
               );
             })}
