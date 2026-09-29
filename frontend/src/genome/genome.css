@@ -69,3 +69,26 @@
 .animate-cultural-pulse {
   animation: cultural-pulse 2s infinite;
 }
+
+/* Vertical Laser Sweep for Scanner Reticle */
+@keyframes scanLaser {
+  0% {
+    top: 6%;
+    opacity: 0.3;
+  }
+  50% {
+    top: 92%;
+    opacity: 1;
+  }
+  100% {
+    top: 6%;
+    opacity: 0.3;
+  }
+}
+
+.animate-scan-laser {
+  position: absolute;
+  left: 0;
+  right: 0;
+  animation: scanLaser 1.8s ease-in-out infinite;
+}
