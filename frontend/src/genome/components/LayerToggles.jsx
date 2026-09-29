@@ -12,7 +12,9 @@ import {
   Languages,
   BookOpen,
   CheckSquare,
-  Square
+  Square,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -35,31 +37,40 @@ export default function LayerToggles({
   onClearAll = () => {},
   elementCounts = {}
 }) {
+  const [isMobileOpen, setIsMobileOpen] = React.useState(false);
   const typeKeys = Object.keys(CULTURAL_TYPES);
   const allSelected = typeKeys.every((t) => activeTypes.has(t));
 
   return (
-    <div className="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-2xl p-3 shadow-2xl flex flex-col gap-2 max-w-full">
-      <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span className="text-xs font-black text-white tracking-wide uppercase">
-            सांस्कृतिक स्तर (Cultural Layers)
+    <div className="bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-2xl flex flex-col gap-2 max-w-full">
+      <div className="flex items-center justify-between gap-2 border-b border-slate-800/80 pb-2">
+        <button
+          type="button"
+          onClick={() => setIsMobileOpen(!isMobileOpen)}
+          className="flex items-center gap-1.5 text-left cursor-pointer sm:cursor-default"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <span className="text-[11px] sm:text-xs font-black text-white tracking-wide uppercase">
+            सांस्कृतिक स्तर ({activeTypes.size}/{typeKeys.length})
           </span>
-        </div>
+          <span className="sm:hidden text-slate-400 ml-1">
+            {isMobileOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </span>
+        </button>
+
         <div className="flex items-center gap-1">
           <button
             onClick={allSelected ? onClearAll : onSelectAll}
             className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
           >
             {allSelected ? <Square className="w-3 h-3 text-slate-400" /> : <CheckSquare className="w-3 h-3 text-amber-400" />}
-            <span>{allSelected ? 'सभी हटाएं' : 'सभी चुनें'}</span>
+            <span className="hidden xs:inline">{allSelected ? 'हटाएं' : 'सभी चुनें'}</span>
           </button>
         </div>
       </div>
 
-      {/* Layer Chips */}
-      <div className="flex flex-wrap gap-1.5 max-h-[140px] md:max-h-none overflow-y-auto custom-scrollbar">
+      {/* Layer Chips - always visible on desktop (sm:), toggleable on mobile */}
+      <div className={`${isMobileOpen ? 'flex' : 'hidden sm:flex'} flex-wrap gap-1.5 max-h-[160px] sm:max-h-[140px] md:max-h-none overflow-y-auto custom-scrollbar`}>
         {typeKeys.map((typeKey) => {
           const cfg = CULTURAL_TYPES[typeKey];
           const active = activeTypes.has(typeKey);

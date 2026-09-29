@@ -25,32 +25,32 @@ export default function DemoControlBar({
   onBack = null
 }) {
   return (
-    <header className="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-2 flex flex-wrap items-center justify-between gap-3 text-xs z-30 select-none">
+    <header className="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-2.5 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs z-30 select-none">
       {/* Title & Brand */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
         {onBack && (
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold transition-all cursor-pointer mr-1 active:scale-95 shadow-xs"
+            className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold transition-all cursor-pointer mr-0.5 sm:mr-1 active:scale-95 shadow-xs"
             title="वापस जाएं (Back to Storefront / App)"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">वापस</span>
           </button>
         )}
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-terracotta flex items-center justify-center text-slate-950 font-black shadow-md">
-          <Sparkles className="w-4 h-4 fill-slate-950" />
+        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-terracotta flex items-center justify-center text-slate-950 font-black shadow-md shrink-0">
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-slate-950" />
         </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-sm font-black text-white tracking-wide">
-              भारत सांस्कृतिक जीनोम (Bharat Cultural Genome)
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <h1 className="text-xs sm:text-sm font-black text-white tracking-wide truncate max-w-[150px] xs:max-w-[200px] sm:max-w-none">
+              भारत सांस्कृतिक जीनोम
             </h1>
-            <span className="text-[10px] px-2 py-0.2 rounded-full bg-amber-500/20 text-amber-300 font-black border border-amber-500/30">
-              SIH 2026 • PS 26197
+            <span className="hidden sm:inline-block text-[9px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 shrink-0">
+              SIH 2026
             </span>
           </div>
-          <p className="text-[10px] text-slate-400">
+          <p className="hidden md:block text-[10px] text-slate-400">
             स्थानिक सांस्कृतिक स्तर, संबंध, लोककथाएं व ऐतिहासिक समयरेखा
           </p>
         </div>
@@ -82,40 +82,41 @@ export default function DemoControlBar({
       </div>
 
       {/* Action Controls: Search, Festival Pulse, Sources, Reset */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <button
           onClick={onOpenSearch}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-amber-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
+          className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-amber-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
           title="एटलस में किसी भी परंपरा या स्थान को खोजें (Key: 9)"
         >
           <Search className="w-3.5 h-3.5 text-amber-400" />
-          <span className="hidden sm:inline">खोजें (Search)</span>
+          <span className="hidden sm:inline">खोजें</span>
         </button>
 
         <button
           onClick={onOpenFestivalPulse}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-orange-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
+          className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-orange-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
           title="मासिक भारतीय उत्सव चक्र (Key: 8)"
         >
           <Flame className="w-3.5 h-3.5 text-orange-400" />
-          <span className="hidden sm:inline">उत्सव पल्स</span>
+          <span className="hidden sm:inline">उत्सव</span>
         </button>
 
         <button
           onClick={onOpenSources}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
+          className="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
+          title="डेटा व स्रोत"
         >
           <Database className="w-3.5 h-3.5 text-cyan-400" />
-          <span>डेटा व स्रोत</span>
+          <span className="hidden sm:inline">स्रोत</span>
         </button>
 
         <button
           onClick={onReset}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
-          title="Reset map view and active overlays"
+          className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
+          title="रीसेट (Reset map view)"
         >
-          <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-          <span>रीसेट (Reset)</span>
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span className="hidden md:inline">रीसेट</span>
         </button>
       </div>
     </header>

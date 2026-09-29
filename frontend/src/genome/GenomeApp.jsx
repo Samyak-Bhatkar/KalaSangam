@@ -278,12 +278,12 @@ export default function GenomeApp({ onBack = null }) {
 
   if (loading) {
     return (
-      <div className="w-screen h-screen bg-[#070D1D] flex flex-col items-center justify-center text-slate-300">
+      <div className="w-full h-full min-h-[500px] bg-[#070D1D] flex flex-col items-center justify-center text-slate-300 p-4 text-center">
         <div className="w-12 h-12 border-3 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
         <h2 className="text-base font-black text-white tracking-wide">
           भारत सांस्कृतिक जीनोम मानचित्र लोड हो रहा है...
         </h2>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-slate-500 mt-1 max-w-sm">
           Loading 10 Cultural Layers, Survey of India GeoJSON & Living Knowledge Vault
         </p>
       </div>
@@ -292,7 +292,7 @@ export default function GenomeApp({ onBack = null }) {
 
   if (error) {
     return (
-      <div className="w-screen h-screen bg-[#070D1D] flex flex-col items-center justify-center p-6 text-center">
+      <div className="w-full h-full min-h-[500px] bg-[#070D1D] flex flex-col items-center justify-center p-4 sm:p-6 text-center">
         <AlertCircle className="w-12 h-12 text-red-400 mb-3" />
         <h2 className="text-lg font-black text-white">सांस्कृतिक डेटा लोड करने में त्रुटि</h2>
         <p className="text-xs text-red-300 mt-1 max-w-md">{error}</p>
@@ -307,7 +307,7 @@ export default function GenomeApp({ onBack = null }) {
   }
 
   return (
-    <div className={`relative ${onBack ? 'w-full h-[88vh] min-h-[720px] rounded-2xl border border-slate-800 shadow-2xl' : 'w-screen h-screen'} overflow-hidden flex flex-col bg-[#070D1D]`}>
+    <div className={`relative ${onBack ? 'w-full h-[78vh] sm:h-[88vh] min-h-[500px] sm:min-h-[720px] rounded-xl sm:rounded-2xl border border-slate-800 shadow-2xl' : 'w-full h-screen'} overflow-hidden flex flex-col bg-[#070D1D]`}>
       {/* Top Demo & Brand Bar */}
       <DemoControlBar
         isDemoActive={true}
@@ -340,7 +340,7 @@ export default function GenomeApp({ onBack = null }) {
         />
 
         {/* Floating Top-Left Controls: Layer Toggles */}
-        <div className="absolute top-4 left-4 z-20 max-w-md pointer-events-auto">
+        <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-20 max-w-[calc(100vw-1rem)] sm:max-w-md pointer-events-auto">
           <LayerToggles
             activeTypes={activeTypes}
             onToggleType={handleToggleType}
@@ -351,21 +351,22 @@ export default function GenomeApp({ onBack = null }) {
         </div>
 
         {/* Floating Mode Switcher Pills (Top Center-Right) */}
-        <div className="absolute top-4 right-4 z-20 flex flex-wrap items-center gap-1.5 pointer-events-auto">
+        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-20 flex flex-wrap items-center justify-end gap-1 sm:gap-1.5 pointer-events-auto max-w-[calc(100vw-1rem)]">
           {/* Ask the Atlas Search Pill */}
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-lg backdrop-blur-md bg-slate-900/90 text-amber-300 border-amber-500/40 hover:bg-slate-800"
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-lg backdrop-blur-md bg-slate-900/90 text-amber-300 border-amber-500/40 hover:bg-slate-800"
             title="परंपरा या स्थान खोजें (Key: 9)"
           >
             <Search className="w-3.5 h-3.5 text-amber-400" />
-            <span>एटलस से पूछें (Search)</span>
+            <span className="hidden sm:inline">एटलस से पूछें (Search)</span>
+            <span className="sm:hidden text-[10px]">खोज</span>
           </button>
 
           {/* Festival Pulse Toggle Pill */}
           <button
             onClick={() => setIsFestivalPulseOpen(!isFestivalPulseOpen)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-lg backdrop-blur-md ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-lg backdrop-blur-md ${
               isFestivalPulseOpen
                 ? 'bg-orange-500 text-slate-950 font-black border-orange-400 scale-105'
                 : 'bg-slate-900/90 text-orange-300 border-orange-500/40 hover:bg-slate-800'
@@ -373,7 +374,8 @@ export default function GenomeApp({ onBack = null }) {
             title="मासिक उत्सव चक्र (Key: 8)"
           >
             <Flame className="w-3.5 h-3.5" />
-            <span>उत्सव पल्स (Festivals)</span>
+            <span className="hidden sm:inline">उत्सव पल्स (Festivals)</span>
+            <span className="sm:hidden text-[10px]">उत्सव</span>
           </button>
 
           {/* Unknown India Discovery Mode Toggle */}
@@ -385,14 +387,15 @@ export default function GenomeApp({ onBack = null }) {
                 handleTriggerScene('6');
               }
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-lg backdrop-blur-md ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-lg backdrop-blur-md ${
               isUnknownIndiaMode
                 ? 'bg-orange-500 text-slate-950 font-black border-orange-400 scale-105'
                 : 'bg-slate-900/90 text-orange-300 border-orange-500/40 hover:bg-slate-800'
             }`}
           >
             <Compass className="w-3.5 h-3.5" />
-            <span>अपरिचित भारत (Unknown India)</span>
+            <span className="hidden md:inline">अपरिचित भारत (Unknown India)</span>
+            <span className="md:hidden text-[10px]">अपरिचित</span>
           </button>
 
           {/* Curated Journey Route Toggle */}
@@ -404,19 +407,20 @@ export default function GenomeApp({ onBack = null }) {
                 handleTriggerScene('7');
               }
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-lg backdrop-blur-md ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-lg backdrop-blur-md ${
               isJourneyActive
                 ? 'bg-emerald-500 text-slate-950 font-black border-emerald-400 scale-105'
                 : 'bg-slate-900/90 text-emerald-300 border-emerald-500/40 hover:bg-slate-800'
             }`}
           >
             <Navigation className="w-3.5 h-3.5" />
-            <span>सांस्कृतिक यात्रा (Heritage Trail)</span>
+            <span className="hidden md:inline">सांस्कृतिक यात्रा (Heritage Trail)</span>
+            <span className="md:hidden text-[10px]">यात्रा</span>
           </button>
         </div>
 
         {/* Floating Side Drawer (Right Side) */}
-        <div className="absolute bottom-4 right-4 z-30 pointer-events-auto">
+        <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-auto right-2 sm:right-4 z-30 pointer-events-auto max-w-[calc(100vw-1rem)] sm:max-w-none">
           {/* 1. Cultural DNA Explorer Drawer */}
           {dnaOriginElement && (
             <CulturalDNAExplorer

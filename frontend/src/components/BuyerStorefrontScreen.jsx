@@ -18,6 +18,8 @@ import {
   Play,
   Pause,
   Compass,
+  Menu,
+  X,
 } from 'lucide-react';
 import { fetchStorefrontProducts } from '../services/api';
 import IndiaCraftMap from './IndiaCraftMap';
@@ -41,6 +43,7 @@ export default function BuyerStorefrontScreen({ onGoToLogin, onScanMotifPublic, 
   const [showCraftPins, setShowCraftPins] = useState(false);
   const [activePinId, setActivePinId] = useState(null);
   const [playingAudioUrl, setPlayingAudioUrl] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const audioRef = useRef(null);
 
   const togglePlayAudio = (url) => {
@@ -85,42 +88,45 @@ export default function BuyerStorefrontScreen({ onGoToLogin, onScanMotifPublic, 
   });
 
   return (
-    <div className="min-h-screen bg-[#FAF9F5] text-slate-900 flex flex-col font-sans select-none w-full">
+    <div className="min-h-screen bg-[#FAF9F5] text-slate-900 flex flex-col font-sans select-none w-full max-w-full overflow-x-hidden">
       {/* Top Public Header */}
-      <header className="sticky top-0 z-30 px-4 md:px-8 lg:px-12 py-3.5 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-30 px-3 sm:px-6 md:px-8 lg:px-12 py-3 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
+        <div className="flex items-center justify-between gap-2">
+          {/* Logo & Brand Info */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <img
               src="/brand_emblem.png"
               alt="ShilpSetu Emblem"
-              className="w-9 h-9 rounded-full border border-amber-500/40 object-cover shrink-0 shadow-xs"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-amber-500/40 object-cover shrink-0 shadow-xs"
             />
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-base font-black tracking-tight text-slate-900 flex items-center gap-1">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h1 className="text-sm sm:text-base font-black tracking-tight text-slate-900 flex items-center gap-1 truncate">
                   <span>शिल्पसेतु बाज़ार</span>
-                  <span className="text-[#C85A32] text-xs font-serif italic">ShilpSetu Live</span>
+                  <span className="text-[#C85A32] text-xs font-serif italic hidden xs:inline">Live</span>
                 </h1>
-                <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
-                  ONDC & GeM Verified
+                <span className="text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200 shrink-0">
+                  ONDC & GeM
                 </span>
               </div>
-              <p className="text-[10px] text-slate-500 font-medium">
-                भारत के पारंपरिक कारीगरों से सीधे खरीदे गए प्रमाणित हस्तशिल्प
+              <p className="text-[9px] sm:text-[10px] text-slate-500 font-medium truncate max-w-[190px] sm:max-w-none">
+                पारंपरिक कारीगरों से सीधे प्रमाणित हस्तशिल्प
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Desktop Navigation Buttons */}
+          <div className="hidden lg:flex items-center gap-2">
             <button
               onClick={() => setViewMode(viewMode === 'genome' ? 'grid' : 'genome')}
               className={`py-1.5 px-3 rounded-full text-xs font-black flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95 border ${
                 viewMode === 'genome'
                   ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md scale-105'
-                  : 'bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 text-amber-300 border-amber-500/50 hover:border-amber-400'
+                  : 'bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 text-amber-900 border-amber-500/50 hover:border-amber-400'
               }`}
               title="10-स्तरीय सांस्कृतिक जीनोम मानचित्र, कथक समयरेखा व DNA संबंध"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
               <span>सांस्कृतिक जीनोम (Genome Map)</span>
             </button>
             {onOpenExplorer && (
@@ -149,110 +155,202 @@ export default function BuyerStorefrontScreen({ onGoToLogin, onScanMotifPublic, 
               <span>कारीगर / समन्वयक लॉगिन</span>
             </button>
           </div>
-        </header>
 
-        {/* Hero Value Banner */}
-        <section className="px-4 md:px-8 lg:px-12 py-7 bg-gradient-to-br from-[#1E2A4A] via-[#172036] to-[#0F172A] text-white">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider mb-2 border border-amber-400/30">
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                <span>100% बिचौलिया-मुक्त सीधी खरीद</span>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-black tracking-tight">
-                भारत के हाशिए पर स्थित कारीगरों का डिजिटल बाज़ार
-              </h2>
-              <p className="text-xs md:text-sm text-slate-300 mt-1 max-w-xl">
-                शिल्पसेतु AI द्वारा सत्यापित उत्पाद, डिजिटल जीआई संप्रभु सील (Digital GI Sovereign Seal) एवं प्रामाणिक क्यूआर कोड के साथ।
-              </p>
-            </div>
+          {/* Mobile Quick Action + Hamburger Menu Toggle */}
+          <div className="flex lg:hidden items-center gap-1.5">
+            <button
+              onClick={() => setViewMode(viewMode === 'genome' ? 'grid' : 'genome')}
+              className={`py-1.5 px-2.5 rounded-full text-[11px] font-black flex items-center gap-1 shadow-xs cursor-pointer transition-all active:scale-95 border ${
+                viewMode === 'genome'
+                  ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md'
+                  : 'bg-amber-50 text-amber-900 border-amber-300'
+              }`}
+            >
+              <Sparkles className="w-3 h-3 text-amber-600" />
+              <span>जीनोम</span>
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
 
-            <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 shrink-0 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-300 font-black text-xl">
-                {products.length}
+        {/* Mobile Navigation Drawer / Dropdown */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden mt-3 pt-3 border-t border-slate-200 flex flex-col gap-2 animate-in slide-in-from-top-2 duration-200">
+            <button
+              onClick={() => {
+                setViewMode(viewMode === 'genome' ? 'grid' : 'genome');
+                setMobileMenuOpen(false);
+              }}
+              className={`w-full py-2.5 px-3.5 rounded-xl text-left font-black text-xs flex items-center justify-between border transition-all ${
+                viewMode === 'genome'
+                  ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-xs'
+                  : 'bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-600" />
+                <span>🧬 10-स्तरीय सांस्कृतिक जीनोम (Genome Map)</span>
               </div>
-              <div className="text-left">
-                <div className="text-xs font-bold text-white">लाइव उत्पाद</div>
-                <div className="text-[10px] text-slate-300">सीधे ONDC व GeM पर उपलब्ध</div>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+
+            {onOpenExplorer && (
+              <button
+                onClick={() => {
+                  onOpenExplorer();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full py-2.5 px-3.5 rounded-xl text-left font-bold text-xs bg-slate-900 text-amber-300 border border-slate-800 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-amber-400" />
+                  <span>🧭 धरोहर अन्वेषक (Heritage Explorer)</span>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {onScanMotifPublic && (
+              <button
+                onClick={() => {
+                  onScanMotifPublic();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full py-2.5 px-3.5 rounded-xl text-left font-bold text-xs bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 border border-amber-400 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-slate-950" />
+                  <span>✨ रूपांकन पहचानें (Scan Motif AI)</span>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                onGoToLogin();
+                setMobileMenuOpen(false);
+              }}
+              className="w-full py-2.5 px-3.5 rounded-xl text-left font-bold text-xs bg-[#C85A32] text-white flex items-center justify-between shadow-xs"
+            >
+              <div className="flex items-center gap-2">
+                <LogIn className="w-4 h-4 text-white" />
+                <span>👤 कारीगर / समन्वयक लॉगिन</span>
               </div>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+      </header>
+
+      {/* Hero Value Banner */}
+      <section className="px-3 sm:px-6 md:px-8 lg:px-12 py-5 sm:py-7 bg-gradient-to-br from-[#1E2A4A] via-[#172036] to-[#0F172A] text-white">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider mb-2 border border-amber-400/30">
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span>100% बिचौलिया-मुक्त सीधी खरीद</span>
             </div>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-tight">
+              भारत के हाशिए पर स्थित कारीगरों का डिजिटल बाज़ार
+            </h2>
+            <p className="text-xs md:text-sm text-slate-300 mt-1 max-w-xl">
+              शिल्पसेतु AI द्वारा सत्यापित उत्पाद, डिजिटल जीआई संप्रभु सील (Digital GI Sovereign Seal) एवं प्रामाणिक क्यूआर कोड के साथ।
+            </p>
           </div>
 
-          {/* Search Bar & View Toggle */}
-          <div className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="कलाकृति, कारीगर या श्रेणी खोजें (जैसे: टेराकोटा, चंदेरी, शांति देवी)..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-slate-400 text-xs md:text-sm focus:outline-none focus:border-amber-400 backdrop-blur-sm transition-colors"
-              />
+          <div className="p-2.5 sm:p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 shrink-0 flex items-center gap-3 self-start sm:self-auto">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-300 font-black text-lg sm:text-xl">
+              {products.length}
             </div>
-
-            {/* View Switcher Toggle */}
-            <div className="flex items-center p-1 rounded-xl bg-slate-900/70 border border-white/20 shrink-0 self-start sm:self-auto shadow-inner">
-              <button
-                type="button"
-                id="toggle-view-grid"
-                onClick={() => setViewMode('grid')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === 'grid'
-                    ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
-                    : 'text-slate-300 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <span>🛍️</span>
-                <span>ग्रिड दृश्य</span>
-              </button>
-              <button
-                type="button"
-                id="toggle-view-map"
-                onClick={() => setViewMode('map')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === 'map'
-                    ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
-                    : 'text-slate-300 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <span>🗺️</span>
-                <span>भारत धरोहर एटलस</span>
-              </button>
-              <button
-                type="button"
-                id="toggle-view-genome"
-                onClick={() => setViewMode('genome')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === 'genome'
-                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black shadow-xs'
-                    : 'text-amber-300 hover:text-white hover:bg-white/10'
-                }`}
-                title="10 सांस्कृतिक स्तर, कथक समयरेखा व जीनोम संबंध"
-              >
-                <span>🧬</span>
-                <span>सांस्कृतिक जीनोम (10 स्तर)</span>
-              </button>
-              <a
-                href="/genome.html?demo=1"
-                target="_blank"
-                rel="noopener noreferrer"
-                title="नये टैब में पूर्ण स्क्रीन खोलें"
-                className="flex items-center p-1.5 text-slate-400 hover:text-amber-300 transition-colors"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+            <div className="text-left">
+              <div className="text-xs font-bold text-white">लाइव उत्पाद</div>
+              <div className="text-[10px] text-slate-300">सीधे ONDC व GeM पर उपलब्ध</div>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Product Grid or Interactive Craft Map or Cultural Genome Map */}
-        <main className="flex-1 px-4 md:px-8 lg:px-12 py-8 overflow-y-auto">
-          {viewMode === 'genome' ? (
-            <div className="w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-800 animate-in fade-in duration-300">
-              <React.Suspense fallback={
-                <div className="w-full h-[700px] bg-[#070D1D] flex flex-col items-center justify-center text-amber-400 font-bold gap-3">
-                  <div className="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        {/* Search Bar & View Toggle */}
+        <div className="mt-4 sm:mt-5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="कलाकृति, कारीगर या श्रेणी खोजें (जैसे: टेराकोटा, चंदेरी, शांति देवी)..."
+              className="w-full pl-10 pr-4 py-2 sm:py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-slate-400 text-xs md:text-sm focus:outline-none focus:border-amber-400 backdrop-blur-sm transition-colors"
+            />
+          </div>
+
+          {/* View Switcher Toggle */}
+          <div className="w-full sm:w-auto flex items-center p-1 rounded-xl bg-slate-900/80 border border-white/20 shrink-0 shadow-inner overflow-x-auto no-scrollbar gap-1">
+            <button
+              type="button"
+              id="toggle-view-grid"
+              onClick={() => setViewMode('grid')}
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                viewMode === 'grid'
+                  ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <span>🛍️</span>
+              <span>ग्रिड दृश्य</span>
+            </button>
+            <button
+              type="button"
+              id="toggle-view-map"
+              onClick={() => setViewMode('map')}
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                viewMode === 'map'
+                  ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <span>🗺️</span>
+              <span>भारत धरोहर एटलस</span>
+            </button>
+            <button
+              type="button"
+              id="toggle-view-genome"
+              onClick={() => setViewMode('genome')}
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                viewMode === 'genome'
+                  ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black shadow-xs'
+                  : 'text-amber-300 hover:text-white hover:bg-white/10'
+              }`}
+              title="10 सांस्कृतिक स्तर, कथक समयरेखा व जीनोम संबंध"
+            >
+              <span>🧬</span>
+              <span>सांस्कृतिक जीनोम</span>
+            </button>
+            <a
+              href="/genome.html?demo=1"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="नये टैब में पूर्ण स्क्रीन खोलें"
+              className="flex items-center p-1.5 text-slate-400 hover:text-amber-300 transition-colors shrink-0"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Product Grid or Interactive Craft Map or Cultural Genome Map */}
+      <main className="flex-1 px-3 sm:px-6 md:px-8 lg:px-12 py-4 sm:py-8 overflow-y-auto max-w-full">
+        {viewMode === 'genome' ? (
+          <div className="w-full rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-slate-800 animate-in fade-in duration-300">
+            <React.Suspense fallback={
+              <div className="w-full h-[500px] sm:h-[700px] bg-[#070D1D] flex flex-col items-center justify-center text-amber-400 font-bold gap-3 p-4 text-center">
+                <div className="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
                   <span>भारत सांस्कृतिक जीनोम मानचित्र लोड हो रहा है...</span>
                 </div>
               }>

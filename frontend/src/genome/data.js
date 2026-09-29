@@ -7,12 +7,22 @@
  * - timeline_events
  */
 
+import fallbackElements from '../../public/data/genome/cultural_elements.json';
+import fallbackRelations from '../../public/data/genome/relations.json';
+import fallbackStories from '../../public/data/genome/stories.json';
+import fallbackTimelineEvents from '../../public/data/genome/timeline_events.json';
+
 let cachedData = null;
 
 export async function loadGenomeData() {
   if (cachedData) {
     return cachedData;
   }
+
+  let elements = fallbackElements;
+  let relations = fallbackRelations;
+  let stories = fallbackStories;
+  let timelineEvents = fallbackTimelineEvents;
 
   try {
     const [elementsRes, relationsRes, storiesRes, timelineRes] = await Promise.all([
@@ -22,16 +32,26 @@ export async function loadGenomeData() {
       fetch('/data/genome/timeline_events.json')
     ]);
 
-    if (!elementsRes.ok || !relationsRes.ok || !storiesRes.ok || !timelineRes.ok) {
-      throw new Error(`Failed to load genome data: status [${elementsRes.status}, ${relationsRes.status}, ${storiesRes.status}, ${timelineRes.status}]`);
+    if (elementsRes.ok && relationsRes.ok && storiesRes.ok && timelineRes.ok) {
+      const ct = elementsRes.headers.get('content-type') || '';
+      if (!ct.includes('text/html')) {
+        const [eJson, rJson, sJson, tJson] = await Promise.all([
+          elementsRes.json(),
+          relationsRes.json(),
+          storiesRes.json(),
+          timelineRes.json()
+        ]);
+        if (Array.isArray(eJson) && Array.isArray(rJson)) {
+          elements = eJson;
+          relations = rJson;
+          stories = sJson;
+          timelineEvents = tJson;
+        }
+      }
     }
-
-    const [elements, relations, stories, timelineEvents] = await Promise.all([
-      elementsRes.json(),
-      relationsRes.json(),
-      storiesRes.json(),
-      timelineRes.json()
-    ]);
+  } catch (err) {
+    console.warn('[Cultural Genome] Network fetch notice, engaging bundled dataset:', err);
+  }
 
     const elementsById = new Map();
     elements.forEach((el) => elementsById.set(el.id, el));
