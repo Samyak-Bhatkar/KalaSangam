@@ -189,6 +189,7 @@ export default function ExplorerShell({ onBack, onOpenMarketplace, initialTab = 
         {activeTab === 'scan' && (
           <div className="w-full">
             <MotifDecoder
+              isOpen={true}
               mode="public"
               language={language}
               onClose={onBack}

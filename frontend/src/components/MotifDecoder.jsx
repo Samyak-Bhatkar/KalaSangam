@@ -57,7 +57,7 @@ async function downscaleImageBase64(base64Str, maxDim = 1024) {
 }
 
 export default function MotifDecoder({
-  isOpen,
+  isOpen = true,
   onClose,
   getFrameBase64,
   mode = 'artisan', // 'artisan' | 'public'
@@ -102,6 +102,24 @@ export default function MotifDecoder({
 
   // Trigger scan when photo is provided
   const triggerScan = async (uploadedBase64 = null) => {
+    let rawB64 = uploadedBase64 || uploadedImagePreview;
+    if (!rawB64 && getFrameBase64) {
+      try {
+        rawB64 = getFrameBase64();
+      } catch (camErr) {
+        console.warn('Frame capture failed, prompting file upload:', camErr);
+        setCameraError(true);
+      }
+    }
+
+    // Strict guard: if no photo was explicitly provided or uploaded, NEVER scan or populate craft record
+    if (!rawB64) {
+      setIsScanning(false);
+      setIsCardVisible(false);
+      setMotifResult(null);
+      return;
+    }
+
     setIsScanning(true);
     setIsCardVisible(false);
     setAttachedToProduct(false);
@@ -111,16 +129,6 @@ export default function MotifDecoder({
     const startTime = Date.now();
 
     try {
-      let rawB64 = uploadedBase64 || uploadedImagePreview;
-      if (!rawB64 && getFrameBase64) {
-        try {
-          rawB64 = getFrameBase64();
-        } catch (camErr) {
-          console.warn('Frame capture failed, prompting file upload:', camErr);
-          setCameraError(true);
-        }
-      }
-
       // Downscale to max 1024px & strip EXIF metadata
       const cleanB64 = await downscaleImageBase64(rawB64, 1024);
 
@@ -223,19 +231,14 @@ export default function MotifDecoder({
     const reader = new FileReader();
     reader.onload = (event) => {
       const b64 = event.target?.result;
+      if (!b64) return;
       setCameraError(false);
       setUploadedImagePreview(b64);
       triggerScan(b64);
     };
     reader.readAsDataURL(file);
-  };
-
-  // Handle instant 1-click test with sample terracotta craft
-  const handleScanSample = () => {
-    const sampleImg = '/terracotta_pot_clean.png';
-    setCameraError(false);
-    setUploadedImagePreview(sampleImg);
-    triggerScan(sampleImg);
+    // Reset file input value so selecting the same photo triggers onChange
+    e.target.value = '';
   };
 
   // Reset scanner to scan another photo
@@ -246,6 +249,7 @@ export default function MotifDecoder({
     setUploadedImagePreview(null);
     setIsScanning(false);
     setIsSpeaking(false);
+    setIsCalibrating(false);
   };
 
   // Play narration
@@ -527,7 +531,7 @@ export default function MotifDecoder({
 
         {/* Upload Button Option right below reticle */}
         {!cameraError && (
-          <div className="mt-2">
+          <div className="mt-3">
             <input
               type="file"
               ref={fileInputRef}
@@ -537,10 +541,10 @@ export default function MotifDecoder({
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="text-[11px] font-bold text-amber-400 hover:text-amber-300 underline flex items-center gap-1 cursor-pointer bg-black/40 px-2 py-0.5 rounded-md"
+              className="px-4 py-2 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-xs font-bold flex items-center gap-2 cursor-pointer shadow-md active:scale-95 transition-all"
             >
-              <Upload className="w-3 h-3" />
-              <span>{isHi ? 'गैलरी से फोटो चुनें' : 'Upload from device'}</span>
+              <Upload className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isHi ? 'गैलरी से फोटो चुनें' : 'Upload from Gallery'}</span>
             </button>
           </div>
         )}
@@ -568,41 +572,8 @@ export default function MotifDecoder({
         </div>
       )}
 
-      {/* ─── 3.5 INITIAL PROMPT CARD (Before Photo Upload) ─────────────────── */}
-      {!isScanning && (!motifResult || !isCardVisible) && (
-        <div className="px-4 pb-4 z-40 animate-in fade-in duration-300">
-          <div className="p-4 rounded-3xl bg-slate-950/85 backdrop-blur-xl border border-amber-400/30 shadow-2xl text-center space-y-2.5 max-w-sm mx-auto">
-            <div className="text-xs font-bold text-amber-300 flex items-center justify-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>{isHi ? 'फोटो अपलोड करें व रूपांकन पहचानें' : 'Upload Photo to Decode Motif'}</span>
-            </div>
-            <p className="text-[11px] text-slate-300 leading-snug">
-              {isHi
-                ? 'अपने फोन या गैलरी से किसी भी पारंपरिक हस्तशिल्प, बर्तन या वस्त्र की फोटो चुनें। AI सांस्कृतिक जीनोम से मिलान कर उसका पूर्ण प्रामाणिक विवरण देगा।'
-                : 'Select any craft, pottery or textile photo from your device. AI will decode its cultural provenance.'}
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 cursor-pointer"
-              >
-                <Upload className="w-4 h-4" />
-                <span>{isHi ? 'गैलरी से फोटो चुनें' : 'Choose Photo from Gallery'}</span>
-              </button>
-              <button
-                onClick={handleScanSample}
-                className="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-amber-300 border border-amber-400/30 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-95 cursor-pointer"
-              >
-                <span>🏺</span>
-                <span>{isHi ? 'नमूना टेराकोटा शिल्प' : 'Sample Terracotta'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ─── 4. SLIDE-UP MOTIF BOTTOM SHEET (Only when photo is uploaded & decoded) ─── */}
-      {!isScanning && motifResult && isCardVisible && (
+      {!isScanning && Boolean(uploadedImagePreview) && Boolean(motifResult) && isCardVisible && (
         <div className="px-3 pb-3 sm:pb-5 z-50 animate-in slide-in-from-bottom duration-300">
           <div className="p-4 rounded-3xl bg-gradient-to-b from-slate-900/98 to-slate-950/98 backdrop-blur-2xl border border-amber-400/50 shadow-2xl text-left space-y-3 max-h-[60vh] overflow-y-auto no-scrollbar pb-safe">
             
