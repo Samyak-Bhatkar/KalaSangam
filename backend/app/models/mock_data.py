@@ -47,6 +47,7 @@ CRAFT_FIXTURES = {
         "sample_image_url": "/terracotta_pot_raw.png",
         "raw_image_url": "/terracotta_pot_raw.png",
         "clean_image_url": "/terracotta_pot_clean.png",
+        "lifestyle_image_url": "/terracotta_pot_lifestyle.png",
         "artisan_name": "Sunil Kumar Prajapati",
         "artisan_community": "Backward Classes Potter Community",
         "sample_transcript_hi": "यह गोरखपुर का टेराकोटा मिट्टी की पारंपरिक हांडी है। तालाब की शुद्ध मिट्टी से चाक पर बनाया है। नक्काशी करने और भट्टी में पकाने में छह घंटे का समय लगा। मिट्टी और ईंधन का खर्चा करीब एक सौ अस्सी रुपये आया।",

@@ -43,6 +43,7 @@ export async function getCraftPresets() {
           sample_image_url: '/terracotta_pot_raw.png',
           raw_image_url: '/terracotta_pot_raw.png',
           clean_image_url: '/terracotta_pot_clean.png',
+          lifestyle_image_url: '/terracotta_pot_lifestyle.png',
           artisan_name: 'Sunil Kumar Prajapati',
           cluster_pin: '273001',
           gi_tag_serial: 'GI-0687-0105',

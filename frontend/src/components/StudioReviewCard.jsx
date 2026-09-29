@@ -617,7 +617,9 @@ export default function StudioReviewCard({ activeSubStep = null }) {
     (selectedBgId && compositeCache[selectedBgId]?.base64) ||
     (selectedBgId && compositeCache[selectedBgId]?.url) ||
     lifestyleImageBase64 ||
-    lifestyleImageUrl;
+    lifestyleImageUrl ||
+    selectedPreset?.lifestyle_image_url ||
+    '/terracotta_pot_lifestyle.png';
 
   // Carousel State for Step 2 (Lifestyle Staging comparison - 1 Clean Studio + 3 Suggested Backgrounds)
   const [selectedCarouselIndex, setSelectedCarouselIndex] = useState(1);
@@ -1147,10 +1149,10 @@ export default function StudioReviewCard({ activeSubStep = null }) {
                 }}
                 className="relative flex items-center justify-center pointer-events-auto"
               >
-                {/* Product Photo */}
+                {/* Product Photo: Raw Artisan Photo (Image 1 on Left) */}
                 <img
-                  src={studioSrc}
-                  alt="Clean AI Studio Output (Artisan View)"
+                  src={rawSrc}
+                  alt="Raw Artisan Photo (Artisan View)"
                   className="w-full h-full object-contain p-3 pointer-events-none select-none"
                 />
 

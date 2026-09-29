@@ -276,8 +276,10 @@ export function ArtisanProvider({ children }) {
     setSelectedPreset(craft);
     const rawUrl = craft.raw_image_url || craft.sample_image_url || '/terracotta_pot_raw.png';
     const cleanUrl = craft.clean_image_url || '/terracotta_pot_clean.png';
+    const lifestyleUrl = craft.lifestyle_image_url || '/terracotta_pot_lifestyle.png';
     setRawImageUrl(rawUrl);
     setStudioImageUrl(cleanUrl);
+    setLifestyleImageUrl(lifestyleUrl);
     setTranscript(craft.sample_transcript_hi || craft.sample_transcript_en || '');
 
     // Pre-populate catalog data from preset
