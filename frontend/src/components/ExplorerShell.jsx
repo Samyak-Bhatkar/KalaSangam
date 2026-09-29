@@ -24,9 +24,17 @@ import { BRANDING_CONFIG } from '../config/branding';
 
 const NaadVirasatContainer = React.lazy(() => import('../features/naad-virasat'));
 
-
 export default function ExplorerShell({ onBack, onOpenMarketplace, initialTab = 'scan', language = 'hi', onToggleLanguage }) {
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('view') === 'naad' || p.get('tab') === 'naad' || p.get('naad') === 'true' || p.get('demo') === '1') {
+        return 'naad';
+      }
+      if (p.get('tab')) return p.get('tab');
+    }
+    return initialTab;
+  });
   const [studentLensActive, setStudentLensActive] = useState(false);
   const [citationModalOpen, setCitationModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);

@@ -91,7 +91,7 @@ export default function App() {
     const pathname = window.location.pathname;
     if (pathname === '/explore' || pathname.startsWith('/explore')) return true;
     const params = new URLSearchParams(window.location.search);
-    return params.get('view') === 'explore' || params.get('explore') === 'true';
+    return params.get('view') === 'explore' || params.get('view') === 'naad' || params.get('explore') === 'true' || params.get('naad') === 'true' || params.get('demo') === '1';
   });
 
   // Support public motif scanner route with NO login (?view=scan or ?scan=true)
