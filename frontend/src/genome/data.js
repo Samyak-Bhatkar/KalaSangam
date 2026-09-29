@@ -25,33 +25,34 @@ export async function loadGenomeData() {
   let timelineEvents = fallbackTimelineEvents;
 
   try {
-    const [elementsRes, relationsRes, storiesRes, timelineRes] = await Promise.all([
-      fetch('/data/genome/cultural_elements.json'),
-      fetch('/data/genome/relations.json'),
-      fetch('/data/genome/stories.json'),
-      fetch('/data/genome/timeline_events.json')
-    ]);
+    try {
+      const [elementsRes, relationsRes, storiesRes, timelineRes] = await Promise.all([
+        fetch('/data/genome/cultural_elements.json'),
+        fetch('/data/genome/relations.json'),
+        fetch('/data/genome/stories.json'),
+        fetch('/data/genome/timeline_events.json')
+      ]);
 
-    if (elementsRes.ok && relationsRes.ok && storiesRes.ok && timelineRes.ok) {
-      const ct = elementsRes.headers.get('content-type') || '';
-      if (!ct.includes('text/html')) {
-        const [eJson, rJson, sJson, tJson] = await Promise.all([
-          elementsRes.json(),
-          relationsRes.json(),
-          storiesRes.json(),
-          timelineRes.json()
-        ]);
-        if (Array.isArray(eJson) && Array.isArray(rJson)) {
-          elements = eJson;
-          relations = rJson;
-          stories = sJson;
-          timelineEvents = tJson;
+      if (elementsRes.ok && relationsRes.ok && storiesRes.ok && timelineRes.ok) {
+        const ct = elementsRes.headers.get('content-type') || '';
+        if (!ct.includes('text/html')) {
+          const [eJson, rJson, sJson, tJson] = await Promise.all([
+            elementsRes.json(),
+            relationsRes.json(),
+            storiesRes.json(),
+            timelineRes.json()
+          ]);
+          if (Array.isArray(eJson) && Array.isArray(rJson)) {
+            elements = eJson;
+            relations = rJson;
+            stories = sJson;
+            timelineEvents = tJson;
+          }
         }
       }
+    } catch (err) {
+      console.warn('[Cultural Genome] Network fetch notice, engaging bundled dataset:', err);
     }
-  } catch (err) {
-    console.warn('[Cultural Genome] Network fetch notice, engaging bundled dataset:', err);
-  }
 
     const elementsById = new Map();
     elements.forEach((el) => elementsById.set(el.id, el));
