@@ -7,12 +7,12 @@ echo   Ministry of Social Justice and Empowerment (MoSJE)
 echo =======================================================
 
 echo [1/2] Starting FastAPI Backend in a new window...
-start "ShilpSetu Backend (8000)" cmd /k ""%~dp0run_backend.bat""
+start "ShilpSetu Backend (8000)" cmd /k call "%~dp0run_backend.bat"
 
 timeout /t 2 /nobreak >nul
 
 echo [2/2] Starting React Frontend in a new window...
-start "ShilpSetu Frontend (5173)" cmd /k ""%~dp0run_frontend.bat""
+start "ShilpSetu Frontend (5173)" cmd /k call "%~dp0run_frontend.bat"
 
 echo.
 echo =======================================================

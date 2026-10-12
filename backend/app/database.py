@@ -254,6 +254,61 @@ def seed_canonical_fixtures() -> None:
                         generate_published_product_qr(pid, fixture.get("title_en", "Craft"), "http://localhost:5173")
                     except Exception as qr_err:
                         logger.warning(f"Could not generate QR for {pid}: {qr_err}")
+        # Ensure full 50+ craft sample catalog is seeded for storefront on fresh system
+        try:
+            from .models.sample_catalog import SAMPLE_PRODUCTS
+            for item in SAMPLE_PRODUCTS:
+                pid = item["id"]
+                cursor.execute("SELECT id FROM products WHERE id = ?", (pid,))
+                if not cursor.fetchone():
+                    img_url = f"/samples/{item['image_file']}"
+                    sample_pins_item = [
+                        {
+                            "id": "pin_1",
+                            "pin_number": 1,
+                            "x_pct": 50.0,
+                            "y_pct": 45.0,
+                            "category": "craft_detail",
+                            "bank_term": "Authentic Craftsmanship",
+                            "short_label_hi": "हस्तनिर्मित शिल्प",
+                            "short_label_en": "Authentic Handcraft",
+                            "full_description_hi": f"{item['technique']} द्वारा प्रमाणित कारीगर निर्मित",
+                            "full_description_en": f"Certified handcrafted piece utilizing traditional {item['technique']}",
+                            "language": "hi"
+                        }
+                    ]
+                    cursor.execute("""
+                        INSERT INTO products (
+                            id, title_hi, title_en, description_hi, description_en,
+                            craft_category, technique, raw_cost, labor_hours,
+                            b2c_price, b2b_price, gem_price, artisan_name,
+                            beneficiary_id, cluster_pin, raw_image_url,
+                            studio_image_url, lifestyle_image_url, watermarked_image_url, annotated_image_url,
+                            craft_pins, status, qr_code_url, created_at, published_at, channel, original_transcript
+                        ) VALUES (
+                            ?, ?, ?, ?, ?,
+                            ?, ?, ?, ?,
+                            ?, ?, ?, ?,
+                            ?, ?, ?,
+                            ?, ?, ?, ?,
+                            ?, 'published', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'camera', ?
+                        )
+                    """, (
+                        pid,
+                        item["title_hi"], item["title_en"],
+                        item["description_hi"], item["description_en"],
+                        item["craft_category"], item["technique"],
+                        item["raw_cost"], item["labor_hours"],
+                        item["b2c_price"], item["b2b_price"], item["gem_price"],
+                        item["artisan_name"], item["beneficiary_id"], item["cluster_pin"],
+                        img_url, img_url, img_url, img_url, img_url,
+                        json.dumps(sample_pins_item),
+                        f"/static/uploads/qr_{pid}.png",
+                        item["description_hi"]
+                    ))
+        except Exception as seed_err:
+            logger.warning(f"Sample catalog seed notice: {seed_err}")
+
         conn.commit()
 
 def cleanup_expired_drafts(hours: int = 24) -> int:

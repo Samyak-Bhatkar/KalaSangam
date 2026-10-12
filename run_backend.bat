@@ -10,10 +10,7 @@ echo =======================================================
 cd /d "%~dp0\backend"
 
 echo [1/3] Checking if port 8000 is occupied...
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8000 ^| findstr LISTENING') do (
-    echo [INFO] Freeing stale process on port 8000 (PID %%a)...
-    taskkill /F /PID %%a >nul 2>&1
-)
+powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }" >nul 2>&1
 
 echo [2/3] Verifying Python environment...
 python -c "import fastapi, uvicorn" >nul 2>&1

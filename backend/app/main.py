@@ -16,7 +16,7 @@ from PIL import Image
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, BackgroundTasks, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, HTMLResponse, RedirectResponse
 import starlette.formparsers
 import starlette.requests
 
@@ -165,6 +165,11 @@ flutter_build_dir = Path(__file__).resolve().parent.parent.parent / "mobile_flut
 if flutter_build_dir.exists():
     app.mount("/flutter", StaticFiles(directory=str(flutter_build_dir), html=True), name="flutter")
 
+# Mount sample craft assets so both backend and frontend serve identical sample paths
+samples_dir = Path(__file__).resolve().parent.parent.parent / "frontend" / "public" / "samples"
+if samples_dir.exists():
+    app.mount("/samples", StaticFiles(directory=str(samples_dir)), name="samples")
+
 @app.on_event("startup")
 def startup_event():
     """Initializes SQLite database schema and runs lazy draft cleanup."""
@@ -174,6 +179,40 @@ def startup_event():
         logger.info(f"Database initialized. Lazy cleanup purged {purged} expired draft(s).")
     except Exception as e:
         logger.error(f"Database startup failed: {e}")
+
+@app.get("/", response_class=HTMLResponse)
+def root():
+    return """<!DOCTYPE html>
+<html>
+<head>
+    <title>ShilpSetu AI - API Gateway</title>
+    <meta http-equiv="refresh" content="2;url=http://localhost:5173/" />
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #1e293b; border: 1px solid #334155; padding: 2.5rem; border-radius: 16px; max-width: 500px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { color: #f97316; margin-bottom: 0.5rem; font-size: 1.6rem; }
+        p { color: #94a3b8; font-size: 1rem; line-height: 1.6; }
+        .actions { margin-top: 1.8rem; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+        .btn { display: inline-block; padding: 0.75rem 1.4rem; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.2s; font-size: 0.95rem; }
+        .btn-primary { background: #f97316; color: white; }
+        .btn-primary:hover { background: #ea580c; }
+        .btn-secondary { background: #334155; color: #e2e8f0; border: 1px solid #475569; }
+        .btn-secondary:hover { background: #475569; }
+        .note { margin-top: 1.2rem; font-size: 0.85rem; color: #64748b; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>ShilpSetu AI Backend Active</h1>
+        <p>You are viewing the <strong>FastAPI Backend Server</strong> (Port 8000). The interactive <strong>Web Application UI</strong> is running on port <strong>5173</strong>.</p>
+        <div class="actions">
+            <a class="btn btn-primary" href="http://localhost:5173">Open Web App (Port 5173)</a>
+            <a class="btn btn-secondary" href="/docs">Swagger API Docs (/docs)</a>
+        </div>
+        <p class="note">Redirecting to the Web App in 2 seconds...</p>
+    </div>
+</body>
+</html>"""
 
 @app.get("/health")
 def health_check():

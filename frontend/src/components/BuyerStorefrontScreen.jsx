@@ -388,6 +388,7 @@ export default function BuyerStorefrontScreen({ onGoToLogin, onScanMotifPublic, 
                       src={p.studio_image_url || p.raw_image_url || '/placeholder_craft.png'}
                       alt={p.title_en || 'Craft'}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/placeholder_craft.png'; }}
                     />
                     <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-bold">
                       <ShieldCheck className="w-3 h-3 text-emerald-400" />

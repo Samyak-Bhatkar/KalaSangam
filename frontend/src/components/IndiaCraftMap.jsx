@@ -418,6 +418,7 @@ export default function IndiaCraftMap({
                           src={p.studio_image_url || p.raw_image_url || '/placeholder_craft.png'}
                           alt={p.title_en || 'Product'}
                           className="w-12 h-12 rounded-lg object-cover bg-slate-800 shrink-0 group-hover:scale-105 transition-transform"
+                          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/placeholder_craft.png'; }}
                         />
                         <div className="flex-1 min-w-0 text-left">
                           <h5 className="text-xs font-bold text-white truncate group-hover:text-amber-300">
