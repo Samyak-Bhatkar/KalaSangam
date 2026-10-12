@@ -77,11 +77,8 @@ mobile_flutter/windows/flutter/ephemeral/
 mobile_flutter/linux/flutter/ephemeral/
 coverage/
 
-# Presentation media & recordings (Local disk only - do not push to GitHub)
-recordings/
-ShilpSetu_Scene_Videos/
+# Video files (Local disk only - do not push large video binaries to GitHub)
 *.mp4
-*.webp
 *.dll
 
 # OS & Editors
